@@ -1,0 +1,25 @@
+{
+  "pilot": "pilot_20260929T180102Z",
+  "spec": "SPEC.md",
+  "note": "Under SPEC.md the reference is correct by construction; under another spec a failure may be a spec difference.",
+  "runs": {
+    "B1": [
+      {
+        "suite": "round1_crucible_tests.py",
+        "ran": true,
+        "reference_passes": true,
+        "exit_code": 0,
+        "failures": []
+      }
+    ],
+    "B2": [
+      {
+        "suite": "round1_crucible_tests.py",
+        "ran": true,
+        "reference_passes": true,
+        "exit_code": 0,
+        "failures": []
+      }
+    ]
+  }
+}

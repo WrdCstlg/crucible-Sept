@@ -1,0 +1,15 @@
+{
+  "model": "gemini-3.8-flash",
+  "seconds": 95.3,
+  "usage": {
+    "prompt_token_count": 39316,
+    "cached_content_token_count": 0,
+    "candidates_token_count": 1144,
+    "thoughts_token_count": 21833,
+    "total_token_count": 62293,
+    "service_tier": null
+  },
+  "agent_calls": 1,
+  "arm": "A",
+  "spec": "SPEC_v0_original.md"
+}

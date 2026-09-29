@@ -1,0 +1,13 @@
+{
+  "model": "claude-opus-5-5",
+  "effort": "high",
+  "stop_reason": "end_turn",
+  "seconds": 10.4,
+  "agent_calls": 1,
+  "usage": {
+    "input_tokens": 1434,
+    "output_tokens": 1173
+  },
+  "cost_usd": 0.0292,
+  "arm": "C"
+}

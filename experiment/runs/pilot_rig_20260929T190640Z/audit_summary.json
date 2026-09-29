@@ -1,0 +1,72 @@
+{
+  "pilot": "pilot_rig_20260929T190640Z",
+  "pilot_checks": [
+    {
+      "id": "freeze.hashes_match",
+      "status": "pass",
+      "evidence": "6 files checked; changed: none"
+    },
+    {
+      "id": "spec.hash_matches_config",
+      "status": "pass",
+      "evidence": "SPEC.md: recorded 4b9a1944ef274931a2ef14bf69ea811ed1f403beefc533be8e08bcbc8c1a7fee, now 4b9a1944ef274931a2ef14bf69ea811ed1f403beefc533be8e08bcbc8c1a7fee"
+    },
+    {
+      "id": "mutation.self_test",
+      "status": "pass",
+      "evidence": "SELF-TEST PASSED"
+    }
+  ],
+  "trials": {
+    "A1": {
+      "sha256": "2db1ef5356fa5456fdc06e671d4ea9ba7fb60e0c5de1bca2d919197db20ccb20",
+      "failed_checks": []
+    },
+    "A2": {
+      "sha256": "1a760fd49e75dde7abef63c1878a39fae7bfeb804fed5891fb4761f608a465b7",
+      "failed_checks": []
+    },
+    "A3": {
+      "sha256": "b409e22265554c7fbfa61d7ab01f0c23f1db32ab703ab93120efd26e9763557f",
+      "failed_checks": []
+    },
+    "A4": {
+      "sha256": "8f786b448d8f659e83e7932dd5cde6946dc254e1ea6a5f9bc8c53a195a9354ea",
+      "failed_checks": []
+    },
+    "A5": {
+      "sha256": "0aa4997394839cadb820128850821228a60a9d44ab9d4fcbe6660d293f59a55d",
+      "failed_checks": []
+    },
+    "B1": {
+      "sha256": "cf7ee8aed2c3991d7ca2c1aa1df040ee1616c61ba8f898d338e5d8a1962c0eef",
+      "failed_checks": []
+    },
+    "B2": {
+      "sha256": "884e9d2bb279e8e39fce6585cace911ef74f264537f0d7477f65aea1c2aa5e69",
+      "failed_checks": [
+        "crucible.verdicts_vs_hidden"
+      ]
+    },
+    "C1": {
+      "sha256": "7262941bb60620c7aaff512ca7c4606ce61bc1d4bcb8a96c368b7bdf141fdb25",
+      "failed_checks": []
+    },
+    "C2": {
+      "sha256": "1ddf1440b3693f6abcb2e091c38673cb8a99ac9180bcc4faa133aa68d98b39db",
+      "failed_checks": []
+    },
+    "C3": {
+      "sha256": "259823f7ffcdd054f288d0b36b3386d6670418a3c327ada771ba5eb9c7e21dad",
+      "failed_checks": []
+    },
+    "C4": {
+      "sha256": "7228990505f7947f29946be8819234d42a274a00ecdd650380f9564f96c4de07",
+      "failed_checks": []
+    },
+    "C5": {
+      "sha256": "232b0a8eb612527d47e43bde7a92d903ffaa9bb68751cc90795a823f0a9d4d9c",
+      "failed_checks": []
+    }
+  }
+}

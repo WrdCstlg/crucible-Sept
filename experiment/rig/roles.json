@@ -1,0 +1,27 @@
+{
+  "evaluated": {
+    "provider": "google",
+    "model": "gemini-3.8-flash",
+    "api_key_env": "GEMINI_API_KEY",
+    "settings": {"thinking_level": "HIGH", "max_tokens": 65536},
+    "price_per_mtok": null,
+    "note": "Model under evaluation. Thinking level HIGH. Called directly, with no agent framework and no tools."
+  },
+  "competitor": {
+    "provider": "anthropic",
+    "model": "claude-opus-5-5",
+    "api_key_env": "ANTHROPIC_API_KEY",
+    "settings": {"effort": "xhigh", "max_tokens": 64000},
+    "price_per_mtok": {"input": 4.0, "output": 20.0},
+    "note": "Competitor expected to be stronger. Effort xhigh (above high). Thinking is always on for this model."
+  },
+  "observer": {
+    "provider": "openai_compatible",
+    "model": "kimi-k3",
+    "api_key_env": "KIMI_API_KEY",
+    "base_url_env": "KIMI_BASE_URL",
+    "settings": {"max_tokens": 16000},
+    "price_per_mtok": null,
+    "note": "Judge of process integrity, from a third model family. Blinded; never produces pass/fail, which comes only from the hidden tests."
+  }
+}

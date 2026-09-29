@@ -1,0 +1,93 @@
+```python
+_DIGITS = frozenset("0123456789")
+_EVENTS = frozenset(("OPEN", "PAUSE", "RESUME", "CLOSE", "REOPEN"))
+_LIMIT = 14_400_000
+
+_NOT_OPENED = 0
+_RUNNING = 1
+_PAUSED = 2
+_CLOSED = 3
+
+
+def _parse(line):
+    if not isinstance(line, str):
+        return None
+    s = line.strip()
+    if not s:
+        return None
+    parts = s.split(",")
+    if len(parts) != 3:
+        return None
+    ts, tid, ev = (p.strip() for p in parts)
+    if not ts or not all(c in _DIGITS for c in ts):
+        return None
+    if not tid:
+        return None
+    if ev not in _EVENTS:
+        return None
+    return int(ts), tid, ev
+
+
+def compute_sla(stream):
+    events = []
+    if stream is not None:
+        for line in stream:
+            parsed = _parse(line)
+            if parsed is not None:
+                events.append(parsed)
+
+    if not events:
+        return []
+
+    now = max(e[0] for e in events)
+    # Python's sort is stable, so equal timestamps keep stream order.
+    events.sort(key=lambda e: e[0])
+
+    # ticket_id -> [state, used, run_start]
+    tickets = {}
+    for ts, tid, ev in events:
+        t = tickets.get(tid)
+        if t is None:
+            t = [_NOT_OPENED, 0, 0]
+            tickets[tid] = t
+        state = t[0]
+        if ev == "OPEN":
+            if state == _NOT_OPENED or state == _CLOSED:
+                t[0] = _RUNNING
+                t[1] = 0
+                t[2] = ts
+        elif ev == "PAUSE":
+            if state == _RUNNING:
+                t[1] += ts - t[2]
+                t[0] = _PAUSED
+        elif ev == "RESUME":
+            if state == _PAUSED:
+                t[0] = _RUNNING
+                t[2] = ts
+        elif ev == "CLOSE":
+            if state == _RUNNING:
+                t[1] += ts - t[2]
+                t[0] = _CLOSED
+            elif state == _PAUSED:
+                t[0] = _CLOSED
+        elif ev == "REOPEN":
+            if state == _CLOSED:
+                t[0] = _RUNNING
+                t[2] = ts
+
+    result = []
+    for tid in sorted(tickets):
+        state, used, start = tickets[tid]
+        if state == _NOT_OPENED:
+            continue
+        if state == _RUNNING:
+            used += now - start
+        used = int(used)
+        result.append({
+            "ticket_id": tid,
+            "used_ms": used,
+            "breached": used > _LIMIT,
+            "status": "closed" if state == _CLOSED else "open",
+        })
+    return result
+```

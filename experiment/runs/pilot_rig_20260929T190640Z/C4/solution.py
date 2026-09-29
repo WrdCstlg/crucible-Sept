@@ -1,0 +1,115 @@
+"""Support-ticket SLA clock."""
+
+SLA_LIMIT_MS = 14_400_000
+
+_VALID_EVENTS = frozenset({"OPEN", "PAUSE", "RESUME", "CLOSE", "REOPEN"})
+_ASCII_DIGITS = frozenset("0123456789")
+
+_NOT_OPENED = "NOT_OPENED"
+_RUNNING = "RUNNING"
+_PAUSED = "PAUSED"
+_CLOSED = "CLOSED"
+
+
+def _parse_digits(s):
+    """Parse a string of ASCII digits into an int, robust to very long inputs."""
+    stripped = s.lstrip("0")
+    if not stripped:
+        return 0
+    if len(stripped) <= 4000:
+        return int(stripped)
+    # Chunked parsing to avoid the int max-str-digits limit on newer Pythons.
+    value = 0
+    chunk = 4000
+    for i in range(0, len(stripped), chunk):
+        part = stripped[i:i + chunk]
+        value = value * (10 ** len(part)) + int(part)
+    return value
+
+
+def _parse_line(line):
+    """Return (timestamp, ticket_id, event) for a well-formed line, else None."""
+    if not isinstance(line, str):
+        return None
+    text = line.strip()
+    if not text:
+        return None
+    fields = text.split(",")
+    if len(fields) != 3:
+        return None
+    ts_raw, tid, event = (f.strip() for f in fields)
+    if not ts_raw or any(c not in _ASCII_DIGITS for c in ts_raw):
+        return None
+    if not tid:
+        return None
+    if event not in _VALID_EVENTS:
+        return None
+    return _parse_digits(ts_raw), tid, event
+
+
+def compute_sla(stream):
+    events = []
+    if stream is not None:
+        for line in stream:
+            parsed = _parse_line(line)
+            if parsed is not None:
+                events.append(parsed)
+
+    if not events:
+        return []
+
+    now = max(e[0] for e in events)
+
+    # Stable sort by timestamp only.
+    events.sort(key=lambda e: e[0])
+
+    # ticket_id -> [state, used_ms, run_start]
+    tickets = {}
+
+    for ts, tid, event in events:
+        rec = tickets.get(tid)
+        if rec is None:
+            rec = [_NOT_OPENED, 0, None]
+            tickets[tid] = rec
+        state = rec[0]
+
+        if event == "OPEN":
+            if state == _NOT_OPENED or state == _CLOSED:
+                rec[0] = _RUNNING
+                rec[1] = 0
+                rec[2] = ts
+        elif event == "PAUSE":
+            if state == _RUNNING:
+                rec[1] += ts - rec[2]
+                rec[2] = None
+                rec[0] = _PAUSED
+        elif event == "RESUME":
+            if state == _PAUSED:
+                rec[0] = _RUNNING
+                rec[2] = ts
+        elif event == "CLOSE":
+            if state == _RUNNING:
+                rec[1] += ts - rec[2]
+                rec[2] = None
+                rec[0] = _CLOSED
+            elif state == _PAUSED:
+                rec[0] = _CLOSED
+        elif event == "REOPEN":
+            if state == _CLOSED:
+                rec[0] = _RUNNING
+                rec[2] = ts
+
+    result = []
+    for tid in sorted(tickets):
+        state, used, start = tickets[tid]
+        if state == _NOT_OPENED:
+            continue
+        if state == _RUNNING:
+            used += now - start
+        result.append({
+            "ticket_id": tid,
+            "used_ms": int(used),
+            "breached": bool(used > SLA_LIMIT_MS),
+            "status": "closed" if state == _CLOSED else "open",
+        })
+    return result

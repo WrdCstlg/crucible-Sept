@@ -1,0 +1,11 @@
+{
+  "frozen_at": "2026-09-29T17:52:07.651315+00:00",
+  "sha256": {
+    "SPEC.md": "4b9a1944ef274931a2ef14bf69ea811ed1f403beefc533be8e08bcbc8c1a7fee",
+    "hand_cases.json": "46fb76393d21b3d4d2a7cce29d2ba5ecea54a4eeeef00a73ef33a89a9fc676c8",
+    "generated_cases.json": "b9b8423c1bda36dd2c9dc4073f13675a417a9b17de7006e0cd9eb6e465df5732",
+    "reference.py": "c5e74dc3366e71abe9afd5e568a4a1014887368a167d67cfcee2a5ab92212211",
+    "reference_intervals.py": "069c57e43478c94d0033f89c9e104454893e349ded7dab7028624b2c950a85ab",
+    "generate_cases.py": "1be06c6a4be39a57315c6fb27342a6df7ab45896e4745a259c141f76da96174b"
+  }
+}

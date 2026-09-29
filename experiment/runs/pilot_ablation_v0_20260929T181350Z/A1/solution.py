@@ -1,0 +1,146 @@
+"""Support-ticket SLA clock implementation."""
+
+import csv
+from typing import Any, Dict, Iterable, List, Optional
+
+
+def compute_sla(stream: Iterable[str]) -> List[Dict[str, Any]]:
+    """Compute SLA metrics for a stream of support-ticket events.
+
+    Args:
+        stream: An iterable of CSV strings formatted as 'timestamp_ms,ticket_id,event'.
+
+    Returns:
+        A list of dictionaries with keys 'ticket_id', 'used_ms', 'breached', 'status',
+        sorted by 'ticket_id' ascending.
+    """
+    if stream is None:
+        return []
+
+    events = []
+    max_ts: Optional[int] = None
+
+    for original_idx, line in enumerate(stream):
+        if not isinstance(line, str):
+            continue
+        try:
+            reader = csv.reader([line])
+            row = next(reader, None)
+        except Exception:
+            continue
+
+        if not row or len(row) != 3:
+            continue
+
+        col0, col1, col2 = (col.strip() for col in row)
+
+        try:
+            ts = int(col0)
+            if ts < 0:
+                continue
+        except (ValueError, TypeError):
+            continue
+
+        if max_ts is None or ts > max_ts:
+            max_ts = ts
+
+        ticket_id = col1
+        event = col2
+
+        if not ticket_id:
+            continue
+
+        events.append((ts, original_idx, ticket_id, event))
+
+    if not events and max_ts is None:
+        return []
+
+    # Sort events by timestamp_ms; ties are broken by original arrival order (stable sort)
+    events.sort(key=lambda x: (x[0], x[1]))
+
+    now = max_ts if max_ts is not None else 0
+
+    # Ticket state machine
+    # Possible states: 'RUNNING', 'PAUSED', 'CLOSED'
+    ticket_state: Dict[str, str] = {}
+    ticket_used: Dict[str, int] = {}
+    ticket_last_start: Dict[str, Optional[int]] = {}
+
+    for ts, _, ticket_id, event in events:
+        if ticket_id not in ticket_state:
+            if event == "OPEN":
+                ticket_state[ticket_id] = "RUNNING"
+                ticket_used[ticket_id] = 0
+                ticket_last_start[ticket_id] = ts
+            # Any event for a ticket before its first valid OPEN is silently ignored
+            continue
+
+        state = ticket_state[ticket_id]
+
+        if state == "RUNNING":
+            if event == "PAUSE":
+                start_ts = ticket_last_start[ticket_id]
+                if start_ts is not None:
+                    ticket_used[ticket_id] += ts - start_ts
+                ticket_last_start[ticket_id] = None
+                ticket_state[ticket_id] = "PAUSED"
+            elif event == "CLOSE":
+                start_ts = ticket_last_start[ticket_id]
+                if start_ts is not None:
+                    ticket_used[ticket_id] += ts - start_ts
+                ticket_last_start[ticket_id] = None
+                ticket_state[ticket_id] = "CLOSED"
+            # OPEN when already open -> ignored
+            # RESUME when running -> ignored
+            # REOPEN when not closed -> ignored
+
+        elif state == "PAUSED":
+            if event == "RESUME":
+                ticket_last_start[ticket_id] = ts
+                ticket_state[ticket_id] = "RUNNING"
+            elif event == "CLOSE":
+                # Time from PAUSE to CLOSE does not count
+                ticket_last_start[ticket_id] = None
+                ticket_state[ticket_id] = "CLOSED"
+            # OPEN when already open -> ignored
+            # PAUSE when already paused -> ignored
+            # REOPEN when not closed -> ignored
+
+        elif state == "CLOSED":
+            if event == "REOPEN":
+                ticket_last_start[ticket_id] = ts
+                ticket_state[ticket_id] = "RUNNING"
+            # OPEN when already closed -> ignored
+            # PAUSE when closed -> ignored
+            # RESUME when closed -> ignored
+            # CLOSE when already closed -> ignored
+
+    results: List[Dict[str, Any]] = []
+    sla_limit = 14400000  # 4 hours in milliseconds
+
+    for ticket_id in sorted(ticket_state.keys()):
+        state = ticket_state[ticket_id]
+        used_ms = ticket_used[ticket_id]
+
+        if state == "RUNNING":
+            start_ts = ticket_last_start[ticket_id]
+            if start_ts is not None:
+                used_ms += now - start_ts
+            status = "open"
+        elif state == "PAUSED":
+            status = "open"
+        elif state == "CLOSED":
+            status = "closed"
+        else:
+            continue
+
+        breached = used_ms > sla_limit
+
+        results.append({
+            "ticket_id": ticket_id,
+            "used_ms": used_ms,
+            "breached": breached,
+            "status": status,
+        })
+
+    return results

@@ -1,0 +1,130 @@
+import csv
+from typing import Any, Dict, Iterable, List, Optional
+
+
+def compute_sla(stream: Iterable[str]) -> List[Dict[str, Any]]:
+    SLA_LIMIT_MS = 14_400_000
+    VALID_EVENTS = {"OPEN", "PAUSE", "RESUME", "CLOSE", "REOPEN"}
+
+    events: List[tuple[int, int, str, str]] = []
+    max_timestamp_ms: Optional[int] = None
+
+    for original_idx, raw_line in enumerate(stream):
+        if not isinstance(raw_line, str):
+            continue
+        line = raw_line.strip()
+        if not line:
+            continue
+
+        try:
+            row = next(csv.reader([line]))
+        except Exception:
+            continue
+
+        if len(row) != 3:
+            continue
+
+        ts_str = row[0].strip()
+        try:
+            ts = int(ts_str)
+            if ts < 0:
+                continue
+        except ValueError:
+            continue
+
+        # "Now" is the maximum timestamp_ms appearing anywhere in the stream
+        # (including lines that are otherwise invalid).
+        if max_timestamp_ms is None or ts > max_timestamp_ms:
+            max_timestamp_ms = ts
+
+        ticket_id = row[1].strip()
+        if not ticket_id:
+            continue
+
+        event = row[2].strip()
+        if event in VALID_EVENTS:
+            events.append((ts, original_idx, ticket_id, event))
+
+    if max_timestamp_ms is None:
+        return []
+
+    # Sort all events by timestamp_ms; ties are broken by original arrival order (stable sort).
+    events.sort(key=lambda x: (x[0], x[1]))
+
+    # Tracks ticket state machine:
+    # State values: 'RUNNING', 'PAUSED', 'CLOSED'
+    tickets: Dict[str, Dict[str, Any]] = {}
+
+    for ts, _, ticket_id, event in events:
+        if ticket_id not in tickets:
+            # Any event for a ticket before its first valid OPEN is silently ignored.
+            if event == "OPEN":
+                tickets[ticket_id] = {
+                    "has_valid_open": True,
+                    "state": "RUNNING",
+                    "clock_start": ts,
+                    "used_ms": 0,
+                }
+            continue
+
+        data = tickets[ticket_id]
+        state = data["state"]
+
+        if state == "RUNNING":
+            if event == "PAUSE":
+                data["used_ms"] += ts - data["clock_start"]
+                data["clock_start"] = None
+                data["state"] = "PAUSED"
+            elif event == "CLOSE":
+                data["used_ms"] += ts - data["clock_start"]
+                data["clock_start"] = None
+                data["state"] = "CLOSED"
+            # OPEN (already open), RESUME (clock running), REOPEN (not closed) are ignored.
+
+        elif state == "PAUSED":
+            if event == "RESUME":
+                data["clock_start"] = ts
+                data["state"] = "RUNNING"
+            elif event == "CLOSE":
+                # Time from PAUSE to CLOSE does not count.
+                data["state"] = "CLOSED"
+            # OPEN (already open), PAUSE (already paused), REOPEN (not closed) are ignored.
+
+        elif state == "CLOSED":
+            if event == "REOPEN":
+                data["clock_start"] = ts
+                data["state"] = "RUNNING"
+            # OPEN, PAUSE, RESUME, CLOSE (already closed) are ignored.
+
+    results: List[Dict[str, Any]] = []
+
+    for ticket_id in sorted(tickets.keys()):
+        data = tickets[ticket_id]
+        if not data["has_valid_open"]:
+            continue
+
+        used_ms = data["used_ms"]
+        state = data["state"]
+
+        if state == "RUNNING":
+            used_ms += max_timestamp_ms - data["clock_start"]
+            status = "open"
+        elif state == "PAUSED":
+            status = "open"
+        elif state == "CLOSED":
+            status = "closed"
+        else:
+            continue
+
+        breached = used_ms > SLA_LIMIT_MS
+
+        results.append(
+            {
+                "ticket_id": ticket_id,
+                "used_ms": used_ms,
+                "breached": breached,
+                "status": status,
+            }
+        )
+
+    return results

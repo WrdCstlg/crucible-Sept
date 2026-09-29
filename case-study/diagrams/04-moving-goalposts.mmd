@@ -1,0 +1,6 @@
+flowchart LR
+    R2["Round 2 test suite<br/>includes 'ring buffer saturation'"] --> F2["All 3 candidates fail<br/>expected 1 cascade, got 2,500"]
+    F2 --> R3["Round 3: a brand-new test suite<br/>with no saturation test"]
+    R3 --> P3["All 3 candidates pass<br/>and are declared 'verified survivors'"]
+    P3 --> RE["Replay: the survivors<br/>against the round 2 suite"]
+    RE --> X["All 3 still fail,<br/>with the same error as round 2"]

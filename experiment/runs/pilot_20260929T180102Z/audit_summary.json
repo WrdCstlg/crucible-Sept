@@ -1,0 +1,70 @@
+{
+  "pilot": "pilot_20260929T180102Z",
+  "pilot_checks": [
+    {
+      "id": "freeze.hashes_match",
+      "status": "pass",
+      "evidence": "6 files checked; changed: none"
+    },
+    {
+      "id": "spec.hash_matches_config",
+      "status": "n/a",
+      "evidence": "SPEC.md: recorded None, now 4b9a1944ef274931a2ef14bf69ea811ed1f403beefc533be8e08bcbc8c1a7fee"
+    },
+    {
+      "id": "mutation.self_test",
+      "status": "pass",
+      "evidence": "SELF-TEST PASSED"
+    }
+  ],
+  "trials": {
+    "A1": {
+      "sha256": "85d241e8d7ae39d549d04ad33386adafbd345a1b70b05839c76d3e13c5998b98",
+      "failed_checks": []
+    },
+    "A2": {
+      "sha256": "5c564e7284cfdd53c702700c611bf226b9d5b0b12bd7594f42c94a53c89f579f",
+      "failed_checks": []
+    },
+    "A3": {
+      "sha256": "6b4e1b0d269eb843bdb9b1c8fc3131a3a3e45a06150c85fe28ced5b1bf9e5307",
+      "failed_checks": []
+    },
+    "A4": {
+      "sha256": "a69f6a22e85570c6e65ac9e2eedb84d41ed1852c37ac93bc88abcad570b7b2df",
+      "failed_checks": []
+    },
+    "A5": {
+      "sha256": "00c56264173cc2d940f56f068c77b9dbf90072bbc8b41f7293cf90316af50b5f",
+      "failed_checks": []
+    },
+    "B1": {
+      "sha256": "2855a239ef99c7c5adf818280fcf2123cf0e70da8a72b2bc83d90b557e6f9250",
+      "failed_checks": []
+    },
+    "B2": {
+      "sha256": "5101a2a28c48c9a63eb282b69cc47b865cf295a90149297d4edb602dbe4d936f",
+      "failed_checks": []
+    },
+    "C1": {
+      "sha256": "dc15afa6b5be9bc7991ec0e75c55e6487114a8485e9b1d0a614875b7c2dc0de9",
+      "failed_checks": []
+    },
+    "C2": {
+      "sha256": "3866961f51e0e0d734fb4f0ebb3d24144930485f4094f38ae25c028cbd3ba1e6",
+      "failed_checks": []
+    },
+    "C3": {
+      "sha256": "e86be1924333519f7423ba1fe9cc3182dff03339b46785609fd65624dd9543ad",
+      "failed_checks": []
+    },
+    "C4": {
+      "sha256": "3b5c736f342ceedb84ae812c3e478da33ff156848d8a830e2802ea7b0508de02",
+      "failed_checks": []
+    },
+    "C5": {
+      "sha256": "c9caaa7ea720ec066202842828659b95bc4b3106110a31303752f8b298d25eef",
+      "failed_checks": []
+    }
+  }
+}

@@ -1,0 +1,37 @@
+{
+  "pilot": "pilot_rig_20260929T190640Z",
+  "spec": "SPEC.md",
+  "note": "Under SPEC.md the reference is correct by construction; under another spec a failure may be a spec difference.",
+  "runs": {
+    "B1": [
+      {
+        "suite": "round1_crucible_tests.py",
+        "ran": true,
+        "reference_passes": true,
+        "exit_code": 0,
+        "failures": []
+      }
+    ],
+    "B2": [
+      {
+        "suite": "round1_crucible_tests.py",
+        "ran": true,
+        "reference_passes": false,
+        "exit_code": 1,
+        "failures": [
+          "[FAIL] test_malformed_lines_do_not_affect_now: [test_malformed_lines_do_not_affect_now] Result mismatch:",
+          "AssertionError: [test_malformed_lines_do_not_affect_now] Result mismatch:"
+        ]
+      },
+      {
+        "suite": "round2_crucible_tests.py",
+        "ran": true,
+        "reference_passes": false,
+        "exit_code": 1,
+        "failures": [
+          "FAIL: Malformed lines ignored and do not affect 'now'"
+        ]
+      }
+    ]
+  }
+}

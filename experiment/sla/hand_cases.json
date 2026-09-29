@@ -1,0 +1,53 @@
+[
+  {
+    "id": "H1",
+    "title": "Boundary pass: exactly 4h used does not breach",
+    "why": "Strictly-greater rule; paused hour excluded (1h + 3h = 4h)",
+    "author": "user",
+    "lines": ["0,T1,OPEN", "3600000,T1,PAUSE", "7200000,T1,RESUME", "18000000,T1,CLOSE"],
+    "expected": [{"ticket_id": "T1", "used_ms": 14400000, "breached": false, "status": "closed"}]
+  },
+  {
+    "id": "H2",
+    "title": "Boundary fail: 4h + 1ms breaches",
+    "why": "One millisecond over the limit",
+    "author": "user",
+    "lines": ["0,T1,OPEN", "3600000,T1,PAUSE", "7200000,T1,RESUME", "18000001,T1,CLOSE"],
+    "expected": [{"ticket_id": "T1", "used_ms": 14400001, "breached": true, "status": "closed"}]
+  },
+  {
+    "id": "H3",
+    "title": "Closed mid-pause",
+    "why": "The PAUSE-to-CLOSE stretch never counts",
+    "author": "user",
+    "lines": ["0,T1,OPEN", "3600000,T1,PAUSE", "7200000,T1,CLOSE"],
+    "expected": [{"ticket_id": "T1", "used_ms": 3600000, "breached": false, "status": "closed"}]
+  },
+  {
+    "id": "H4",
+    "title": "Reopen continues the running total",
+    "why": "2h + 1.5h cumulative; the closed gap does not count",
+    "author": "user",
+    "lines": ["0,T1,OPEN", "7200000,T1,CLOSE", "10800000,T1,REOPEN", "16200000,T1,CLOSE"],
+    "expected": [{"ticket_id": "T1", "used_ms": 12600000, "breached": false, "status": "closed"}]
+  },
+  {
+    "id": "H5",
+    "title": "Still-open ticket counts to the global now",
+    "why": "Now = max timestamp in the whole stream (11h), not the ticket's own last event",
+    "author": "user",
+    "lines": ["0,T1,OPEN", "36000000,T2,OPEN", "39600000,T2,CLOSE"],
+    "expected": [
+      {"ticket_id": "T1", "used_ms": 39600000, "breached": true, "status": "open"},
+      {"ticket_id": "T2", "used_ms": 3600000, "breached": false, "status": "closed"}
+    ]
+  },
+  {
+    "id": "H6",
+    "title": "Garbage events are ignored",
+    "why": "RESUME while running, double PAUSE, CLOSE for a never-opened ticket: all ignored; T9 omitted",
+    "author": "user (concrete lines drafted from the description: please confirm)",
+    "lines": ["0,T1,OPEN", "1000,T1,RESUME", "2000,T1,PAUSE", "3000,T1,PAUSE", "4000,T1,RESUME", "5000,T1,CLOSE", "6000,T9,CLOSE"],
+    "expected": [{"ticket_id": "T1", "used_ms": 3000, "breached": false, "status": "closed"}]
+  }
+]

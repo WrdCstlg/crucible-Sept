@@ -1,0 +1,18 @@
+{
+  "role": "evaluated",
+  "provider": "google",
+  "model": "gemini-3.8-flash",
+  "seconds": 89.8,
+  "agent_calls": 1,
+  "usage": {
+    "input_tokens": 970,
+    "output_tokens": 24869,
+    "thinking_tokens": 23911
+  },
+  "cost_usd": null,
+  "stop_reason": "STOP",
+  "tool_calls": 0,
+  "arm": "A",
+  "runner": "rig",
+  "spec": "SPEC.md"
+}

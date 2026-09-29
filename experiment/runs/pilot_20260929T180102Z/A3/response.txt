@@ -1,0 +1,123 @@
+```python
+def compute_sla(stream):
+    """
+    Computes SLA usage and status for support tickets from an event stream.
+
+    :param stream: Iterable of strings, each representing a CSV record.
+    :return: List of dicts for each ticket that had at least one valid OPEN,
+             sorted by ticket_id ascending.
+    """
+    valid_events = {"OPEN", "PAUSE", "RESUME", "CLOSE", "REOPEN"}
+    parsed_records = []
+
+    for line in stream:
+        trimmed_line = line.strip()
+        parts = trimmed_line.split(",")
+        if len(parts) != 3:
+            continue
+
+        ts_str = parts[0].strip()
+        ticket_id = parts[1].strip()
+        event = parts[2].strip()
+
+        if not ts_str or not all("0" <= c <= "9" for c in ts_str):
+            continue
+        if not ticket_id:
+            continue
+        if event not in valid_events:
+            continue
+
+        timestamp = int(ts_str)
+        parsed_records.append((timestamp, ticket_id, event))
+
+    if not parsed_records:
+        return []
+
+    # Stable sort by timestamp; records with equal timestamps keep their stream order.
+    parsed_records.sort(key=lambda r: r[0])
+
+    now = max(r[0] for r in parsed_records)
+
+    # Ticket state machine
+    # States: 'NOT_OPENED', 'RUNNING', 'PAUSED', 'CLOSED'
+    tickets = {}
+
+    for ts, tid, event in parsed_records:
+        if tid not in tickets:
+            tickets[tid] = {
+                "state": "NOT_OPENED",
+                "used_ms": 0,
+                "running_start": None,
+                "had_valid_open": False,
+            }
+
+        ticket = tickets[tid]
+        state = ticket["state"]
+
+        if event == "OPEN":
+            if state == "NOT_OPENED":
+                ticket["state"] = "RUNNING"
+                ticket["used_ms"] = 0
+                ticket["running_start"] = ts
+                ticket["had_valid_open"] = True
+            elif state == "CLOSED":
+                ticket["state"] = "RUNNING"
+                ticket["used_ms"] = 0
+                ticket["running_start"] = ts
+                ticket["had_valid_open"] = True
+            # RUNNING or PAUSED: ignored
+
+        elif event == "PAUSE":
+            if state == "RUNNING":
+                ticket["used_ms"] += ts - ticket["running_start"]
+                ticket["state"] = "PAUSED"
+                ticket["running_start"] = None
+            # NOT_OPENED, PAUSED, CLOSED: ignored
+
+        elif event == "RESUME":
+            if state == "PAUSED":
+                ticket["state"] = "RUNNING"
+                ticket["running_start"] = ts
+            # NOT_OPENED, RUNNING, CLOSED: ignored
+
+        elif event == "CLOSE":
+            if state == "RUNNING":
+                ticket["used_ms"] += ts - ticket["running_start"]
+                ticket["state"] = "CLOSED"
+                ticket["running_start"] = None
+            elif state == "PAUSED":
+                ticket["state"] = "CLOSED"
+            # NOT_OPENED, CLOSED: ignored
+
+        elif event == "REOPEN":
+            if state == "CLOSED":
+                ticket["state"] = "RUNNING"
+                ticket["running_start"] = ts
+            # NOT_OPENED, RUNNING, PAUSED: ignored
+
+    sla_limit = 14_400_000
+    results = []
+
+    for tid, info in tickets.items():
+        if not info["had_valid_open"]:
+            continue
+
+        state = info["state"]
+        total_used = info["used_ms"]
+
+        if state == "RUNNING":
+            total_used += now - info["running_start"]
+
+        status = "closed" if state == "CLOSED" else "open"
+        breached = total_used > sla_limit
+
+        results.append({
+            "ticket_id": tid,
+            "used_ms": total_used,
+            "breached": breached,
+            "status": status,
+        })
+
+    results.sort(key=lambda x: x["ticket_id"])
+    return results
+```

@@ -1,0 +1,55 @@
+{
+  "trial": "C1",
+  "arm": "C",
+  "runner": "antigravity",
+  "checks": [
+    {
+      "id": "harness.no_exception",
+      "status": "pass",
+      "evidence": "no exception"
+    },
+    {
+      "id": "isolation.no_tool_calls",
+      "status": "n/a",
+      "evidence": "agent-framework run: see the SDK session logs instead"
+    },
+    {
+      "id": "output.matches_response",
+      "status": "pass",
+      "evidence": "solution sha256 d35a8b96994f65d7134cf37571ee4002731f0f0bc0aa5f7d0f26965b75841645"
+    },
+    {
+      "id": "grade.reproduced",
+      "status": "pass",
+      "evidence": "now 29/39, failed ['E07', 'E22', 'R1', 'R2', 'R3', 'R5', 'R6', 'S1', 'S2', 'S3']; recorded failed ['E07', 'E22', 'R1', 'R2', 'R3', 'R5', 'R6', 'S1', 'S2', 'S3']"
+    }
+  ],
+  "facts": {
+    "spec": "SPEC_v0_original.md",
+    "seconds": 18.5,
+    "agent_calls": 1,
+    "cost_usd": 0.0447,
+    "crucible_status": null,
+    "rounds_run": null,
+    "strict_pass": false,
+    "cases_passed": 29,
+    "cases_total": 39
+  },
+  "pilot_checks": [
+    {
+      "id": "freeze.hashes_match",
+      "status": "pass",
+      "evidence": "6 files checked; changed: none"
+    },
+    {
+      "id": "spec.hash_matches_config",
+      "status": "pass",
+      "evidence": "SPEC_v0_original.md: recorded 2d0198f52f89b4a98e3f88a630b5decd99ea4b27ab0f6cf06639cdfc6870cd75, now 2d0198f52f89b4a98e3f88a630b5decd99ea4b27ab0f6cf06639cdfc6870cd75"
+    },
+    {
+      "id": "mutation.self_test",
+      "status": "pass",
+      "evidence": "SELF-TEST PASSED"
+    }
+  ]
+}

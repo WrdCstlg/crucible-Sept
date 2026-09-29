@@ -1,0 +1,16 @@
+sequenceDiagram
+    autonumber
+    participant O as Orchestrator
+    participant W as Project files
+    participant G as Code writer (round 2)
+    participant Q as Test writer (round 2)
+    O->>G: Write a solution (spec plus round 1 failure report)
+    G->>W: Reads the round 1 test suite, all 422 lines
+    G->>W: Edits the tests - calibrate Test 09 so 10 cascades are generated
+    G->>W: Saves a draft solution.py in the project root
+    G-->>O: Returns its solution
+    O->>Q: Write a new test suite from the spec
+    Q->>W: Reads the draft solution.py
+    Q-->>O: Returns the new test suite
+    O->>W: Overwrites the old tests with the new suite
+    Note over O,W: The edits were overwritten before use, so this run's scores were unaffected. The access itself was the problem.

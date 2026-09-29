@@ -1,0 +1,403 @@
+{
+  "config": {
+    "started_utc": "2026-09-29T18:01:02.466331+00:00",
+    "frozen_at": "2026-09-29T17:52:07.651315+00:00",
+    "cases": 39,
+    "freeze_sha256": {
+      "SPEC.md": "4b9a1944ef274931a2ef14bf69ea811ed1f403beefc533be8e08bcbc8c1a7fee",
+      "hand_cases.json": "46fb76393d21b3d4d2a7cce29d2ba5ecea54a4eeeef00a73ef33a89a9fc676c8",
+      "generated_cases.json": "b9b8423c1bda36dd2c9dc4073f13675a417a9b17de7006e0cd9eb6e465df5732",
+      "reference.py": "c5e74dc3366e71abe9afd5e568a4a1014887368a167d67cfcee2a5ab92212211",
+      "reference_intervals.py": "069c57e43478c94d0033f89c9e104454893e349ded7dab7028624b2c950a85ab",
+      "generate_cases.py": "1be06c6a4be39a57315c6fb27342a6df7ab45896e4745a259c141f76da96174b"
+    },
+    "minutes": 50.0,
+    "runs": {
+      "A": 5,
+      "B": 2,
+      "C": 5
+    }
+  },
+  "skipped_runs": [],
+  "arms": {
+    "A": {
+      "runs": 5,
+      "valid_runs": 5,
+      "harness_errors": 0,
+      "strict_passes": 5,
+      "pass_rate": 1.0,
+      "mean_cases_passed": 39.0,
+      "mean_seconds": 38.1,
+      "total_tokens": 146740,
+      "cost_usd": 0,
+      "most_failed_cases": []
+    },
+    "B": {
+      "runs": 2,
+      "valid_runs": 2,
+      "harness_errors": 0,
+      "strict_passes": 2,
+      "pass_rate": 1.0,
+      "mean_cases_passed": 39.0,
+      "mean_seconds": 180.6,
+      "total_tokens": 205961,
+      "cost_usd": 0,
+      "most_failed_cases": []
+    },
+    "C": {
+      "runs": 5,
+      "valid_runs": 5,
+      "harness_errors": 0,
+      "strict_passes": 5,
+      "pass_rate": 1.0,
+      "mean_cases_passed": 39.0,
+      "mean_seconds": 11.3,
+      "total_tokens": 13441,
+      "cost_usd": 0.1542,
+      "most_failed_cases": []
+    }
+  },
+  "h1_gap_closed": null,
+  "h3_crucible_vs_hidden": {
+    "crucible_pass_hidden_pass": 4,
+    "false_pass": 0,
+    "false_fail": 0,
+    "crucible_fail_hidden_fail": 0
+  },
+  "runs": [
+    {
+      "run": "A1",
+      "arm": "A",
+      "status": "done",
+      "seconds": 21.1,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": null,
+      "tokens": 15998,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "A2",
+      "arm": "A",
+      "status": "done",
+      "seconds": 32.7,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": null,
+      "tokens": 35643,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "A3",
+      "arm": "A",
+      "status": "done",
+      "seconds": 31.8,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": null,
+      "tokens": 18693,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "A4",
+      "arm": "A",
+      "status": "done",
+      "seconds": 42.5,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": null,
+      "tokens": 25996,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "A5",
+      "arm": "A",
+      "status": "done",
+      "seconds": 62.6,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": null,
+      "tokens": 50410,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "B1",
+      "arm": "B",
+      "status": "done",
+      "seconds": 166.9,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": null,
+      "tokens": 109238,
+      "agent_calls": 4,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": "PASSED",
+      "rounds_run": 1
+    },
+    {
+      "run": "B2",
+      "arm": "B",
+      "status": "done",
+      "seconds": 194.2,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": null,
+      "tokens": 96723,
+      "agent_calls": 4,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": "PASSED",
+      "rounds_run": 1
+    },
+    {
+      "run": "C1",
+      "arm": "C",
+      "status": "done",
+      "seconds": 12.9,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.0326,
+      "tokens": 2775,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "C2",
+      "arm": "C",
+      "status": "done",
+      "seconds": 10.6,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.0295,
+      "tokens": 2621,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "C3",
+      "arm": "C",
+      "status": "done",
+      "seconds": 11.6,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.0323,
+      "tokens": 2763,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "C4",
+      "arm": "C",
+      "status": "done",
+      "seconds": 10.4,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.0292,
+      "tokens": 2607,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "C5",
+      "arm": "C",
+      "status": "done",
+      "seconds": 10.9,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.0306,
+      "tokens": 2675,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": null,
+      "rounds_run": null
+    }
+  ],
+  "b_candidates": [
+    {
+      "run": "B1",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39
+    },
+    {
+      "run": "B1",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39
+    },
+    {
+      "run": "B2",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39
+    },
+    {
+      "run": "B2",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39
+    }
+  ]
+}

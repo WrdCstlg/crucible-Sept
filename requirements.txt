@@ -1,0 +1,6 @@
+google-antigravity==0.1.20
+python-dotenv>=1.0.0
+# Evaluation rig (experiment/rig): provider-agnostic model calls. Minimum versions are the ones tested.
+anthropic>=0.79.0
+google-genai>=1.57.0
+openai>=1.109.0

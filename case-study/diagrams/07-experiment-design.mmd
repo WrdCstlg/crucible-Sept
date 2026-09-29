@@ -1,0 +1,10 @@
+flowchart LR
+    SPEC["Same spec text<br/>for every arm"] --> A["Arm A<br/>Gemini Flash, one call"]
+    SPEC --> B["Arm B<br/>Gemini Flash inside Crucible"]
+    SPEC --> C["Arm C<br/>Claude Opus 5.5, one call"]
+    A --> SOL["Solutions"]
+    B --> SOL
+    C --> SOL
+    SOL --> GR["Hidden grader<br/>39 frozen cases, all-or-nothing"]
+    T["Frozen test set<br/>never shown to any model"] -.-> GR
+    GR --> RES["Results"]

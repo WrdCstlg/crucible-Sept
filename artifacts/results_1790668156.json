@@ -1,0 +1,85 @@
+{
+  "schema_version": "1.1.0",
+  "run_id": "crucible-1790667552",
+  "start_time": "2026-09-29T07:39:12.728670+00:00",
+  "end_time": "2026-09-29T07:49:16.609571+00:00",
+  "total_duration_seconds": 603.877,
+  "problem_statement": "Parse a continuous 5GB telemetry stream to detect thermal throttling cascades (>=95C causing >=90C within 500ms).",
+  "paradigms": [
+    "Micro-batching with dictionary state aggregation",
+    "Zero-copy memory-mapped file processing",
+    "Streaming Finite-State Machine with a bounded ring buffer"
+  ],
+  "configuration": {
+    "mode": "live",
+    "entrypoint": "process_telemetry",
+    "timeout_seconds": 120,
+    "sandbox_engine": "isolated_subprocess",
+    "verifiers": [
+      "deterministic_exit_code_zero",
+      "120s_watchdog_kill",
+      "ast_entrypoint_contract",
+      "ast_import_guard",
+      "cumulative_regression_gate"
+    ]
+  },
+  "summary": {
+    "status": "PASSED",
+    "survived": true,
+    "total_iterations_run": 1,
+    "total_evaluations": 3,
+    "passed_evaluations": 1,
+    "failed_evaluations": 2,
+    "timeout_evaluations": 0,
+    "winning_branches": [
+      "branch_1"
+    ],
+    "deployed_artifacts": [
+      "deployments/winner_branch_1_1790668156.py"
+    ]
+  },
+  "iterations": [
+    {
+      "iteration": 1,
+      "timestamp": "2026-09-29T07:49:16.608290+00:00",
+      "test_harness": {
+        "path": "arena_test_iter_1.py",
+        "size_bytes": 11689,
+        "cumulative_suites_enforced": 1
+      },
+      "branches": [
+        {
+          "name": "branch_1",
+          "paradigm": "Micro-batching with dictionary state aggregation",
+          "exit_code": 0,
+          "status": "PASS",
+          "duration_seconds": 1.704,
+          "solution_size_bytes": 15367,
+          "stdout": "[Test Suite 1]\n============================================================\nADVERSARIAL TELEMETRY QA SUITE: THERMAL THROTTLING CASCADES\nDetected Stream Format: csv\nStrict Memory Limit:   50.0 MB\n============================================================\n\n[PASS] Sanity: Single valid cascade (delta = 200ms): OK\n[PASS] Boundary: Trigger temperature under threshold (94.99C): OK\n[PASS] Boundary: Trigger temperature exact threshold (95.0C): OK\n[PASS] Boundary: Follower temperature under threshold (89.99C): OK\n[PASS] Boundary: Follower temperature exact threshold (90.0C): OK\n[PASS] Boundary: Time window exact boundary (delta = 500ms): OK\n[PASS] Boundary: Time window exceeded (delta = 501ms): OK\n[PASS] Temporal Causality: Follower before trigger event: OK\n[PASS] Multiple Cascades: Disjoint thermal cascades: OK\n[PASS] Window Eviction: Triggers without follower (state cleanup): OK\n[PASS] High-Volume Streaming: expected 1 cascade, detected 1\n\n============================================================\nEXECUTION METRICS & REPORT\n============================================================\nTotal Test Cases:    12\nTests Passed:        12\nTests Failed:        0\nTotal Telemetry Recs:200,049\nSimulated Stream Vol:4.85 MB (Simulated continuous 5GB segment)\nPeak Memory Usage:   0.59 MB / 50.00 MB limit\nTotal Elapsed Time:  1.666 s\nStreaming Throughput:120,091 records/sec\nMemory Limit Status: PASSED\n============================================================\nRESULT: ALL ADVERSARIAL QA TESTS PASSED\n",
+          "stderr": ""
+        },
+        {
+          "name": "branch_2",
+          "paradigm": "Zero-copy memory-mapped file processing",
+          "exit_code": 1,
+          "status": "FAIL",
+          "duration_seconds": 0.045,
+          "solution_size_bytes": 15007,
+          "stdout": "",
+          "stderr": "[Test Suite 1]\nTraceback (most recent call last):\n  File \"./.crucible_workspace\\branch_2\\arena_test_suite_1.py\", line 1, in <module>\n    import solution\n  File \"./.crucible_workspace\\branch_2\\solution.py\", line 89, in <module>\n    class CascadeEvent(tuple):\n    ...<111 lines>...\n            )\nTypeError: nonempty __slots__ not supported for subtype of 'tuple'\n"
+        },
+        {
+          "name": "branch_3",
+          "paradigm": "Streaming Finite-State Machine with a bounded ring buffer",
+          "exit_code": 1,
+          "status": "FAIL",
+          "duration_seconds": 1.285,
+          "solution_size_bytes": 15107,
+          "stdout": "[Test Suite 1]\n============================================================\nADVERSARIAL TELEMETRY QA SUITE: THERMAL THROTTLING CASCADES\nDetected Stream Format: csv\nStrict Memory Limit:   50.0 MB\n============================================================\n\n[PASS] Sanity: Single valid cascade (delta = 200ms): OK\n[PASS] Boundary: Trigger temperature under threshold (94.99C): OK\n[PASS] Boundary: Trigger temperature exact threshold (95.0C): OK\n[PASS] Boundary: Follower temperature under threshold (89.99C): OK\n[PASS] Boundary: Follower temperature exact threshold (90.0C): OK\n[PASS] Boundary: Time window exact boundary (delta = 500ms): OK\n[PASS] Boundary: Time window exceeded (delta = 501ms): OK\n[PASS] Temporal Causality: Follower before trigger event: OK\n[PASS] Multiple Cascades: Disjoint thermal cascades: OK\n[PASS] Window Eviction: Triggers without follower (state cleanup): OK\n[FAIL] High-Volume Streaming: expected 1 cascade, detected 0\n\n============================================================\nEXECUTION METRICS & REPORT\n============================================================\nTotal Test Cases:    12\nTests Passed:        11\nTests Failed:        1\nTotal Telemetry Recs:200,049\nSimulated Stream Vol:4.85 MB (Simulated continuous 5GB segment)\nPeak Memory Usage:   0.07 MB / 50.00 MB limit\nTotal Elapsed Time:  1.250 s\nStreaming Throughput:159,996 records/sec\nMemory Limit Status: PASSED\n============================================================\nRESULT: ADVERSARIAL QA TEST SUITE FAILED\n",
+          "stderr": ""
+        }
+      ],
+      "synthesis_report": "# Architectural Synthesis: Telemetry Arena Evaluation\n\n## Executive Verdict\n\n| Branch | Strategy | Status | Exit Code | Pass Rate | Peak Memory | Throughput | Verdict |\n| :--- | :--- | :---: | :---: | :---: | :---: | :---: | :--- |\n| **branch_1** | Micro-batching with dictionary state aggregation | **PASS** | `0` | **12 / 12 (100%)** | 0.59 MB / 50.00 MB | 120,091 rec/s | **SURVIVOR / WINNER** |\n| **branch_2** | Zero-copy memory-mapped file processing | **FAIL** | `1` | 0 / 12 (0%) | N/A | 0 rec/s | **DISCARDED (Crash on import)** |\n| **branch_3** | Streaming FSM with bounded ring buffer | **FAIL** | `1` | 11 / 12 (91.7%) | 0.07 MB / 50.00 MB | 159,996 rec/s | **DISCARDED (Silent data loss)** |\n\n---\n\n## Detailed Failure Analysis\n\n### 1. `branch_2` (Zero-Copy Memory-Mapped File Processing) \u2014 Dead on Arrival\n* **Exit Code:** `1`\n* **Duration:** `0.045s`\n* **Root Cause:** Fundamental Python data model violation.\n* **Failure Trace:**\n  ```text\n  File \"./.crucible_workspace/branch_2/solution.py\", line 89, in <module>\n      class CascadeEvent(tuple):\n  TypeError: nonempty __slots__ not supported for subtype of 'tuple'\n  ```\n* **Architectural Critique:** The implementation attempted premature micro-optimization by combining `__slots__` with a built-in immutable sequence (`tuple`), failing at load time before a single record was ingested. Zero tests executed. Immediate disqualification.\n\n---\n\n### 2. `branch_3` (Streaming FSM with Bounded Ring Buffer) \u2014 Correctness Failure Under Load\n* **Exit Code:** `1`\n* **Duration:** `1.285s`\n* **Root Cause:** State truncation / buffer overflow under high stream volumes.\n* **Metric Failure:**\n  ```text\n  [FAIL] High-Volume Streaming: expected 1 cascade, detected 0\n  Tests Passed: 11 / 12 | Tests Failed: 1\n  ```\n* **Architectural Critique:** While delivering impressive theoretical throughput (**159,996 rec/s**) and near-zero memory consumption (**0.07 MB**), the bounded ring buffer proved fragile under volume stress (**200,049 records**). The fixed buffer capacity aggressively overwrote or evicted unfulfilled trigger states before downstream follower correlation completed over the sliding temporal window. In a real-time alerting context, dropping thermal cascades is an unacceptable critical failure.\n\n---\n\n## The Winner: `branch_1` (Micro-Batching with Dictionary State Aggregation)\n\n### Why It Survived:\n1. **Flawless Adversarial Coverage:**\n   * Passed all **12/12** adversarial test cases, correctly handling single valid cascades, boundary conditions ($94.99^\\circ\\text{C}$ vs $95.0^\\circ\\text{C}$ trigger, $89.99^\\circ\\text{C}$ vs $90.0^\\circ\\text{C}$ follower, exact $500\\text{ms}$ and $501\\text{ms}$ boundaries), temporal inversion, and state eviction.\n   * Successfully detected the target cascade under load: `[PASS] High-Volume Streaming: expected 1 cascade, detected 1`.\n2. **Robust SLA & Resource Footprint:**\n   * **Throughput:** Processed **200,049 records** in **1.666 s** (**120,091 rec/s**).\n   * **Memory Utilization:** Peak resident memory stood at **0.59 MB**, utilizing only **1.18%** of the strict 50.00 MB limit.\n3. **Correctness Over Synthetic Speed:**\n   * Micro-batching with explicit dictionary aggregation avoided both the fragility of fixed-length ring buffers and the interpreter-level traps of overly bespoke C-extension idioms. It delivered high throughput without sacrificing temporal causality or window retention.\n\n**Decision:** Deploy **`branch_1`** to production."
+    }
+  ]
+}

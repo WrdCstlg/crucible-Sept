@@ -1,0 +1,104 @@
+```python
+def compute_sla(stream):
+    ASCII_DIGITS = set('0123456789')
+    VALID_EVENTS = {'OPEN', 'PAUSE', 'RESUME', 'CLOSE', 'REOPEN'}
+
+    well_formed = []
+    for line in stream:
+        if not isinstance(line, str):
+            continue
+        trimmed = line.strip()
+        parts = trimmed.split(',')
+        if len(parts) != 3:
+            continue
+        ts_str = parts[0].strip()
+        ticket_id = parts[1].strip()
+        event = parts[2].strip()
+
+        if not ts_str or not all(c in ASCII_DIGITS for c in ts_str):
+            continue
+        if not ticket_id:
+            continue
+        if event not in VALID_EVENTS:
+            continue
+
+        well_formed.append((int(ts_str, 10), ticket_id, event))
+
+    if not well_formed:
+        return []
+
+    # Process events in order of timestamp; stable sort preserves original stream order
+    well_formed.sort(key=lambda x: x[0])
+
+    now = well_formed[-1][0]
+
+    class TicketData:
+        __slots__ = ('ticket_id', 'state', 'used_ms', 'running_start', 'had_valid_open')
+
+        def __init__(self, ticket_id):
+            self.ticket_id = ticket_id
+            self.state = 'NOT_OPENED'
+            self.used_ms = 0
+            self.running_start = None
+            self.had_valid_open = False
+
+    tickets = {}
+
+    for ts, ticket_id, event in well_formed:
+        if ticket_id not in tickets:
+            tickets[ticket_id] = TicketData(ticket_id)
+        ticket = tickets[ticket_id]
+
+        if event == 'OPEN':
+            if ticket.state == 'NOT_OPENED':
+                ticket.state = 'RUNNING'
+                ticket.used_ms = 0
+                ticket.running_start = ts
+                ticket.had_valid_open = True
+            elif ticket.state == 'CLOSED':
+                ticket.state = 'RUNNING'
+                ticket.used_ms = 0
+                ticket.running_start = ts
+                ticket.had_valid_open = True
+        elif event == 'PAUSE':
+            if ticket.state == 'RUNNING':
+                ticket.used_ms += ts - ticket.running_start
+                ticket.running_start = None
+                ticket.state = 'PAUSED'
+        elif event == 'RESUME':
+            if ticket.state == 'PAUSED':
+                ticket.state = 'RUNNING'
+                ticket.running_start = ts
+        elif event == 'CLOSE':
+            if ticket.state == 'RUNNING':
+                ticket.used_ms += ts - ticket.running_start
+                ticket.running_start = None
+                ticket.state = 'CLOSED'
+            elif ticket.state == 'PAUSED':
+                ticket.state = 'CLOSED'
+        elif event == 'REOPEN':
+            if ticket.state == 'CLOSED':
+                ticket.state = 'RUNNING'
+                ticket.running_start = ts
+
+    SLA_LIMIT = 14_400_000
+
+    results = []
+    for ticket in tickets.values():
+        if not ticket.had_valid_open:
+            continue
+
+        if ticket.state == 'RUNNING':
+            ticket.used_ms += now - ticket.running_start
+            ticket.running_start = None
+
+        results.append({
+            "ticket_id": ticket.ticket_id,
+            "used_ms": ticket.used_ms,
+            "breached": ticket.used_ms > SLA_LIMIT,
+            "status": "closed" if ticket.state == 'CLOSED' else "open",
+        })
+
+    results.sort(key=lambda x: x["ticket_id"])
+    return results
+```

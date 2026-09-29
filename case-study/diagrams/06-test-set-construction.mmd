@@ -1,0 +1,14 @@
+flowchart TD
+    H["Group 1: 6 hand-written cases<br/>my worked examples"] --> O1{"Do both reference<br/>implementations pass?"}
+    O1 -- no --> STOP["Stop: fix the reference or the spec"]
+    O1 -- yes --> E["Group 2: 24 edge cases<br/>one per spec rule, answers computed by hand"]
+    E --> O2{"Do both references match<br/>every hand-computed answer?"}
+    O2 -- no --> STOP
+    O2 -- yes --> RS["Groups 3-4: 6 random mixes and 3 stress streams<br/>seeded generator, up to 28,150 lines"]
+    RS --> O3{"Do the two<br/>references agree?"}
+    O3 -- no --> STOP
+    O3 -- yes --> M["Mutation check:<br/>break a correct solution 11 ways"]
+    M --> K{"Is every broken version<br/>caught by a targeted case?"}
+    K -- "no: the 'now' bug was caught only by 2 random cases" --> ADD["Add targeted case E24"]
+    ADD --> M
+    K -- yes --> FZ["Freeze with SHA-256 fingerprints<br/>before any model runs"]

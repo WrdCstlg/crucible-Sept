@@ -1,0 +1,81 @@
+```python
+def compute_sla(stream):
+    LIMIT = 14_400_000
+    VALID_EVENTS = {"OPEN", "PAUSE", "RESUME", "CLOSE", "REOPEN"}
+    DIGITS = set("0123456789")
+
+    events = []
+    if stream is None:
+        return []
+
+    for raw in stream:
+        if not isinstance(raw, str):
+            continue
+        line = raw.strip()
+        if not line:
+            continue
+        parts = line.split(",")
+        if len(parts) != 3:
+            continue
+        ts_s, tid, ev = (p.strip() for p in parts)
+        if not ts_s or any(c not in DIGITS for c in ts_s):
+            continue
+        if not tid:
+            continue
+        if ev not in VALID_EVENTS:
+            continue
+        events.append((int(ts_s), tid, ev))
+
+    if not events:
+        return []
+
+    # Stable sort by timestamp only
+    events.sort(key=lambda e: e[0])
+    now = max(e[0] for e in events)
+
+    # ticket_id -> [state, used_ms, running_start]
+    tickets = {}
+
+    for ts, tid, ev in events:
+        rec = tickets.get(tid)
+        state = rec[0] if rec is not None else "NOT_OPENED"
+
+        if ev == "OPEN":
+            if state == "NOT_OPENED" or state == "CLOSED":
+                tickets[tid] = ["RUNNING", 0, ts]
+        elif ev == "PAUSE":
+            if state == "RUNNING":
+                rec[1] += ts - rec[2]
+                rec[0] = "PAUSED"
+                rec[2] = None
+        elif ev == "RESUME":
+            if state == "PAUSED":
+                rec[0] = "RUNNING"
+                rec[2] = ts
+        elif ev == "CLOSE":
+            if state == "RUNNING":
+                rec[1] += ts - rec[2]
+                rec[0] = "CLOSED"
+                rec[2] = None
+            elif state == "PAUSED":
+                rec[0] = "CLOSED"
+                rec[2] = None
+        elif ev == "REOPEN":
+            if state == "CLOSED":
+                rec[0] = "RUNNING"
+                rec[2] = ts
+
+    result = []
+    for tid in sorted(tickets):
+        state, used, start = tickets[tid]
+        if state == "RUNNING":
+            used += now - start
+        used = int(used)
+        result.append({
+            "ticket_id": tid,
+            "used_ms": used,
+            "breached": bool(used > LIMIT),
+            "status": "closed" if state == "CLOSED" else "open",
+        })
+    return result
+```

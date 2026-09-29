@@ -1,0 +1,463 @@
+{
+  "config": {
+    "started_utc": "2026-09-29T19:06:40.406749+00:00",
+    "frozen_at": "2026-09-29T17:52:07.651315+00:00",
+    "cases": 39,
+    "freeze_sha256": {
+      "SPEC.md": "4b9a1944ef274931a2ef14bf69ea811ed1f403beefc533be8e08bcbc8c1a7fee",
+      "hand_cases.json": "46fb76393d21b3d4d2a7cce29d2ba5ecea54a4eeeef00a73ef33a89a9fc676c8",
+      "generated_cases.json": "b9b8423c1bda36dd2c9dc4073f13675a417a9b17de7006e0cd9eb6e465df5732",
+      "reference.py": "c5e74dc3366e71abe9afd5e568a4a1014887368a167d67cfcee2a5ab92212211",
+      "reference_intervals.py": "069c57e43478c94d0033f89c9e104454893e349ded7dab7028624b2c950a85ab",
+      "generate_cases.py": "1be06c6a4be39a57315c6fb27342a6df7ab45896e4745a259c141f76da96174b"
+    },
+    "minutes": 50.0,
+    "spec": "SPEC.md",
+    "spec_sha256": "4b9a1944ef274931a2ef14bf69ea811ed1f403beefc533be8e08bcbc8c1a7fee",
+    "runs": {
+      "A": 5,
+      "B": 2,
+      "C": 5
+    },
+    "runner": "rig",
+    "rig": {
+      "roles": {
+        "evaluated": {
+          "provider": "google",
+          "model": "gemini-3.8-flash",
+          "api_key_env": "GEMINI_API_KEY",
+          "settings": {
+            "thinking_level": "HIGH",
+            "max_tokens": 65536
+          },
+          "price_per_mtok": null,
+          "note": "Model under evaluation. Thinking level HIGH. Called directly, with no agent framework and no tools."
+        },
+        "competitor": {
+          "provider": "anthropic",
+          "model": "claude-opus-5-5",
+          "api_key_env": "ANTHROPIC_API_KEY",
+          "settings": {
+            "effort": "xhigh",
+            "max_tokens": 64000
+          },
+          "price_per_mtok": {
+            "input": 4.0,
+            "output": 20.0
+          },
+          "note": "Competitor expected to be stronger. Effort xhigh (above high). Thinking is always on for this model."
+        },
+        "observer": {
+          "provider": "openai_compatible",
+          "model": "kimi-k3",
+          "api_key_env": "KIMI_API_KEY",
+          "base_url_env": "KIMI_BASE_URL",
+          "settings": {
+            "max_tokens": 16000
+          },
+          "price_per_mtok": null,
+          "note": "Judge of process integrity, from a third model family. Blinded; never produces pass/fail, which comes only from the hidden tests."
+        }
+      },
+      "roles_sha256": "0df4d2e763970600a54eed1c8b83bd65759a1da937e31dfc12f8146fcf9c98e8"
+    },
+    "labels": {
+      "A": "A: gemini-3.8-flash, 1 call",
+      "B": "B: gemini-3.8-flash in Crucible",
+      "C": "C: claude-opus-5-5, 1 call"
+    }
+  },
+  "skipped_runs": [],
+  "arms": {
+    "A": {
+      "runs": 5,
+      "valid_runs": 5,
+      "harness_errors": 0,
+      "strict_passes": 5,
+      "pass_rate": 1.0,
+      "mean_cases_passed": 39.0,
+      "mean_seconds": 99.0,
+      "total_tokens": 137070,
+      "cost_usd": 0,
+      "most_failed_cases": []
+    },
+    "B": {
+      "runs": 2,
+      "valid_runs": 2,
+      "harness_errors": 0,
+      "strict_passes": 1,
+      "pass_rate": 0.5,
+      "mean_cases_passed": 19.5,
+      "mean_seconds": 429.8,
+      "total_tokens": 244744,
+      "cost_usd": 0,
+      "most_failed_cases": []
+    },
+    "C": {
+      "runs": 5,
+      "valid_runs": 5,
+      "harness_errors": 0,
+      "strict_passes": 5,
+      "pass_rate": 1.0,
+      "mean_cases_passed": 39.0,
+      "mean_seconds": 18.8,
+      "total_tokens": 17947,
+      "cost_usd": 0.2442,
+      "most_failed_cases": []
+    }
+  },
+  "h1_gap_closed": null,
+  "h3_crucible_vs_hidden": {
+    "crucible_pass_hidden_pass": 2,
+    "false_pass": 0,
+    "false_fail": 4,
+    "crucible_fail_hidden_fail": 0
+  },
+  "runs": [
+    {
+      "run": "A1",
+      "arm": "A",
+      "status": "done",
+      "seconds": 102.5,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": null,
+      "tokens": 27425,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "A2",
+      "arm": "A",
+      "status": "done",
+      "seconds": 94.9,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": null,
+      "tokens": 26995,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "A3",
+      "arm": "A",
+      "status": "done",
+      "seconds": 113.8,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": null,
+      "tokens": 30186,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "A4",
+      "arm": "A",
+      "status": "done",
+      "seconds": 89.8,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": null,
+      "tokens": 25839,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "A5",
+      "arm": "A",
+      "status": "done",
+      "seconds": 93.8,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": null,
+      "tokens": 26625,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "B1",
+      "arm": "B",
+      "status": "done",
+      "seconds": 248.7,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": null,
+      "tokens": 71975,
+      "agent_calls": 4,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": "PASSED",
+      "rounds_run": 1
+    },
+    {
+      "run": "B2",
+      "arm": "B",
+      "status": "done",
+      "seconds": 610.8,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": null,
+      "tokens": 172769,
+      "agent_calls": 8,
+      "graded": false,
+      "strict_pass": false,
+      "cases_passed": 0,
+      "cases_total": null,
+      "by_layer": null,
+      "failed_cases": null,
+      "first_failure": null,
+      "crucible_status": "FAILED",
+      "rounds_run": 2
+    },
+    {
+      "run": "C1",
+      "arm": "C",
+      "status": "done",
+      "seconds": 19.5,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.04886,
+      "tokens": 3590,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "C2",
+      "arm": "C",
+      "status": "done",
+      "seconds": 18.9,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.04742,
+      "tokens": 3518,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "C3",
+      "arm": "C",
+      "status": "done",
+      "seconds": 21.8,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.05832,
+      "tokens": 4063,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "C4",
+      "arm": "C",
+      "status": "done",
+      "seconds": 19.8,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.05076,
+      "tokens": 3685,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "C5",
+      "arm": "C",
+      "status": "done",
+      "seconds": 13.9,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.03888,
+      "tokens": 3091,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "24/24",
+        "random": "6/6",
+        "stress": "3/3"
+      },
+      "failed_cases": [],
+      "first_failure": null,
+      "crucible_status": null,
+      "rounds_run": null
+    }
+  ],
+  "b_candidates": [
+    {
+      "run": "B1",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39
+    },
+    {
+      "run": "B1",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39
+    },
+    {
+      "run": "B2",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "FAIL",
+      "hidden_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39
+    },
+    {
+      "run": "B2",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "FAIL",
+      "hidden_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39
+    },
+    {
+      "run": "B2",
+      "candidate": "round2_branch_1",
+      "crucible_verdict": "FAIL",
+      "hidden_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39
+    },
+    {
+      "run": "B2",
+      "candidate": "round2_branch_2",
+      "crucible_verdict": "FAIL",
+      "hidden_pass": true,
+      "cases_passed": 39,
+      "cases_total": 39
+    }
+  ]
+}

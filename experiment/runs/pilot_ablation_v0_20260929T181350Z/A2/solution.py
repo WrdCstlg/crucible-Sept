@@ -1,0 +1,137 @@
+import csv
+
+
+def compute_sla(stream):
+    """Compute SLA clock for support tickets from a stream of CSV events."""
+    if isinstance(stream, str):
+        stream = stream.splitlines()
+
+    valid_event_types = {"OPEN", "PAUSE", "RESUME", "CLOSE", "REOPEN"}
+
+    now = None
+    records = []
+
+    for arrival_idx, line in enumerate(stream):
+        if not isinstance(line, str):
+            try:
+                line = line.decode("utf-8")
+            except Exception:
+                continue
+
+        line_stripped = line.strip()
+        if not line_stripped:
+            continue
+
+        try:
+            row = next(csv.reader([line_stripped], skipinitialspace=True))
+        except Exception:
+            row = line_stripped.split(",")
+
+        # Extract timestamp for 'now' from any line where column 0 has a valid timestamp_ms
+        if row:
+            try:
+                ts_val = int(row[0].strip())
+                if ts_val >= 0:
+                    if now is None or ts_val > now:
+                        now = ts_val
+            except ValueError:
+                pass
+
+        if len(row) != 3:
+            continue
+
+        ts_str, ticket_id, event = [col.strip() for col in row]
+
+        try:
+            ts = int(ts_str)
+            if ts < 0:
+                continue
+        except ValueError:
+            continue
+
+        if not ticket_id:
+            continue
+
+        if event not in valid_event_types:
+            continue
+
+        records.append((ts, arrival_idx, ticket_id, event))
+
+    if now is None:
+        now = 0
+
+    # Sort events by timestamp_ms ascending, breaking ties by arrival order (stable sort)
+    records.sort(key=lambda r: (r[0], r[1]))
+
+    # Ticket states:
+    # 'OPEN_RUNNING': ticket is open, clock is running
+    # 'OPEN_PAUSED':  ticket is open, clock is paused
+    # 'CLOSED':       ticket is closed
+    tickets = {}
+
+    for ts, _, ticket_id, event in records:
+        if ticket_id not in tickets:
+            if event == "OPEN":
+                tickets[ticket_id] = {
+                    "state": "OPEN_RUNNING",
+                    "used_ms": 0,
+                    "clock_started_at": ts,
+                }
+            # Any event before first valid OPEN is silently ignored
+            continue
+
+        t_data = tickets[ticket_id]
+        state = t_data["state"]
+
+        if state == "OPEN_RUNNING":
+            if event == "PAUSE":
+                t_data["used_ms"] += ts - t_data["clock_started_at"]
+                t_data["state"] = "OPEN_PAUSED"
+            elif event == "CLOSE":
+                t_data["used_ms"] += ts - t_data["clock_started_at"]
+                t_data["state"] = "CLOSED"
+            # OPEN, RESUME, REOPEN are invalid when running -> silently ignored
+
+        elif state == "OPEN_PAUSED":
+            if event == "RESUME":
+                t_data["clock_started_at"] = ts
+                t_data["state"] = "OPEN_RUNNING"
+            elif event == "CLOSE":
+                # Time from PAUSE to CLOSE does not count
+                t_data["state"] = "CLOSED"
+            # OPEN, PAUSE, REOPEN are invalid when paused -> silently ignored
+
+        elif state == "CLOSED":
+            if event == "REOPEN":
+                t_data["clock_started_at"] = ts
+                t_data["state"] = "OPEN_RUNNING"
+            # OPEN, PAUSE, RESUME, CLOSE are invalid when closed -> silently ignored
+
+    results = []
+    sla_limit = 14_400_000
+
+    for ticket_id, t_data in tickets.items():
+        state = t_data["state"]
+        used_ms = t_data["used_ms"]
+
+        if state == "OPEN_RUNNING":
+            used_ms += now - t_data["clock_started_at"]
+            status = "open"
+        elif state == "OPEN_PAUSED":
+            status = "open"
+        else:  # CLOSED
+            status = "closed"
+
+        breached = used_ms > sla_limit
+
+        results.append(
+            {
+                "ticket_id": ticket_id,
+                "used_ms": used_ms,
+                "breached": breached,
+                "status": status,
+            }
+        )
+
+    results.sort(key=lambda x: x["ticket_id"])
+    return results

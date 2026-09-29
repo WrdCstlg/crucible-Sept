@@ -1,0 +1,92 @@
+from typing import Iterable, List, Dict, Any
+
+SLA_LIMIT_MS = 14_400_000
+_VALID_EVENTS = {"OPEN", "PAUSE", "RESUME", "CLOSE", "REOPEN"}
+_DIGITS = set("0123456789")
+
+NOT_OPENED = "NOT_OPENED"
+RUNNING = "RUNNING"
+PAUSED = "PAUSED"
+CLOSED = "CLOSED"
+
+
+def _parse_line(line):
+    if not isinstance(line, str):
+        return None
+    s = line.strip()
+    if not s:
+        return None
+    parts = s.split(",")
+    if len(parts) != 3:
+        return None
+    ts_s, tid, ev = (p.strip() for p in parts)
+    if not ts_s or any(c not in _DIGITS for c in ts_s):
+        return None
+    if not tid:
+        return None
+    if ev not in _VALID_EVENTS:
+        return None
+    return int(ts_s, 10), tid, ev
+
+
+def compute_sla(stream: Iterable[str]) -> List[Dict[str, Any]]:
+    events = []
+    if stream is None:
+        return []
+    for line in stream:
+        parsed = _parse_line(line)
+        if parsed is not None:
+            events.append(parsed)
+
+    if not events:
+        return []
+
+    now = max(e[0] for e in events)
+    events.sort(key=lambda e: e[0])  # stable sort
+
+    state: Dict[str, str] = {}
+    used: Dict[str, int] = {}
+    start: Dict[str, int] = {}
+
+    for ts, tid, ev in events:
+        st = state.get(tid, NOT_OPENED)
+        if ev == "OPEN":
+            if st == NOT_OPENED or st == CLOSED:
+                state[tid] = RUNNING
+                used[tid] = 0
+                start[tid] = ts
+        elif ev == "PAUSE":
+            if st == RUNNING:
+                used[tid] += ts - start[tid]
+                state[tid] = PAUSED
+        elif ev == "RESUME":
+            if st == PAUSED:
+                state[tid] = RUNNING
+                start[tid] = ts
+        elif ev == "CLOSE":
+            if st == RUNNING:
+                used[tid] += ts - start[tid]
+                state[tid] = CLOSED
+            elif st == PAUSED:
+                state[tid] = CLOSED
+        elif ev == "REOPEN":
+            if st == CLOSED:
+                state[tid] = RUNNING
+                start[tid] = ts
+
+    result: List[Dict[str, Any]] = []
+    for tid in sorted(state.keys()):
+        st = state[tid]
+        if st == NOT_OPENED:
+            continue
+        total = used[tid]
+        if st == RUNNING:
+            total += now - start[tid]
+        total = int(total)
+        result.append({
+            "ticket_id": tid,
+            "used_ms": total,
+            "breached": bool(total > SLA_LIMIT_MS),
+            "status": "closed" if st == CLOSED else "open",
+        })
+    return result

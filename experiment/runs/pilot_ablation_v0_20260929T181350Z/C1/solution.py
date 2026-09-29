@@ -1,0 +1,87 @@
+def compute_sla(stream):
+    """Compute SLA usage per ticket from a stream of CSV event lines.
+
+    Returns a list of dicts with keys ticket_id, used_ms, breached and status,
+    sorted by ticket_id.
+    """
+    LIMIT = 14_400_000
+    VALID_EVENTS = {"OPEN", "PAUSE", "RESUME", "CLOSE", "REOPEN"}
+
+    events = []  # (timestamp, arrival_index, ticket_id, event)
+    now = None
+
+    for idx, line in enumerate(stream):
+        if not isinstance(line, str):
+            continue
+        s = line.strip()
+        if not s:
+            continue
+        parts = s.split(",")
+        if len(parts) != 3:
+            continue
+        ts_str, tid, ev = (p.strip() for p in parts)
+        # Timestamp must be a non-negative integer made of ASCII digits only.
+        if not ts_str or not all("0" <= c <= "9" for c in ts_str):
+            continue
+        if not tid or not ev:
+            continue
+        ts = int(ts_str)
+        # Well-formed lines count toward "now" even if the event is invalid.
+        if now is None or ts > now:
+            now = ts
+        events.append((ts, idx, tid, ev))
+
+    # Stable sort by timestamp; ties keep arrival order.
+    events.sort(key=lambda e: (e[0], e[1]))
+
+    # Per-ticket state: "running", "paused" or "closed".
+    state = {}
+    used = {}
+    run_start = {}
+
+    for ts, _, tid, ev in events:
+        if ev not in VALID_EVENTS:
+            continue
+        st = state.get(tid)
+        if st is None:
+            # Only OPEN is valid before a ticket has been opened.
+            if ev == "OPEN":
+                state[tid] = "running"
+                used[tid] = 0
+                run_start[tid] = ts
+            continue
+        if ev == "OPEN":
+            # Already opened at some point; OPEN is invalid.
+            continue
+        if ev == "PAUSE":
+            if st == "running":
+                used[tid] += ts - run_start[tid]
+                state[tid] = "paused"
+        elif ev == "RESUME":
+            if st == "paused":
+                state[tid] = "running"
+                run_start[tid] = ts
+        elif ev == "CLOSE":
+            if st == "running":
+                used[tid] += ts - run_start[tid]
+                state[tid] = "closed"
+            elif st == "paused":
+                state[tid] = "closed"
+        elif ev == "REOPEN":
+            if st == "closed":
+                state[tid] = "running"
+                run_start[tid] = ts
+
+    result = []
+    for tid in sorted(state):
+        st = state[tid]
+        total = used[tid]
+        if st == "running" and now is not None:
+            total += max(0, now - run_start[tid])
+        result.append({
+            "ticket_id": tid,
+            "used_ms": total,
+            "breached": total > LIMIT,
+            "status": "closed" if st == "closed" else "open",
+        })
+    return result

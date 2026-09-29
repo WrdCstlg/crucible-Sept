@@ -1,0 +1,134 @@
+{
+  "model": "gemini-3.8-flash",
+  "seconds": 610.8,
+  "agent_calls": 8,
+  "calls": [
+    {
+      "role": "gen",
+      "provider": "google",
+      "model": "gemini-3.8-flash",
+      "seconds": 30.1,
+      "usage": {
+        "input_tokens": 1020,
+        "output_tokens": 7918,
+        "thinking_tokens": 6934
+      },
+      "cost_usd": null,
+      "stop_reason": "STOP",
+      "tool_calls": 0
+    },
+    {
+      "role": "gen",
+      "provider": "google",
+      "model": "gemini-3.8-flash",
+      "seconds": 79.0,
+      "usage": {
+        "input_tokens": 1028,
+        "output_tokens": 21293,
+        "thinking_tokens": 20253
+      },
+      "cost_usd": null,
+      "stop_reason": "STOP",
+      "tool_calls": 0
+    },
+    {
+      "role": "qa",
+      "provider": "google",
+      "model": "gemini-3.8-flash",
+      "seconds": 142.5,
+      "usage": {
+        "input_tokens": 1090,
+        "output_tokens": 43278,
+        "thinking_tokens": 34371
+      },
+      "cost_usd": null,
+      "stop_reason": "STOP",
+      "tool_calls": 0
+    },
+    {
+      "role": "synth",
+      "provider": "google",
+      "model": "gemini-3.8-flash",
+      "seconds": 15.3,
+      "usage": {
+        "input_tokens": 1610,
+        "output_tokens": 2546,
+        "thinking_tokens": 1556
+      },
+      "cost_usd": null,
+      "stop_reason": "STOP",
+      "tool_calls": 0
+    },
+    {
+      "role": "gen",
+      "provider": "google",
+      "model": "gemini-3.8-flash",
+      "seconds": 131.3,
+      "usage": {
+        "input_tokens": 2068,
+        "output_tokens": 33749,
+        "thinking_tokens": 32508
+      },
+      "cost_usd": null,
+      "stop_reason": "STOP",
+      "tool_calls": 0
+    },
+    {
+      "role": "gen",
+      "provider": "google",
+      "model": "gemini-3.8-flash",
+      "seconds": 108.1,
+      "usage": {
+        "input_tokens": 2076,
+        "output_tokens": 27497,
+        "thinking_tokens": 26128
+      },
+      "cost_usd": null,
+      "stop_reason": "STOP",
+      "tool_calls": 0
+    },
+    {
+      "role": "qa",
+      "provider": "google",
+      "model": "gemini-3.8-flash",
+      "seconds": 85.7,
+      "usage": {
+        "input_tokens": 1090,
+        "output_tokens": 22819,
+        "thinking_tokens": 16264
+      },
+      "cost_usd": null,
+      "stop_reason": "STOP",
+      "tool_calls": 0
+    },
+    {
+      "role": "synth",
+      "provider": "google",
+      "model": "gemini-3.8-flash",
+      "seconds": 10.3,
+      "usage": {
+        "input_tokens": 1610,
+        "output_tokens": 2077,
+        "thinking_tokens": 1377
+      },
+      "cost_usd": null,
+      "stop_reason": "STOP",
+      "tool_calls": 0
+    }
+  ],
+  "rounds_run": 2,
+  "crucible_status": "FAILED",
+  "winners": [],
+  "graded_branch": null,
+  "crucible_verdicts": {
+    "round1_branch_1": "FAIL",
+    "round1_branch_2": "FAIL",
+    "round2_branch_1": "FAIL",
+    "round2_branch_2": "FAIL"
+  },
+  "role": "evaluated",
+  "tool_calls": 0,
+  "arm": "B",
+  "runner": "rig",
+  "spec": "SPEC.md"
+}

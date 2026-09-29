@@ -1,0 +1,646 @@
+{
+  "config": {
+    "started_utc": "2026-09-29T18:13:50.117160+00:00",
+    "frozen_at": "2026-09-29T17:52:07.651315+00:00",
+    "cases": 39,
+    "freeze_sha256": {
+      "SPEC.md": "4b9a1944ef274931a2ef14bf69ea811ed1f403beefc533be8e08bcbc8c1a7fee",
+      "hand_cases.json": "46fb76393d21b3d4d2a7cce29d2ba5ecea54a4eeeef00a73ef33a89a9fc676c8",
+      "generated_cases.json": "b9b8423c1bda36dd2c9dc4073f13675a417a9b17de7006e0cd9eb6e465df5732",
+      "reference.py": "c5e74dc3366e71abe9afd5e568a4a1014887368a167d67cfcee2a5ab92212211",
+      "reference_intervals.py": "069c57e43478c94d0033f89c9e104454893e349ded7dab7028624b2c950a85ab",
+      "generate_cases.py": "1be06c6a4be39a57315c6fb27342a6df7ab45896e4745a259c141f76da96174b"
+    },
+    "minutes": 50.0,
+    "spec": "SPEC_v0_original.md",
+    "spec_sha256": "2d0198f52f89b4a98e3f88a630b5decd99ea4b27ab0f6cf06639cdfc6870cd75",
+    "runs": {
+      "A": 5,
+      "B": 2,
+      "C": 5
+    }
+  },
+  "skipped_runs": [],
+  "arms": {
+    "A": {
+      "runs": 5,
+      "valid_runs": 5,
+      "harness_errors": 0,
+      "strict_passes": 0,
+      "pass_rate": 0.0,
+      "mean_cases_passed": 27.6,
+      "mean_seconds": 115.4,
+      "total_tokens": 310776,
+      "cost_usd": 0,
+      "most_failed_cases": [
+        [
+          "E07",
+          5
+        ],
+        [
+          "E16",
+          5
+        ],
+        [
+          "E22",
+          5
+        ],
+        [
+          "R1",
+          5
+        ],
+        [
+          "R2",
+          5
+        ],
+        [
+          "R3",
+          5
+        ],
+        [
+          "R5",
+          5
+        ],
+        [
+          "R6",
+          5
+        ]
+      ]
+    },
+    "B": {
+      "runs": 2,
+      "valid_runs": 2,
+      "harness_errors": 0,
+      "strict_passes": 0,
+      "pass_rate": 0.0,
+      "mean_cases_passed": 27.5,
+      "mean_seconds": 282.8,
+      "total_tokens": 305558,
+      "cost_usd": 0,
+      "most_failed_cases": [
+        [
+          "E07",
+          2
+        ],
+        [
+          "E16",
+          2
+        ],
+        [
+          "E22",
+          2
+        ],
+        [
+          "R1",
+          2
+        ],
+        [
+          "R2",
+          2
+        ],
+        [
+          "R3",
+          2
+        ],
+        [
+          "R5",
+          2
+        ],
+        [
+          "R6",
+          2
+        ]
+      ]
+    },
+    "C": {
+      "runs": 5,
+      "valid_runs": 5,
+      "harness_errors": 0,
+      "strict_passes": 0,
+      "pass_rate": 0.0,
+      "mean_cases_passed": 29.0,
+      "mean_seconds": 18.9,
+      "total_tokens": 14716,
+      "cost_usd": 0.2237,
+      "most_failed_cases": [
+        [
+          "E07",
+          5
+        ],
+        [
+          "E22",
+          5
+        ],
+        [
+          "R1",
+          5
+        ],
+        [
+          "R2",
+          5
+        ],
+        [
+          "R3",
+          5
+        ],
+        [
+          "R5",
+          5
+        ],
+        [
+          "R6",
+          5
+        ],
+        [
+          "S1",
+          5
+        ]
+      ]
+    }
+  },
+  "h1_gap_closed": null,
+  "h3_crucible_vs_hidden": {
+    "crucible_pass_hidden_pass": 0,
+    "false_pass": 4,
+    "false_fail": 0,
+    "crucible_fail_hidden_fail": 0
+  },
+  "runs": [
+    {
+      "run": "A1",
+      "arm": "A",
+      "status": "done",
+      "seconds": 127.0,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": null,
+      "tokens": 52998,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": false,
+      "cases_passed": 28,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "21/24",
+        "random": "1/6",
+        "stress": "0/3"
+      },
+      "failed_cases": [
+        "E07",
+        "E16",
+        "E22",
+        "R1",
+        "R2",
+        "R3",
+        "R5",
+        "R6",
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "first_failure": "E07: expected {'ticket_id': 'T1', 'used_ms': 500, 'breached': False, 'status': 'closed'}, got {'ticket_id': 'T1', 'used_ms': 20000000, 'breached': True, 'status': 'closed'}",
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "A2",
+      "arm": "A",
+      "status": "done",
+      "seconds": 118.4,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": null,
+      "tokens": 54072,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": false,
+      "cases_passed": 27,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "20/24",
+        "random": "1/6",
+        "stress": "0/3"
+      },
+      "failed_cases": [
+        "E07",
+        "E15",
+        "E16",
+        "E22",
+        "R1",
+        "R2",
+        "R3",
+        "R5",
+        "R6",
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "first_failure": "E07: expected {'ticket_id': 'T1', 'used_ms': 500, 'breached': False, 'status': 'closed'}, got {'ticket_id': 'T1', 'used_ms': 20000000, 'breached': True, 'status': 'closed'}",
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "A3",
+      "arm": "A",
+      "status": "done",
+      "seconds": 125.9,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": null,
+      "tokens": 63410,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": false,
+      "cases_passed": 27,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "20/24",
+        "random": "1/6",
+        "stress": "0/3"
+      },
+      "failed_cases": [
+        "E07",
+        "E15",
+        "E16",
+        "E22",
+        "R1",
+        "R2",
+        "R3",
+        "R5",
+        "R6",
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "first_failure": "E07: expected {'ticket_id': 'T1', 'used_ms': 500, 'breached': False, 'status': 'closed'}, got {'ticket_id': 'T1', 'used_ms': 20000000, 'breached': True, 'status': 'closed'}",
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "A4",
+      "arm": "A",
+      "status": "done",
+      "seconds": 95.3,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": null,
+      "tokens": 62293,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": false,
+      "cases_passed": 28,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "21/24",
+        "random": "1/6",
+        "stress": "0/3"
+      },
+      "failed_cases": [
+        "E07",
+        "E16",
+        "E22",
+        "R1",
+        "R2",
+        "R3",
+        "R5",
+        "R6",
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "first_failure": "E07: expected {'ticket_id': 'T1', 'used_ms': 500, 'breached': False, 'status': 'closed'}, got {'ticket_id': 'T1', 'used_ms': 20000000, 'breached': True, 'status': 'closed'}",
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "A5",
+      "arm": "A",
+      "status": "done",
+      "seconds": 110.6,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": null,
+      "tokens": 78003,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": false,
+      "cases_passed": 28,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "21/24",
+        "random": "1/6",
+        "stress": "0/3"
+      },
+      "failed_cases": [
+        "E07",
+        "E16",
+        "E22",
+        "R1",
+        "R2",
+        "R3",
+        "R5",
+        "R6",
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "first_failure": "E07: expected {'ticket_id': 'T1', 'used_ms': 500, 'breached': False, 'status': 'closed'}, got {'ticket_id': 'T1', 'used_ms': 20000000, 'breached': True, 'status': 'closed'}",
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "B1",
+      "arm": "B",
+      "status": "done",
+      "seconds": 272.9,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": null,
+      "tokens": 153343,
+      "agent_calls": 4,
+      "graded": true,
+      "strict_pass": false,
+      "cases_passed": 28,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "21/24",
+        "random": "1/6",
+        "stress": "0/3"
+      },
+      "failed_cases": [
+        "E07",
+        "E16",
+        "E22",
+        "R1",
+        "R2",
+        "R3",
+        "R5",
+        "R6",
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "first_failure": "E07: expected {'ticket_id': 'T1', 'used_ms': 500, 'breached': False, 'status': 'closed'}, got {'ticket_id': 'T1', 'used_ms': 20000000, 'breached': True, 'status': 'closed'}",
+      "crucible_status": "PASSED",
+      "rounds_run": 1
+    },
+    {
+      "run": "B2",
+      "arm": "B",
+      "status": "done",
+      "seconds": 292.6,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": null,
+      "tokens": 152215,
+      "agent_calls": 4,
+      "graded": true,
+      "strict_pass": false,
+      "cases_passed": 27,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "20/24",
+        "random": "1/6",
+        "stress": "0/3"
+      },
+      "failed_cases": [
+        "E07",
+        "E15",
+        "E16",
+        "E22",
+        "R1",
+        "R2",
+        "R3",
+        "R5",
+        "R6",
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "first_failure": "E07: expected {'ticket_id': 'T1', 'used_ms': 500, 'breached': False, 'status': 'closed'}, got {'ticket_id': 'T1', 'used_ms': 20000000, 'breached': True, 'status': 'closed'}",
+      "crucible_status": "PASSED",
+      "rounds_run": 1
+    },
+    {
+      "run": "C1",
+      "arm": "C",
+      "status": "done",
+      "seconds": 18.5,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.0447,
+      "tokens": 2940,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": false,
+      "cases_passed": 29,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "22/24",
+        "random": "1/6",
+        "stress": "0/3"
+      },
+      "failed_cases": [
+        "E07",
+        "E22",
+        "R1",
+        "R2",
+        "R3",
+        "R5",
+        "R6",
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "first_failure": "E07: expected {'ticket_id': 'T1', 'used_ms': 500, 'breached': False, 'status': 'closed'}, got {'ticket_id': 'T1', 'used_ms': 20000000, 'breached': True, 'status': 'closed'}",
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "C2",
+      "arm": "C",
+      "status": "done",
+      "seconds": 18.6,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.0432,
+      "tokens": 2867,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": false,
+      "cases_passed": 29,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "22/24",
+        "random": "1/6",
+        "stress": "0/3"
+      },
+      "failed_cases": [
+        "E07",
+        "E22",
+        "R1",
+        "R2",
+        "R3",
+        "R5",
+        "R6",
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "first_failure": "E07: expected {'ticket_id': 'T1', 'used_ms': 500, 'breached': False, 'status': 'closed'}, got {'ticket_id': 'T1', 'used_ms': 20000000, 'breached': True, 'status': 'closed'}",
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "C3",
+      "arm": "C",
+      "status": "done",
+      "seconds": 19.2,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.0451,
+      "tokens": 2960,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": false,
+      "cases_passed": 29,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "22/24",
+        "random": "1/6",
+        "stress": "0/3"
+      },
+      "failed_cases": [
+        "E07",
+        "E22",
+        "R1",
+        "R2",
+        "R3",
+        "R5",
+        "R6",
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "first_failure": "E07: expected {'ticket_id': 'T1', 'used_ms': 500, 'breached': False, 'status': 'closed'}, got {'ticket_id': 'T1', 'used_ms': 20000000, 'breached': True, 'status': 'closed'}",
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "C4",
+      "arm": "C",
+      "status": "done",
+      "seconds": 18.8,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.0453,
+      "tokens": 2971,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": false,
+      "cases_passed": 29,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "22/24",
+        "random": "1/6",
+        "stress": "0/3"
+      },
+      "failed_cases": [
+        "E07",
+        "E22",
+        "R1",
+        "R2",
+        "R3",
+        "R5",
+        "R6",
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "first_failure": "E07: expected {'ticket_id': 'T1', 'used_ms': 500, 'breached': False, 'status': 'closed'}, got {'ticket_id': 'T1', 'used_ms': 20000000, 'breached': True, 'status': 'closed'}",
+      "crucible_status": null,
+      "rounds_run": null
+    },
+    {
+      "run": "C5",
+      "arm": "C",
+      "status": "done",
+      "seconds": 19.2,
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.0454,
+      "tokens": 2978,
+      "agent_calls": 1,
+      "graded": true,
+      "strict_pass": false,
+      "cases_passed": 29,
+      "cases_total": 39,
+      "by_layer": {
+        "hand": "6/6",
+        "edge": "22/24",
+        "random": "1/6",
+        "stress": "0/3"
+      },
+      "failed_cases": [
+        "E07",
+        "E22",
+        "R1",
+        "R2",
+        "R3",
+        "R5",
+        "R6",
+        "S1",
+        "S2",
+        "S3"
+      ],
+      "first_failure": "E07: expected {'ticket_id': 'T1', 'used_ms': 500, 'breached': False, 'status': 'closed'}, got {'ticket_id': 'T1', 'used_ms': 20000000, 'breached': True, 'status': 'closed'}",
+      "crucible_status": null,
+      "rounds_run": null
+    }
+  ],
+  "b_candidates": [
+    {
+      "run": "B1",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": false,
+      "cases_passed": 28,
+      "cases_total": 39
+    },
+    {
+      "run": "B1",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": false,
+      "cases_passed": 28,
+      "cases_total": 39
+    },
+    {
+      "run": "B2",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": false,
+      "cases_passed": 27,
+      "cases_total": 39
+    },
+    {
+      "run": "B2",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": false,
+      "cases_passed": 27,
+      "cases_total": 39
+    }
+  ]
+}

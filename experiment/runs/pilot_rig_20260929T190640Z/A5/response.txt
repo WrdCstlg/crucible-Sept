@@ -1,0 +1,96 @@
+```python
+def compute_sla(stream):
+    """
+    Compute SLA clock metrics for tickets from a stream of CSV records.
+    """
+    VALID_EVENTS = {"OPEN", "PAUSE", "RESUME", "CLOSE", "REOPEN"}
+    SLA_LIMIT = 14_400_000
+
+    events = []
+    for idx, line in enumerate(stream):
+        if not isinstance(line, str):
+            continue
+        stripped = line.strip()
+        parts = stripped.split(",")
+        if len(parts) != 3:
+            continue
+        ts_str = parts[0].strip()
+        ticket_id = parts[1].strip()
+        event = parts[2].strip()
+
+        if not ts_str or not all("0" <= c <= "9" for c in ts_str):
+            continue
+        if not ticket_id:
+            continue
+        if event not in VALID_EVENTS:
+            continue
+
+        ts = int(ts_str)
+        events.append((ts, idx, ticket_id, event))
+
+    if not events:
+        return []
+
+    events.sort(key=lambda e: (e[0], e[1]))
+    now = events[-1][0]
+
+    NOT_OPENED = 0
+    RUNNING = 1
+    PAUSED = 2
+    CLOSED = 3
+
+    # ticket_id -> [state, used_ms, running_since, had_valid_open]
+    tickets = {}
+
+    for ts, _, ticket_id, event in events:
+        if ticket_id not in tickets:
+            tickets[ticket_id] = [NOT_OPENED, 0, 0, False]
+        t = tickets[ticket_id]
+        state = t[0]
+
+        if event == "OPEN":
+            if state == NOT_OPENED or state == CLOSED:
+                t[0] = RUNNING
+                t[1] = 0
+                t[2] = ts
+                t[3] = True
+        elif event == "PAUSE":
+            if state == RUNNING:
+                t[1] += ts - t[2]
+                t[0] = PAUSED
+        elif event == "RESUME":
+            if state == PAUSED:
+                t[0] = RUNNING
+                t[2] = ts
+        elif event == "CLOSE":
+            if state == RUNNING:
+                t[1] += ts - t[2]
+                t[0] = CLOSED
+            elif state == PAUSED:
+                t[0] = CLOSED
+        elif event == "REOPEN":
+            if state == CLOSED:
+                t[0] = RUNNING
+                t[2] = ts
+
+    result = []
+    for ticket_id, (state, used_ms, running_since, had_valid_open) in tickets.items():
+        if not had_valid_open:
+            continue
+
+        total_used = used_ms
+        if state == RUNNING:
+            total_used += now - running_since
+
+        result.append(
+            {
+                "ticket_id": ticket_id,
+                "used_ms": total_used,
+                "breached": total_used > SLA_LIMIT,
+                "status": "closed" if state == CLOSED else "open",
+            }
+        )
+
+    result.sort(key=lambda r: r["ticket_id"])
+    return result
+```

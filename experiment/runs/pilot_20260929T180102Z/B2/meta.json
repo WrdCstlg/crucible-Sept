@@ -1,0 +1,67 @@
+{
+  "model": "gemini (Crucible)",
+  "seconds": 194.2,
+  "agent_calls": 4,
+  "calls": [
+    {
+      "role": "gen",
+      "seconds": 39.8,
+      "usage": {
+        "prompt_token_count": 11359,
+        "cached_content_token_count": 0,
+        "candidates_token_count": 1208,
+        "thoughts_token_count": 8357,
+        "total_token_count": 20924,
+        "service_tier": null
+      }
+    },
+    {
+      "role": "gen",
+      "seconds": 36.7,
+      "usage": {
+        "prompt_token_count": 11371,
+        "cached_content_token_count": 0,
+        "candidates_token_count": 912,
+        "thoughts_token_count": 7082,
+        "total_token_count": 19365,
+        "service_tier": null
+      }
+    },
+    {
+      "role": "qa",
+      "seconds": 98.5,
+      "usage": {
+        "prompt_token_count": 15366,
+        "cached_content_token_count": 8125,
+        "candidates_token_count": 6878,
+        "thoughts_token_count": 19345,
+        "total_token_count": 41589,
+        "service_tier": null
+      }
+    },
+    {
+      "role": "synth",
+      "seconds": 15.2,
+      "usage": {
+        "prompt_token_count": 12368,
+        "cached_content_token_count": 0,
+        "candidates_token_count": 678,
+        "thoughts_token_count": 1799,
+        "total_token_count": 14845,
+        "service_tier": null
+      }
+    }
+  ],
+  "rounds_run": 1,
+  "crucible_status": "PASSED",
+  "winners": [
+    "branch_1",
+    "branch_2"
+  ],
+  "graded_branch": "branch_1",
+  "crucible_verdicts": {
+    "round1_branch_1": "PASS",
+    "round1_branch_2": "PASS"
+  },
+  "arm": "B"
+}

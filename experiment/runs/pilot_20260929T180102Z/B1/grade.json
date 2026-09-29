@@ -1,0 +1,287 @@
+{
+  "solution": "<local path>\\experiment\\runs\\pilot_20260929T180102Z\\B1\\solution.py",
+  "strict_pass": true,
+  "passed": 39,
+  "total": 39,
+  "by_layer": {
+    "hand": "6/6",
+    "edge": "24/24",
+    "random": "6/6",
+    "stress": "3/3"
+  },
+  "cases": [
+    {
+      "id": "H1",
+      "layer": "hand",
+      "title": "Boundary pass: exactly 4h used does not breach",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H2",
+      "layer": "hand",
+      "title": "Boundary fail: 4h + 1ms breaches",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H3",
+      "layer": "hand",
+      "title": "Closed mid-pause",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H4",
+      "layer": "hand",
+      "title": "Reopen continues the running total",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H5",
+      "layer": "hand",
+      "title": "Still-open ticket counts to the global now",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H6",
+      "layer": "hand",
+      "title": "Garbage events are ignored",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E01",
+      "layer": "edge",
+      "title": "Empty stream returns []",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E02",
+      "layer": "edge",
+      "title": "Only malformed lines returns []",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E03",
+      "layer": "edge",
+      "title": "Open ticket at exactly the limit at end of stream does not breach",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E04",
+      "layer": "edge",
+      "title": "Open ticket 1 ms over the limit at end of stream breaches",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E05",
+      "layer": "edge",
+      "title": "RESUME on a closed ticket is ignored (clock must not restart)",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E06",
+      "layer": "edge",
+      "title": "PAUSE on a closed ticket is ignored; a later REOPEN runs, not paused",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E07",
+      "layer": "edge",
+      "title": "OPEN on a closed ticket resets used time to zero",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E08",
+      "layer": "edge",
+      "title": "REOPEN while running or paused is ignored",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E09",
+      "layer": "edge",
+      "title": "OPEN while running does not reset; OPEN while paused does not resume",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E10",
+      "layer": "edge",
+      "title": "Out-of-order arrival is sorted by timestamp",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E11",
+      "layer": "edge",
+      "title": "Events earlier than the first OPEN are ignored even if they arrive later",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E12",
+      "layer": "edge",
+      "title": "Tie: PAUSE then RESUME at the same ms nets zero paused time",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E13",
+      "layer": "edge",
+      "title": "Tie: RESUME then PAUSE at the same ms leaves the ticket paused",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E14",
+      "layer": "edge",
+      "title": "Tie: CLOSE+REOPEN vs REOPEN+CLOSE at the same ms depends on arrival order",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E15",
+      "layer": "edge",
+      "title": "A malformed line with a huge timestamp must not move now",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E16",
+      "layer": "edge",
+      "title": "Malformed variants are all ignored",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E17",
+      "layer": "edge",
+      "title": "Leading zeros and whitespace-padded fields are well-formed",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E18",
+      "layer": "edge",
+      "title": "A well-formed but invalid event still sets now",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E19",
+      "layer": "edge",
+      "title": "Sort is code-point order and ticket IDs are case-sensitive",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E20",
+      "layer": "edge",
+      "title": "A paused ticket at end of stream counts only up to its pause",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E21",
+      "layer": "edge",
+      "title": "Closed while paused, then REOPEN runs from the REOPEN",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E22",
+      "layer": "edge",
+      "title": "After an OPEN reset, a later REOPEN continues from the reset total",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E23",
+      "layer": "edge",
+      "title": "Breach accumulated across a REOPEN cycle",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "E24",
+      "layer": "edge",
+      "title": "Now is the largest timestamp, not the timestamp of the last line to arrive",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R1",
+      "layer": "random",
+      "title": "Random mix #1: 8 tickets",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R2",
+      "layer": "random",
+      "title": "Random mix #2: 8 tickets",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R3",
+      "layer": "random",
+      "title": "Random mix #3: 8 tickets",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R4",
+      "layer": "random",
+      "title": "Random mix #4: 8 tickets",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R5",
+      "layer": "random",
+      "title": "Random mix #5: 8 tickets",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R6",
+      "layer": "random",
+      "title": "Random mix #6: 8 tickets",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S1",
+      "layer": "stress",
+      "title": "Stress: 60 tickets",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S2",
+      "layer": "stress",
+      "title": "Stress: 600 tickets",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S3",
+      "layer": "stress",
+      "title": "Stress: 6000 tickets",
+      "pass": true,
+      "reason": null
+    }
+  ]
+}

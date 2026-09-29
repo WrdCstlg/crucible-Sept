@@ -1,0 +1,55 @@
+{
+  "trial": "C2",
+  "arm": "C",
+  "runner": "rig",
+  "checks": [
+    {
+      "id": "harness.no_exception",
+      "status": "pass",
+      "evidence": "no exception"
+    },
+    {
+      "id": "isolation.no_tool_calls",
+      "status": "pass",
+      "evidence": "0 tool calls attempted across 1 model calls; no tools were declared"
+    },
+    {
+      "id": "output.matches_response",
+      "status": "pass",
+      "evidence": "solution sha256 2578ad803f6e681d1ed3646010ef68a2703922faa81c550c8108af1488a64780"
+    },
+    {
+      "id": "grade.reproduced",
+      "status": "pass",
+      "evidence": "now 39/39, failed none; recorded failed []"
+    }
+  ],
+  "facts": {
+    "spec": "SPEC.md",
+    "seconds": 18.9,
+    "agent_calls": 1,
+    "cost_usd": 0.04742,
+    "crucible_status": null,
+    "rounds_run": null,
+    "strict_pass": true,
+    "cases_passed": 39,
+    "cases_total": 39
+  },
+  "pilot_checks": [
+    {
+      "id": "freeze.hashes_match",
+      "status": "pass",
+      "evidence": "6 files checked; changed: none"
+    },
+    {
+      "id": "spec.hash_matches_config",
+      "status": "pass",
+      "evidence": "SPEC.md: recorded 4b9a1944ef274931a2ef14bf69ea811ed1f403beefc533be8e08bcbc8c1a7fee, now 4b9a1944ef274931a2ef14bf69ea811ed1f403beefc533be8e08bcbc8c1a7fee"
+    },
+    {
+      "id": "mutation.self_test",
+      "status": "pass",
+      "evidence": "SELF-TEST PASSED"
+    }
+  ]
+}

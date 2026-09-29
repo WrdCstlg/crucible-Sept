@@ -1,0 +1,16 @@
+flowchart TD
+    subgraph LOCK["Locked-down AI agents: no tools, no file access, empty scratch folder"]
+        G["Phase 1: Code writers<br/>2-3 agents, each forced into a different approach"]
+        Q["Phase 2: Test writer<br/>writes a new test suite from the spec"]
+        SY["Phase 4: Synthesis agent<br/>explains why candidates failed"]
+    end
+    S["Problem spec"] --> G
+    S --> Q
+    G --> AST["AST gate<br/>right function name, no blocked imports"]
+    AST --> AR["Phase 3: Arena<br/>each candidate runs against<br/>every test suite written so far"]
+    Q --> AR
+    AR --> D{"Does any candidate<br/>pass every suite?"}
+    D -- yes --> P["Promote survivors<br/>and write telemetry"]
+    D -- no --> SY
+    SY --> F["Failure report fed<br/>into the next round"]
+    F --> G

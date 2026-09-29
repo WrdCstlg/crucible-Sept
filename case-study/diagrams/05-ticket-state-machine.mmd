@@ -1,0 +1,16 @@
+stateDiagram-v2
+    [*] --> NOT_OPENED
+    NOT_OPENED --> RUNNING : OPEN (used time starts at 0)
+    RUNNING --> PAUSED : PAUSE
+    PAUSED --> RUNNING : RESUME
+    RUNNING --> CLOSED : CLOSE
+    PAUSED --> CLOSED : CLOSE (paused stretch not counted)
+    CLOSED --> RUNNING : REOPEN (total continues)
+    CLOSED --> RUNNING : OPEN (total resets to 0)
+    note right of RUNNING
+        The SLA clock counts only in this state
+    end note
+    note left of CLOSED
+        PAUSE and RESUME are ignored here.
+        Any event not drawn is ignored.
+    end note

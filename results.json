@@ -1,0 +1,166 @@
+{
+  "schema_version": "1.1.0",
+  "run_id": "crucible-1790671763",
+  "start_time": "2026-09-29T08:49:23.670082+00:00",
+  "end_time": "2026-09-29T09:23:36.451166+00:00",
+  "total_duration_seconds": 2052.778,
+  "problem_statement": "Parse a continuous 5GB telemetry stream to detect thermal throttling cascades (>=95C causing >=90C within 500ms).",
+  "paradigms": [
+    "Micro-batching with dictionary state aggregation",
+    "Zero-copy memory-mapped file processing",
+    "Streaming Finite-State Machine with a bounded ring buffer"
+  ],
+  "configuration": {
+    "mode": "live",
+    "entrypoint": "process_telemetry",
+    "force_iterations": 2,
+    "timeout_seconds": 120,
+    "sandbox_engine": "isolated_subprocess",
+    "verifiers": [
+      "deterministic_exit_code_zero",
+      "120s_watchdog_kill",
+      "ast_entrypoint_contract",
+      "ast_import_guard",
+      "cumulative_regression_gate"
+    ]
+  },
+  "summary": {
+    "status": "FAILED",
+    "survived": false,
+    "total_iterations_run": 3,
+    "total_evaluations": 9,
+    "passed_evaluations": 0,
+    "failed_evaluations": 9,
+    "timeout_evaluations": 0,
+    "winning_branches": [],
+    "deployed_artifacts": []
+  },
+  "iterations": [
+    {
+      "iteration": 1,
+      "timestamp": "2026-09-29T08:58:18.755130+00:00",
+      "test_harness": {
+        "path": "arena_test_iter_1.py",
+        "size_bytes": 11735,
+        "cumulative_suites_enforced": 1
+      },
+      "branches": [
+        {
+          "name": "branch_1",
+          "paradigm": "Micro-batching with dictionary state aggregation",
+          "exit_code": 1,
+          "status": "FAIL",
+          "duration_seconds": 3.466,
+          "solution_size_bytes": 7116,
+          "stdout": "[Test Suite 1]\n======================================================================\n   ADVERSARIAL STRESS HARNESS: THERMAL THROTTLING CASCADE DETECTOR    \n======================================================================\n[RUNNING] Test: Exact Temperature Boundaries\n  [PASS] Exact Temperature Boundaries passed.\n[RUNNING] Test: Window Boundary (500ms vs 501ms)\n  [PASS] Window Boundary (500ms vs 501ms) passed.\n[RUNNING] Test: Causality Inversion\n  [PASS] Causality Inversion passed.\n[RUNNING] Test: Out-of-Order Jitter\n  [PASS] Out-of-Order Jitter passed.\n[RUNNING] Test: 500,000 Record High-Volume Continuous Stream & Resident Memory Limit\n\n--- STREAMING METRICS ---\nTotal Base Records Streamed : 500,000\nCascades Injected           : 49\nCascades Detected           : 598\nExecution Duration          : 3.427 s\nThroughput                  : 145,902.0 records/sec\nPeak Auxiliary Memory       : 0.09 MB\nMemory Ceiling Allowed      : 50.00 MB\n-------------------------\n\n",
+          "stderr": "[Test Suite 1]\n\n[FAIL] Test 'High-Volume Streaming & Memory Bound' FAILED assertion: Cascade count mismatch! Expected 49, but detected 598\n"
+        },
+        {
+          "name": "branch_2",
+          "paradigm": "Zero-copy memory-mapped file processing",
+          "exit_code": 1,
+          "status": "FAIL",
+          "duration_seconds": 7.793,
+          "solution_size_bytes": 6559,
+          "stdout": "[Test Suite 1]\n======================================================================\n   ADVERSARIAL STRESS HARNESS: THERMAL THROTTLING CASCADE DETECTOR    \n======================================================================\n[RUNNING] Test: Exact Temperature Boundaries\n  [PASS] Exact Temperature Boundaries passed.\n[RUNNING] Test: Window Boundary (500ms vs 501ms)\n  [PASS] Window Boundary (500ms vs 501ms) passed.\n[RUNNING] Test: Causality Inversion\n  [PASS] Causality Inversion passed.\n[RUNNING] Test: Out-of-Order Jitter\n  [PASS] Out-of-Order Jitter passed.\n[RUNNING] Test: 500,000 Record High-Volume Continuous Stream & Resident Memory Limit\n\n--- STREAMING METRICS ---\nTotal Base Records Streamed : 500,000\nCascades Injected           : 49\nCascades Detected           : 598\nExecution Duration          : 7.757 s\nThroughput                  : 64,455.4 records/sec\nPeak Auxiliary Memory       : 0.00 MB\nMemory Ceiling Allowed      : 50.00 MB\n-------------------------\n\n",
+          "stderr": "[Test Suite 1]\n\n[FAIL] Test 'High-Volume Streaming & Memory Bound' FAILED assertion: Cascade count mismatch! Expected 49, but detected 598\n"
+        },
+        {
+          "name": "branch_3",
+          "paradigm": "Streaming Finite-State Machine with a bounded ring buffer",
+          "exit_code": 1,
+          "status": "FAIL",
+          "duration_seconds": 5.933,
+          "solution_size_bytes": 9076,
+          "stdout": "[Test Suite 1]\n======================================================================\n   ADVERSARIAL STRESS HARNESS: THERMAL THROTTLING CASCADE DETECTOR    \n======================================================================\n[RUNNING] Test: Exact Temperature Boundaries\n  [PASS] Exact Temperature Boundaries passed.\n[RUNNING] Test: Window Boundary (500ms vs 501ms)\n  [PASS] Window Boundary (500ms vs 501ms) passed.\n[RUNNING] Test: Causality Inversion\n  [PASS] Causality Inversion passed.\n[RUNNING] Test: Out-of-Order Jitter\n  [PASS] Out-of-Order Jitter passed.\n[RUNNING] Test: 500,000 Record High-Volume Continuous Stream & Resident Memory Limit\n\n--- STREAMING METRICS ---\nTotal Base Records Streamed : 500,000\nCascades Injected           : 49\nCascades Detected           : 598\nExecution Duration          : 5.898 s\nThroughput                  : 84,780.2 records/sec\nPeak Auxiliary Memory       : 0.01 MB\nMemory Ceiling Allowed      : 50.00 MB\n-------------------------\n\n",
+          "stderr": "[Test Suite 1]\n\n[FAIL] Test 'High-Volume Streaming & Memory Bound' FAILED assertion: Cascade count mismatch! Expected 49, but detected 598\n"
+        }
+      ],
+      "synthesis_report": "# Ruthless Architectural Synthesis: Thermal Throttling Cascade Detector Arena\n\n**TO:** Systems Engineering Directorate  \n**FROM:** Lead Systems Architect  \n**DATE:** 2026-09-29  \n**SUBJECT:** Arena Evaluation & Elimination Report \u2014 Thermal Throttling Cascade Detector  \n\n---\n\n## 1. Executive Verdict: Total Disqualification (No Winner)\n\nUnder the strict operational directive:\n> *\u201cDiscard any branch with a non-zero exit code or memory crash.\u201d*\n\n**Every single candidate implementation has been summarily discarded.** \n\n| Candidate Branch | Architecture Strategy | Exit Code | Status | Verified Outcome |\n| :--- | :--- | :---: | :---: | :--- |\n| **`branch_1`** | Micro-batching w/ Dictionary Aggregation | `1` | **FAIL** | **DISQUALIFIED** |\n| **`branch_2`** | Zero-Copy Memory-Mapped File Processing | `1` | **FAIL** | **DISQUALIFIED** |\n| **`branch_3`** | Streaming FSM w/ Bounded Ring Buffer | `1` | **FAIL** | **DISQUALIFIED** |\n\n**Zero candidates survived.** In a mission-critical telemetry and hardware safety system, throughput and zero-copy semantics are meaningless when the underlying state machine suffers catastrophic false-positive amplification. No branch will be promoted to staging.\n\n---\n\n## 2. Shared Catastrophic Defect: False-Positive Cascade Explosion\n\nAll three branches passed the initial micro-tests:\n* `Exact Temperature Boundaries`: **PASS**\n* `Window Boundary (500ms vs 501ms)`: **PASS**\n* `Causality Inversion`: **PASS**\n* `Out-of-Order Jitter`: **PASS**\n\nHowever, under continuous load in `Test: 500,000 Record High-Volume Continuous Stream & Resident Memory Limit`, every branch collapsed with the exact same logical failure:\n\n```text\n[FAIL] Test 'High-Volume Streaming & Memory Bound' FAILED assertion: \nCascade count mismatch! Expected 49, but detected 598\n```\n\n### Root Cause Analysis\nAcross all 500,000 records, exactly **49 cascades were injected**, yet all three implementations reported **598 cascades**\u2014an overcount of **+549 false positives (1,220% of expected signal)**.\n\nThis uniform failure indicates a shared algorithmic pathology:\n1. **Lack of Incident Coalescing / Hysteresis Suppression**: Once an injected cascade crosses the thermal threshold, subsequent telemetry samples within the same thermal episode continue to re-trigger cascade events on every sliding window tick rather than latching into a single cascade incident.\n2. **Missing Window Reset / Cooldown Guard**: When an event cascade is identified, the sliding state is not properly drained or debounced, causing trailing temperature reads to generate spurious duplicate cascade detections.\n\n---\n\n## 3. Post-Mortem Metric Comparison\n\nWhile all branches failed functionally, their runtime profiles illustrate the architectural trade-offs between batching, ring buffers, and memory mapping:\n\n```\n+---------------------------------------------------------------------------------------------------------+\n| Branch   | Strategy               | Throughput         | Duration | Peak Aux Mem | Status / Exit Code   |\n+---------------------------------------------------------------------------------------------------------+\n| branch_1 | Micro-batching + Dict  | 145,902.0 rec/s    | 3.427 s  | 0.09 MB      | FAIL (Exit Code: 1)  |\n| branch_2 | Zero-Copy mmap         |  64,455.4 rec/s    | 7.757 s  | 0.00 MB      | FAIL (Exit Code: 1)  |\n| branch_3 | Streaming FSM + Buffer |  84,780.2 rec/s    | 5.898 s  | 0.01 MB      | FAIL (Exit Code: 1)  |\n+---------------------------------------------------------------------------------------------------------+\n```\n\n---\n\n## 4. Branch-by-Branch Autopsy\n\n### Branch 1: Micro-Batching with Dictionary State Aggregation\n* **Execution Duration:** `3.427 s` streaming (`3.466 s` total wall clock)\n* **Throughput:** `145,902.0 records/sec` (Fastest)\n* **Peak Auxiliary Memory:** `0.09 MB` (Ceiling: `50.00 MB`)\n* **Disqualification Vector:** `Exit Code: 1`\n* **Architectural Critique:**  \n  `branch_1` achieved the highest raw throughput by batching reads and utilizing dictionary lookups. While auxiliary memory (`0.09 MB`) was well below the `50.00 MB` limit, micro-batch boundaries exacerbated the windowing flaw by evaluating cascade conditions across chunk edges without maintaining continuous causal deduplication. Fast garbage detection is still garbage detection.\n\n### Branch 2: Zero-Copy Memory-Mapped File Processing\n* **Execution Duration:** `7.757 s` streaming (`7.793 s` total wall clock)\n* **Throughput:** `64,455.4 records/sec` (Slowest, 55.8% slower than Branch 1)\n* **Peak Auxiliary Memory:** `0.00 MB` (Best auxiliary profile)\n* **Disqualification Vector:** `Exit Code: 1`\n* **Architectural Critique:**  \n  `branch_2` delivered textbook zero-copy auxiliary resident memory (`0.00 MB`), operating directly over the mapped stream. However, it paid a massive latency penalty: at `64,455.4 rec/s`, it was more than 2.2x slower than `branch_1`. Furthermore, zero-copy pointer traversal provided zero defense against the state leakage that caused the 598-detection blowout.\n\n### Branch 3: Streaming Finite-State Machine with Bounded Ring Buffer\n* **Execution Duration:** `5.898 s` streaming (`5.933 s` total wall clock)\n* **Throughput:** `84,780.2 records/sec`\n* **Peak Auxiliary Memory:** `0.01 MB`\n* **Disqualification Vector:** `Exit Code: 1`\n* **Architectural Critique:**  \n  `branch_3` represents the theoretically ideal architecture: deterministic memory bounds (`0.01 MB`) and O(1) buffer push/pop overhead. However, its FSM transition table failed to model the post-cascade quiescent state. The ring buffer held lingering hot samples across window boundaries, continually tripping the cascade detector on each sample iteration instead of advancing to an acknowledgment state.\n\n---\n\n## 5. Architectural Directive & Next Steps\n\n1. **Reject All PRs**: Close pull requests for `branch_1`, `branch_2`, and `branch_3`.\n2. **Fix Cascade Debounce / Incident Latching**: Introduce an explicit cooldown window ($T_{\\text{cooldown}} \\ge 500\\,\\text{ms}$) or an edge-triggered latching mechanism so that a sustained elevated thermal event generates exactly **one** cascade notification.\n3. **Target Candidate**: Once the FSM transition logic is fixed, standardizing on **Branch 3's design pattern** (streaming FSM + bounded ring buffer) offers the best balance of deterministic memory overhead (`0.01 MB`) and steady-state streaming performance, without the page-fault overhead of `mmap` or the allocation churn of dictionary micro-batching."
+    },
+    {
+      "iteration": 2,
+      "timestamp": "2026-09-29T09:10:41.986038+00:00",
+      "test_harness": {
+        "path": "arena_test_iter_2.py",
+        "size_bytes": 9262,
+        "cumulative_suites_enforced": 2
+      },
+      "branches": [
+        {
+          "name": "branch_1",
+          "paradigm": "Micro-batching with dictionary state aggregation",
+          "exit_code": 1,
+          "status": "FAIL",
+          "duration_seconds": 3.545,
+          "solution_size_bytes": 7333,
+          "stdout": "[Test Suite 1]\n======================================================================\n   ADVERSARIAL STRESS HARNESS: THERMAL THROTTLING CASCADE DETECTOR    \n======================================================================\n[RUNNING] Test: Exact Temperature Boundaries\n  [PASS] Exact Temperature Boundaries passed.\n[RUNNING] Test: Window Boundary (500ms vs 501ms)\n  [PASS] Window Boundary (500ms vs 501ms) passed.\n[RUNNING] Test: Causality Inversion\n  [PASS] Causality Inversion passed.\n[RUNNING] Test: Out-of-Order Jitter\n  [PASS] Out-of-Order Jitter passed.\n[RUNNING] Test: 500,000 Record High-Volume Continuous Stream & Resident Memory Limit\n\n--- STREAMING METRICS ---\nTotal Base Records Streamed : 500,000\nCascades Injected           : 49\nCascades Detected           : 500\nExecution Duration          : 3.509 s\nThroughput                  : 142,471.9 records/sec\nPeak Auxiliary Memory       : 0.33 MB\nMemory Ceiling Allowed      : 50.00 MB\n-------------------------\n\n",
+          "stderr": "[Test Suite 1]\n\n[FAIL] Test 'High-Volume Streaming & Memory Bound' FAILED assertion: Cascade count mismatch! Expected 49, but detected 500\n"
+        },
+        {
+          "name": "branch_2",
+          "paradigm": "Zero-copy memory-mapped file processing",
+          "exit_code": 1,
+          "status": "FAIL",
+          "duration_seconds": 9.182,
+          "solution_size_bytes": 6383,
+          "stdout": "[Test Suite 1]\n======================================================================\n   ADVERSARIAL STRESS HARNESS: THERMAL THROTTLING CASCADE DETECTOR    \n======================================================================\n[RUNNING] Test: Exact Temperature Boundaries\n  [PASS] Exact Temperature Boundaries passed.\n[RUNNING] Test: Window Boundary (500ms vs 501ms)\n  [PASS] Window Boundary (500ms vs 501ms) passed.\n[RUNNING] Test: Causality Inversion\n  [PASS] Causality Inversion passed.\n[RUNNING] Test: Out-of-Order Jitter\n  [PASS] Out-of-Order Jitter passed.\n[RUNNING] Test: 500,000 Record High-Volume Continuous Stream & Resident Memory Limit\n\n--- STREAMING METRICS ---\nTotal Base Records Streamed : 500,000\nCascades Injected           : 49\nCascades Detected           : 500\nExecution Duration          : 9.147 s\nThroughput                  : 54,663.1 records/sec\nPeak Auxiliary Memory       : 0.00 MB\nMemory Ceiling Allowed      : 50.00 MB\n-------------------------\n\n",
+          "stderr": "[Test Suite 1]\n\n[FAIL] Test 'High-Volume Streaming & Memory Bound' FAILED assertion: Cascade count mismatch! Expected 49, but detected 500\n"
+        },
+        {
+          "name": "branch_3",
+          "paradigm": "Streaming Finite-State Machine with a bounded ring buffer",
+          "exit_code": 1,
+          "status": "FAIL",
+          "duration_seconds": 3.105,
+          "solution_size_bytes": 6656,
+          "stdout": "[Test Suite 1]\n======================================================================\n   ADVERSARIAL STRESS HARNESS: THERMAL THROTTLING CASCADE DETECTOR    \n======================================================================\n[RUNNING] Test: Exact Temperature Boundaries\n  [PASS] Exact Temperature Boundaries passed.\n[RUNNING] Test: Window Boundary (500ms vs 501ms)\n  [PASS] Window Boundary (500ms vs 501ms) passed.\n[RUNNING] Test: Causality Inversion\n  [PASS] Causality Inversion passed.\n[RUNNING] Test: Out-of-Order Jitter\n  [PASS] Out-of-Order Jitter passed.\n[RUNNING] Test: 500,000 Record High-Volume Continuous Stream & Resident Memory Limit\n\n--- STREAMING METRICS ---\nTotal Base Records Streamed : 500,000\nCascades Injected           : 49\nCascades Detected           : 500\nExecution Duration          : 3.071 s\nThroughput                  : 162,829.9 records/sec\nPeak Auxiliary Memory       : 0.01 MB\nMemory Ceiling Allowed      : 50.00 MB\n-------------------------\n\n",
+          "stderr": "[Test Suite 1]\n\n[FAIL] Test 'High-Volume Streaming & Memory Bound' FAILED assertion: Cascade count mismatch! Expected 49, but detected 500\n"
+        }
+      ],
+      "synthesis_report": "# Systems Architecture Review: Ruthless Synthesis\n\n## 1. Executive Verdict & Gate Enforcement\n\nPer the architectural qualification mandate: **Any branch exhibiting a non-zero exit code or memory crash must be discarded.**\n\n| Implementation Branch | Architecture Strategy | Status | Exit Code | Injected vs Detected | Verdict |\n| :--- | :--- | :--- | :--- | :--- | :--- |\n| **`branch_1`** | Micro-batching w/ Dictionary State Aggregation | **FAIL** | `1` | 49 vs 500 | **DISCARDED** |\n| **`branch_2`** | Zero-Copy Memory-Mapped File Processing | **FAIL** | `1` | 49 vs 500 | **DISCARDED** |\n| **`branch_3`** | Streaming FSM w/ Bounded Ring Buffer | **FAIL** | `1` | 49 vs 500 | **DISCARDED** |\n\n### Hard Truth: Zero Survived the Crucible\nUnder strict zero-exit-code gate criteria, **no branch survived production certification**. Every single branch failed assertion `[FAIL] Test 'High-Volume Streaming & Memory Bound' FAILED assertion: Cascade count mismatch! Expected 49, but detected 500` with **Exit Code 1**.\n\nAll three implementations passed edge-case validation (**Exact Temperature Boundaries**, **Window Boundary 500ms vs 501ms**, **Causality Inversion**, and **Out-of-Order Jitter**), but broke identically on state deduplication/window reset semantics under the 500,000-record continuous stream, over-counting cascades by **10.2x** (detecting 500 instead of 49).\n\n---\n\n## 2. Comparative Telemetry & Failure Autopsy\n\nWhile all candidates failed functional verification on the continuous stream assertion, their underlying execution models diverged dramatically in computational efficiency and throughput.\n\n```\n+-----------------------------------------------------------------------------------------+\n| Branch   | Total Duration | Exec Duration | Throughput          | Peak Aux Mem | Status |\n+-----------------------------------------------------------------------------------------+\n| branch_1 | 3.545 s        | 3.509 s       | 142,471.9 rec/s     | 0.33 MB      | FAIL   |\n| branch_2 | 9.182 s        | 9.147 s       |  54,663.1 rec/s     | 0.00 MB      | FAIL   |\n| branch_3 | 3.105 s        | 3.071 s       | 162,829.9 rec/s     | 0.01 MB      | FAIL   |\n+-----------------------------------------------------------------------------------------+\n```\n\n### Why `branch_2` (Zero-Copy Memory-Mapped) Collapsed\n- **Throughput:** `54,663.1 records/sec` (Lagged `branch_3` by **66.4%**).\n- **Execution Duration:** `9.147 s` total execution duration (nearly **3x slower** than `branch_3`).\n- **Autopsy:** `branch_2` attempted an mmap-based zero-copy pattern. While its resident auxiliary memory registered as `0.00 MB` (leveraging OS page caching), synchronous page fault overhead, TLB shootdowns, and sequential paging latency over 500,000 records destroyed stream processing throughput. It turned an in-memory streaming workload into an OS paging bottleneck.\n\n### Why `branch_1` (Micro-batching + Hash Map) Lagged\n- **Throughput:** `142,471.9 records/sec` (**12.5% slower** than `branch_3`).\n- **Peak Auxiliary Memory:** `0.33 MB` (**33x higher memory overhead** than `branch_3`).\n- **Autopsy:** Micro-batching forced artificial latency barriers, hashing overhead, and dynamic dictionary state allocations. The heap thrashing and garbage collection/deallocation churn created noticeable throughput drag.\n\n### Why `branch_3` (Streaming FSM + Ring Buffer) Dominated the Profile\n- **Throughput:** **`162,829.9 records/sec`** (Peak stream velocity).\n- **Duration:** **`3.071 s`** (Fastest execution across all suites).\n- **Peak Auxiliary Memory:** **`0.01 MB`** (Strict $O(1)$ memory footprint, well below the 50.00 MB ceiling).\n- **Engineering Merits:** Operating on fixed, bounded ring-buffer windows with state transitions evaluated on ingest eliminated allocations, hash table overhead, and kernel boundary crossings entirely.\n\n---\n\n## 3. Architectural Decision\n\n1. **Immediate Action:** **Block merging of all branches.** Do not deploy any candidate with an unhandled cascade detection bug (`Expected 49, but detected 500`).\n2. **Path Forward:** Adopt **`branch_3`** as the sole architectural baseline. Its Streaming FSM and bounded ring-buffer design demonstrated clear algorithmic superiority (`162,829.9 rec/sec`, `0.01 MB` memory). Once the cascade deduplication/triggering window bug in the continuous stream handler is resolved, `branch_3` is the only viable candidate for production deployment. Discard `branch_1` and `branch_2` permanently."
+    },
+    {
+      "iteration": 3,
+      "timestamp": "2026-09-29T09:23:36.450555+00:00",
+      "test_harness": {
+        "path": "arena_test_iter_3.py",
+        "size_bytes": 17098,
+        "cumulative_suites_enforced": 3
+      },
+      "branches": [
+        {
+          "name": "branch_1",
+          "paradigm": "Micro-batching with dictionary state aggregation",
+          "exit_code": 1,
+          "status": "FAIL",
+          "duration_seconds": 0.033,
+          "solution_size_bytes": 4666,
+          "stdout": "[Test Suite 1]\n======================================================================\n   ADVERSARIAL STRESS HARNESS: THERMAL THROTTLING CASCADE DETECTOR    \n======================================================================\n[RUNNING] Test: Exact Temperature Boundaries\n",
+          "stderr": "[Test Suite 1]\n\n[FAIL] Test 'Exact Temperature Boundaries' FAILED assertion: Exact boundary 95.0C and 90.0C should produce 1 cascade, got: 0\n"
+        },
+        {
+          "name": "branch_2",
+          "paradigm": "Zero-copy memory-mapped file processing",
+          "exit_code": 1,
+          "status": "FAIL",
+          "duration_seconds": 7.421,
+          "solution_size_bytes": 6110,
+          "stdout": "[Test Suite 1]\n======================================================================\n   ADVERSARIAL STRESS HARNESS: THERMAL THROTTLING CASCADE DETECTOR    \n======================================================================\n[RUNNING] Test: Exact Temperature Boundaries\n  [PASS] Exact Temperature Boundaries passed.\n[RUNNING] Test: Window Boundary (500ms vs 501ms)\n  [PASS] Window Boundary (500ms vs 501ms) passed.\n[RUNNING] Test: Causality Inversion\n  [PASS] Causality Inversion passed.\n[RUNNING] Test: Out-of-Order Jitter\n  [PASS] Out-of-Order Jitter passed.\n[RUNNING] Test: 500,000 Record High-Volume Continuous Stream & Resident Memory Limit\n\n--- STREAMING METRICS ---\nTotal Base Records Streamed : 500,000\nCascades Injected           : 49\nCascades Detected           : 500\nExecution Duration          : 7.388 s\nThroughput                  : 67,681.5 records/sec\nPeak Auxiliary Memory       : 0.02 MB\nMemory Ceiling Allowed      : 50.00 MB\n-------------------------\n\n",
+          "stderr": "[Test Suite 1]\n\n[FAIL] Test 'High-Volume Streaming & Memory Bound' FAILED assertion: Cascade count mismatch! Expected 49, but detected 500\n"
+        },
+        {
+          "name": "branch_3",
+          "paradigm": "Streaming Finite-State Machine with a bounded ring buffer",
+          "exit_code": 1,
+          "status": "FAIL",
+          "duration_seconds": 6.008,
+          "solution_size_bytes": 6133,
+          "stdout": "[Test Suite 1]\n======================================================================\n   ADVERSARIAL STRESS HARNESS: THERMAL THROTTLING CASCADE DETECTOR    \n======================================================================\n[RUNNING] Test: Exact Temperature Boundaries\n  [PASS] Exact Temperature Boundaries passed.\n[RUNNING] Test: Window Boundary (500ms vs 501ms)\n  [PASS] Window Boundary (500ms vs 501ms) passed.\n[RUNNING] Test: Causality Inversion\n  [PASS] Causality Inversion passed.\n[RUNNING] Test: Out-of-Order Jitter\n  [PASS] Out-of-Order Jitter passed.\n[RUNNING] Test: 500,000 Record High-Volume Continuous Stream & Resident Memory Limit\n\n--- STREAMING METRICS ---\nTotal Base Records Streamed : 500,000\nCascades Injected           : 49\nCascades Detected           : 500\nExecution Duration          : 5.974 s\nThroughput                  : 83,700.9 records/sec\nPeak Auxiliary Memory       : 0.01 MB\nMemory Ceiling Allowed      : 50.00 MB\n-------------------------\n\n",
+          "stderr": "[Test Suite 1]\n\n[FAIL] Test 'High-Volume Streaming & Memory Bound' FAILED assertion: Cascade count mismatch! Expected 49, but detected 500\n"
+        }
+      ],
+      "synthesis_report": "# Lead Systems Architect Review: Adversarial Stress Arena Synthesis\n\n---\n\n## 1. Executive Verdict: Total Disqualification (Zero Survivors)\n\nPursuant to the mandatory architectural constraint (**\"Discard any branch with a non-zero exit code or memory crash\"**), **every competing implementation is summarily rejected**. \n\n* **branch_1:** Disqualified (`Exit Code: 1`, `Status: FAIL`)\n* **branch_2:** Disqualified (`Exit Code: 1`, `Status: FAIL`)\n* **branch_3:** Disqualified (`Exit Code: 1`, `Status: FAIL`)\n\n**No candidate survived the adversarial stress harness.** In production systems, throughput and zero-copy semantics mean nothing if state logic collapses. Deploying incorrect cascade detection produces catastrophic alert fatigue and invalid thermal remediation.\n\n---\n\n## 2. Forensic Autopsy of Failed Branches\n\n### Branch 1: Micro-batching with Dictionary State Aggregation\n* **Status:** `FAIL` | **Exit Code:** `1` | **Total Duration:** `0.033s`\n* **Assertion Failure:** \n  ```text\n  [FAIL] Test 'Exact Temperature Boundaries' FAILED assertion: Exact boundary 95.0C and 90.0C should produce 1 cascade, got: 0\n  ```\n* **Failure Analysis:** \n  Branch 1 was dead on arrival at **0.033 seconds**. It failed the most fundamental unit invariant: handling exact boundary thresholds (`95.0\u00b0C` and `90.0\u00b0C`). The micro-batching dictionary aggregator utilized strict inequalities (`>` instead of `>=`) or dropped edge records during batch grouping, yielding `0` cascades instead of `1`. It never reached the streaming, out-of-order jitter, or memory stress phases.\n\n---\n\n### Branch 2: Zero-Copy Memory-Mapped File Processing\n* **Status:** `FAIL` | **Exit Code:** `1` | **Total Duration:** `7.421s`\n* **Streaming Metrics:**\n  * **Records Processed:** `500,000`\n  * **Execution Duration:** `7.388 s`\n  * **Throughput:** `67,681.5 records/sec`\n  * **Peak Auxiliary Memory:** `0.02 MB` (Ceiling: `50.00 MB`)\n* **Assertion Failure:**\n  ```text\n  [FAIL] Test 'High-Volume Streaming & Memory Bound' FAILED assertion: Cascade count mismatch! Expected 49, but detected 500\n  ```\n* **Failure Analysis:**\n  Branch 2 cleared the unit boundaries (`Exact Temperature`, `500ms vs 501ms Window`, `Causality Inversion`, and `Out-of-Order Jitter`) and stayed well within memory constraints (`0.02 MB` vs `50.00 MB` allowed). However, under continuous 500k-record streaming, its state tracking disintegrated. It detected **500 cascades** against **49 injected ground-truth cascades**\u2014an overcount factor of **10.2x**. The zero-copy mmap parser failed to correctly maintain temporal state across buffer/page boundaries, triggering spurious cascades on raw thermal spikes without verifying window continuity.\n\n---\n\n### Branch 3: Streaming Finite-State Machine with a Bounded Ring Buffer\n* **Status:** `FAIL` | **Exit Code:** `1` | **Total Duration:** `6.008s`\n* **Streaming Metrics:**\n  * **Records Processed:** `500,000`\n  * **Execution Duration:** `5.974 s`\n  * **Throughput:** `83,700.9 records/sec`\n  * **Peak Auxiliary Memory:** `0.01 MB` (Ceiling: `50.00 MB`)\n* **Assertion Failure:**\n  ```text\n  [FAIL] Test 'High-Volume Streaming & Memory Bound' FAILED assertion: Cascade count mismatch! Expected 49, but detected 500\n  ```\n* **Failure Analysis:**\n  Branch 3 demonstrated the best hardware efficiency in the arena\u2014clocking **83,700.9 records/sec** (a **+23.7%** throughput gain over Branch 2's `67,681.5 records/sec`) with a negligible **0.01 MB** memory footprint. However, it suffered from the **exact same algorithmic defect** as Branch 2: detecting **500 cascades instead of 49**. The FSM failed to execute proper edge-triggered suppression or reset transitions upon cascade resolution, converting individual sensor jitter within high-volume streams into false cascade detections. Fast incorrectness is still failure.\n\n---\n\n## 3. Comparative Metrics Matrix\n\n| Implementation Branch | Exit Code | Unit Tests Passed | Stream Throughput | Peak Auxiliary RAM | Cascade Accuracy (Detected / Expected) | Arena Verdict |\n| :--- | :---: | :---: | :---: | :---: | :---: | :---: |\n| **branch_1** (Micro-batching) | `1` | 0/4 | N/A (Aborted) | N/A | `0 / 1` (Boundary test) | **DISQUALIFIED** |\n| **branch_2** (Zero-copy mmap) | `1` | 4/4 | 67,681.5 rec/s | 0.02 MB | `500 / 49` (Stream test) | **DISQUALIFIED** |\n| **branch_3** (Streaming FSM) | `1` | 4/4 | **83,700.9 rec/s** | **0.01 MB** | `500 / 49` (Stream test) | **DISQUALIFIED** |\n\n---\n\n## 4. Architectural Directive\n\n1. **Production Gate Sealed:** Neither branch is approved for merge. All PRs are rejected.\n2. **Remand to Engineering:** `branch_3` possesses the superior mechanical architecture (FSM + bounded ring buffer achieves optimal cache locality, lowest duration at `5.974 s`, and sub-10 KB auxiliary footprint). The defect lies strictly in the FSM state transition logic failing to debounce or latch active cascades during window slide. Engineering must fix the latch/reset invariant in `branch_3` and re-submit to the adversarial harness."
+    }
+  ]
+}

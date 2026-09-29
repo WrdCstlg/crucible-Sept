@@ -1,0 +1,31 @@
+{
+  "pilot": "pilot_ablation_v0_20260929T181350Z",
+  "spec": "SPEC_v0_original.md",
+  "note": "Under SPEC.md the reference is correct by construction; under another spec a failure may be a spec difference.",
+  "runs": {
+    "B1": [
+      {
+        "suite": "round1_crucible_tests.py",
+        "ran": true,
+        "reference_passes": false,
+        "exit_code": 1,
+        "failures": [
+          "FAIL: 5.1 Complete state-transition coverage & invalid event handling - Item 0 (ticket 'TX') used_ms mismatch: expected 300, got 140"
+        ]
+      }
+    ],
+    "B2": [
+      {
+        "suite": "round1_crucible_tests.py",
+        "ran": true,
+        "reference_passes": false,
+        "exit_code": 1,
+        "failures": [
+          "[FAIL] test_state_machine_20_cells: [test_state_machine_20_cells item #9] ticket s3_open used_ms: expected 100, got 700",
+          "AssertionError: [test_state_machine_20_cells item #9] ticket s3_open used_ms: expected 100, got 700",
+          "Some tests FAILED."
+        ]
+      }
+    ]
+  }
+}

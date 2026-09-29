@@ -1,0 +1,38 @@
+{
+  "schema_version": "1.1.0",
+  "run_id": "crucible-1790704521",
+  "start_time": "2026-09-29T17:55:21.912808+00:00",
+  "end_time": "2026-09-29T17:55:46.028577+00:00",
+  "total_duration_seconds": 24.114,
+  "problem_statement": "# Problem 4: Support-ticket SLA clock\n\nImplement `def compute_sla(stream)` in Python, using only the standard library.\n\n## Input\n\n`stream` is an iterable of strings. Each string is one CSV record: `timestamp_ms,ticket_id,event`.\n\nA line is **well-formed** only if, after trimming surrounding whitespace, it splits on commas into **exactly 3 fields**, and, after trimming each field:\n\n- the timestamp consists only of ASCII digits `0-9` (leading zeros allowed) and is read as a base-10 integer number of milliseconds;\n- the ticket ID is non-empty (ticket IDs are case-sensitive: `t1` and `T1` are different tickets);\n- the event is exactly one of `OPEN`, `PAUSE`, `RESUME`, `CLOSE`, `REOPEN` (uppercase).\n\nAny other line, including an empty line, is **malformed** and is ignored completely: it has no effect on anything, including \"now\".\n\n## Ordering\n\nEvents may arrive out of order. Process the well-formed events in order of timestamp; events with equal timestamps keep their original order in the stream (a stable sort).\n\n## \"Now\"\n\n\"Now\" is the largest timestamp among all well-formed lines, including well-formed events that are later ignored as invalid transitions.\n\n## SLA\n\nThe SLA limit is **14,400,000 ms (4 hours)** of calendar time. A ticket **breaches only if its used time is strictly greater than the limit**. Exactly 14,400,000 ms does not breach.\n\n## Ticket states\n\nEach ticket is in one of four states: `NOT_OPENED` (initial), `RUNNING`, `PAUSED`, `CLOSED`. Used time accumulates only while the ticket is `RUNNING`: from the timestamp of the event that enters `RUNNING` to the timestamp of the event that leaves it. Time spent `PAUSED` or `CLOSED` never counts. For example, the stretch between a `PAUSE` and a later `CLOSE` does not count.\n\nTransitions (any combination marked \"ignored\" is silently ignored: no error, no output, no effect):\n\n| Event  | NOT_OPENED                       | RUNNING      | PAUSED       | CLOSED                                              |\n|--------|----------------------------------|--------------|--------------|-----------------------------------------------------|\n| OPEN   | to RUNNING, used time starts at 0 | ignored      | ignored      | to RUNNING, used time **resets to 0**               |\n| PAUSE  | ignored                          | to PAUSED    | ignored      | ignored                                             |\n| RESUME | ignored                          | ignored      | to RUNNING   | ignored                                             |\n| CLOSE  | ignored                          | to CLOSED    | to CLOSED    | ignored                                             |\n| REOPEN | ignored                          | ignored      | ignored      | to RUNNING, used time **continues** from its total  |\n\n## End of stream\n\nA ticket still `RUNNING` when the stream ends counts up to \"now\". A ticket still `PAUSED` counts only up to its pause.\n\n## Output\n\nReturn a **list** (not a generator or other iterable) with one dict per ticket that had at least one valid `OPEN`. Tickets that never had a valid `OPEN` are omitted. An empty stream returns `[]`.\n\nThe list is sorted by `ticket_id` ascending in Python's default string order (code-point order, so `\"T10\"` sorts before `\"T2\"`).\n\nEach dict has exactly these four keys:\n\n- `\"ticket_id\"`: `str`\n- `\"used_ms\"`: `int`\n- `\"breached\"`: `bool` (`True` only if `used_ms` is strictly greater than 14,400,000; this applies to open tickets too)\n- `\"status\"`: `\"closed\"` if the ticket's final state is `CLOSED`, otherwise `\"open\"`\n\n## Format example\n\nInput:\n\n```\n100,A,OPEN\n400,A,CLOSE\n```\n\nOutput:\n\n```\n[{\"ticket_id\": \"A\", \"used_ms\": 300, \"breached\": False, \"status\": \"closed\"}]\n```\n",
+  "paradigms": [
+    "Per-ticket state machine updated event by event",
+    "Rebuild each ticket's running time intervals, then sum them"
+  ],
+  "configuration": {
+    "mode": "live",
+    "entrypoint": "compute_sla",
+    "force_iterations": 1,
+    "timeout_seconds": 120,
+    "sandbox_engine": "isolated_subprocess",
+    "verifiers": [
+      "deterministic_exit_code_zero",
+      "120s_watchdog_kill",
+      "ast_entrypoint_contract",
+      "ast_import_guard",
+      "cumulative_regression_gate"
+    ]
+  },
+  "summary": {
+    "status": "FAILED",
+    "survived": false,
+    "total_iterations_run": 0,
+    "total_evaluations": 0,
+    "passed_evaluations": 0,
+    "failed_evaluations": 0,
+    "timeout_evaluations": 0,
+    "winning_branches": [],
+    "deployed_artifacts": []
+  },
+  "iterations": []
+}

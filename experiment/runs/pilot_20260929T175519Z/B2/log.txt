@@ -1,0 +1,15 @@
+
+[TOURNAMENT ITERATION 1/2]
+>> Phase 1: Generating Combatants (Decoupled Generators, Zero Tool Permissions)
+
+================================================================================
+OBSERVABILITY TELEMETRY PERSISTED
+   Dashboard Log: <local path>\experiment\runs\pilot_20260929T175519Z\B2\results.json
+   Audit Archive: <local path>\experiment\runs\pilot_20260929T175519Z\B2\artifacts\results_1790704546.json
+   Run ID:        crucible-1790704521
+   Verdict:       FAILED (Survived: False)
+   Evaluations:   0 total | 0 passed | 0 failed | 0 timeouts
+   Total Runtime: 24.114s
+================================================================================
+
+{"error": "TypeError: 'UsageMetadata' object is not callable", "arm": "B"}

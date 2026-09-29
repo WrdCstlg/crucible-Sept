@@ -1,0 +1,84 @@
+{
+  "trial": "B1",
+  "arm": "B",
+  "runner": "rig",
+  "checks": [
+    {
+      "id": "harness.no_exception",
+      "status": "pass",
+      "evidence": "no exception"
+    },
+    {
+      "id": "isolation.no_tool_calls",
+      "status": "pass",
+      "evidence": "0 tool calls attempted across 4 model calls; no tools were declared"
+    },
+    {
+      "id": "output.matches_response",
+      "status": "n/a",
+      "evidence": "no raw response (arm B) or no solution"
+    },
+    {
+      "id": "grade.reproduced",
+      "status": "pass",
+      "evidence": "now 39/39, failed none; recorded failed []"
+    },
+    {
+      "id": "crucible.telemetry_consistent",
+      "status": "pass",
+      "evidence": "byte-identical, times consistent, archive copy identical"
+    },
+    {
+      "id": "crucible.graded_is_winner",
+      "status": "pass",
+      "evidence": "graded solution vs round1_branch_1.py"
+    },
+    {
+      "id": "crucible.verdicts_vs_hidden",
+      "status": "pass",
+      "evidence": {
+        "disagreements": [],
+        "candidates": [
+          {
+            "candidate": "round1_branch_1",
+            "crucible": "PASS",
+            "hidden_grader": "PASS"
+          },
+          {
+            "candidate": "round1_branch_2",
+            "crucible": "PASS",
+            "hidden_grader": "PASS"
+          }
+        ]
+      }
+    }
+  ],
+  "facts": {
+    "spec": "SPEC.md",
+    "seconds": 248.7,
+    "agent_calls": 4,
+    "cost_usd": null,
+    "crucible_status": "PASSED",
+    "rounds_run": 1,
+    "strict_pass": true,
+    "cases_passed": 39,
+    "cases_total": 39
+  },
+  "pilot_checks": [
+    {
+      "id": "freeze.hashes_match",
+      "status": "pass",
+      "evidence": "6 files checked; changed: none"
+    },
+    {
+      "id": "spec.hash_matches_config",
+      "status": "pass",
+      "evidence": "SPEC.md: recorded 4b9a1944ef274931a2ef14bf69ea811ed1f403beefc533be8e08bcbc8c1a7fee, now 4b9a1944ef274931a2ef14bf69ea811ed1f403beefc533be8e08bcbc8c1a7fee"
+    },
+    {
+      "id": "mutation.self_test",
+      "status": "pass",
+      "evidence": "SELF-TEST PASSED"
+    }
+  ]
+}

@@ -1,0 +1,99 @@
+{
+  "trial": "B2",
+  "arm": "B",
+  "runner": "rig",
+  "checks": [
+    {
+      "id": "harness.no_exception",
+      "status": "pass",
+      "evidence": "no exception"
+    },
+    {
+      "id": "isolation.no_tool_calls",
+      "status": "pass",
+      "evidence": "0 tool calls attempted across 8 model calls; no tools were declared"
+    },
+    {
+      "id": "output.matches_response",
+      "status": "n/a",
+      "evidence": "no raw response (arm B) or no solution"
+    },
+    {
+      "id": "grade.reproduced",
+      "status": "n/a",
+      "evidence": "no solution to grade"
+    },
+    {
+      "id": "crucible.telemetry_consistent",
+      "status": "pass",
+      "evidence": "byte-identical, times consistent, archive copy identical"
+    },
+    {
+      "id": "crucible.graded_is_winner",
+      "status": "n/a",
+      "evidence": "Crucible promoted no winner"
+    },
+    {
+      "id": "crucible.verdicts_vs_hidden",
+      "status": "fail",
+      "evidence": {
+        "disagreements": [
+          "round1_branch_1",
+          "round1_branch_2",
+          "round2_branch_1",
+          "round2_branch_2"
+        ],
+        "candidates": [
+          {
+            "candidate": "round1_branch_1",
+            "crucible": "FAIL",
+            "hidden_grader": "PASS"
+          },
+          {
+            "candidate": "round1_branch_2",
+            "crucible": "FAIL",
+            "hidden_grader": "PASS"
+          },
+          {
+            "candidate": "round2_branch_1",
+            "crucible": "FAIL",
+            "hidden_grader": "PASS"
+          },
+          {
+            "candidate": "round2_branch_2",
+            "crucible": "FAIL",
+            "hidden_grader": "PASS"
+          }
+        ]
+      }
+    }
+  ],
+  "facts": {
+    "spec": "SPEC.md",
+    "seconds": 610.8,
+    "agent_calls": 8,
+    "cost_usd": null,
+    "crucible_status": "FAILED",
+    "rounds_run": 2,
+    "strict_pass": false,
+    "cases_passed": 0,
+    "cases_total": null
+  },
+  "pilot_checks": [
+    {
+      "id": "freeze.hashes_match",
+      "status": "pass",
+      "evidence": "6 files checked; changed: none"
+    },
+    {
+      "id": "spec.hash_matches_config",
+      "status": "pass",
+      "evidence": "SPEC.md: recorded 4b9a1944ef274931a2ef14bf69ea811ed1f403beefc533be8e08bcbc8c1a7fee, now 4b9a1944ef274931a2ef14bf69ea811ed1f403beefc533be8e08bcbc8c1a7fee"
+    },
+    {
+      "id": "mutation.self_test",
+      "status": "pass",
+      "evidence": "SELF-TEST PASSED"
+    }
+  ]
+}

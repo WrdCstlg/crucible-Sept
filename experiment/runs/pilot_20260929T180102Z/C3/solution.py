@@ -1,0 +1,95 @@
+SLA_LIMIT_MS = 14_400_000
+
+_VALID_EVENTS = {"OPEN", "PAUSE", "RESUME", "CLOSE", "REOPEN"}
+_DIGITS = set("0123456789")
+
+NOT_OPENED = "NOT_OPENED"
+RUNNING = "RUNNING"
+PAUSED = "PAUSED"
+CLOSED = "CLOSED"
+
+
+def _parse_line(line):
+    """Return (timestamp, ticket_id, event) or None if malformed."""
+    if not isinstance(line, str):
+        return None
+    s = line.strip()
+    if not s:
+        return None
+    parts = s.split(",")
+    if len(parts) != 3:
+        return None
+    ts_s, tid, ev = (p.strip() for p in parts)
+    if not ts_s or any(c not in _DIGITS for c in ts_s):
+        return None
+    if not tid:
+        return None
+    if ev not in _VALID_EVENTS:
+        return None
+    return int(ts_s, 10), tid, ev
+
+
+def compute_sla(stream):
+    events = []
+    if stream is not None:
+        for idx, line in enumerate(stream):
+            parsed = _parse_line(line)
+            if parsed is not None:
+                events.append((parsed[0], idx, parsed[1], parsed[2]))
+
+    if not events:
+        return []
+
+    now = max(e[0] for e in events)
+    events.sort(key=lambda e: (e[0], e[1]))
+
+    # ticket_id -> [state, used, run_start, ever_opened]
+    tickets = {}
+
+    for ts, _idx, tid, ev in events:
+        t = tickets.get(tid)
+        if t is None:
+            t = [NOT_OPENED, 0, 0, False]
+            tickets[tid] = t
+        state = t[0]
+
+        if ev == "OPEN":
+            if state == NOT_OPENED or state == CLOSED:
+                t[0] = RUNNING
+                t[1] = 0
+                t[2] = ts
+                t[3] = True
+        elif ev == "PAUSE":
+            if state == RUNNING:
+                t[1] += ts - t[2]
+                t[0] = PAUSED
+        elif ev == "RESUME":
+            if state == PAUSED:
+                t[0] = RUNNING
+                t[2] = ts
+        elif ev == "CLOSE":
+            if state == RUNNING:
+                t[1] += ts - t[2]
+                t[0] = CLOSED
+            elif state == PAUSED:
+                t[0] = CLOSED
+        elif ev == "REOPEN":
+            if state == CLOSED:
+                t[0] = RUNNING
+                t[2] = ts
+
+    result = []
+    for tid in sorted(tickets):
+        state, used, run_start, opened = tickets[tid]
+        if not opened:
+            continue
+        if state == RUNNING:
+            used += now - run_start
+        used = int(used)
+        result.append({
+            "ticket_id": tid,
+            "used_ms": used,
+            "breached": bool(used > SLA_LIMIT_MS),
+            "status": "closed" if state == CLOSED else "open",
+        })
+    return result

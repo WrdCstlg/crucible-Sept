@@ -1,0 +1,4 @@
+# Fingerprinted evidence must be byte-identical on every platform, or its SHA-256 checks fail after a clone.
+# Store and check out these files exactly as they are: no line-ending conversion.
+experiment/sla/** -text
+experiment/runs/** -text

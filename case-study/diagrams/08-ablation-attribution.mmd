@@ -1,0 +1,7 @@
+flowchart TD
+    FULL["Reviewed spec"] --> ALL["12 of 12 runs pass every case"]
+    V0["Original spec, before review"] --> RUNS["0 of 12 runs pass every case"]
+    RUNS --> C1["Gap 1: what OPEN does on a closed ticket"]
+    RUNS --> C2["Gap 2: what counts as a well-formed line"]
+    C1 --> C1R["Changes the correct answer for 10 of 39 cases<br/>Failures in every run of every arm<br/>Explains every failure in 3 of 5 Claude runs"]
+    C2 --> C2R["Every Gemini run failed it: 7 of 7<br/>No Claude run did: 0 of 5"]

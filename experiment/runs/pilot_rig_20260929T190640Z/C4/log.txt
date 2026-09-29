@@ -1,0 +1,1 @@
+{"role": "competitor", "provider": "anthropic", "model": "claude-opus-5-5", "seconds": 19.8, "agent_calls": 1, "cost_usd": 0.05076, "stop_reason": "end_turn", "tool_calls": 0, "arm": "C", "runner": "rig", "spec": "SPEC.md"}

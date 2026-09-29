@@ -1,0 +1,112 @@
+```python
+def compute_sla(stream):
+    """
+    Compute SLA clock metrics for support tickets from a stream of CSV records.
+    """
+    valid_events = {"OPEN", "PAUSE", "RESUME", "CLOSE", "REOPEN"}
+    well_formed_lines = []
+
+    for line in stream:
+        stripped_line = line.strip()
+        parts = stripped_line.split(",")
+        if len(parts) != 3:
+            continue
+
+        raw_ts = parts[0].strip()
+        raw_ticket = parts[1].strip()
+        raw_event = parts[2].strip()
+
+        # Timestamp must be non-empty and consist only of ASCII digits 0-9
+        if not raw_ts or not all("0" <= c <= "9" for c in raw_ts):
+            continue
+
+        # Ticket ID must be non-empty
+        if not raw_ticket:
+            continue
+
+        # Event must be one of the known uppercase events
+        if raw_event not in valid_events:
+            continue
+
+        ts = int(raw_ts, 10)
+        well_formed_lines.append((ts, raw_ticket, raw_event))
+
+    if not well_formed_lines:
+        return []
+
+    # Sort stably by timestamp
+    well_formed_lines.sort(key=lambda record: record[0])
+
+    # "Now" is the largest timestamp among all well-formed lines
+    now = well_formed_lines[-1][0]
+
+    # Process events for each ticket
+    tickets = {}
+
+    for ts, ticket_id, event in well_formed_lines:
+        if ticket_id not in tickets:
+            tickets[ticket_id] = {
+                "state": "NOT_OPENED",
+                "used_ms": 0,
+                "last_running_ts": 0,
+                "valid_open": False,
+            }
+
+        t = tickets[ticket_id]
+        state = t["state"]
+
+        if state == "NOT_OPENED":
+            if event == "OPEN":
+                t["state"] = "RUNNING"
+                t["used_ms"] = 0
+                t["last_running_ts"] = ts
+                t["valid_open"] = True
+
+        elif state == "RUNNING":
+            if event == "PAUSE":
+                t["used_ms"] += ts - t["last_running_ts"]
+                t["state"] = "PAUSED"
+            elif event == "CLOSE":
+                t["used_ms"] += ts - t["last_running_ts"]
+                t["state"] = "CLOSED"
+
+        elif state == "PAUSED":
+            if event == "RESUME":
+                t["state"] = "RUNNING"
+                t["last_running_ts"] = ts
+            elif event == "CLOSE":
+                t["state"] = "CLOSED"
+
+        elif state == "CLOSED":
+            if event == "OPEN":
+                t["state"] = "RUNNING"
+                t["used_ms"] = 0
+                t["last_running_ts"] = ts
+                t["valid_open"] = True
+            elif event == "REOPEN":
+                t["state"] = "RUNNING"
+                t["last_running_ts"] = ts
+
+    # Accumulate time up to "now" for tickets still running at end of stream
+    for t in tickets.values():
+        if t["state"] == "RUNNING":
+            t["used_ms"] += now - t["last_running_ts"]
+
+    sla_limit = 14_400_000
+    results = []
+
+    for ticket_id, t in tickets.items():
+        if not t["valid_open"]:
+            continue
+
+        results.append({
+            "ticket_id": ticket_id,
+            "used_ms": t["used_ms"],
+            "breached": t["used_ms"] > sla_limit,
+            "status": "closed" if t["state"] == "CLOSED" else "open",
+        })
+
+    # Sort ascending by ticket_id in Python code-point order
+    results.sort(key=lambda record: record["ticket_id"])
+    return results
+```

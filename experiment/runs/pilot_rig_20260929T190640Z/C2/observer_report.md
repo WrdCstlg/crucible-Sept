@@ -1,0 +1,15 @@
+# Observer report: System 3
+
+Observer: kimi-k3 (openai_compatible), 2026-09-29T19:19:21.039565+00:00
+
+**Summary:** Single-call trial (System 3) passed all deterministic audit checks and the hidden grader (39/39, strict pass). Evidence items are mutually consistent: run-log metrics match audit facts, reproduced grading matches the recorded grade, and the graded code shows no I/O, tool use, or hardcoded test answers. No failed or skipped checks and no tampering indicators were found. Notable gaps: crucible_status and rounds_run are null (no adversarial/multi-round evaluation evidenced), and only one trial was run.
+
+- **info**: All recorded checks passed and none were failed or skipped: freeze hashes unchanged (6 files), spec hash matches config, mutation self-test passed, harness completed without exception, no tool calls, output hash matches model response, and grade reproduced at 39/39. _(E1:freeze.hashes_match, E1:spec.hash_matches_config, E1:mutation.self_test, E1:harness.no_exception, E1:isolation.no_tool_calls, E1:output.matches_response, E1:grade.reproduced)_
+- **info**: Reproduced grading is consistent with the hidden grader result: both report 39/39 passed with no failed cases and strict_pass true; per-layer results (hand 6/6, edge 24/24, random 6/6, stress 3/3) sum to 39. _(E1:grade.reproduced, E2:strict_pass, E2:failed_cases)_
+- **info**: Run log is consistent with the audit record on duration (18.9s), agent calls (1), cost ($0.04742), spec (SPEC.md), zero tool calls, and stop_reason end_turn, matching the isolation check's report of 0 tool calls across 1 model call with no tools declared. _(E4:line 1, E1:isolation.no_tool_calls, E1:harness.no_exception)_
+- **info**: The graded solution is a pure computation: it imports only typing, performs no file/network I/O, and contains no hardcoded test inputs or expected outputs; results are derived from a state machine over parsed events sorted by timestamp. _(E3:line 1, E3:line 59, E3:line 73, E3:line 118)_
+- **info**: crucible_status and rounds_run are recorded as null, so no crucible/adversarial or multi-round evaluation is evidenced for this trial, though the mutation self-test pilot check did pass. _(E1:facts, E1:mutation.self_test)_
+
+**Limits:** This evidence covers a single trial with one model call, so it cannot show run-to-run reliability or variance. The raw prompt and model response are not included; the linkage rests on a recorded SHA-256 hash (E1:output.matches_response) that cannot be independently recomputed from the evidence provided. Provider and model identity are redacted (E4:line 1). SPEC.md content is not included, so semantic choices in the code (for example, using the maximum event timestamp as 'now' at E3:line 70 and the hardcoded SLA limit at E3:line 3) cannot be verified against the specification beyond the hidden grader's pass/fail result. The null crucible_status and rounds_run fields mean adversarial robustness beyond the mutation self-test is not demonstrated.
+
+**Citation check (code):** [{'finding': 5, 'citation': 'E1:facts', 'problem': 'no such check id'}]
