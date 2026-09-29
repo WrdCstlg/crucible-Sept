@@ -1,0 +1,15 @@
+flowchart TD
+    C["Candidate code<br/>written by an AI"] --> AST{"AST gate:<br/>required function, no blocked imports?"}
+    AST -- no --> R1["AST_REJECTED"]
+    AST -- yes --> GT{"Any decisive check?<br/>acceptance cases, or an admitted suite"}
+    GT -- no --> UV["UNVERIFIED<br/>never promoted"]
+    GT -- yes --> ACC{"Human-written acceptance cases, if any:<br/>exact match, types included?"}
+    ACC -- no --> R2["ACCEPTANCE_FAIL"]
+    ACC -- yes --> SUI{"Every admitted AI-written suite, if any,<br/>exits 0?"}
+    SUI -- no --> R3["FAIL"]
+    SUI -- yes --> P["PASS: promoted"]
+    T["New AI-written suite"] --> ADM{"Does the trusted reference pass it<br/>in 3 of 3 seeded runs?"}
+    ADM -- yes --> BL["Admitted: blocks"]
+    ADM -- "fails, or varies" --> Q["Quarantined: reported, never blocks"]
+    ADM -- "no reference" --> AD["Advisory: reported, never blocks"]
+    BL -.-> SUI

@@ -108,9 +108,12 @@ class SpecCrucible(rc.CrucibleOrchestrator):
     """Crucible driven by SPEC.md instead of the built-in telemetry prompts. Same lockdown, same arena, same gate."""
 
     def __init__(self, run_dir: Path):
+        # Arm B reproduces the Crucible design that was measured: every AI-written suite blocks (the "legacy" verdict
+        # policy). Crucible's own default is now the deterministic policy; see run_crucible.py.
         super().__init__(problem_statement=SPEC, paradigms=B_PARADIGMS,
                          workspace_dir=str(run_dir / ".crucible_workspace"), mock_mode=False,
-                         entrypoint="compute_sla", output_dir=str(run_dir), force_iterations=1)
+                         entrypoint="compute_sla", output_dir=str(run_dir), force_iterations=1,
+                         verdict_policy="legacy")
         self.run_dir = run_dir
         self.calls = []
         (run_dir / "candidates").mkdir(exist_ok=True)

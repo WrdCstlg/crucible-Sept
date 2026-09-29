@@ -86,6 +86,10 @@ def _google(cfg, system, prompt):
         config.thinking_config = types.ThinkingConfig(thinking_level=types.ThinkingLevel(s["thinking_level"]))
     elif "thinking_budget" in s:
         config.thinking_config = types.ThinkingConfig(thinking_budget=s["thinking_budget"])
+    if "temperature" in s:
+        config.temperature = s["temperature"]
+    if "seed" in s:
+        config.seed = s["seed"]
     r = client.models.generate_content(model=cfg["model"], contents=prompt, config=config)
     parts = [p for c in (r.candidates or []) for p in ((c.content.parts if c.content else None) or [])]
     text = "".join(p.text for p in parts if getattr(p, "text", None) and not getattr(p, "thought", False))
@@ -107,6 +111,8 @@ def _openai_compatible(cfg, system, prompt):
         kwargs["max_tokens"] = s["max_tokens"]
     if "temperature" in s:
         kwargs["temperature"] = s["temperature"]
+    if "seed" in s:
+        kwargs["seed"] = s["seed"]
     r = client.chat.completions.create(**kwargs)
     msg = r.choices[0].message
     details = getattr(r.usage, "completion_tokens_details", None)

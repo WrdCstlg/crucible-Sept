@@ -36,11 +36,14 @@ def publishable_files() -> list[Path]:
 
 
 def local_path_pattern() -> re.Pattern:
-    variants = set()
-    for base in (ROOT, Path.home()):
-        s = str(base)
-        variants |= {s, base.as_posix(), base.as_posix().replace(" ", "%20"), s.replace("\\", "\\\\")}
-    return re.compile("|".join(re.escape(v) for v in sorted(variants, key=len, reverse=True)), re.IGNORECASE)
+    """The folder that holds this repository (so sibling projects too) and the home folder, however a path to them is
+    written: / or \\ separators, doubled or JSON-escaped backslashes, and spaces written as %20."""
+    alternatives = []
+    for base in (ROOT.parent, Path.home()):
+        pieces = [base.drive] + list(base.parts[1:])
+        escaped = ["".join("(?: |%20)" if ch == " " else re.escape(ch) for ch in piece) for piece in pieces]
+        alternatives.append(r"(?:\\+|/)+".join(escaped))
+    return re.compile("|".join(sorted(alternatives, key=len, reverse=True)), re.IGNORECASE)
 
 
 def env_values() -> list[str]:

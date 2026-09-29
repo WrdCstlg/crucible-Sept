@@ -6,6 +6,7 @@
   2. Grader self-test: both references score every case, and every deliberate bug is caught.
   3. Audit records: every trial's audit.json still matches the fingerprint in its pilot's audit_summary.json.
   4. Observer ledgers: every chain is intact and every observer report is unedited.
+  5. Replay: every recorded Crucible verdict reproduces when its recorded code and tests are re-executed (no model calls).
 Exit code 1 if anything fails. Runs in CI on every push.
 """
 import hashlib
@@ -48,6 +49,19 @@ def main() -> bool:
         for ledger in ledgers:
             print(f"--- observer ledger: {ledger.parent.name} ---")
             ok &= observe.verify(ledger.parent)
+
+    import replay  # imported only here: it loads the Crucible orchestrator
+    for pilot in sorted(p for p in (HERE / "runs").iterdir() if p.is_dir()):
+        crucible_runs = [r for r in sorted(pilot.iterdir()) if r.is_dir() and (r / "results.json").exists()]
+        if not crucible_runs:
+            continue
+        reports = [replay.replay_run(r, counterfactual=False) for r in crucible_runs]
+        total = sum(len(v["verdicts"]) for rep in reports for v in rep["rounds"])
+        bad = sum(rep["mismatches"] for rep in reports)
+        if total == 0:
+            continue  # e.g. the invalid pilot: its Crucible runs crashed before judging anything
+        print(f"[{'pass' if not bad else 'FAIL'}] replay reproduces {total - bad}/{total} recorded Crucible verdicts in {pilot.name}")
+        ok &= not bad
     print("ALL EVIDENCE VERIFIED" if ok else "VERIFICATION FAILED")
     return ok
 

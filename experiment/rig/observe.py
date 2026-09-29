@@ -51,10 +51,14 @@ def redactor(roles):
     """Blinds the observer to model identities and keeps local machine paths out of its evidence and reports."""
     words = sorted({w for w in REDACT} | {r["model"] for r in roles.values()}, key=len, reverse=True)
     names = re.compile("|".join(re.escape(w) for w in words), re.IGNORECASE)
-    paths = []
-    for root in (RIG.parent.parent, Path.home()):
-        paths += [str(root), root.as_posix(), root.as_posix().replace(" ", "%20"), str(root).replace("\\", "\\\\")]
-    path_pattern = re.compile("|".join(re.escape(p) for p in sorted(set(paths), key=len, reverse=True)), re.IGNORECASE)
+    # The folder holding the repository, and the home folder, however a path is written (/ or any run of backslashes,
+    # spaces or %20).
+    alternatives = []
+    for base in (RIG.parent.parent.parent, Path.home()):
+        pieces = [base.drive] + list(base.parts[1:])
+        escaped = ["".join("(?: |%20)" if ch == " " else re.escape(ch) for ch in piece) for piece in pieces]
+        alternatives.append(r"(?:\\+|/)+".join(escaped))
+    path_pattern = re.compile("|".join(sorted(alternatives, key=len, reverse=True)), re.IGNORECASE)
     return lambda text: names.sub("[redacted]", path_pattern.sub("<local path>", text))
 
 

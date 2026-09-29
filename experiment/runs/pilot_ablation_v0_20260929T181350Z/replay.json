@@ -1,0 +1,150 @@
+[
+  {
+    "run": "B1",
+    "recorded_policy": "legacy",
+    "rounds": [
+      {
+        "round": 1,
+        "suites_blocking": [
+          "round1_crucible_tests.py"
+        ],
+        "verdicts": [
+          {
+            "branch": "branch_1",
+            "recorded": "PASS",
+            "replayed": "PASS",
+            "match": true
+          },
+          {
+            "branch": "branch_2",
+            "recorded": "PASS",
+            "replayed": "PASS",
+            "match": true
+          }
+        ]
+      }
+    ],
+    "mismatches": 0,
+    "counterfactual": {
+      "reference_only": {
+        "rounds": [
+          {
+            "round": 1,
+            "admission": {
+              "suite": "round1_crucible_tests.py",
+              "decision": "quarantined",
+              "reference_exit_codes": [
+                1,
+                1,
+                1
+              ]
+            },
+            "verdicts": {
+              "branch_1": "UNVERIFIED",
+              "branch_2": "UNVERIFIED"
+            }
+          }
+        ],
+        "promoted": null,
+        "hidden_grader": "nothing promoted"
+      },
+      "reference_and_hand_cases": {
+        "rounds": [
+          {
+            "round": 1,
+            "admission": {
+              "suite": "round1_crucible_tests.py",
+              "decision": "quarantined",
+              "reference_exit_codes": [
+                1,
+                1,
+                1
+              ]
+            },
+            "verdicts": {
+              "branch_1": "PASS",
+              "branch_2": "PASS"
+            }
+          }
+        ],
+        "promoted": "round1_branch_1",
+        "hidden_grader": "28/39"
+      },
+      "note": "Variant 2 uses the author's 6 hand cases as acceptance cases; they are also 6 of the 39 hidden cases, so its hidden grade is not fully independent."
+    }
+  },
+  {
+    "run": "B2",
+    "recorded_policy": "legacy",
+    "rounds": [
+      {
+        "round": 1,
+        "suites_blocking": [
+          "round1_crucible_tests.py"
+        ],
+        "verdicts": [
+          {
+            "branch": "branch_1",
+            "recorded": "PASS",
+            "replayed": "PASS",
+            "match": true
+          },
+          {
+            "branch": "branch_2",
+            "recorded": "PASS",
+            "replayed": "PASS",
+            "match": true
+          }
+        ]
+      }
+    ],
+    "mismatches": 0,
+    "counterfactual": {
+      "reference_only": {
+        "rounds": [
+          {
+            "round": 1,
+            "admission": {
+              "suite": "round1_crucible_tests.py",
+              "decision": "quarantined",
+              "reference_exit_codes": [
+                1,
+                1,
+                1
+              ]
+            },
+            "verdicts": {
+              "branch_1": "UNVERIFIED",
+              "branch_2": "UNVERIFIED"
+            }
+          }
+        ],
+        "promoted": null,
+        "hidden_grader": "nothing promoted"
+      },
+      "reference_and_hand_cases": {
+        "rounds": [
+          {
+            "round": 1,
+            "admission": {
+              "suite": "round1_crucible_tests.py",
+              "decision": "quarantined",
+              "reference_exit_codes": [
+                1,
+                1,
+                1
+              ]
+            },
+            "verdicts": {
+              "branch_1": "PASS",
+              "branch_2": "PASS"
+            }
+          }
+        ],
+        "promoted": "round1_branch_1",
+        "hidden_grader": "27/39"
+      },
+      "note": "Variant 2 uses the author's 6 hand cases as acceptance cases; they are also 6 of the 39 hidden cases, so its hidden grade is not fully independent."
+    }
+  }
+]

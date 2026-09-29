@@ -72,6 +72,8 @@ from run_crucible import (
     extract_code,
     build_parser,
     _create_locked_down_agent_config,
+    run_python,
+    MOCK_SOLUTIONS,
 )
 
 
@@ -294,10 +296,16 @@ class TestMockPipeline:
             data = json.loads(orchestrator.results_path.read_text(encoding="utf-8"))
 
             # 1. Telemetry metadata
-            assert data["schema_version"] == "1.1.0"
+            assert data["schema_version"] == "1.2.0"
             assert data["configuration"]["mode"] == "mock"
             assert data["configuration"]["entrypoint"] == "process_telemetry"
             assert "cumulative_regression_gate" in data["configuration"]["verifiers"]
+            assert "suite_admission_vs_reference" in data["configuration"]["verifiers"]
+            assert data["configuration"]["verdict_policy"]["name"] == "deterministic"
+            # The mock suite passes the mock reference in every stability run, so it is admitted and blocks.
+            admission = data["iterations"][0]["test_harness"]["admission"]
+            assert admission["decision"] == "admitted"
+            assert admission["reference_exit_codes"] == [0, 0, 0]
 
             # 2. Summary counts: 3 evaluations, 2 pass, 1 fail
             s = data["summary"]
@@ -514,6 +522,111 @@ class TestCLIArguments:
         assert args.paradigms == ["P1", "P2"]
         assert args.force_iterations == 2
         assert args.max_iterations == 4
+
+
+# ============================================================
+# Deterministic Verdict Tests
+# ============================================================
+
+FSM_REFERENCE = MOCK_SOLUTIONS["Streaming Finite-State Machine with a bounded ring buffer"]
+
+
+def _mock_orchestrator(tmp_path: Path, **kwargs) -> CrucibleOrchestrator:
+    params = dict(problem_statement="Deterministic verdict test",
+                  paradigms=["Micro-batching with dictionary state aggregation",
+                             "Zero-copy memory-mapped file processing",
+                             "Streaming Finite-State Machine with a bounded ring buffer"],
+                  workspace_dir=str(tmp_path / ".crucible_workspace"), mock_mode=True,
+                  output_dir=str(tmp_path / "mock_output"))
+    params.update(kwargs)
+    return CrucibleOrchestrator(**params)
+
+
+class TestDeterministicVerdicts:
+    """Verdicts come only from deterministic checks: acceptance cases and reference-validated suites."""
+
+    def test_live_run_without_ground_truth_is_refused(self):
+        try:
+            CrucibleOrchestrator("p", ["a"], mock_mode=False)
+            raise AssertionError("expected ValueError: no acceptance cases or reference")
+        except ValueError as e:
+            assert "ground truth" in str(e)
+        CrucibleOrchestrator("p", ["a"], mock_mode=False, allow_advisory_only=True)  # explicit opt-out works
+        CrucibleOrchestrator("p", ["a"], mock_mode=False, verdict_policy="legacy")   # legacy needs none
+
+    def test_suite_that_fails_the_reference_is_quarantined(self):
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            ref = tmp / "reference.py"
+            ref.write_text(FSM_REFERENCE, encoding="utf-8")
+            wrong = tmp / "wrong_suite.py"
+            wrong.write_text("import solution, sys\n"
+                             "result = solution.process_telemetry([(1000, 'cpu0', 96.0), (1200, 'cpu1', 91.0)])\n"
+                             "sys.exit(0 if len(result) == 5 else 1)  # wrong expectation: the true answer is 1\n",
+                             encoding="utf-8")
+            orch = _mock_orchestrator(tmp, reference_solution=str(ref))
+            decision = orch._admit_suite(wrong)
+            assert decision["decision"] == "quarantined"
+            assert "reference fails it" in decision["reason"]
+            assert decision["reference_exit_codes"] == [1, 1, 1]
+
+    def test_no_decisive_check_means_no_promotion(self):
+        """Fail closed: when every suite is quarantined and there are no acceptance cases, nothing is promoted."""
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            ref = tmp / "always_empty_reference.py"
+            ref.write_text("def process_telemetry(stream):\n    return []\n", encoding="utf-8")  # mock suite rejects it
+            orch = _mock_orchestrator(tmp, reference_solution=str(ref))
+            asyncio.run(orch.run(max_iterations=1))
+            data = json.loads(orch.results_path.read_text(encoding="utf-8"))
+            assert data["iterations"][0]["test_harness"]["admission"]["decision"] == "quarantined"
+            assert {b["status"] for b in data["iterations"][0]["branches"]} == {"UNVERIFIED"}
+            assert data["summary"]["survived"] is False
+            assert data["summary"]["unverified_evaluations"] == 3
+
+    def test_suite_without_reference_is_advisory(self):
+        with tempfile.TemporaryDirectory() as d:
+            suite = Path(d) / "suite.py"
+            suite.write_text("import sys\nsys.exit(0)\n", encoding="utf-8")
+            orch = CrucibleOrchestrator("p", ["a"], mock_mode=False, allow_advisory_only=True,
+                                        workspace_dir=str(Path(d) / ".crucible_workspace"),
+                                        output_dir=str(Path(d) / "out"))
+            assert orch._admit_suite(suite)["decision"] == "advisory"
+
+    def test_acceptance_cases_are_decisive(self):
+        """Only the branch whose output matches the human-written case exactly survives."""
+        with tempfile.TemporaryDirectory() as d:
+            tmp = Path(d)
+            case = [{"id": "two_sensor_cascade",
+                     "input": [[1000, "cpu0", 96.0], [1200, "cpu1", 91.0]],
+                     "expected": [{"trigger_timestamp_ms": 1000, "trigger_sensor": "cpu0", "trigger_temp_c": 96.0,
+                                   "cascade_timestamp_ms": 1200, "cascade_sensor": "cpu1", "cascade_temp_c": 91.0,
+                                   "latency_ms": 200}]}]
+            orch = _mock_orchestrator(tmp, acceptance_cases=case)
+            asyncio.run(orch.run(max_iterations=1))
+            data = json.loads(orch.results_path.read_text(encoding="utf-8"))
+            statuses = {b["name"]: b["status"] for b in data["iterations"][0]["branches"]}
+            assert statuses == {"branch_1": "ACCEPTANCE_FAIL", "branch_2": "ACCEPTANCE_FAIL", "branch_3": "PASS"}
+            assert data["summary"]["winning_branches"] == ["branch_3"]
+
+    def test_verdict_environment_is_seeded(self):
+        """Two separate processes see identical string hashes and random numbers."""
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "probe.py").write_text("import random, os\nprint(hash('crucible'), random.random(), "
+                                              "os.environ.get('PYTHONHASHSEED'))\n", encoding="utf-8")
+            first = run_python("probe.py", Path(d))[1]
+            second = run_python("probe.py", Path(d))[1]
+            assert first == second
+            assert first.strip().endswith(" 0")
+
+    def test_rounds_are_saved_for_replay(self):
+        with tempfile.TemporaryDirectory() as d:
+            orch = _mock_orchestrator(Path(d))
+            asyncio.run(orch.run(max_iterations=1))
+            round_dir = orch.output_dir / "rounds" / "round1"
+            assert sorted(p.name for p in round_dir.glob("branch_*.py")) == ["branch_1.py", "branch_2.py", "branch_3.py"]
+            assert (round_dir / "arena_test_iter_1.py").exists()
+            assert json.loads((round_dir / "admission.json").read_text(encoding="utf-8"))["decision"] == "admitted"
 
 
 if __name__ == "__main__":

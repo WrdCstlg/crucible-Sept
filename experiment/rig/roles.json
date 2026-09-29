@@ -3,9 +3,9 @@
     "provider": "google",
     "model": "gemini-3.8-flash",
     "api_key_env": "GEMINI_API_KEY",
-    "settings": {"thinking_level": "HIGH", "max_tokens": 65536},
+    "settings": {"thinking_level": "HIGH", "temperature": 0, "seed": 0, "max_tokens": 65536},
     "price_per_mtok": null,
-    "note": "Model under evaluation. Thinking level HIGH. Called directly, with no agent framework and no tools."
+    "note": "Model under evaluation. Thinking level HIGH; temperature 0 and a fixed seed reduce run-to-run variation (three identical answers to a probe on 2026-09-29), but the provider does not guarantee identical output. Plain API calls, no tools."
   },
   "competitor": {
     "provider": "anthropic",
@@ -13,7 +13,7 @@
     "api_key_env": "ANTHROPIC_API_KEY",
     "settings": {"effort": "xhigh", "max_tokens": 64000},
     "price_per_mtok": {"input": 4.0, "output": 20.0},
-    "note": "Competitor expected to be stronger. Effort xhigh (above high). Thinking is always on for this model."
+    "note": "Competitor expected to be stronger. Effort xhigh. This model rejects sampling parameters (temperature returns HTTP 400, checked 2026-09-29), so its output cannot be pinned."
   },
   "observer": {
     "provider": "openai_compatible",
@@ -22,6 +22,6 @@
     "base_url_env": "KIMI_BASE_URL",
     "settings": {"max_tokens": 16000},
     "price_per_mtok": null,
-    "note": "Judge of process integrity, from a third model family. Blinded; never produces pass/fail, which comes only from the hidden tests."
+    "note": "Judge of process integrity, from a third model family; blinded; never decides pass/fail. The provider only allows temperature 1 for this model (checked 2026-09-29), so reports vary between runs; that is acceptable because reports never decide anything."
   }
 }

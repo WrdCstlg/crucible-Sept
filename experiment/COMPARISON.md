@@ -58,9 +58,24 @@ The cumulative gate carried the round-1 error forward, and all 4 candidates were
 4. **The judge is worth having as a second pair of eyes, not as an authority.** It surfaced one real issue no code check covered, and restated the key failure correctly. It also got one attribution wrong, which is exactly why its findings must cite evidence and never decide scores.
 5. **H1 (how much of the gap Crucible closes) is still unmeasurable:** there's no gap on this task. Measuring it needs a harder problem where the evaluated model alone sometimes fails.
 
-## Improvements identified by this run (not applied, to keep recorded evidence unambiguous)
+## Improvements identified by this run
 
-- Add the reference check for Crucible-written suites to the pipeline itself, as a gate before admitting a suite.
+**Applied after the recorded runs (2026-09-29).** The recorded runs are unchanged, and `replay.py` reproduces their verdicts exactly.
+- **Crucible's deterministic verdict policy:**
+  - Human-written acceptance cases always decide.
+  - An AI-written suite blocks only if the trusted reference passes it in 3 of 3 seeded runs; otherwise it's quarantined or advisory.
+  - A candidate with no decisive check is `UNVERIFIED` and never promoted.
+  - Every verdict-bearing process runs seeded.
+- **Crucible's synthesis agent** is told explicitly that it may not accept, reject or rank candidates.
+- **Exact replay** of every recorded Crucible verdict, with no model calls, checked in CI.
+- **Gemini** is called with temperature 0 and seed 0 in future rig runs.
+
+**Counterfactual** (`replay.py --counterfactual`): under the deterministic policy with the reference alone, none of the recorded runs would have shipped unverified code:
+- Ablation B1 and B2 would have promoted nothing, instead of wrong code.
+- Rig B2 would have promoted nothing, instead of falsely rejecting correct code.
+
+Adding the 6 hand-written cases as acceptance cases, which are also part of the hidden set, fixes rig B2 (39/39). It still lets the ablation's wrong code through, because those cases don't cover the rule the original spec left out.
+
+**Still open:**
 - In the observer's evidence, label "no promoted solution" separately from per-candidate grades, and omit fields that don't apply to an arm.
 - Accept section citations such as `E1:facts` and whole-item citations such as `E2`.
-- Tell Crucible's synthesis agent it may explain but not accept or reject candidates, or add a code check that its narrative matches the promotion decision.

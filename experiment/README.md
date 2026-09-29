@@ -20,7 +20,8 @@ experiment/
 ├── run_pilot.py                Runs all arms in parallel under a deadline, then grades everything
 ├── arms.py                     Arm runner using the Antigravity agent SDK (the first pilots)
 ├── attribution.py              Ablation attribution check
-├── verify_all.py               Verifies all recorded evidence without API keys (runs in CI)
+├── replay.py                   Replays recorded Crucible verdicts with no model calls; --counterfactual applies the deterministic policy
+├── verify_all.py               Verifies all recorded evidence without API keys, including the replay (runs in CI)
 ├── COMPARISON.md               Results and analysis across all pilots
 ├── rig/                        Provider-agnostic three-role rig
 │   ├── roles.json              Which model plays which role, with settings and prices
@@ -42,6 +43,8 @@ experiment/
 
 Arms A and C receive the identical system prompt and spec. No arm ever sees a test case. Only one thing is graded per run: the code from arms A and C, or Crucible's first surviving branch for arm B. If Crucible promotes nothing, arm B fails that run.
 
+Arm B runs Crucible under the **legacy** verdict policy, in which every AI-written suite blocks. That is the design that was measured. Crucible's own default is now the deterministic policy; `replay.py --counterfactual` shows how the recorded runs would have been judged under it.
+
 ## The test set and the grader
 
 - **Groups:** 6 hand-written cases, 24 edge cases with answers computed by hand, 6 seeded random mixes, and 3 stress streams (up to 28,150 lines and 5,690 tickets).
@@ -59,6 +62,7 @@ Arms A and C receive the identical system prompt and spec. No arm ever sees a te
 5. `rig/audit.py` writes `audit.json` for each trial and `audit_summary.json` with a fingerprint of every audit record.
 6. `rig/observe.py` writes a blinded `observer_report.json` and `.md` for each trial, plus `ledger.jsonl` and `observer_key.json` (which trial each "System N" is).
 7. `rig/check_suites.py` runs every Crucible-written test suite against the trusted reference, then writes `suite_check.json`. A suite the reference fails contains a wrong expectation.
+8. `replay.py` re-executes every recorded Crucible verdict from the saved candidates and suites. It uses the policy and environment the run used, and makes no model calls. With `--counterfactual` it also judges the same recordings under the deterministic policy, in two variants: reference only, and reference plus the 6 hand cases. It writes `replay.json`. `verify_all.py` runs the replay check on every pilot.
 
 ## Observer rules (enforced in code)
 

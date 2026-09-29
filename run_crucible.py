@@ -8,10 +8,11 @@ import re
 import time
 import json
 import ast
+import hashlib
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from google.antigravity import Agent, LocalAgentConfig
 
 try:
@@ -44,10 +45,87 @@ class BranchResult:
     stdout: str
     stderr: str
     solution_size_bytes: int = 0
+    advisory: list = field(default_factory=list)  # outcomes of non-blocking suites; never affect the verdict
 
 def extract_code(text: str) -> str:
     match = re.search(r'```(?:python)?\s*(.*?)```', text, re.DOTALL | re.IGNORECASE)
     return match.group(1).strip() if match else text.strip()
+
+
+# ── Deterministic execution ────────────────────────────────────────────
+# Every child process that can influence a verdict (acceptance cases, arena suites, suite admission) runs in the
+# same fixed environment: string hashing is seeded (PYTHONHASHSEED=0) and the `random` module is seeded at start-up
+# through a sitecustomize module. Identical code and inputs then produce identical results. What an environment
+# cannot fix is code that depends on wall-clock time or machine speed; suite admission guards against that by
+# requiring identical outcomes across repeated runs against the reference solution.
+_SEED_DIR = Path(tempfile.gettempdir()) / "crucible_deterministic_env"
+_SITECUSTOMIZE = "import random\nrandom.seed(0)\n"
+
+
+def deterministic_env() -> dict:
+    """Environment for verdict-bearing child processes: seeded hashing and a seeded `random` module."""
+    _SEED_DIR.mkdir(parents=True, exist_ok=True)
+    seed_file = _SEED_DIR / "sitecustomize.py"
+    if not seed_file.exists() or seed_file.read_text(encoding="utf-8") != _SITECUSTOMIZE:
+        seed_file.write_text(_SITECUSTOMIZE, encoding="utf-8")
+    env = dict(os.environ)
+    env["PYTHONHASHSEED"] = "0"
+    env["PYTHONPATH"] = os.pathsep.join(p for p in (str(_SEED_DIR), env.get("PYTHONPATH", "")) if p)
+    return env
+
+
+def run_python(script: str, cwd: Path, timeout: int = 120, deterministic: bool = True) -> tuple[int, str, str, float]:
+    """Runs `python <script>` in cwd. Returns (exit code, stdout, stderr, seconds); exit code 124 means timeout."""
+    start = time.perf_counter()
+    try:
+        p = subprocess.run([sys.executable, script], cwd=cwd, capture_output=True, text=True, timeout=timeout,
+                           env=deterministic_env() if deterministic else None)
+        return p.returncode, p.stdout, p.stderr, round(time.perf_counter() - start, 3)
+    except subprocess.TimeoutExpired:
+        return 124, "", f"TIMEOUT EXPIRED: exceeded the {timeout}-second limit.", round(time.perf_counter() - start, 3)
+    except Exception as e:
+        return 1, "", f"EXECUTION ERROR: {e}", round(time.perf_counter() - start, 3)
+
+
+def load_acceptance_cases(path: str) -> list[dict]:
+    """Loads human-written acceptance cases: a JSON list of {"id", "input" (or "lines"), "expected"}."""
+    cases = json.loads(Path(path).read_text(encoding="utf-8"))
+    normalized = []
+    for i, c in enumerate(cases, 1):
+        if "expected" not in c or ("input" not in c and "lines" not in c):
+            raise ValueError(f"acceptance case #{i} needs 'input' (or 'lines') and 'expected'")
+        normalized.append({"id": str(c.get("id", f"case_{i}")), "input": c.get("input", c.get("lines")),
+                           "expected": c["expected"]})
+    return normalized
+
+
+# The synthesis agent explains; it never decides. Pass/fail and promotion come only from deterministic checks.
+SYNTHESIS_SYSTEM = (
+    "You review test results for competing implementations. Pass/fail and promotion were already decided by "
+    "deterministic checks and are final: do not accept, reject, rank or recommend discarding any candidate, and do "
+    "not declare winners. Explain, citing the logs, why each failing candidate failed and what it should change, so "
+    "the next round can fix it."
+)
+
+# Runs inside a candidate's folder. Results are compared as canonical JSON, so types count: true is not 1, 1 is not 1.0.
+ACCEPTANCE_RUNNER = r'''
+import json, sys
+import solution
+entry = getattr(solution, sys.argv[1])
+cases = json.load(open("acceptance_cases.json", encoding="utf-8"))
+canon = lambda v: json.dumps(v, sort_keys=True)
+failed = []
+for c in cases:
+    try:
+        got = json.loads(json.dumps(entry(c["input"])))
+    except Exception as e:
+        failed.append({"id": c["id"], "error": f"{type(e).__name__}: {e}"[:300]})
+        continue
+    if canon(got) != canon(c["expected"]):
+        failed.append({"id": c["id"], "expected": c["expected"], "got": got})
+print(json.dumps({"cases": len(cases), "failed": failed})[:4000])
+sys.exit(1 if failed else 0)
+'''
 
 
 def _create_locked_down_agent_config(system_instructions: str, temp_dir: str) -> LocalAgentConfig:
@@ -210,12 +288,37 @@ class CrucibleOrchestrator:
     DEFAULT_ENTRYPOINT = "process_telemetry"
     REQUIRED_ENTRYPOINT = "process_telemetry"
 
-    def __init__(self, problem_statement: str, paradigms: list[str], workspace_dir: str = ".crucible_workspace", mock_mode: bool = False, entrypoint: str = "process_telemetry", output_dir: str | None = None, force_iterations: int = 1):
+    VERDICT_POLICIES = ("deterministic", "legacy")
+
+    def __init__(self, problem_statement: str, paradigms: list[str], workspace_dir: str = ".crucible_workspace", mock_mode: bool = False, entrypoint: str = "process_telemetry", output_dir: str | None = None, force_iterations: int = 1,
+                 verdict_policy: str = "deterministic", acceptance_cases: list[dict] | None = None,
+                 reference_solution: str | None = None, stability_runs: int = 3, allow_advisory_only: bool = False):
+        """
+        Verdict policies:
+          deterministic  Human-written acceptance cases always decide. An AI-written test suite may also decide, but only
+                         once the trusted reference solution passes it in every one of `stability_runs` runs; otherwise it
+                         is quarantined (it rejects the reference, or its outcome varies) or advisory (no reference to check
+                         it against). Advisory and quarantined suites are still run and reported; they never block.
+          legacy         Every AI-written suite blocks (the behaviour before 2026-09-29). Kept to reproduce recorded runs.
+        """
+        if verdict_policy not in self.VERDICT_POLICIES:
+            raise ValueError(f"verdict_policy must be one of {self.VERDICT_POLICIES}")
+        if (verdict_policy == "deterministic" and not mock_mode and not acceptance_cases and not reference_solution
+                and not allow_advisory_only):
+            raise ValueError(
+                "Deterministic verdicts need ground truth: pass human-written acceptance cases (--acceptance-cases) "
+                "and/or a trusted reference solution (--reference). To run anyway with AI-written tests as advisory "
+                "only, pass --advisory-only (then only the AST gate can reject a candidate).")
         self.problem_statement = problem_statement
         self.paradigms = paradigms
         self.mock_mode = mock_mode
         self.entrypoint = entrypoint
         self.force_iterations = force_iterations
+        self.verdict_policy = verdict_policy
+        self.acceptance_cases = acceptance_cases or []
+        self.reference_solution = str(Path(reference_solution).resolve()) if reference_solution else None
+        self.stability_runs = max(1, stability_runs)
+        self.suite_admission: list[dict] = []
         self.workspace = Path(workspace_dir).resolve()
         self.project_root = self.workspace.parent if self.workspace.name == ".crucible_workspace" else Path.cwd().resolve()
         
@@ -237,7 +340,7 @@ class CrucibleOrchestrator:
         
         self.run_id = f"crucible-{int(time.time())}"
         self.telemetry = {
-            "schema_version": "1.1.0",
+            "schema_version": "1.2.0",
             "run_id": self.run_id,
             "start_time": datetime.now(timezone.utc).isoformat(),
             "end_time": None,
@@ -256,7 +359,17 @@ class CrucibleOrchestrator:
                     "ast_entrypoint_contract",
                     "ast_import_guard",
                     "cumulative_regression_gate"
-                ]
+                ] + (["human_acceptance_cases", "suite_admission_vs_reference", "deterministic_environment"]
+                     if verdict_policy == "deterministic" else []),
+                "verdict_policy": {
+                    "name": verdict_policy,
+                    "acceptance_cases": len(self.acceptance_cases),
+                    "reference_solution_sha256": (hashlib.sha256(Path(self.reference_solution).read_bytes()).hexdigest()
+                                                  if self.reference_solution else ("mock reference" if mock_mode else None)),
+                    "stability_runs": self.stability_runs,
+                    "environment": "PYTHONHASHSEED=0 and random.seed(0) in every verdict-bearing process"
+                                   if verdict_policy == "deterministic" else "unseeded (legacy)",
+                }
             },
             "summary": {
                 "status": "INITIALIZED",
@@ -292,6 +405,12 @@ class CrucibleOrchestrator:
 
     async def run(self, max_iterations=3):
         self._prepare_workspace()
+        if self.mock_mode and self.verdict_policy == "deterministic" and not self.reference_solution:
+            # Mock mode's trusted reference: the streaming FSM mock solution, adapted to the configured entrypoint.
+            ref = self.workspace / "_mock_reference.py"
+            fsm = MOCK_SOLUTIONS["Streaming Finite-State Machine with a bounded ring buffer"]
+            ref.write_text(fsm.replace("def process_telemetry(", f"def {self.entrypoint}("), encoding="utf-8")
+            self.reference_solution = str(ref)
         feedback = ""
         start_wall_time = time.time()
         overall_status = "FAILED"
@@ -316,9 +435,16 @@ class CrucibleOrchestrator:
                 current_test_script = await self._generate_test_harness(iteration)
                 self.test_suites.append(current_test_script)
                 test_size = current_test_script.stat().st_size if current_test_script.exists() else 0
-                
-                print(f"\n>> Phase 3: The Arena (Executing Across {len(self.test_suites)} Cumulative Test Suite(s))")
-                results = await self._execute_arena(self.test_suites)
+                admission = self._admit_suite(current_test_script)
+                self.suite_admission.append(admission)
+                print(f"   Suite admission: {admission['decision'].upper()} ({admission['reason']})")
+                blocking = [s for s, a in zip(self.test_suites, self.suite_admission) if a["decision"] == "admitted"]
+                advisory = [s for s, a in zip(self.test_suites, self.suite_admission) if a["decision"] != "admitted"]
+
+                print(f"\n>> Phase 3: The Arena ({len(self.acceptance_cases)} acceptance case(s), "
+                      f"{len(blocking)} blocking suite(s), {len(advisory)} advisory suite(s))")
+                results = await self._execute_arena(blocking, advisory)
+                self._save_round(iteration, current_test_script, admission)
                 
                 print("\n>> Phase 4: Ruthless Synthesis")
                 synthesis_report = await self._synthesize_results(results)
@@ -331,7 +457,10 @@ class CrucibleOrchestrator:
                     "test_harness": {
                         "path": f"arena_test_iter_{iteration}.py",
                         "size_bytes": test_size,
-                        "cumulative_suites_enforced": len(self.test_suites)
+                        "cumulative_suites_enforced": len(blocking),
+                        "admission": admission,
+                        "blocking_suites": [s.name for s in blocking],
+                        "advisory_suites": [s.name for s in advisory],
                     },
                     "branches": [
                         {
@@ -342,7 +471,8 @@ class CrucibleOrchestrator:
                             "duration_seconds": r.duration_seconds,
                             "solution_size_bytes": r.solution_size_bytes,
                             "stdout": self._sanitize_paths(r.stdout),
-                            "stderr": self._sanitize_paths(r.stderr)
+                            "stderr": self._sanitize_paths(r.stderr),
+                            "advisory": r.advisory,
                         }
                         for r in results
                     ],
@@ -409,6 +539,7 @@ class CrucibleOrchestrator:
         total_evals = len(all_evals)
         passed_evals = sum(1 for b in all_evals if b["exit_code"] == 0)
         timeout_evals = sum(1 for b in all_evals if b["exit_code"] == 124)
+        unverified_evals = sum(1 for b in all_evals if b["status"] == "UNVERIFIED")
         failed_evals = total_evals - passed_evals
         
         self.telemetry["end_time"] = datetime.now(timezone.utc).isoformat()
@@ -421,6 +552,7 @@ class CrucibleOrchestrator:
             "passed_evaluations": passed_evals,
             "failed_evaluations": failed_evals,
             "timeout_evaluations": timeout_evals,
+            "unverified_evaluations": unverified_evals,
             "winning_branches": winners,
             "deployed_artifacts": deployed_artifacts
         })
@@ -437,13 +569,53 @@ class CrucibleOrchestrator:
             
         print("\n" + "=" * 80)
         print("OBSERVABILITY TELEMETRY PERSISTED")
-        print(f"   Dashboard Log: {self.results_path.resolve()}")
-        print(f"   Audit Archive: {audit_log_path.resolve()}")
+        print(f"   Dashboard Log: {self._sanitize_paths(str(self.results_path.resolve()))}")
+        print(f"   Audit Archive: {self._sanitize_paths(str(audit_log_path.resolve()))}")
         print(f"   Run ID:        {self.run_id}")
         print(f"   Verdict:       {status} (Survived: {survived})")
         print(f"   Evaluations:   {total_evals} total | {passed_evals} passed | {failed_evals} failed | {timeout_evals} timeouts")
         print(f"   Total Runtime: {total_duration}s")
         print("=" * 80 + "\n")
+
+    def _admit_suite(self, suite_path: Path) -> dict:
+        """Decides whether an AI-written suite may block candidates. Deterministic given the suite and the reference."""
+        if self.verdict_policy == "legacy":
+            return {"suite": suite_path.name, "decision": "admitted", "reason": "legacy policy: every AI-written suite blocks"}
+        if not self.reference_solution:
+            return {"suite": suite_path.name, "decision": "advisory",
+                    "reason": "no trusted reference to validate it against; reported, never blocking"}
+        codes, tails = [], []
+        for _ in range(self.stability_runs):
+            with tempfile.TemporaryDirectory(prefix="crucible_admit_") as d:
+                shutil.copy(suite_path, Path(d) / "arena_test.py")
+                shutil.copy(self.reference_solution, Path(d) / "solution.py")
+                code, out, err, _ = run_python("arena_test.py", Path(d))
+                codes.append(code)
+                tails.append(self._sanitize_paths(((err or out).strip().splitlines() or [""])[-1])[:200])
+        if all(c == 0 for c in codes):
+            return {"suite": suite_path.name, "decision": "admitted", "reference_exit_codes": codes,
+                    "reason": f"the trusted reference passes it in all {len(codes)} runs"}
+        if all(c != 0 for c in codes):
+            return {"suite": suite_path.name, "decision": "quarantined", "reference_exit_codes": codes,
+                    "reason": "the trusted reference fails it, so at least one expectation is wrong",
+                    "reference_failure": tails[-1]}
+        return {"suite": suite_path.name, "decision": "quarantined", "reference_exit_codes": codes,
+                "reason": f"unstable: the reference's outcome varied across runs {codes}"}
+
+    def _save_round(self, iteration: int, suite_path: Path, admission: dict):
+        """Keeps every round's candidates, suite and admission decision so the run can be replayed without any model."""
+        round_dir = self.output_dir / "rounds" / f"round{iteration}"
+        round_dir.mkdir(parents=True, exist_ok=True)
+        if self.acceptance_cases and not (round_dir.parent / "acceptance_cases.json").exists():
+            (round_dir.parent / "acceptance_cases.json").write_text(json.dumps(self.acceptance_cases, indent=2), encoding="utf-8")
+        if self.reference_solution and not (round_dir.parent / "reference_solution.py").exists():
+            shutil.copy(self.reference_solution, round_dir.parent / "reference_solution.py")
+        for branch_dir in self.branches:
+            if (branch_dir / "solution.py").exists():
+                shutil.copy(branch_dir / "solution.py", round_dir / f"{branch_dir.name}.py")
+        if suite_path.exists():
+            shutil.copy(suite_path, round_dir / suite_path.name)
+        (round_dir / "admission.json").write_text(json.dumps(admission, indent=2), encoding="utf-8")
 
     def _prepare_workspace(self):
         if self.workspace.exists():
@@ -608,10 +780,31 @@ class CrucibleOrchestrator:
 
         return True, ""
 
-    async def _execute_arena(self, test_suites: list[Path]) -> list[BranchResult]:
+    def _run_acceptance(self, branch_dir: Path) -> tuple[int, str]:
+        """Runs the human-written acceptance cases against one candidate. Returns (exit code, detail)."""
+        (branch_dir / "acceptance_cases.json").write_text(json.dumps(self.acceptance_cases), encoding="utf-8")
+        (branch_dir / "acceptance_runner.py").write_text(ACCEPTANCE_RUNNER, encoding="utf-8")
+        code, out, err, _ = self._run_script(branch_dir, "acceptance_runner.py", self.entrypoint)
+        summary = (out.strip().splitlines() or [""])[-1]
+        return code, summary if summary.startswith("{") else (err or out)[-500:]
+
+    def _run_script(self, cwd: Path, script: str, *args: str) -> tuple[int, str, str, float]:
+        """Like run_python, but passes arguments; seeded environment unless the legacy policy is in force."""
+        start = time.perf_counter()
+        env = deterministic_env() if self.verdict_policy == "deterministic" else None
+        try:
+            p = subprocess.run([sys.executable, script, *args], cwd=cwd, capture_output=True, text=True,
+                               timeout=120, env=env)
+            return p.returncode, p.stdout, p.stderr, round(time.perf_counter() - start, 3)
+        except subprocess.TimeoutExpired:
+            return 124, "", f"TIMEOUT EXPIRED: {script} exceeded the 120-second limit.", round(time.perf_counter() - start, 3)
+        except Exception as e:
+            return 1, "", f"EXECUTION ERROR in {script}: {e}", round(time.perf_counter() - start, 3)
+
+    async def _execute_arena(self, test_suites: list[Path], advisory_suites: list[Path] = ()) -> list[BranchResult]:
         """
-        Executes each candidate solution against all cumulative test suites.
-        A branch passes only if it achieves exit code 0 across every test suite.
+        Judges each candidate. Order: AST gate, then human acceptance cases (decisive), then every blocking suite
+        cumulatively (the first failure ends it). Advisory suites run afterwards for information only.
         """
         results = []
         for i, branch_dir in enumerate(self.branches):
@@ -643,46 +836,45 @@ class CrucibleOrchestrator:
             branch_exit_code = 0
             branch_status = "PASS"
 
-            # ── Cumulative Regression Gate ─────────────────────────────
-            for idx, suite_path in enumerate(test_suites, 1):
+            # ── Fail closed: a promotion needs at least one decisive check ─
+            if self.verdict_policy == "deterministic" and not self.acceptance_cases and not test_suites:
+                branch_exit_code, branch_status = 3, "UNVERIFIED"
+                cumulative_stderr.append("[No decisive check] No acceptance cases and no admitted suite: this candidate "
+                                         "cannot be verified, so it cannot be promoted.")
+                print("       [?] UNVERIFIED: no acceptance cases and no admitted suite")
+
+            # ── Human acceptance cases: always decisive ────────────────
+            elif self.acceptance_cases:
+                code, detail = self._run_acceptance(branch_dir)
+                if code != 0:
+                    branch_exit_code = code
+                    branch_status = "TIMEOUT" if code == 124 else "ACCEPTANCE_FAIL"
+                    cumulative_stderr.append(f"[Acceptance cases]\n{self._sanitize_paths(detail)}")
+                    print(f"       [-] Failed acceptance cases (Code: {code})")
+
+            # ── Cumulative Regression Gate: admitted suites only ───────
+            for idx, suite_path in enumerate(test_suites if branch_exit_code == 0 else [], 1):
                 test_file_name = f"arena_test_suite_{idx}.py"
                 shutil.copy(suite_path, branch_dir / test_file_name)
-                
-                start_t = time.perf_counter()
-                try:
-                    process = subprocess.run(
-                        [sys.executable, test_file_name],
-                        cwd=branch_dir,
-                        capture_output=True,
-                        text=True,
-                        timeout=120
-                    )
-                    duration = round(time.perf_counter() - start_t, 3)
-                    code = process.returncode
-                    out = process.stdout
-                    err = process.stderr
-                except subprocess.TimeoutExpired:
-                    duration = round(time.perf_counter() - start_t, 3)
-                    code = 124
-                    out = ""
-                    err = f"TIMEOUT EXPIRED: Test suite {idx} exceeded the 120-second limit."
-                except Exception as e:
-                    duration = round(time.perf_counter() - start_t, 3)
-                    code = 1
-                    out = ""
-                    err = f"EXECUTION ERROR in suite {idx}: {str(e)}"
-
+                code, out, err, duration = self._run_script(branch_dir, test_file_name)
                 cumulative_duration += duration
                 if out:
                     cumulative_stdout.append(f"[Test Suite {idx}]\n{out}")
                 if err:
                     cumulative_stderr.append(f"[Test Suite {idx}]\n{err}")
-
                 if code != 0:
                     branch_exit_code = code
                     branch_status = "TIMEOUT" if code == 124 else "FAIL"
                     print(f"       [-] Failed Suite {idx} (Code: {code}, Duration: {duration}s)")
                     break
+
+            # ── Advisory suites: reported, never blocking ──────────────
+            advisory = []
+            for suite_path in advisory_suites:
+                shutil.copy(suite_path, branch_dir / f"advisory_{suite_path.name}")
+                code, out, err, duration = self._run_script(branch_dir, f"advisory_{suite_path.name}")
+                advisory.append({"suite": suite_path.name, "exit_code": code, "passed": code == 0,
+                                 "tail": self._sanitize_paths(((err or out).strip().splitlines() or [""])[-1])[:200]})
 
             combined_stdout = "\n".join(cumulative_stdout)
             combined_stderr = "\n".join(cumulative_stderr)
@@ -696,7 +888,8 @@ class CrucibleOrchestrator:
                 duration_seconds=total_duration,
                 stdout=combined_stdout,
                 stderr=combined_stderr,
-                solution_size_bytes=solution_size
+                solution_size_bytes=solution_size,
+                advisory=advisory,
             ))
             print(f"       Verdict: {branch_status} (Exit Code: {branch_exit_code}, Total Duration: {total_duration}s)")
         return results
@@ -714,7 +907,7 @@ class CrucibleOrchestrator:
 
         with tempfile.TemporaryDirectory(prefix="crucible_synth_") as synth_temp:
             config = _create_locked_down_agent_config(
-                system_instructions="You are the Lead Systems Architect. Review the execution logs of competing implementations. Discard any branch with a non-zero exit code or memory crash. Write a Ruthless Synthesis explaining exactly why the winner survived and the others failed, citing specific metrics from the terminal logs.",
+                system_instructions=SYNTHESIS_SYSTEM,
                 temp_dir=synth_temp
             )
             async with Agent(config) as agent:
@@ -733,6 +926,17 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--output-dir", type=str, default=None, help="Directory for results.json and artifacts (default: project root in live mode, .crucible_mock in mock mode)")
     parser.add_argument("--force-iterations", type=int, default=1, help="Minimum number of tournament iterations to run before declaring victory (default: 1)")
     parser.add_argument("--max-iterations", type=int, default=3, help="Maximum number of tournament iterations to run (default: 3)")
+    parser.add_argument("--verdict-policy", choices=CrucibleOrchestrator.VERDICT_POLICIES, default="deterministic",
+                        help="deterministic (default): acceptance cases decide, AI-written suites only once validated "
+                             "against --reference; legacy: every AI-written suite blocks (to reproduce old runs)")
+    parser.add_argument("--acceptance-cases", type=str, default=None,
+                        help="JSON list of human-written cases {id, input, expected}; always decisive")
+    parser.add_argument("--reference", type=str, default=None,
+                        help="Trusted reference solution; AI-written suites block only if it passes them every time")
+    parser.add_argument("--stability-runs", type=int, default=3,
+                        help="Times a suite must pass the reference, with identical outcomes, to be admitted (default: 3)")
+    parser.add_argument("--advisory-only", action="store_true",
+                        help="Run live without acceptance cases or a reference: AI-written suites are advisory only")
     return parser
 
 
@@ -741,7 +945,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     workspace_path = Path.cwd() / ".crucible_workspace"
     mode_label = "MOCK MODE" if args.mock else "LIVE MODE"
-    print(f"Initializing Crucible [{mode_label}] in: {workspace_path}")
+    print(f"Initializing Crucible [{mode_label}, verdict policy: {args.verdict_policy}] in: ./.crucible_workspace")
 
     effective_max_iterations = args.max_iterations
     if args.force_iterations > args.max_iterations:
@@ -751,13 +955,21 @@ if __name__ == "__main__":
         )
         effective_max_iterations = args.force_iterations
 
-    orchestrator = CrucibleOrchestrator(
-        problem_statement=args.problem,
-        paradigms=args.paradigms,
-        workspace_dir=str(workspace_path),
-        mock_mode=args.mock,
-        entrypoint=args.entrypoint,
-        output_dir=args.output_dir,
-        force_iterations=args.force_iterations,
-    )
+    try:
+        orchestrator = CrucibleOrchestrator(
+            problem_statement=args.problem,
+            paradigms=args.paradigms,
+            workspace_dir=str(workspace_path),
+            mock_mode=args.mock,
+            entrypoint=args.entrypoint,
+            output_dir=args.output_dir,
+            force_iterations=args.force_iterations,
+            verdict_policy=args.verdict_policy,
+            acceptance_cases=load_acceptance_cases(args.acceptance_cases) if args.acceptance_cases else None,
+            reference_solution=args.reference,
+            stability_runs=args.stability_runs,
+            allow_advisory_only=args.advisory_only,
+        )
+    except ValueError as e:
+        parser.error(str(e))
     asyncio.run(orchestrator.run(max_iterations=effective_max_iterations))

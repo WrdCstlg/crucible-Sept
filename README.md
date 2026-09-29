@@ -36,6 +36,12 @@
    - **The judge:** Kimi K3 flagged that disagreement from the evidence alone, and found one issue no code check covered. It also misattributed the error once, which is why it never decides scores.
 
    ([full comparison](experiment/COMPARISON.md))
+7. **Verdicts are now deterministic, and fail closed.**
+   - **What decides:** only human-written acceptance cases, and AI-written suites that a trusted reference passes in 3 of 3 seeded runs. Anything else is reported but never blocks, and code with no decisive check is never promoted.
+   - **Replay:** every recorded Crucible verdict reproduces from saved code and tests, with no model calls (14 of 14, checked in CI).
+   - **Counterfactual:** under this policy, none of the recorded runs would have shipped unverified code. Rig B2's false rejection disappears once acceptance cases exist.
+
+   ([details](#determinism-what-is-and-isnt-deterministic))
 
 ---
 
@@ -51,8 +57,9 @@ flowchart TD
     S["Problem spec"] --> G
     S --> Q
     G --> AST["AST gate<br/>right function name, no blocked imports"]
-    AST --> AR["Phase 3: Arena<br/>each candidate runs against<br/>every test suite written so far"]
-    Q --> AR
+    AST --> AR["Phase 3: Arena<br/>acceptance cases, then every<br/>admitted suite written so far"]
+    Q --> ADM["Suite admission<br/>must pass the trusted reference<br/>in 3 of 3 seeded runs"]
+    ADM --> AR
     AR --> D{"Does any candidate<br/>pass every suite?"}
     D -- yes --> P["Promote survivors<br/>and write telemetry"]
     D -- no --> SY
@@ -62,10 +69,10 @@ flowchart TD
 
 - **Code writers** each implement the spec using a different forced approach.
 - **The AST gate** statically checks each candidate before it runs, in under a millisecond. The required top-level function must exist (for example `def process_telemetry(stream):`, configurable with `--entrypoint`). Direct imports of nine module families are rejected: `subprocess`, `socket`, `http`, `urllib`, `requests`, `ctypes`, `cffi`, `signal` and `multiprocessing`. This catches accidents, not attacks: dynamic imports and `os` or `open()` calls get past it.
-- **The arena** runs each candidate in a separate OS process with a 120-second watchdog. Exit code 0 means pass.
-- **The cumulative regression gate** requires survivors to pass every test suite written so far, not just the latest. Without it, "survivors" in one run failed the previous round's tests with the same error.
+- **The arena** runs each candidate in a separate OS process with a 120-second watchdog, in a seeded environment. Human-written acceptance cases run first and always decide; then every admitted suite. See [the determinism section](#determinism-what-is-and-isnt-deterministic).
+- **The cumulative regression gate** requires survivors to pass every admitted suite written so far, not just the latest. Without it, "survivors" in one run failed the previous round's tests with the same error.
 - **Lockdown:** agents run with no tools, a deny-all policy and an empty temporary folder. The orchestrator alone writes code and tests to disk.
-- **The synthesis agent** writes a failure report that is fed into the next round. It never decides pass or fail.
+- **The synthesis agent** writes a failure report that is fed into the next round. It is told explicitly that it may not accept, reject or rank candidates; pass or fail is already final.
 - **Telemetry:** each run writes `results.json` plus a timestamped archive in `artifacts/`. Both are machine-readable and can gate CI:
 
   ```bash
@@ -77,6 +84,58 @@ flowchart TD
 ```bash
 python run_crucible.py --mock
 python run_crucible.py --mock --entrypoint analyze_data
+```
+
+---
+
+## Determinism: what is and isn't deterministic
+
+AI models can't be made deterministic from the outside. Claude Opus 5.5 rejects sampling parameters, Kimi K3 only accepts temperature 1, and Gemini's temperature 0 and seed reduce variation without guaranteeing it. So model outputs are treated as **recorded inputs**, and everything that *decides* anything is deterministic code.
+
+```mermaid
+flowchart TD
+    C["Candidate code<br/>written by an AI"] --> AST{"AST gate:<br/>required function, no blocked imports?"}
+    AST -- no --> R1["AST_REJECTED"]
+    AST -- yes --> GT{"Any decisive check?<br/>acceptance cases, or an admitted suite"}
+    GT -- no --> UV["UNVERIFIED<br/>never promoted"]
+    GT -- yes --> ACC{"Human-written acceptance cases, if any:<br/>exact match, types included?"}
+    ACC -- no --> R2["ACCEPTANCE_FAIL"]
+    ACC -- yes --> SUI{"Every admitted AI-written suite, if any,<br/>exits 0?"}
+    SUI -- no --> R3["FAIL"]
+    SUI -- yes --> P["PASS: promoted"]
+    T["New AI-written suite"] --> ADM{"Does the trusted reference pass it<br/>in 3 of 3 seeded runs?"}
+    ADM -- yes --> BL["Admitted: blocks"]
+    ADM -- "fails, or varies" --> Q["Quarantined: reported, never blocks"]
+    ADM -- "no reference" --> AD["Advisory: reported, never blocks"]
+    BL -.-> SUI
+```
+
+| Component | Deterministic? | How |
+|---|---|---|
+| Pass, fail and promotion | **Yes** | Decided only by acceptance cases, reference-validated suites and exit codes. With no decisive check, a candidate is `UNVERIFIED` and never promoted |
+| Execution environment | **Yes** | Every verdict-bearing process runs with `PYTHONHASHSEED=0` and `random.seed(0)` |
+| Test set, grading, audits | **Yes** | Seeded generation, frozen fingerprints, code-only checks |
+| Published results | **Yes, verifiable** | [`experiment/replay.py`](experiment/replay.py) re-executes every recorded Crucible verdict from saved code and tests, with no model calls. CI checks all 14 |
+| Timing-dependent tests | Guarded | A suite whose outcome varies against the reference is quarantined; timeouts are generous safety nets |
+| Model outputs | **No** | Recorded as inputs. Gemini is pinned where possible (temperature 0, seed 0); Opus and Kimi can't be |
+| Judge reports | No | Advisory only, never decisive, and hash-chained so they can't be edited afterwards |
+
+**Counterfactual on the recorded runs** (`python experiment/replay.py --counterfactual …`): the same saved code and tests, judged under the deterministic policy.
+
+| Crucible runs | What happened (legacy policy) | Deterministic, reference only | Deterministic, reference + 6 hand-written acceptance cases* |
+|---|---|---|---|
+| Agent-SDK pilot, B1 and B2 | Correct code promoted | Same | Same |
+| Ablation, B1 and B2 | **Wrong code promoted** (28/39, 27/39) | Nothing promoted: `UNVERIFIED` | Wrong code promoted: the 6 cases don't cover the rule the spec left out |
+| Rig pilot, B1 | Correct code promoted | Same | Same |
+| Rig pilot, B2 | **Correct code falsely rejected** | Nothing promoted: `UNVERIFIED` | **Correct code promoted (39/39)** |
+
+\*These 6 cases are also part of the 39-case hidden test set, so this column's grades aren't fully independent. The lesson holds either way: the deterministic policy never ships unverified code, and what it *can* verify is only as good as the acceptance cases' coverage.
+
+**Acceptance cases** are a JSON list, compared exactly with types included (`true` is not `1`, and `1` is not `1.0`):
+
+```json
+[{"id": "boundary", "input": ["0,T1,OPEN", "14400000,T1,CLOSE"],
+  "expected": [{"ticket_id": "T1", "used_ms": 14400000, "breached": false, "status": "closed"}]}]
 ```
 
 ---
@@ -163,7 +222,8 @@ No API keys needed:
 ```bash
 python run_crucible.py --mock           # the full Crucible pipeline with synthetic responses
 pytest tests/ -v                        # orchestrator test suite
-python experiment/verify_all.py         # frozen tests, grader self-test, audit records, observer ledgers
+python experiment/verify_all.py         # frozen tests, grader self-test, audits, ledgers, replay of every recorded verdict
+python experiment/replay.py --counterfactual experiment/runs/pilot_rig_20260929T190640Z   # judge recorded runs under the deterministic policy
 ```
 
 The evaluation rig (needs keys for the roles in `experiment/rig/roles.json`):
@@ -180,10 +240,16 @@ python experiment/run_pilot.py --rig --spec experiment/sla/SPEC_v0_original.md -
 Crucible live mode (needs `GEMINI_API_KEY`):
 
 ```bash
-python run_crucible.py                                    # default telemetry problem
-python run_crucible.py --force-iterations 3 --max-iterations 3
-python run_crucible.py "Your problem statement" --paradigms "Approach one" "Approach two"
+# Deterministic verdicts need ground truth: human-written acceptance cases and/or a trusted reference solution
+python run_crucible.py "Your problem statement" --entrypoint your_function \
+  --acceptance-cases my_cases.json --reference my_reference.py \
+  --paradigms "Approach one" "Approach two" --max-iterations 3
+
+python run_crucible.py --advisory-only           # explore without ground truth: AI tests are reported, nothing is promoted
+python run_crucible.py --verdict-policy legacy   # the old behaviour (every AI-written suite blocks), to reproduce past runs
 ```
+
+Without `--acceptance-cases` or `--reference`, a live run is refused unless you pass `--advisory-only`. Crucible's live prompts are tuned to its default telemetry problem; the evaluation rig uses spec-driven prompts instead.
 
 ---
 
@@ -200,6 +266,7 @@ crucible-Sept/
 │   ├── run_pilot.py           # runs all arms under a deadline, then grades
 │   ├── arms.py                # arm runner for the agent SDK (first pilots)
 │   ├── attribution.py         # ablation attribution check
+│   ├── replay.py              # replays recorded Crucible verdicts with no model calls; counterfactual policy check
 │   ├── verify_all.py          # verifies all recorded evidence without API keys (runs in CI)
 │   ├── rig/                   # provider-agnostic three-role rig: roles, providers, audit, observer
 │   └── runs/                  # one folder per pilot: raw evidence
@@ -214,7 +281,11 @@ crucible-Sept/
 ## Known limitations
 
 - **Crucible's sandbox is a separate process, not a container.** Candidate code can read and write host files. The AST gate filters accidental imports; it isn't a security boundary. Don't run untrusted third-party code with it.
-- **Crucible's tests are AI-written.** In normal use, a wrong AI-written test can reject correct code or pass wrong code, and the cumulative gate carries it forward. The experiment avoids this by grading with a frozen, self-checked test set instead.
+- **Verdicts are only as good as the ground truth.**
+  - AI-written tests no longer decide unless a trusted reference passes them.
+  - Without acceptance cases or a reference, Crucible promotes nothing.
+  - Acceptance cases only catch what they cover: in the counterfactual, 6 hand-written cases let wrong code through because none tested the rule the spec left out.
+  - The recorded experiment arms used the legacy policy, in which every AI-written suite blocks.
 - **The experiment is small:** one problem, 12 runs per condition. Treat the results as indicative, not statistically conclusive. The ablation's hidden tests encode decisions made during spec review, so it measures the value of the review, not raw model capability.
 - **Some of the test set is AI-written.** Apart from the 6 hand-written cases, the test cases and reference implementations were written by an AI (Claude). They're checked against the hand cases, two independent implementations, hand-computed answers and the mutation check, but not against a human-written reference.
 - **An observer report is a claim, not evidence.** Citations are verified in code, but the observer can still misread the evidence, and it can't detect gaps in the spec. It's blinded to model identity, but it can tell a Crucible trial from a single call.
