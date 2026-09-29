@@ -7,7 +7,7 @@
 
 <!-- EDIT: Title and subtitle are placeholders. -->
 
-> **In one sentence:** with the same AI models and the same hidden tests, changing nothing but the clarity of the problem description moved the results from **0 of 12** runs passing to **12 of 12**.
+> **In one sentence:** reviewing the problem description for gaps found a rule that, left unstated, every AI model guessed wrong in every run, and that the AI-written tests failed to catch: **0 of 12** runs passed with the original description, **12 of 12** with the reviewed one. Because the hidden tests encode the decisions made during that review, this measures what the gap costs, not which model is smarter.
 
 ## At a glance
 

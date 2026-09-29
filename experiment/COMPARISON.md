@@ -76,6 +76,15 @@ The cumulative gate carried the round-1 error forward, and all 4 candidates were
 
 Adding the 6 hand-written cases as acceptance cases, which are also part of the hidden set, fixes rig B2 (39/39). It still lets the ablation's wrong code through, because those cases don't cover the rule the original spec left out.
 
+| Crucible runs | What happened (legacy policy) | Deterministic, reference only | Deterministic, reference + 6 hand-written acceptance cases* |
+|---|---|---|---|
+| Agent-SDK pilot, B1 and B2 | Correct code promoted | Same | Same |
+| Ablation, B1 and B2 | **Wrong code promoted** (28/39, 27/39) | Nothing promoted: `UNVERIFIED` | Wrong code promoted: the 6 cases don't cover the rule the spec left out |
+| Rig pilot, B1 | Correct code promoted | Same | Same |
+| Rig pilot, B2 | **Correct code falsely rejected** | Nothing promoted: `UNVERIFIED` | **Correct code promoted (39/39)** |
+
+\*These 6 cases are also part of the 39-case hidden test set, so this column's grades aren't fully independent.
+
 **Still open:**
 - In the observer's evidence, label "no promoted solution" separately from per-candidate grades, and omit fields that don't apply to an arm.
 - Accept section citations such as `E1:facts` and whole-item citations such as `E2`.
