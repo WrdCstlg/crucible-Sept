@@ -493,6 +493,14 @@ class TestCLIArguments:
         assert args.output_dir is None
         assert args.force_iterations == 1
         assert args.max_iterations == 3
+        assert args.mutation_gate is False
+        assert args.mutation_threshold == 0.60
+
+    def test_mutation_gate_arguments(self):
+        parser = build_parser()
+        args = parser.parse_args(["--mutation-gate", "--mutation-threshold", "0.75"])
+        assert args.mutation_gate is True
+        assert args.mutation_threshold == 0.75
 
     def test_force_iterations_argument(self):
         parser = build_parser()
@@ -513,7 +521,9 @@ class TestCLIArguments:
             "--output-dir", "custom_out",
             "--paradigms", "P1", "P2",
             "--force-iterations", "2",
-            "--max-iterations", "4"
+            "--max-iterations", "4",
+            "--mutation-gate",
+            "--mutation-threshold", "0.80",
         ])
         assert args.problem == "Custom Problem"
         assert args.mock is True
@@ -522,6 +532,9 @@ class TestCLIArguments:
         assert args.paradigms == ["P1", "P2"]
         assert args.force_iterations == 2
         assert args.max_iterations == 4
+        assert args.mutation_gate is True
+        assert args.mutation_threshold == 0.80
+
 
 
 # ============================================================

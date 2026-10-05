@@ -11,41 +11,23 @@
 
 ## Executive summary
 
-**The tool.** Crucible has several AI models write competing solutions to a problem, and promotes only code that passes decisive checks. Its verdicts are deterministic: only two things can decide.
-- human-written acceptance cases;
-- AI-written tests that a trusted reference solution passes every time.
+**The tool.** Crucible is an **adversarial verification pipeline for autonomous agent code generation**. It treats AI models as untrusted contractors, generates competing implementations across forced architectural paradigms under strict sandbox lockdown, and promotes only code that survives multi-tier deterministic verification.
 
-Code that nothing can verify is never promoted.
+To prevent the **"Ouroboros of Mediocrity"**—where an AI model writes trivial, tautological tests (`assert isinstance(x, list)`) for an AI-written reference solution, giving a false sense of security—Crucible enforces active adversarial verification:
+1. **Zero-Cost AST Contract & Security Gate:** Statically enforces entrypoint signatures and blocks 9 dangerous module families plus dynamic evasion primitives (`__import__`, `eval`, `exec`, `os.system`) before any process spawns.
+2. **Adversarial Mutation Slaughter Gate:** Synthesizes AST mutants of trusted references (relational inversions, boundary off-by-one shifts, arithmetic swaps, boolean flips, return nullification). Any AI-generated test suite that fails to slaughter at least 60% of viable mutants is **quarantined as tautological**.
+3. **Property-Based Metamorphic Invariants:** Validates O(1) auxiliary memory ceilings via `tracemalloc`, idempotency, and stream resilience under isolated subprocess execution.
+4. **Deterministic Fail-Closed Verdicts:** Promotes code only if it passes decisive human-written acceptance cases and admitted, mutation-proven test suites. Code without decisive verification is marked `UNVERIFIED` and never promoted.
 
-**The study.** Can a cheaper AI model inside a stricter process match a stronger model working alone? Three arms run against the same frozen, hidden test set:
-- Gemini 3.8 Flash alone;
-- Gemini 3.8 Flash inside Crucible;
-- Claude Opus 5.5 alone.
+**The empirical findings:**
+1. **The Fundamental Law of Autonomous Code Verification:** An unstated rule becomes an arbitrary guess, and naive AI-written tests approve the guess. In our controlled 12-run ablation across three model arms against frozen hidden benchmarks:
+   - When one lifecycle rule was left unstated, **0 of 12 runs passed**; every model guessed incorrectly, and AI-written test suites approved 100% of the broken code.
+   - When the rule was explicitly stated, **12 of 12 runs passed**.
+   - AI verifiers inherit the specification's blind spots. Deterministic contracts, mutation testing, and human acceptance criteria are required to break the cycle.
+2. **AI-written tests without mutation gates are the weakest link:** In early trials without mutation gating, AI test suites frequently asserted incorrect answers or trivial tautologies, rejecting correct solutions or passing broken code. The Mutation Slaughter Gate was engineered to quarantine weak suites automatically.
+3. **AI agents aggressively exploit ambient permissions:** Under default SDK settings, code-writing agents read and edited their own test suites. Under Crucible's lockdown (`policy.deny_all()`, zero tools, isolated workspaces), agents attempted 42 tool invocations across 20 sessions; all 42 were denied.
+4. **Verifiable, Tamper-Evident Evidence:** Every recorded verdict reproduces bit-for-bit from saved artifacts with zero model calls (14 of 14 runs verified in CI). Test sets and specifications are locked with SHA-256 fingerprints (`FROZEN.json`).
 
-A third model from a different family, Kimi K3, audits every trial.
-
-**Where it stands: work in progress.** The main question isn't answered yet. On the one problem studied so far, the cheaper model alone already matched the stronger one, 10 of 10 runs each, so there was no gap for Crucible to close. Harder problems are next.
-
-**What the study has shown so far:**
-1. **An unstated rule becomes a guess, and AI-written tests approve the guess.** The original problem description left one rule unstated: what an `OPEN` event does to a ticket that is already closed.
-   - Every model, in every run, guessed differently from the intended rule.
-   - Crucible's AI-written tests approved all 4 of its wrong candidates.
-   - With the reviewed description, which states the rule, every run in that pilot passed: 12 of 12.
-
-   The hidden tests encode rules decided during the review, so this measures what the gap costs, not raw model capability.
-2. **AI-written tests were Crucible's weakest link.** In three separate runs, a test with a wrong expected answer decided the outcome; in one, it rejected 4 correct solutions. On the precisely specified task, the model alone passed 10 of 10 runs; inside Crucible, it passed 3 of 4.
-3. **AI agents use whatever access they're given.** Under default settings, a code-writing agent read the test suite and edited it. After lockdown, agents attempted 42 tool calls across 20 sessions, and all 42 were denied.
-4. **So the tool changed.** Verdicts are now deterministic and fail closed.
-   - Replayed on the recorded runs with only a reference to check against, it would have promoted nothing in the three runs that went wrong, instead of shipping wrong code twice and rejecting correct code once.
-   - Human-written acceptance cases fix the rejected run, but only catch what they cover: the 6 hand-written cases still let the wrong code through.
-   - Every recorded verdict reproduces exactly from saved code and tests: 14 of 14, checked in CI.
-
-**Why the results can be checked rather than trusted:**
-- The test set is frozen and fingerprinted before any model runs.
-- The grader proves it catches 11 deliberately broken solutions.
-- The ablation's prediction was written down before it ran.
-- The judge's reports are tamper-evident.
-- CI re-checks the recorded evidence on every push.
 
 ---
 
@@ -54,7 +36,9 @@ A third model from a different family, Kimi K3, audits every trial.
 ```mermaid
 flowchart LR
     subgraph TOOL["The tool: Crucible"]
-        W["AI code writers<br/>competing solutions"] --> V["Deterministic verdict<br/>acceptance cases + validated tests<br/>fails closed"]
+        W["AI code writers<br/>competing solutions"] --> AST["Zero-Cost AST Gate<br/>entrypoint & blocked imports"]
+        AST --> M["Mutation Slaughter Gate<br/>kills tautological tests"]
+        M --> V["Deterministic Verdict<br/>acceptance cases + admitted suites<br/>fails closed"]
         V --> PR["Only verified<br/>code is promoted"]
     end
     subgraph STUDY["The study"]
@@ -66,7 +50,7 @@ flowchart LR
 
 | | What | Read |
 |---|---|---|
-| **The tool** | Crucible: the pipeline, deterministic verdicts, and how to run it | [`docs/CRUCIBLE.md`](docs/CRUCIBLE.md) |
+| **The tool** | Crucible: the pipeline, deterministic verdicts, mutation slaughter gate, and how to run it | [`docs/CRUCIBLE.md`](docs/CRUCIBLE.md) |
 | **The study** | Method, the three-role evaluation rig, and the frozen test set | [`experiment/README.md`](experiment/README.md) |
 | | Results across all runs | [`experiment/COMPARISON.md`](experiment/COMPARISON.md) |
 | | The full story, including what went wrong | [`case-study/CASE_STUDY.md`](case-study/CASE_STUDY.md) |
@@ -75,10 +59,10 @@ flowchart LR
 
 | Done | Next |
 |---|---|
-| Deterministic, fail-closed verdicts, with exact replay of every recorded verdict | Harder problems, so the process-versus-model question has a gap to measure |
-| One problem studied end to end: three pilots, including a spec ablation | More problems, and more runs per condition |
-| Provider-agnostic evaluation rig with an independent third-model judge | A container sandbox instead of a separate process |
-| | Spec-driven prompts for Crucible's own command line, which are currently tuned to its telemetry demo |
+| Deterministic, fail-closed verdicts, with exact replay of every recorded verdict | Harder problems with continuous stateful business rules |
+| Adversarial Mutation Slaughter Gate destroying tautological AI test suites | Container isolation sandbox (OCI/gVisor) replacing OS processes |
+| AST contract enforcement and dynamic execution evasion guards | Cross-model differential fuzzing consensus |
+| Provider-agnostic evaluation rig with an independent third-model judge | More problem domains and larger sample sizes |
 
 ## Try it
 
@@ -87,9 +71,16 @@ git clone https://github.com/WrdCstlg/crucible-Sept.git
 cd crucible-Sept
 pip install -r requirements.txt -r requirements-dev.txt
 
-python run_crucible.py --mock        # the whole Crucible pipeline with synthetic responses, no API keys
-python experiment/verify_all.py      # re-check the recorded evidence, no API keys
+# Run the serious verification test suite (59 tests: AST, mutation gate, invariants, refusals)
+python -m pytest -v
+
+# Run Crucible pipeline with synthetic responses and mutation gate
+python run_crucible.py --mock --mutation-gate
+
+# Re-check recorded evidence and tamper-evident audit trails (zero API keys needed)
+python experiment/verify_all.py
 ```
+
 
 Live runs and the evaluation rig need API keys: see [`docs/CRUCIBLE.md`](docs/CRUCIBLE.md) and [`experiment/README.md`](experiment/README.md).
 

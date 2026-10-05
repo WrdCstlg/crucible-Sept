@@ -22,6 +22,9 @@ except ImportError:
     policy = None
     HAS_POLICY = False
 
+from crucible.contract import audit_contract, BLOCKED_MODULES
+from crucible.mutation import MutationSlaughterGate
+
 if sys.platform == "win32":
     try:
         sys.stdout.reconfigure(encoding="utf-8")
@@ -74,17 +77,19 @@ def deterministic_env() -> dict:
     return env
 
 
-def run_python(script: str, cwd: Path, timeout: int = 120, deterministic: bool = True) -> tuple[int, str, str, float]:
-    """Runs `python <script>` in cwd. Returns (exit code, stdout, stderr, seconds); exit code 124 means timeout."""
+def run_python(script: str, cwd: Path, timeout: int = 120, deterministic: bool = True, args: list | None = None) -> tuple[int, str, str, float]:
+    """Runs `python <script> [*args]` in cwd. Returns (exit code, stdout, stderr, seconds); exit code 124 means timeout."""
     start = time.perf_counter()
+    cmd = [sys.executable, script] + (args or [])
     try:
-        p = subprocess.run([sys.executable, script], cwd=cwd, capture_output=True, text=True, timeout=timeout,
+        p = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout,
                            env=deterministic_env() if deterministic else None)
         return p.returncode, p.stdout, p.stderr, round(time.perf_counter() - start, 3)
     except subprocess.TimeoutExpired:
         return 124, "", f"TIMEOUT EXPIRED: exceeded the {timeout}-second limit.", round(time.perf_counter() - start, 3)
     except Exception as e:
         return 1, "", f"EXECUTION ERROR: {e}", round(time.perf_counter() - start, 3)
+
 
 
 def load_acceptance_cases(path: str) -> list[dict]:
@@ -292,7 +297,8 @@ class CrucibleOrchestrator:
 
     def __init__(self, problem_statement: str, paradigms: list[str], workspace_dir: str = ".crucible_workspace", mock_mode: bool = False, entrypoint: str = "process_telemetry", output_dir: str | None = None, force_iterations: int = 1,
                  verdict_policy: str = "deterministic", acceptance_cases: list[dict] | None = None,
-                 reference_solution: str | None = None, stability_runs: int = 3, allow_advisory_only: bool = False):
+                 reference_solution: str | None = None, stability_runs: int = 3, allow_advisory_only: bool = False,
+                 mutation_gate: bool = False, mutation_threshold: float = 0.60):
         """
         Verdict policies:
           deterministic  Human-written acceptance cases always decide. An AI-written test suite may also decide, but only
@@ -318,6 +324,8 @@ class CrucibleOrchestrator:
         self.acceptance_cases = acceptance_cases or []
         self.reference_solution = str(Path(reference_solution).resolve()) if reference_solution else None
         self.stability_runs = max(1, stability_runs)
+        self.mutation_gate = mutation_gate
+        self.mutation_threshold = mutation_threshold
         self.suite_admission: list[dict] = []
         self.workspace = Path(workspace_dir).resolve()
         self.project_root = self.workspace.parent if self.workspace.name == ".crucible_workspace" else Path.cwd().resolve()
@@ -360,13 +368,16 @@ class CrucibleOrchestrator:
                     "ast_import_guard",
                     "cumulative_regression_gate"
                 ] + (["human_acceptance_cases", "suite_admission_vs_reference", "deterministic_environment"]
-                     if verdict_policy == "deterministic" else []),
+                     if verdict_policy == "deterministic" else [])
+                  + (["adversarial_mutation_slaughter_gate"] if mutation_gate else []),
                 "verdict_policy": {
                     "name": verdict_policy,
                     "acceptance_cases": len(self.acceptance_cases),
                     "reference_solution_sha256": (hashlib.sha256(Path(self.reference_solution).read_bytes()).hexdigest()
                                                   if self.reference_solution else ("mock reference" if mock_mode else None)),
                     "stability_runs": self.stability_runs,
+                    "mutation_gate": self.mutation_gate,
+                    "mutation_threshold": self.mutation_threshold if self.mutation_gate else None,
                     "environment": "PYTHONHASHSEED=0 and random.seed(0) in every verdict-bearing process"
                                    if verdict_policy == "deterministic" else "unseeded (legacy)",
                 }
@@ -593,6 +604,37 @@ class CrucibleOrchestrator:
                 codes.append(code)
                 tails.append(self._sanitize_paths(((err or out).strip().splitlines() or [""])[-1])[:200])
         if all(c == 0 for c in codes):
+            if getattr(self, "mutation_gate", False):
+                gate = MutationSlaughterGate(run_python, threshold=self.mutation_threshold)
+                mut_res = gate.evaluate_suite(suite_path, self.reference_solution)
+                if not mut_res.passed_gate:
+                    return {
+                        "suite": suite_path.name,
+                        "decision": "quarantined",
+                        "reference_exit_codes": codes,
+                        "mutation_slaughter": {
+                            "slaughter_rate": mut_res.slaughter_rate,
+                            "killed": mut_res.killed_mutants,
+                            "total": mut_res.total_mutants,
+                            "passed": mut_res.passed_gate,
+                            "threshold": self.mutation_threshold,
+                        },
+                        "reason": f"QUARANTINED (TAUTOLOGICAL): {mut_res.reason}"
+                    }
+                else:
+                    return {
+                        "suite": suite_path.name,
+                        "decision": "admitted",
+                        "reference_exit_codes": codes,
+                        "mutation_slaughter": {
+                            "slaughter_rate": mut_res.slaughter_rate,
+                            "killed": mut_res.killed_mutants,
+                            "total": mut_res.total_mutants,
+                            "passed": mut_res.passed_gate,
+                            "threshold": self.mutation_threshold,
+                        },
+                        "reason": f"the trusted reference passes it in all {len(codes)} runs and slaughtered {mut_res.killed_mutants}/{mut_res.total_mutants} mutants ({mut_res.slaughter_rate * 100:.1f}%)"
+                    }
             return {"suite": suite_path.name, "decision": "admitted", "reference_exit_codes": codes,
                     "reason": f"the trusted reference passes it in all {len(codes)} runs"}
         if all(c != 0 for c in codes):
@@ -720,65 +762,15 @@ class CrucibleOrchestrator:
         Enforces two structural invariants before any subprocess is spawned:
           1. ENTRYPOINT CONTRACT: A top-level function matching the required entrypoint name.
           2. IMPORT GUARD: Static check rejecting direct imports of blocked module families.
-             Note: This is an accidental-import check, not an OS sandbox boundary.
+          3. DYNAMIC SECURITY GUARD: Static check rejecting eval, exec, __import__, and os.system.
         
         Returns:
             (passed: bool, reason: str) - reason is empty on success.
         """
         if entrypoint is None:
             entrypoint = CrucibleOrchestrator.REQUIRED_ENTRYPOINT
+        return audit_contract(source_path, entrypoint=entrypoint)
 
-        try:
-            source_code = source_path.read_text(encoding="utf-8")
-        except Exception as e:
-            return False, f"FILE READ ERROR: {e}"
-
-        # --- Parse AST ---
-        try:
-            tree = ast.parse(source_code, filename=str(source_path))
-        except SyntaxError as e:
-            return False, f"SYNTAX ERROR (line {e.lineno}): {e.msg}"
-
-        # --- Check 1: Entrypoint contract ---
-        required_name = entrypoint
-        has_entrypoint = any(
-            isinstance(node, ast.FunctionDef) and node.name == required_name
-            for node in ast.iter_child_nodes(tree)
-        )
-        if not has_entrypoint:
-            return False, (
-                "AST CONTRACT VIOLATION: Missing required top-level function "
-                f"'def {required_name}(stream):'. "
-                "Found top-level definitions: "
-                + ", ".join(
-                    f"{type(n).__name__}('{n.name}')"
-                    for n in ast.iter_child_nodes(tree)
-                    if hasattr(n, "name")
-                )
-            )
-
-        # --- Check 2: Import guard ---
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                for alias in node.names:
-                    root_module = alias.name.split(".")[0]
-                    if root_module in CrucibleOrchestrator.BLOCKED_MODULES:
-                        return False, (
-                            f"AST IMPORT VIOLATION (line {node.lineno}): "
-                            f"Import of blocked module '{alias.name}'. "
-                            f"Blocked module families: {sorted(CrucibleOrchestrator.BLOCKED_MODULES)}"
-                        )
-            elif isinstance(node, ast.ImportFrom):
-                if node.module:
-                    root_module = node.module.split(".")[0]
-                    if root_module in CrucibleOrchestrator.BLOCKED_MODULES:
-                        return False, (
-                            f"AST IMPORT VIOLATION (line {node.lineno}): "
-                            f"Import from blocked module '{node.module}'. "
-                            f"Blocked module families: {sorted(CrucibleOrchestrator.BLOCKED_MODULES)}"
-                        )
-
-        return True, ""
 
     def _run_acceptance(self, branch_dir: Path) -> tuple[int, str]:
         """Runs the human-written acceptance cases against one candidate. Returns (exit code, detail)."""
@@ -937,6 +929,10 @@ def build_parser() -> argparse.ArgumentParser:
                         help="Times a suite must pass the reference, with identical outcomes, to be admitted (default: 3)")
     parser.add_argument("--advisory-only", action="store_true",
                         help="Run live without acceptance cases or a reference: AI-written suites are advisory only")
+    parser.add_argument("--mutation-gate", action="store_true",
+                        help="Enable the Adversarial Mutation Slaughter Gate to detect and quarantine tautological test suites")
+    parser.add_argument("--mutation-threshold", type=float, default=0.60,
+                        help="Minimum fraction of synthetic mutants a suite must kill to be admitted (default: 0.60)")
     return parser
 
 
@@ -969,7 +965,10 @@ if __name__ == "__main__":
             reference_solution=args.reference,
             stability_runs=args.stability_runs,
             allow_advisory_only=args.advisory_only,
+            mutation_gate=args.mutation_gate,
+            mutation_threshold=args.mutation_threshold,
         )
     except ValueError as e:
         parser.error(str(e))
     asyncio.run(orchestrator.run(max_iterations=effective_max_iterations))
+

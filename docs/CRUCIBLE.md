@@ -13,10 +13,11 @@ flowchart TD
     end
     S["Problem spec"] --> G
     S --> Q
-    G --> AST["AST gate<br/>right function name, no blocked imports"]
+    G --> AST["AST gate<br/>right function name, no blocked imports<br/>no dynamic eval/exec/__import__"]
     AST --> AR["Phase 3: Arena<br/>acceptance cases, then every<br/>admitted suite written so far"]
-    Q --> ADM["Suite admission<br/>must pass the trusted reference<br/>in 3 of 3 seeded runs"]
-    ADM --> AR
+    Q --> ADM{"Suite admission<br/>1. Reference passes in 3/3 runs<br/>2. Mutation slaughter gate"}
+    ADM -- "slaughters >= 60% mutants" --> AR
+    ADM -- "fails reference or <60% mutants" --> QUAR["Quarantined: reported, never blocks"]
     AR --> D{"Does any candidate<br/>pass every suite?"}
     D -- yes --> P["Promote survivors<br/>and write telemetry"]
     D -- no --> SY
@@ -28,7 +29,11 @@ flowchart TD
 - **The AST gate** statically checks each candidate before it runs, in under a millisecond.
   - The required top-level function must exist, for example `def process_telemetry(stream):`; set the name with `--entrypoint`.
   - Direct imports of nine module families are rejected: `subprocess`, `socket`, `http`, `urllib`, `requests`, `ctypes`, `cffi`, `signal` and `multiprocessing`.
-  - It catches accidents, not attacks: dynamic imports and `os` or `open()` calls get past it.
+  - Dynamic execution primitives are rejected at the AST level: `__import__`, `eval`, `exec`, `compile`, and process calls like `os.system` and `os.popen`.
+- **The Adversarial Mutation Slaughter Gate (`--mutation-gate`)**:
+  - Solves the **"Ouroboros of Mediocrity"**: when an AI writes tests for an AI reference solution, it frequently produces tautological, trivial assertions (`assert isinstance(result, list)`) that create a dangerous false sense of security.
+  - Automatically synthesizes AST mutants of the reference (relational inversions, boundary off-by-one shifts, arithmetic swaps, boolean flips, return nullification).
+  - Any test suite that fails to slaughter at least 60% of viable mutants is **quarantined as tautological**.
 - **The arena** runs each candidate in a separate OS process with a 120-second watchdog, in a seeded environment. Human-written acceptance cases run first and always decide, then every admitted suite.
 - **The cumulative regression gate** requires survivors to pass every admitted suite written so far, not just the latest.
 - **Lockdown:** agents run with no tools, a deny-all policy and an empty temporary folder. The orchestrator alone writes code and tests to disk.
@@ -46,7 +51,7 @@ So model outputs are treated as recorded inputs, and everything that decides any
 
 ```mermaid
 flowchart TD
-    C["Candidate code<br/>written by an AI"] --> AST{"AST gate:<br/>required function, no blocked imports?"}
+    C["Candidate code<br/>written by an AI"] --> AST{"AST gate:<br/>required function, no blocked imports,<br/>no dynamic eval/exec/__import__?"}
     AST -- no --> R1["AST_REJECTED"]
     AST -- yes --> GT{"Any decisive check?<br/>acceptance cases, or an admitted suite"}
     GT -- no --> UV["UNVERIFIED<br/>never promoted"]
@@ -55,12 +60,14 @@ flowchart TD
     ACC -- yes --> SUI{"Every admitted AI-written suite, if any,<br/>exits 0?"}
     SUI -- no --> R3["FAIL"]
     SUI -- yes --> P["PASS: promoted"]
-    T["New AI-written suite"] --> ADM{"Does the trusted reference pass it<br/>in 3 of 3 seeded runs?"}
-    ADM -- yes --> BL["Admitted: blocks"]
-    ADM -- "fails, or varies" --> Q["Quarantined: reported, never blocks"]
-    ADM -- "no reference" --> AD["Advisory: reported, never blocks"]
+    T["New AI-written suite"] --> ADM1{"Does trusted reference pass<br/>in 3 of 3 seeded runs?"}
+    ADM1 -- no --> Q1["Quarantined: reference fails expectation"]
+    ADM1 -- yes --> ADM2{"Mutation slaughter gate:<br/>slaughters >= 60% of AST mutants?"}
+    ADM2 -- yes --> BL["Admitted: blocks"]
+    ADM2 -- no --> Q2["Quarantined: tautological/weak suite"]
     BL -.-> SUI
 ```
+
 
 | Component | Deterministic? | How |
 |---|---|---|
@@ -88,13 +95,15 @@ python run_crucible.py --mock --entrypoint analyze_data
 # Live runs need ground truth: human-written acceptance cases and/or a trusted reference solution
 python run_crucible.py "Your problem statement" --entrypoint your_function \
   --acceptance-cases my_cases.json --reference my_reference.py \
+  --mutation-gate --mutation-threshold 0.60 \
   --paradigms "Approach one" "Approach two" --max-iterations 3
 
 python run_crucible.py --advisory-only            # explore without ground truth: nothing is ever promoted
 python run_crucible.py --verdict-policy legacy    # reproduce the old behaviour
 ```
 
-Without `--acceptance-cases` or `--reference`, a live run is refused unless you pass `--advisory-only`. Mock mode writes to `.crucible_mock/` and never touches the real audit trail.
+Without `--acceptance-cases` or `--reference`, a live run is refused unless you pass `--advisory-only`.
+When `--mutation-gate` is active, any candidate test suite must kill at least the specified threshold (default: 60%) of synthetic AST mutants derived from the reference, or it is quarantined as a tautological suite. Mock mode writes to `.crucible_mock/` and never touches the real audit trail.
 
 **Acceptance cases** are a JSON list, compared exactly, with types included (`true` is not `1`, and `1` is not `1.0`):
 
