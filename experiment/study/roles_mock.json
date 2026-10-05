@@ -1,0 +1,24 @@
+{
+  "evaluated": {
+    "provider": "mock",
+    "model": "mock-evaluated",
+    "settings": {"max_tokens": 4000,
+                 "solution_files": ["experiment/bizsla/reference.py", "experiment/study/mock/planted_B07.py",
+                                    "experiment/study/mock/planted_B13.py", "experiment/study/mock/planted_B21.py"],
+                 "qa_suite_file": "experiment/study/mock/qa_suite.py"},
+    "price_per_mtok": {"input": 1.0, "output": 1.0},
+    "max_input_tokens_per_call": 60000,
+    "note": "DRY RUN ONLY. No network. Fictitious prices exercise the spend-cap logic. Results are never evidence."
+  },
+  "competitor": {
+    "provider": "mock",
+    "model": "mock-competitor",
+    "settings": {"max_tokens": 4000,
+                 "solution_files": ["experiment/bizsla/reference.py", "experiment/bizsla/reference.py",
+                                    "experiment/study/mock/planted_B13.py"],
+                 "qa_suite_file": "experiment/study/mock/qa_suite.py"},
+    "price_per_mtok": {"input": 2.0, "output": 2.0},
+    "max_input_tokens_per_call": 20000,
+    "note": "DRY RUN ONLY."
+  }
+}

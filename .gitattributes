@@ -2,3 +2,4 @@
 # Store and check out these files exactly as they are: no line-ending conversion.
 experiment/sla/** -text
 experiment/runs/** -text
+experiment/bizsla/** -text

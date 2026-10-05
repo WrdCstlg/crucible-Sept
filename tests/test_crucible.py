@@ -75,6 +75,18 @@ from run_crucible import (
     run_python,
     MOCK_SOLUTIONS,
 )
+from crucible.sandbox import Sandbox, docker_available
+
+import pytest
+
+# Pipeline mechanics run on the subprocess backend for speed (mock solutions and suites are our own fixtures).
+# TestDockerEndToEnd runs the full pipeline inside the Docker sandbox.
+FAST = Sandbox("subprocess-unsafe")
+MOCK_PARADIGMS = [
+    "Micro-batching with dictionary state aggregation",
+    "Zero-copy memory-mapped file processing",
+    "Streaming Finite-State Machine with a bounded ring buffer",
+]
 
 
 # ============================================================
@@ -269,94 +281,120 @@ class TestMockPipeline:
 
     def test_mock_pipeline_branch_outcomes_and_deployments(self):
         """
-        Verify mock mode executes the tournament and produces exact branch outcomes:
-        Branch 1 fails (algorithmic edge case).
-        Branch 2 and 3 pass.
-        Winners are promoted to deployments directory.
+        Both gate paths, end to end:
+          Round 1: the count-only suite passes the reference and kills most code mutants, but almost no output
+                   probes, so it is QUARANTINED. Nothing decisive exists, so all branches are UNVERIFIED and
+                   nothing is promoted.
+          Round 2: the exact-output suite is ADMITTED on both axes. Branch 1 (algorithm bug) and branch 2 (wrong
+                   output schema) fail; only branch 3 is promoted.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
-            workspace = tmp_path / ".crucible_workspace"
-            out_dir = tmp_path / "mock_output"
             orchestrator = CrucibleOrchestrator(
                 problem_statement="Test thermal throttling cascade detection",
-                paradigms=[
-                    "Micro-batching with dictionary state aggregation",
-                    "Zero-copy memory-mapped file processing",
-                    "Streaming Finite-State Machine with a bounded ring buffer",
-                ],
-                workspace_dir=str(workspace),
+                paradigms=MOCK_PARADIGMS,
+                workspace_dir=str(tmp_path / ".crucible_workspace"),
                 mock_mode=True,
-                output_dir=str(out_dir),
+                output_dir=str(tmp_path / "mock_output"),
+                sandbox=FAST,
             )
 
-            asyncio.run(orchestrator.run(max_iterations=1))
+            asyncio.run(orchestrator.run(max_iterations=2))
 
             assert orchestrator.results_path.exists(), "results.json not created in output dir"
             data = json.loads(orchestrator.results_path.read_text(encoding="utf-8"))
 
             # 1. Telemetry metadata
-            assert data["schema_version"] == "1.2.0"
+            assert data["schema_version"] == "1.3.0"
             assert data["configuration"]["mode"] == "mock"
             assert data["configuration"]["entrypoint"] == "process_telemetry"
             assert "cumulative_regression_gate" in data["configuration"]["verifiers"]
             assert "suite_admission_vs_reference" in data["configuration"]["verifiers"]
             assert data["configuration"]["verdict_policy"]["name"] == "deterministic"
-            # The mock suite passes the mock reference in every stability run, so it is admitted and blocks.
-            admission = data["iterations"][0]["test_harness"]["admission"]
-            assert admission["decision"] == "admitted"
-            assert admission["reference_exit_codes"] == [0, 0, 0]
 
-            # 2. Summary counts: 3 evaluations, 2 pass, 1 fail
+            # 2. Round 1: quarantined by the output-contract axis, nothing verified
+            r1 = data["iterations"][0]
+            adm1 = r1["test_harness"]["admission"]
+            assert adm1["decision"] == "quarantined"
+            assert adm1["reference_exit_codes"] == [0, 0, 0]
+            ms1 = adm1["mutation_slaughter"]
+            assert ms1["code_axis_passed"] is True and ms1["output_axis_passed"] is False
+            assert {b["status"] for b in r1["branches"]} == {"UNVERIFIED"}
+
+            # 3. Round 2: admitted on both axes, only the correct branch passes
+            r2 = data["iterations"][1]
+            adm2 = r2["test_harness"]["admission"]
+            assert adm2["decision"] == "admitted", adm2["reason"]
+            assert adm2["mutation_slaughter"]["slaughter_rate"] >= 0.60
+            assert adm2["mutation_slaughter"]["output_rate"] >= 0.60
+            assert {b["name"]: b["exit_code"] == 0 for b in r2["branches"]} == \
+                {"branch_1": False, "branch_2": False, "branch_3": True}
+
+            # 4. Summary
             s = data["summary"]
             assert s["status"] == "PASSED"
             assert s["survived"] is True
-            assert s["total_evaluations"] == 3
-            assert s["passed_evaluations"] == 2
-            assert s["failed_evaluations"] == 1
+            assert s["total_evaluations"] == 6
+            assert s["passed_evaluations"] == 1
+            assert s["unverified_evaluations"] == 3
             assert s["timeout_evaluations"] == 0
-            assert s["winning_branches"] == ["branch_2", "branch_3"]
+            assert s["winning_branches"] == ["branch_3"]
 
-            # 3. Deployed artifacts verification
+            # 5. Deployed artifacts verification
             deployed = s["deployed_artifacts"]
-            assert len(deployed) == 2
+            assert len(deployed) == 1
             for rel_str in deployed:
                 full_path = orchestrator.project_root / rel_str
                 assert full_path.exists(), f"Deployed artifact does not exist: {full_path}"
                 content = full_path.read_text(encoding="utf-8")
                 assert "def process_telemetry(stream):" in content
+                assert "latency_ms" in content  # the correct (FSM) schema, not branch_2's
                 # Ensure no absolute paths leaked into deployed_artifacts
                 assert not rel_str.startswith("C:") and not rel_str.startswith("/"), \
                     f"Deployed artifact path is not relative: {rel_str}"
 
-    def test_mock_pipeline_with_custom_entrypoint(self):
+    def test_without_the_mutation_gate_the_weak_suite_promotes_wrong_code(self):
         """
-        Verify mock mode adapts mock solutions and harness to a custom entrypoint.
-        Executing with --entrypoint analyze_data must succeed with 2 winners.
+        The hazard the gate exists for, demonstrated: with the gate off, the count-only suite is admitted because
+        the reference passes it, and branch_2 (wrong output schema: trigger_ts / cascade_ts, no latency) is
+        promoted to production alongside the correct branch.
         """
         with tempfile.TemporaryDirectory() as tmpdir:
             tmp_path = Path(tmpdir)
-            workspace = tmp_path / ".crucible_workspace"
-            out_dir = tmp_path / "mock_output"
+            orch = CrucibleOrchestrator(problem_statement="gate off", paradigms=MOCK_PARADIGMS,
+                                        workspace_dir=str(tmp_path / ".crucible_workspace"), mock_mode=True,
+                                        output_dir=str(tmp_path / "mock_output"), mutation_gate=False, sandbox=FAST)
+            asyncio.run(orch.run(max_iterations=1))
+            data = json.loads(orch.results_path.read_text(encoding="utf-8"))
+            assert data["iterations"][0]["test_harness"]["admission"]["decision"] == "admitted"
+            assert data["summary"]["winning_branches"] == ["branch_2", "branch_3"]
+            promoted = [(orch.project_root / p).read_text(encoding="utf-8") for p in data["summary"]["deployed_artifacts"]]
+            assert any('"trigger_ts"' in c and "latency_ms" not in c for c in promoted)
+
+    def test_mock_pipeline_with_custom_entrypoint(self):
+        """
+        Verify mock mode adapts mock solutions, harnesses, reference and probes to a custom entrypoint.
+        """
+        with tempfile.TemporaryDirectory() as tmpdir:
+            tmp_path = Path(tmpdir)
             orchestrator = CrucibleOrchestrator(
                 problem_statement="Test custom contract",
-                paradigms=[
-                    "Micro-batching with dictionary state aggregation",
-                    "Zero-copy memory-mapped file processing",
-                    "Streaming Finite-State Machine with a bounded ring buffer",
-                ],
-                workspace_dir=str(workspace),
+                paradigms=MOCK_PARADIGMS,
+                workspace_dir=str(tmp_path / ".crucible_workspace"),
                 mock_mode=True,
                 entrypoint="analyze_data",
-                output_dir=str(out_dir),
+                output_dir=str(tmp_path / "mock_output"),
+                sandbox=FAST,
             )
 
-            asyncio.run(orchestrator.run(max_iterations=1))
+            asyncio.run(orchestrator.run(max_iterations=2))
 
             data = json.loads(orchestrator.results_path.read_text(encoding="utf-8"))
             assert data["configuration"]["entrypoint"] == "analyze_data"
+            assert [i["test_harness"]["admission"]["decision"] for i in data["iterations"]] == \
+                ["quarantined", "admitted"]
             assert data["summary"]["survived"] is True
-            assert data["summary"]["winning_branches"] == ["branch_2", "branch_3"]
+            assert data["summary"]["winning_branches"] == ["branch_3"]
 
             # Verify deployed solutions declare def analyze_data
             for rel_str in data["summary"]["deployed_artifacts"]:
@@ -370,6 +408,7 @@ class TestMockPipeline:
             problem_statement="Test isolation",
             paradigms=["Streaming Finite-State Machine with a bounded ring buffer"],
             mock_mode=True,
+            sandbox=FAST,
         )
         assert orchestrator.output_dir.name == ".crucible_mock"
         assert orchestrator.results_path.parent.name == ".crucible_mock"
@@ -389,6 +428,7 @@ class TestMockPipeline:
                 workspace_dir=str(workspace),
                 mock_mode=True,
                 output_dir=str(out_dir),
+                sandbox=FAST,
             )
 
             asyncio.run(orchestrator.run(max_iterations=2))
@@ -400,6 +440,7 @@ class TestMockPipeline:
             # Both suites were generated and preserved
             assert orchestrator.test_suites[0].name == "arena_test_iter_1.py"
             assert orchestrator.test_suites[1].name == "arena_test_iter_2.py"
+            assert data["summary"]["survived"] is False
 
     def test_force_iterations_overrides_early_exit(self):
         """Verify that --force-iterations forces subsequent iterations even when survivors exist."""
@@ -407,19 +448,22 @@ class TestMockPipeline:
             tmp_path = Path(tmpdir)
             workspace = tmp_path / ".crucible_workspace"
             out_dir = tmp_path / "mock_output"
-            # In mock mode, branch_2 and branch_3 survive iteration 1
+            # Gate off so round 1's suite is admitted and the FSM branch survives it; force=2 must still run round 2.
             orchestrator = CrucibleOrchestrator(
                 problem_statement="Force iterations test",
-                paradigms=["Zero-copy memory-mapped file processing"],
+                paradigms=["Streaming Finite-State Machine with a bounded ring buffer"],
                 workspace_dir=str(workspace),
                 mock_mode=True,
                 output_dir=str(out_dir),
                 force_iterations=2,
+                mutation_gate=False,
+                sandbox=FAST,
             )
 
             asyncio.run(orchestrator.run(max_iterations=2))
 
             data = json.loads(orchestrator.results_path.read_text(encoding="utf-8"))
+            assert data["iterations"][0]["branches"][0]["exit_code"] == 0  # a survivor existed in round 1
             # Should have executed 2 iterations despite surviving round 1
             assert len(data["iterations"]) == 2
             assert data["summary"]["total_iterations_run"] == 2
@@ -438,6 +482,7 @@ class TestMockPipeline:
                 workspace_dir=str(workspace),
                 mock_mode=True,
                 output_dir=str(out_dir),
+                sandbox=FAST,
             )
 
             # Manually inject iteration with a simulated timeout (exit code 124)
@@ -493,7 +538,7 @@ class TestCLIArguments:
         assert args.output_dir is None
         assert args.force_iterations == 1
         assert args.max_iterations == 3
-        assert args.mutation_gate is False
+        assert args.mutation_gate is None  # None = automatic: on whenever a reference exists (deterministic policy)
         assert args.mutation_threshold == 0.60
 
     def test_mutation_gate_arguments(self):
@@ -501,6 +546,7 @@ class TestCLIArguments:
         args = parser.parse_args(["--mutation-gate", "--mutation-threshold", "0.75"])
         assert args.mutation_gate is True
         assert args.mutation_threshold == 0.75
+        assert parser.parse_args(["--no-mutation-gate"]).mutation_gate is False
 
     def test_force_iterations_argument(self):
         parser = build_parser()
@@ -546,11 +592,9 @@ FSM_REFERENCE = MOCK_SOLUTIONS["Streaming Finite-State Machine with a bounded ri
 
 def _mock_orchestrator(tmp_path: Path, **kwargs) -> CrucibleOrchestrator:
     params = dict(problem_statement="Deterministic verdict test",
-                  paradigms=["Micro-batching with dictionary state aggregation",
-                             "Zero-copy memory-mapped file processing",
-                             "Streaming Finite-State Machine with a bounded ring buffer"],
+                  paradigms=MOCK_PARADIGMS,
                   workspace_dir=str(tmp_path / ".crucible_workspace"), mock_mode=True,
-                  output_dir=str(tmp_path / "mock_output"))
+                  output_dir=str(tmp_path / "mock_output"), sandbox=FAST)
     params.update(kwargs)
     return CrucibleOrchestrator(**params)
 
@@ -560,12 +604,12 @@ class TestDeterministicVerdicts:
 
     def test_live_run_without_ground_truth_is_refused(self):
         try:
-            CrucibleOrchestrator("p", ["a"], mock_mode=False)
+            CrucibleOrchestrator("p", ["a"], mock_mode=False, sandbox=FAST)
             raise AssertionError("expected ValueError: no acceptance cases or reference")
         except ValueError as e:
             assert "ground truth" in str(e)
-        CrucibleOrchestrator("p", ["a"], mock_mode=False, allow_advisory_only=True)  # explicit opt-out works
-        CrucibleOrchestrator("p", ["a"], mock_mode=False, verdict_policy="legacy")   # legacy needs none
+        CrucibleOrchestrator("p", ["a"], mock_mode=False, allow_advisory_only=True, sandbox=FAST)  # explicit opt-out
+        CrucibleOrchestrator("p", ["a"], mock_mode=False, verdict_policy="legacy", sandbox=FAST)   # legacy needs none
 
     def test_suite_that_fails_the_reference_is_quarantined(self):
         with tempfile.TemporaryDirectory() as d:
@@ -603,7 +647,7 @@ class TestDeterministicVerdicts:
             suite.write_text("import sys\nsys.exit(0)\n", encoding="utf-8")
             orch = CrucibleOrchestrator("p", ["a"], mock_mode=False, allow_advisory_only=True,
                                         workspace_dir=str(Path(d) / ".crucible_workspace"),
-                                        output_dir=str(Path(d) / "out"))
+                                        output_dir=str(Path(d) / "out"), sandbox=FAST)
             assert orch._admit_suite(suite)["decision"] == "advisory"
 
     def test_acceptance_cases_are_decisive(self):
@@ -639,7 +683,51 @@ class TestDeterministicVerdicts:
             round_dir = orch.output_dir / "rounds" / "round1"
             assert sorted(p.name for p in round_dir.glob("branch_*.py")) == ["branch_1.py", "branch_2.py", "branch_3.py"]
             assert (round_dir / "arena_test_iter_1.py").exists()
-            assert json.loads((round_dir / "admission.json").read_text(encoding="utf-8"))["decision"] == "admitted"
+            saved = json.loads((round_dir / "admission.json").read_text(encoding="utf-8"))
+            assert saved["decision"] == "quarantined"
+            assert saved["mutation_slaughter"]["output_axis_passed"] is False
+            assert (orch.output_dir / "rounds" / "reference_solution.py").exists()
+
+    def test_invariant_gate_rejects_an_impure_candidate(self, monkeypatch):
+        """
+        --invariants, end to end: a candidate that returns correct output but clears its caller's input list passes
+        every admitted test, so without the invariant gate it is promoted. With it, it is rejected (INVARIANT_FAIL).
+        """
+        import run_crucible
+        impure = FSM_REFERENCE.replace("    return cascades", "    if isinstance(stream, list):\n"
+                                                              "        stream.clear()\n"
+                                                              "    return cascades")
+        assert impure != FSM_REFERENCE
+        monkeypatch.setitem(run_crucible.MOCK_SOLUTIONS, "Impure FSM", impure)
+        outcomes = {}
+        for invariants in (False, True):
+            with tempfile.TemporaryDirectory() as d:
+                orch = _mock_orchestrator(Path(d), paradigms=["Impure FSM"], invariants=invariants)
+                asyncio.run(orch.run(max_iterations=2))
+                data = json.loads(orch.results_path.read_text(encoding="utf-8"))
+                last = data["iterations"][-1]["branches"][0]
+                outcomes[invariants] = (last["status"], data["summary"]["survived"], last["stderr"])
+                if invariants:
+                    assert "idempotence_invariant" in data["configuration"]["verifiers"]
+        assert outcomes[False][:2] == ("PASS", True), outcomes[False]
+        assert outcomes[True][:2] == ("INVARIANT_FAIL", False), outcomes[True]
+        assert "mutated its input" in outcomes[True][2]
+
+
+@pytest.mark.skipif(not docker_available()[0], reason="Docker not available")
+class TestDockerEndToEnd:
+    """The full mock pipeline inside the real Docker sandbox: same verdicts as the fast backend."""
+
+    def test_full_pipeline_in_docker_quarantines_then_promotes_only_the_correct_branch(self):
+        with tempfile.TemporaryDirectory() as d:
+            orch = _mock_orchestrator(Path(d), sandbox=Sandbox("docker"))
+            asyncio.run(orch.run(max_iterations=2))
+            data = json.loads(orch.results_path.read_text(encoding="utf-8"))
+            assert data["configuration"]["sandbox"]["backend"] == "docker"
+            assert data["configuration"]["sandbox"]["network"] == "none"
+            assert [i["test_harness"]["admission"]["decision"] for i in data["iterations"]] == \
+                ["quarantined", "admitted"]
+            assert data["summary"]["winning_branches"] == ["branch_3"]
 
 
 if __name__ == "__main__":

@@ -2,7 +2,33 @@
 
 This folder is the study that puts the Crucible tool ([`docs/CRUCIBLE.md`](../docs/CRUCIBLE.md)) under test. Its question: does a cheaper model, alone or inside Crucible, match a stronger model at writing correct code? Every result can be checked by a skeptical reader.
 
-**Status: work in progress.** On the one problem studied so far, the cheaper model alone already matched the stronger one, so there was no gap for Crucible to close. The next step is harder problems. Results so far are in [`COMPARISON.md`](COMPARISON.md), and the narrative is in the [case study](../case-study/CASE_STUDY.md).
+**Status.**
+- **The pilots (Problems 1–4, `experiment/sla`, `experiment/runs/pilot_*`) are history, not evidence about rates.** They had n ≤ 5 per arm, on a problem the cheaper model alone already solved as well as the stronger one, so Crucible had no gap to close and no statistical comparison is possible.
+- **The study that answers the question is pre-registered:** [`PREREGISTRATION.md`](PREREGISTRATION.md). It uses a harder problem (`bizsla/`), independent samples, n = 80 (A 30 / B 20 / C 30), exact Fisher tests with a power statement, and fixed exclusion and publication rules. The harness has been tested end to end on a zero-cost mock provider.
+- **The live run is waiting** on the user confirming a spend cap. Until its results are committed under `runs/study_*`, the question remains open.
+
+Pilot results are in [`COMPARISON.md`](COMPARISON.md), and the narrative is in the [case study](../case-study/CASE_STUDY.md).
+
+## The pre-registered study (Problem 5: business-hours SLA)
+
+| Piece | What it guarantees |
+|---|---|
+| [`bizsla/SPEC.md`](bizsla/SPEC.md) | Business-hours SLA with P1–P4 limits, holidays, priority changes, pause/resume/close/reopen, an exact breach-minute rule and a 10 s performance requirement. It is the only problem text any arm sees. |
+| [`bizsla/reference.py`](bizsla/reference.py) + [`bizsla/brute_force.py`](bizsla/brute_force.py) | Two independently written oracles: closed-form calendar arithmetic, and a minute-by-minute simulation. They must agree on every non-stress case. |
+| [`bizsla/hand_cases.json`](bizsla/hand_cases.json) | 20 cases whose expected outputs were derived by hand, each with a written justification. Both oracles must match them. |
+| [`bizsla/generate_cases.py`](bizsla/generate_cases.py) | 201 generated cases (edge, random, holiday, churn, medium) plus 4 stress cases from a version-independent SplitMix PRNG. Frozen by `FROZEN.json`; `--check` fails on any change. |
+| [`bizsla/grade.py`](bizsla/grade.py) | Hidden grader running in the Docker sandbox. Scoring is all-or-nothing over 225 scored cases. `--self-test`: the reference scores 225/225, the brute force fails only the stress cases (too slow, as intended), and all 22 planted bugs are caught. B14, B15 and B19 are the hardest to catch, with 2 killers each. |
+| [`stats.py`](stats.py) | Wilson intervals, exact Fisher test, exact power and minimum detectable gap. Cross-checked against scipy, textbook values and simulation in `tests/test_stats.py`. |
+| [`study/arm_study.py`](study/arm_study.py) | One run of arm A, B or C. Arm B is Crucible on the deterministic policy, using only the spec's 4 public examples as acceptance cases. A guard **refuses** any call past the arm's ceiling (A and C 1, B 10) and any oversized prompt. |
+| [`study/run_study.py`](study/run_study.py) | Pre-flight refusals: changed test set, missing or uncommitted pre-registration, unpriced model, no spend cap, live output outside Docker. Runs A, C and B interleaved under a hard, reserve-before-launch spend cap, then grades, runs H4 and writes `RESULTS.md` using exactly the pre-registered analysis. |
+
+```bash
+python experiment/bizsla/generate_cases.py --check                       # freeze intact?
+python experiment/bizsla/grade.py --self-test                            # oracles agree; all 22 planted bugs caught
+python experiment/study/run_study.py --mock --cap-usd 5 --a-runs 3 --b-runs 2 --c-runs 3   # zero-cost dry run
+python experiment/study/run_study.py --plan-only --cap-usd <cap>        # worst-case cost, no calls
+python experiment/study/run_study.py --cap-usd <cap> --env-file <path to .env>             # the live study
+```
 
 ## The evaluation rig
 
@@ -66,6 +92,12 @@ experiment/
 │   ├── audit.py                Code-generated audit record: 10 checks per trial
 │   ├── observe.py              Blinded observer reports and the hash-chained ledger
 │   └── check_suites.py         Tests the tester: Crucible-written suites vs the trusted reference
+├── PREREGISTRATION.md          Hypotheses, n, tests, exclusions and publication rules, fixed before the study
+├── bizsla/                     Problem 5 (the study): spec, two oracles, hand cases, frozen generated + stress cases, grader
+├── study/                      The study runner, arm runner, roles (live and mock) and mock fixtures
+├── stats.py                    Wilson, Fisher exact, power
+├── validate_mutation_gate.py   Gate vs an independent yardstick on the 11 recorded AI-written suites (in-sample)
+├── gate_validation/            Its report
 └── runs/                       One folder per pilot: raw evidence, never edited
 ```
 

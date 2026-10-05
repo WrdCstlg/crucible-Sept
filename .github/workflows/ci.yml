@@ -10,9 +10,16 @@ jobs:
   test:
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
         python-version: ["3.10", "3.11", "3.12", "3.13"]
+    env:
+      # Linux runners have Docker (Linux containers): model-written code runs in the real sandbox.
+      # Windows runners only offer Windows containers, so they use the explicitly-unsafe subprocess backend
+      # (throwaway runner, no secrets in the environment).
+      CRUCIBLE_SANDBOX: ${{ matrix.os == 'windows-latest' && 'subprocess-unsafe' || 'docker' }}
+      PYTHONIOENCODING: utf-8
 
     steps:
       - name: Check out repository
@@ -29,15 +36,33 @@ jobs:
           pip install -r requirements.txt
           pip install -r requirements-dev.txt
 
-      - name: Run test suite
-        run: |
-          python -m pytest tests/ -v
 
-      - name: Validate mock execution
+      - name: Run test suite (fast)
+        run: |
+          python -m pytest tests/ -v -m "not slow"
+
+      - name: Validate mock execution (weak suite quarantined, strong suite admitted)
         run: |
           python run_crucible.py --mock
           python run_crucible.py --mock --entrypoint analyze_data
 
-      - name: Verify recorded evidence (frozen tests, grader self-test, audit records, observer ledgers)
+  evidence-and-e2e:
+    runs-on: ubuntu-latest
+    env:
+      CRUCIBLE_SANDBOX: docker
+      PYTHONIOENCODING: utf-8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
         run: |
-          python experiment/verify_all.py
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt -r requirements-dev.txt
+
+      - name: Verify recorded evidence (pilot freeze + grader, audits, ledgers, replay, Problem 5 freeze + grader)
+        run: python experiment/verify_all.py
+
+      - name: End-to-end mock study (real runner, real Crucible, real grader, real gate, Docker)
+        run: python -m pytest tests/ -v -m slow

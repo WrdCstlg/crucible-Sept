@@ -1,0 +1,7 @@
+# DRY-RUN FIXTURE: a QA suite built only from the SPEC examples.
+import json, sys
+import solution
+CASES = json.loads('[{"lines": ["540,A,OPEN,P2", "600,A,CLOSE"], "expected": [{"ticket_id": "A", "priority": "P2", "used_minutes": 60, "breached": false, "breached_at": null, "status": "closed"}]}, {"lines": ["6720,B,OPEN,P1", "10680,B,PAUSE"], "expected": [{"ticket_id": "B", "priority": "P1", "used_minutes": 120, "breached": false, "breached_at": null, "status": "paused"}]}, {"lines": ["540,C,OPEN,P1", "900,C,CLOSE"], "expected": [{"ticket_id": "C", "priority": "P1", "used_minutes": 360, "breached": true, "breached_at": 781, "status": "closed"}]}, {"lines": ["540,D,OPEN,P3", "2040,D,PAUSE", "open,D,RESUME", "2100,D,RESUME,P1", "5,*,HOLIDAY"], "expected": [{"ticket_id": "D", "priority": "P3", "used_minutes": 60, "breached": false, "breached_at": null, "status": "paused"}]}]')
+bad = [i for i, c in enumerate(CASES) if solution.compute_sla(list(c['lines'])) != c['expected']]
+print('FAIL', bad) if bad else print('PASS')
+sys.exit(1 if bad else 0)

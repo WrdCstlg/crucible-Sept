@@ -387,6 +387,23 @@ What the attribution check showed (`experiment/attribution.py` reproduces it):
 - **Check each AI-written test suite against my hand cases** before it's allowed into the regression gate.
 - **Use a different model family for test writing** than for code writing, to reduce shared blind spots.
 
+### Update (October 2026): the follow-up study is built and pre-registered, not yet run
+
+<!-- EDIT: rewrite in your voice if you like; every fact below is checked by code in the repository. -->
+
+- **A harder problem** ([`experiment/bizsla`](../experiment/bizsla/SPEC.md)): business-hours calendars, holidays and priority changes mid-ticket, plus a performance requirement.
+- **Ground truth checked from several directions:**
+  - two algorithmically independent oracles;
+  - 20 hand-derived cases with written justifications;
+  - 225 frozen hidden cases;
+  - 22 planted bugs, all caught.
+- **A pre-registration** ([`experiment/PREREGISTRATION.md`](../experiment/PREREGISTRATION.md)): n = 80 (30/20/30), exact Fisher tests, a power statement, exclusion rules, a hard spend cap, and a commitment to publish whatever comes out.
+- **The AI-written test problem, tackled in the tool:**
+  - no AI-written suite can decide a verdict until a three-axis mutation gate admits it;
+  - on the 11 suites recorded in these pilots, the gate matched an independent yardstick on all 11. That figure is in-sample.
+- **Model-written code now runs in a Docker sandbox** with no network, a read-only filesystem and no host environment.
+- **The live run is the remaining step.** Until it is published, the question this case study set out to ask is still open.
+
 ---
 
 ## How this was built: who did what
@@ -399,6 +416,7 @@ What the attribution check showed (`experiment/attribution.py` reproduces it):
 | **A Gemini-based coding agent** (Google Antigravity) | Built the original Crucible pipeline and README, and applied fixes after each review |
 | **Claude (Anthropic), via Claude Code** | Independent audits of the repository and run logs; the experiment harness (reference implementations, test generator, grader, arm runners); analysis |
 | **An AI assistant** | Helped me draft the spec design, which I reviewed and own <!-- EDIT: describe this in your own terms --> |
+| **Claude (Anthropic), via Google Antigravity** (October 2026) | The follow-up: the Docker sandbox, the three-axis mutation gate and its validation, the Problem 5 spec draft, oracles, hand cases, grader and planted bugs, the statistics module, the pre-registration draft and the study harness. The competitor arm is also a Claude model; that threat to validity is stated in the pre-registration. |
 
 ---
 

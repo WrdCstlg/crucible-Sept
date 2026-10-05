@@ -1,0 +1,488 @@
+{
+  "reference": "experiment/sla/reference.py",
+  "threshold": 0.6,
+  "sandbox": {
+    "backend": "docker",
+    "image": "python:3.12-slim@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d",
+    "network": "none",
+    "rootfs": "read-only",
+    "code_mount": "read-only",
+    "tmpfs_mb": 64,
+    "user": "65534:65534",
+    "capabilities": "all dropped",
+    "no_new_privileges": true,
+    "memory_mb": 1024,
+    "cpus": 1.0,
+    "pids_limit": 128,
+    "env": "allowlist only"
+  },
+  "corpus_inputs": 36,
+  "independent_yardstick": "11 hand-written bugs (grade.MUTANTS)",
+  "confusion": {
+    "admitted_and_strong": 4,
+    "quarantined_and_weak": 7,
+    "admitted_but_weak (false security)": 0,
+    "quarantined_but_strong (lost signal)": 0
+  },
+  "agreement": "11/11",
+  "two_axis_confusion": {
+    "admitted_and_strong": 4,
+    "quarantined_and_weak": 6,
+    "admitted_but_weak (false security)": 1,
+    "quarantined_but_strong (lost signal)": 0
+  },
+  "two_axis_agreement": "10/11",
+  "calibration_note": "input axis added after the two-axis gate admitted control_exact_hand on this set; three-axis figure is in-sample",
+  "rows": [
+    {
+      "suite": "runs/pilot_20260929T180102Z/B1/candidates/round1_crucible_tests.py",
+      "kind": "recorded AI suite",
+      "baseline_passes_reference": true,
+      "gate_admits": true,
+      "two_axis_gate_admits": true,
+      "code_axis": {
+        "killed": 39,
+        "viable": 39,
+        "rate": 1.0,
+        "passed": true
+      },
+      "output_axis": {
+        "killed": 9,
+        "viable": 9,
+        "rate": 1.0,
+        "passed": true
+      },
+      "input_axis": {
+        "killed": 7,
+        "viable": 7,
+        "rate": 1.0,
+        "passed": true,
+        "survivors": []
+      },
+      "equivalent_excluded": 1,
+      "stillborn_excluded": 0,
+      "human_bugs": {
+        "killed": 10,
+        "total": 11,
+        "rate": 0.909,
+        "missed": [
+          "M02 now = last line to arrive"
+        ]
+      },
+      "independently_strong": true,
+      "agree": true,
+      "two_axis_agree": true,
+      "gate_reason": "Adversarial Mutation Gate: Slaughtered 39/39 viable mutants (100.0%; 1 equivalent and 0 stillborn excluded). Meets threshold of 60.0%. Output-contract probes: killed 9/9 (100.0%) meets 60.0%. Input-domain probes: killed 7/7 (100.0%) meets 60.0%."
+    },
+    {
+      "suite": "runs/pilot_20260929T180102Z/B2/candidates/round1_crucible_tests.py",
+      "kind": "recorded AI suite",
+      "baseline_passes_reference": true,
+      "gate_admits": true,
+      "two_axis_gate_admits": true,
+      "code_axis": {
+        "killed": 39,
+        "viable": 39,
+        "rate": 1.0,
+        "passed": true
+      },
+      "output_axis": {
+        "killed": 9,
+        "viable": 9,
+        "rate": 1.0,
+        "passed": true
+      },
+      "input_axis": {
+        "killed": 7,
+        "viable": 7,
+        "rate": 1.0,
+        "passed": true,
+        "survivors": []
+      },
+      "equivalent_excluded": 1,
+      "stillborn_excluded": 0,
+      "human_bugs": {
+        "killed": 11,
+        "total": 11,
+        "rate": 1.0,
+        "missed": []
+      },
+      "independently_strong": true,
+      "agree": true,
+      "two_axis_agree": true,
+      "gate_reason": "Adversarial Mutation Gate: Slaughtered 39/39 viable mutants (100.0%; 1 equivalent and 0 stillborn excluded). Meets threshold of 60.0%. Output-contract probes: killed 9/9 (100.0%) meets 60.0%. Input-domain probes: killed 7/7 (100.0%) meets 60.0%."
+    },
+    {
+      "suite": "runs/pilot_ablation_v0_20260929T181350Z/B1/candidates/round1_crucible_tests.py",
+      "kind": "recorded AI suite",
+      "baseline_passes_reference": false,
+      "gate_admits": false,
+      "two_axis_gate_admits": false,
+      "code_axis": {
+        "killed": 0,
+        "viable": 0,
+        "rate": 0.0,
+        "passed": null
+      },
+      "output_axis": {
+        "killed": 0,
+        "viable": 0,
+        "rate": null,
+        "passed": null
+      },
+      "input_axis": {
+        "killed": 0,
+        "viable": 0,
+        "rate": null,
+        "passed": null,
+        "survivors": []
+      },
+      "equivalent_excluded": 0,
+      "stillborn_excluded": 0,
+      "human_bugs": null,
+      "independently_strong": false,
+      "agree": true,
+      "two_axis_agree": true,
+      "gate_reason": "Mutation gate: the suite fails the unmutated reference (exit 1: - 5.1 Complete state-transition coverage & invalid event handling: Item 0 (ticket 'TX') used_ms mismatch: expected 300, got 140); its kill count would be meaningless. Fail closed."
+    },
+    {
+      "suite": "runs/pilot_ablation_v0_20260929T181350Z/B2/candidates/round1_crucible_tests.py",
+      "kind": "recorded AI suite",
+      "baseline_passes_reference": false,
+      "gate_admits": false,
+      "two_axis_gate_admits": false,
+      "code_axis": {
+        "killed": 0,
+        "viable": 0,
+        "rate": 0.0,
+        "passed": null
+      },
+      "output_axis": {
+        "killed": 0,
+        "viable": 0,
+        "rate": null,
+        "passed": null
+      },
+      "input_axis": {
+        "killed": 0,
+        "viable": 0,
+        "rate": null,
+        "passed": null,
+        "survivors": []
+      },
+      "equivalent_excluded": 0,
+      "stillborn_excluded": 0,
+      "human_bugs": null,
+      "independently_strong": false,
+      "agree": true,
+      "two_axis_agree": true,
+      "gate_reason": "Mutation gate: the suite fails the unmutated reference (exit 1: Some tests FAILED.); its kill count would be meaningless. Fail closed."
+    },
+    {
+      "suite": "runs/pilot_rig_20260929T190640Z/B1/candidates/round1_crucible_tests.py",
+      "kind": "recorded AI suite",
+      "baseline_passes_reference": true,
+      "gate_admits": true,
+      "two_axis_gate_admits": true,
+      "code_axis": {
+        "killed": 39,
+        "viable": 39,
+        "rate": 1.0,
+        "passed": true
+      },
+      "output_axis": {
+        "killed": 9,
+        "viable": 9,
+        "rate": 1.0,
+        "passed": true
+      },
+      "input_axis": {
+        "killed": 7,
+        "viable": 7,
+        "rate": 1.0,
+        "passed": true,
+        "survivors": []
+      },
+      "equivalent_excluded": 1,
+      "stillborn_excluded": 0,
+      "human_bugs": {
+        "killed": 11,
+        "total": 11,
+        "rate": 1.0,
+        "missed": []
+      },
+      "independently_strong": true,
+      "agree": true,
+      "two_axis_agree": true,
+      "gate_reason": "Adversarial Mutation Gate: Slaughtered 39/39 viable mutants (100.0%; 1 equivalent and 0 stillborn excluded). Meets threshold of 60.0%. Output-contract probes: killed 9/9 (100.0%) meets 60.0%. Input-domain probes: killed 7/7 (100.0%) meets 60.0%."
+    },
+    {
+      "suite": "runs/pilot_rig_20260929T190640Z/B2/candidates/round1_crucible_tests.py",
+      "kind": "recorded AI suite",
+      "baseline_passes_reference": false,
+      "gate_admits": false,
+      "two_axis_gate_admits": false,
+      "code_axis": {
+        "killed": 0,
+        "viable": 0,
+        "rate": 0.0,
+        "passed": null
+      },
+      "output_axis": {
+        "killed": 0,
+        "viable": 0,
+        "rate": null,
+        "passed": null
+      },
+      "input_axis": {
+        "killed": 0,
+        "viable": 0,
+        "rate": null,
+        "passed": null,
+        "survivors": []
+      },
+      "equivalent_excluded": 0,
+      "stillborn_excluded": 0,
+      "human_bugs": null,
+      "independently_strong": false,
+      "agree": true,
+      "two_axis_agree": true,
+      "gate_reason": "Mutation gate: the suite fails the unmutated reference (exit 1: Got:      [{'ticket_id': '-10', 'used_ms': 0, 'breached': False, 'status': 'open'}, {'ticket_id': 'A', 'used_ms': 444444344, 'breached': True, 'status': 'open'}]); its kill count would be meaningless. Fail closed."
+    },
+    {
+      "suite": "runs/pilot_rig_20260929T190640Z/B2/candidates/round2_crucible_tests.py",
+      "kind": "recorded AI suite",
+      "baseline_passes_reference": false,
+      "gate_admits": false,
+      "two_axis_gate_admits": false,
+      "code_axis": {
+        "killed": 0,
+        "viable": 0,
+        "rate": 0.0,
+        "passed": null
+      },
+      "output_axis": {
+        "killed": 0,
+        "viable": 0,
+        "rate": null,
+        "passed": null
+      },
+      "input_axis": {
+        "killed": 0,
+        "viable": 0,
+        "rate": null,
+        "passed": null,
+        "survivors": []
+      },
+      "equivalent_excluded": 0,
+      "stillborn_excluded": 0,
+      "human_bugs": null,
+      "independently_strong": false,
+      "agree": true,
+      "two_axis_agree": true,
+      "gate_reason": "Mutation gate: the suite fails the unmutated reference (exit 1: --- Summary: 28 passed, 1 failed ---); its kill count would be meaningless. Fail closed."
+    },
+    {
+      "suite": "control_tautology",
+      "kind": "control (weak)",
+      "baseline_passes_reference": true,
+      "gate_admits": false,
+      "two_axis_gate_admits": false,
+      "code_axis": {
+        "killed": 7,
+        "viable": 39,
+        "rate": 0.179,
+        "passed": false
+      },
+      "output_axis": {
+        "killed": 0,
+        "viable": 9,
+        "rate": 0.0,
+        "passed": false
+      },
+      "input_axis": {
+        "killed": 0,
+        "viable": 7,
+        "rate": 0.0,
+        "passed": false,
+        "survivors": [
+          "Input probe: upper-case every string (case-insensitive reader)",
+          "Input probe: lower-case every string (case-insensitive reader)",
+          "Input probe: truncate decimal numbers inside strings (lenient number parser)",
+          "Input probe: skip the first item",
+          "Input probe: skip the last item",
+          "Input probe: process items in reverse arrival order",
+          "Input probe: process items sorted by their text (lexicographic, not by value)"
+        ]
+      },
+      "equivalent_excluded": 1,
+      "stillborn_excluded": 0,
+      "human_bugs": {
+        "killed": 1,
+        "total": 11,
+        "rate": 0.091,
+        "missed": [
+          "M01 breach at or over the limit",
+          "M02 now = last line to arrive",
+          "M03 no sort (arrival order)",
+          "M04 RESUME revives a closed ticket",
+          "M05 OPEN on closed continues like REOPEN",
+          "M06 event names case-insensitive",
+          "M07 natural (numeric) ticket sort",
+          "M09 decimal timestamps accepted",
+          "M10 paused tickets keep counting to now",
+          "M11 REOPEN resets the total"
+        ]
+      },
+      "independently_strong": false,
+      "agree": true,
+      "two_axis_agree": true,
+      "gate_reason": "Adversarial Mutation Gate: Slaughtered 7/39 viable mutants (17.9%; 1 equivalent and 0 stillborn excluded). FAILED threshold of 60.0%. Suite is rejected as weak/tautological. Output-contract probes: killed 0/9 (0.0%) FAILED 60.0%: the suite does not check output values (rejected as weak/tautological). Input-domain probes: killed 0/7 (0.0%) FAILED 60.0%: the suite does not exercise the input classes a careless reader gets wrong (case, whitespace, order, malformed values) (rejected as weak/tautological)."
+    },
+    {
+      "suite": "control_count_only",
+      "kind": "control (weak)",
+      "baseline_passes_reference": true,
+      "gate_admits": false,
+      "two_axis_gate_admits": false,
+      "code_axis": {
+        "killed": 23,
+        "viable": 39,
+        "rate": 0.59,
+        "passed": false
+      },
+      "output_axis": {
+        "killed": 4,
+        "viable": 9,
+        "rate": 0.444,
+        "passed": false
+      },
+      "input_axis": {
+        "killed": 2,
+        "viable": 7,
+        "rate": 0.286,
+        "passed": false,
+        "survivors": [
+          "Input probe: upper-case every string (case-insensitive reader)",
+          "Input probe: truncate decimal numbers inside strings (lenient number parser)",
+          "Input probe: skip the last item",
+          "Input probe: process items in reverse arrival order",
+          "Input probe: process items sorted by their text (lexicographic, not by value)"
+        ]
+      },
+      "equivalent_excluded": 1,
+      "stillborn_excluded": 0,
+      "human_bugs": {
+        "killed": 1,
+        "total": 11,
+        "rate": 0.091,
+        "missed": [
+          "M01 breach at or over the limit",
+          "M02 now = last line to arrive",
+          "M03 no sort (arrival order)",
+          "M04 RESUME revives a closed ticket",
+          "M05 OPEN on closed continues like REOPEN",
+          "M06 event names case-insensitive",
+          "M07 natural (numeric) ticket sort",
+          "M09 decimal timestamps accepted",
+          "M10 paused tickets keep counting to now",
+          "M11 REOPEN resets the total"
+        ]
+      },
+      "independently_strong": false,
+      "agree": true,
+      "two_axis_agree": true,
+      "gate_reason": "Adversarial Mutation Gate: Slaughtered 23/39 viable mutants (59.0%; 1 equivalent and 0 stillborn excluded). FAILED threshold of 60.0%. Suite is rejected as weak/tautological. Output-contract probes: killed 4/9 (44.4%) FAILED 60.0%: the suite does not check output values (rejected as weak/tautological). Input-domain probes: killed 2/7 (28.6%) FAILED 60.0%: the suite does not exercise the input classes a careless reader gets wrong (case, whitespace, order, malformed values) (rejected as weak/tautological)."
+    },
+    {
+      "suite": "control_exact_hand",
+      "kind": "control (strong)",
+      "baseline_passes_reference": true,
+      "gate_admits": false,
+      "two_axis_gate_admits": true,
+      "code_axis": {
+        "killed": 33,
+        "viable": 39,
+        "rate": 0.846,
+        "passed": true
+      },
+      "output_axis": {
+        "killed": 9,
+        "viable": 9,
+        "rate": 1.0,
+        "passed": true
+      },
+      "input_axis": {
+        "killed": 3,
+        "viable": 7,
+        "rate": 0.429,
+        "passed": false,
+        "survivors": [
+          "Input probe: upper-case every string (case-insensitive reader)",
+          "Input probe: truncate decimal numbers inside strings (lenient number parser)",
+          "Input probe: process items in reverse arrival order",
+          "Input probe: process items sorted by their text (lexicographic, not by value)"
+        ]
+      },
+      "equivalent_excluded": 1,
+      "stillborn_excluded": 0,
+      "human_bugs": {
+        "killed": 3,
+        "total": 11,
+        "rate": 0.273,
+        "missed": [
+          "M02 now = last line to arrive",
+          "M03 no sort (arrival order)",
+          "M04 RESUME revives a closed ticket",
+          "M05 OPEN on closed continues like REOPEN",
+          "M06 event names case-insensitive",
+          "M07 natural (numeric) ticket sort",
+          "M09 decimal timestamps accepted",
+          "M10 paused tickets keep counting to now"
+        ]
+      },
+      "independently_strong": false,
+      "agree": true,
+      "two_axis_agree": false,
+      "gate_reason": "Adversarial Mutation Gate: Slaughtered 33/39 viable mutants (84.6%; 1 equivalent and 0 stillborn excluded). Meets threshold of 60.0%. Output-contract probes: killed 9/9 (100.0%) meets 60.0%. Input-domain probes: killed 3/7 (42.9%) FAILED 60.0%: the suite does not exercise the input classes a careless reader gets wrong (case, whitespace, order, malformed values) (rejected as weak/tautological)."
+    },
+    {
+      "suite": "control_exact_hand_edge",
+      "kind": "control (strong)",
+      "baseline_passes_reference": true,
+      "gate_admits": true,
+      "two_axis_gate_admits": true,
+      "code_axis": {
+        "killed": 39,
+        "viable": 39,
+        "rate": 1.0,
+        "passed": true
+      },
+      "output_axis": {
+        "killed": 9,
+        "viable": 9,
+        "rate": 1.0,
+        "passed": true
+      },
+      "input_axis": {
+        "killed": 7,
+        "viable": 7,
+        "rate": 1.0,
+        "passed": true,
+        "survivors": []
+      },
+      "equivalent_excluded": 1,
+      "stillborn_excluded": 0,
+      "human_bugs": {
+        "killed": 11,
+        "total": 11,
+        "rate": 1.0,
+        "missed": []
+      },
+      "independently_strong": true,
+      "agree": true,
+      "two_axis_agree": true,
+      "gate_reason": "Adversarial Mutation Gate: Slaughtered 39/39 viable mutants (100.0%; 1 equivalent and 0 stillborn excluded). Meets threshold of 60.0%. Output-contract probes: killed 9/9 (100.0%) meets 60.0%. Input-domain probes: killed 7/7 (100.0%) meets 60.0%."
+    }
+  ]
+}

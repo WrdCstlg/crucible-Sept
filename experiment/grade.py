@@ -17,6 +17,9 @@ from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
+sys.path.insert(0, str(HERE.parent))
+from crucible.sandbox import scrubbed_env  # noqa: E402  (allowlisted env: graded code never sees API keys)
+
 CASE_FILES = [HERE / "sla" / "hand_cases.json", HERE / "sla" / "generated_cases.json"]
 MARKER = "@@CRUCIBLE_GRADER_RESULT@@"
 KEYS = {"ticket_id", "used_ms", "breached", "status"}
@@ -74,7 +77,8 @@ def run_case(solution, case):
     with tempfile.TemporaryDirectory(prefix="crucible_grade_") as cwd:
         try:
             proc = subprocess.run([sys.executable, "-c", CHILD, str(solution), case["_file"], case["id"], MARKER],
-                                  cwd=cwd, capture_output=True, text=True, timeout=timeout)
+                                  cwd=cwd, capture_output=True, text=True, timeout=timeout,
+                                  env=scrubbed_env(deterministic=False))
         except subprocess.TimeoutExpired:
             return f"timeout after {timeout}s"
     lines = [l for l in proc.stdout.splitlines() if l.startswith(MARKER)]

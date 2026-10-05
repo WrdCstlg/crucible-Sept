@@ -10,6 +10,10 @@ Supported providers (set per role in roles.json):
   anthropic          Claude models via the Anthropic SDK (streaming; `effort` setting supported)
   google             Gemini models via the google-genai SDK (optional `thinking_level` or `thinking_budget`)
   openai_compatible  Any OpenAI-compatible endpoint: OpenAI, Moonshot Kimi, LM Studio, Ollama, vLLM
+  mock               No network. Canned answers from files named in the role's settings, for dry runs of the
+                     whole study pipeline. Never valid evidence: results are labelled mock everywhere.
+
+The roles file defaults to rig/roles.json; set CRUCIBLE_ROLES to use another (e.g. experiment/study/roles_study.json).
 """
 import json
 import os
@@ -42,7 +46,8 @@ class Completion:
         return {k: v for k, v in asdict(self).items() if k not in ("text",)}
 
 
-def load_roles(path: Path = ROLES_FILE) -> dict:
+def load_roles(path: Path | None = None) -> dict:
+    path = path or Path(os.environ.get("CRUCIBLE_ROLES", "").strip() or ROLES_FILE)
     return json.loads(Path(path).read_text(encoding="utf-8"))
 
 
@@ -121,7 +126,25 @@ def _openai_compatible(cfg, system, prompt):
             r.choices[0].finish_reason, len(msg.tool_calls or []))
 
 
-ADAPTERS = {"anthropic": _anthropic, "google": _google, "openai_compatible": _openai_compatible}
+def _mock(cfg, system, prompt):
+    """Deterministic per (CRUCIBLE_MOCK_SEED, system, prompt). QA prompts get the suite file; others a solution."""
+    import hashlib
+    s = cfg["settings"]
+    key = f"{os.environ.get('CRUCIBLE_MOCK_SEED', '')}|{system}|{prompt}".encode()
+    pick = int(hashlib.sha256(key).hexdigest(), 16)
+    if "QA engineer" in system:
+        body = (PROJECT_ROOT / s["qa_suite_file"]).read_text(encoding="utf-8")
+    elif "```python" not in system and "Python module" not in system:
+        body = None
+    else:
+        files = s["solution_files"]
+        body = (PROJECT_ROOT / files[pick % len(files)]).read_text(encoding="utf-8")
+    text = f"```python\n{body}\n```" if body is not None else "Mock synthesis: see deterministic verdicts."
+    tin, tout = len(system + prompt) // 4, len(text) // 4
+    return text, f"mock:{cfg['model']}", tin, tout, 0, "end_turn", 0
+
+
+ADAPTERS = {"anthropic": _anthropic, "google": _google, "openai_compatible": _openai_compatible, "mock": _mock}
 
 
 def generate(cfg: dict, system: str, prompt: str) -> Completion:

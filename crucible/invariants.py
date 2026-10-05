@@ -1,15 +1,13 @@
 """
-Crucible Property-Based Metamorphic Invariant Engine.
+Crucible behavioural invariants: checks that example-based tests usually miss.
 
-Verifies behavioral invariants and resource bounds that unit tests often miss:
-  1. MEMORY CEILING INVARIANT: Strict O(1) auxiliary memory ceiling verification
-     using tracemalloc under continuous high-volume data streams.
-  2. IDEMPOTENCE & STATE PURITY: Verifies that multiple invocations with identical inputs
-     produce identical outputs without mutating inputs or retaining leaky global state.
-  3. MALFORMED STREAM RESILIENCE: Validates that out-of-order, malformed, or boundary
-     records are handled deterministically without crashing.
-  4. METAMORPHIC DIFFERENTIAL ORACLE: Cross-checks competing candidate branches on
-     metamorphic data transforms (e.g. chronological chunking, time-shift invariance).
+  1. IDEMPOTENCE & PURITY (wired into the pipeline with --invariants): calling the entrypoint twice with the same
+     input must return the same result, and the entrypoint must not mutate its input. Refuses solutions that
+     carry hidden state between calls (module-level caches, global accumulators).
+  2. MEMORY CEILING (library only): peak traced allocation under a 100,000-record stream must stay below a limit.
+     The built-in stream is telemetry-shaped, so this check is not wired into the generic pipeline.
+
+Both run the candidate in the caller's sandbox via `run_python_fn`.
 """
 import json
 import subprocess
@@ -58,28 +56,41 @@ if peak_mb > limit_mb:
 sys.exit(0)
 '''
 
-# Script template to verify idempotence and purity
+# Script template to verify idempotence and purity. Inputs come from inputs.json when present (any problem),
+# otherwise from a built-in telemetry-style stream.
 IDEMPOTENCE_RUNNER = r'''
-import sys
+import copy
 import json
+import os
+import sys
 import solution
 
 entrypoint_name = sys.argv[1]
 entry = getattr(solution, entrypoint_name)
 
-stream_data = [
-    f"{i*50},sensor_{i%3},{75.0 + (i%25)}"
-    for i in range(200)
-]
+if os.path.exists("inputs.json"):
+    inputs = json.load(open("inputs.json", encoding="utf-8"))
+else:
+    inputs = [[f"{i*50},sensor_{i%3},{75.0 + (i%25)}" for i in range(200)]]
 
-# Run 1
-res1 = json.loads(json.dumps(list(entry(list(stream_data)))))
-# Run 2 with fresh copy
-res2 = json.loads(json.dumps(list(entry(list(stream_data)))))
+def canon(v):
+    if not isinstance(v, (list, dict, str, int, float, bool, type(None), tuple)):
+        v = list(v)
+    return json.dumps(v, sort_keys=True, default=repr)
 
-if res1 != res2:
-    sys.stderr.write(f"Idempotence violation: run 1 produced {len(res1)} items, run 2 produced {len(res2)} items.\n")
-    sys.exit(1)
+for n, item in enumerate(inputs):
+    original = copy.deepcopy(item)
+    first = canon(entry(copy.deepcopy(item)))
+    second = canon(entry(copy.deepcopy(item)))
+    if first != second:
+        sys.stderr.write(f"Idempotence violation on input #{n}: a second call with the same input returned a "
+                         f"different result (hidden state carried between calls).\n")
+        sys.exit(1)
+    probe = copy.deepcopy(item)
+    entry(probe)
+    if probe != original:
+        sys.stderr.write(f"Purity violation on input #{n}: the entrypoint mutated its input.\n")
+        sys.exit(1)
 
 sys.exit(0)
 '''
@@ -125,17 +136,21 @@ class MetamorphicInvariantChecker:
                 duration_seconds=dur,
             )
 
-    def check_idempotence(self, solution_path: Path, entrypoint: str = "process_telemetry") -> InvariantCheckResult:
+    def check_idempotence(self, solution_path: Path, entrypoint: str = "process_telemetry",
+                          inputs: Optional[list] = None) -> InvariantCheckResult:
         """
-        Verifies that repeated executions of the candidate yield identical output and don't leak dirty state.
+        Verifies that repeated calls with identical input return identical output (no state leaking between calls)
+        and that the entrypoint does not mutate its input. `inputs`: a list of entrypoint arguments (JSON values).
         """
         with tempfile.TemporaryDirectory(prefix="crucible_idemp_") as tmp_d:
             tmp_dir = Path(tmp_d)
             (tmp_dir / "solution.py").write_text(solution_path.read_text(encoding="utf-8"), encoding="utf-8")
             (tmp_dir / "idemp_runner.py").write_text(IDEMPOTENCE_RUNNER, encoding="utf-8")
+            if inputs is not None:
+                (tmp_dir / "inputs.json").write_text(json.dumps(inputs), encoding="utf-8")
 
             code, out, err, dur = self.run_python_fn(
-                "idemp_runner.py", tmp_dir, timeout=30, args=[entrypoint]
+                "idemp_runner.py", tmp_dir, timeout=60, args=[entrypoint]
             )
 
             passed = (code == 0)

@@ -28,11 +28,16 @@ EXP = Path(__file__).resolve().parent
 sys.path.insert(0, str(EXP))
 sys.path.insert(0, str(EXP.parent))
 import grade  # noqa: E402
-from run_crucible import ACCEPTANCE_RUNNER, CrucibleOrchestrator, deterministic_env, load_acceptance_cases, run_python  # noqa: E402
+from run_crucible import ACCEPTANCE_RUNNER, CrucibleOrchestrator, load_acceptance_cases  # noqa: E402
+from crucible.sandbox import Sandbox  # noqa: E402
 
 REFERENCE = EXP / "sla" / "reference.py"
 HAND_CASES = EXP / "sla" / "hand_cases.json"
 STABILITY_RUNS = 3
+# Replay re-creates the conditions the recorded runs were judged under: a host subprocess (now with a scrubbed
+# environment) and the v1 AST checks. New Crucible runs use the Docker sandbox and the strict AST profile.
+REPLAY_SANDBOX = Sandbox(backend="subprocess-unsafe")
+REPLAY_AST_PROFILE = "v1"
 
 
 def recordings(run_dir: Path) -> dict:
@@ -54,11 +59,11 @@ def run_suite(candidate: Path, suite: Path, deterministic: bool) -> int:
     with tempfile.TemporaryDirectory(prefix="crucible_replay_") as d:
         shutil.copy(candidate, Path(d) / "solution.py")
         shutil.copy(suite, Path(d) / "arena_test_suite.py")
-        return run_python("arena_test_suite.py", Path(d), deterministic=deterministic)[0]
+        return REPLAY_SANDBOX.run("arena_test_suite.py", Path(d), deterministic=deterministic)[0]
 
 
 def judge(candidate: Path, suites: list[Path], entrypoint: str, deterministic: bool) -> str:
-    ok, _ = CrucibleOrchestrator._audit_contract(candidate, entrypoint=entrypoint)
+    ok, _ = CrucibleOrchestrator._audit_contract(candidate, entrypoint=entrypoint, profile=REPLAY_AST_PROFILE)
     if not ok:
         return "AST_REJECTED"
     for suite in suites:
@@ -73,17 +78,12 @@ def passes_acceptance(candidate: Path, cases: list[dict], entrypoint: str) -> bo
         shutil.copy(candidate, Path(d) / "solution.py")
         (Path(d) / "acceptance_cases.json").write_text(json.dumps(cases), encoding="utf-8")
         (Path(d) / "acceptance_runner.py").write_text(ACCEPTANCE_RUNNER, encoding="utf-8")
-        try:
-            p = subprocess.run([sys.executable, "acceptance_runner.py", entrypoint], cwd=d, capture_output=True,
-                               text=True, timeout=120, env=deterministic_env())
-            return p.returncode == 0
-        except subprocess.TimeoutExpired:
-            return False
+        return REPLAY_SANDBOX.run("acceptance_runner.py", Path(d), deterministic=True, args=[entrypoint])[0] == 0
 
 
 def judge_deterministic(candidate: Path, admitted: list[Path], cases: list[dict], entrypoint: str) -> str:
     """The deterministic policy, including fail-closed: no decisive check means no promotion."""
-    ok, _ = CrucibleOrchestrator._audit_contract(candidate, entrypoint=entrypoint)
+    ok, _ = CrucibleOrchestrator._audit_contract(candidate, entrypoint=entrypoint, profile=REPLAY_AST_PROFILE)
     if not ok:
         return "AST_REJECTED"
     if not cases and not admitted:

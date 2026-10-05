@@ -108,6 +108,30 @@ class TestMetamorphicInvariants:
             assert res.passed is False, "Expected impure stateful solution to fail idempotency!"
             assert "Idempotency failure" in res.details
 
+    def test_input_mutation_fails_purity_even_when_output_is_stable(self):
+        """Returns the same answer every call but destroys the caller's data: refused."""
+        with tempfile.TemporaryDirectory() as d:
+            sol_path = Path(d) / "solution.py"
+            sol_path.write_text("def process_telemetry(stream):\n"
+                                "    out = [x for x in stream if x[2] >= 95.0]\n"
+                                "    stream.clear()\n"
+                                "    return out\n", encoding="utf-8")
+            res = MetamorphicInvariantChecker(run_python).check_idempotence(
+                sol_path, inputs=[[[1000, "cpu0", 96.0], [1100, "cpu1", 80.0]]])
+            assert res.passed is False
+            assert "mutated its input" in res.details
+
+    def test_idempotence_is_problem_agnostic_with_explicit_inputs(self):
+        """Any entrypoint and input shape: here a dict-in, dict-out function named `score`."""
+        with tempfile.TemporaryDirectory() as d:
+            sol_path = Path(d) / "solution.py"
+            sol_path.write_text("def score(doc):\n    return {'n': len(doc['items'])}\n", encoding="utf-8")
+            checker = MetamorphicInvariantChecker(run_python)
+            assert checker.check_idempotence(sol_path, "score", inputs=[{"items": [1, 2]}, {"items": []}]).passed
+            sol_path.write_text("SEEN = []\ndef score(doc):\n    SEEN.append(1)\n    return {'n': len(SEEN)}\n",
+                                encoding="utf-8")
+            assert not checker.check_idempotence(sol_path, "score", inputs=[{"items": [1]}]).passed
+
     def test_watchdog_timeout_kills_runaway_loop(self):
         with tempfile.TemporaryDirectory() as d:
             tmp = Path(d)

@@ -3,3 +3,4 @@ __pycache__/
 .crucible_workspace/
 deployments/
 .crucible_mock/
+scratch_*.log

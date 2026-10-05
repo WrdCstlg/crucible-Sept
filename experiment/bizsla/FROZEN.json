@@ -1,0 +1,13 @@
+{
+  "frozen_at": "2026-10-05T21:46:03.554557+00:00",
+  "sha256": {
+    "SPEC.md": "9444103987a8f913bf3e294a7b14fe0aa2589a77c579db22b69dd445eab2e53c",
+    "hand_cases.json": "31828c4b2db00be30d70a60eb4f59ec28c7c932f82782ab27616da6fe7959942",
+    "public_cases.json": "8e4a02d36da0f5103e38d9c0cf794295bad097af5b340154a01be5d928277b36",
+    "generated_cases.json": "6b09223e234c90ac741bb30d896f9c6192087175de2635dac2d15cf22db21ecb",
+    "stress_cases.json": "2670f442034e6a141c615f8720cf94fb3a87d11ad957e244b90a659e7abd20fe",
+    "reference.py": "1cb7d39a3c91518cefdce48bf40f12450790eb1a7857ad78f12878ccbd2e1edb",
+    "brute_force.py": "071896a0349231f94fbd953796229886e068a11e0959acdef96c45cd3eb4972c",
+    "generate_cases.py": "453e3151bb57e37b779d71a4857d1f1168f4c597ae3a4135f8bfe0c7f5149cf8"
+  }
+}

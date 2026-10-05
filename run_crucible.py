@@ -24,6 +24,8 @@ except ImportError:
 
 from crucible.contract import audit_contract, BLOCKED_MODULES
 from crucible.mutation import MutationSlaughterGate
+from crucible.invariants import MetamorphicInvariantChecker
+from crucible.sandbox import Sandbox, SandboxUnavailable, default_sandbox, deterministic_env, docker_available  # noqa: F401
 
 if sys.platform == "win32":
     try:
@@ -55,40 +57,16 @@ def extract_code(text: str) -> str:
     return match.group(1).strip() if match else text.strip()
 
 
-# ── Deterministic execution ────────────────────────────────────────────
-# Every child process that can influence a verdict (acceptance cases, arena suites, suite admission) runs in the
-# same fixed environment: string hashing is seeded (PYTHONHASHSEED=0) and the `random` module is seeded at start-up
-# through a sitecustomize module. Identical code and inputs then produce identical results. What an environment
-# cannot fix is code that depends on wall-clock time or machine speed; suite admission guards against that by
-# requiring identical outcomes across repeated runs against the reference solution.
-_SEED_DIR = Path(tempfile.gettempdir()) / "crucible_deterministic_env"
-_SITECUSTOMIZE = "import random\nrandom.seed(0)\n"
-
-
-def deterministic_env() -> dict:
-    """Environment for verdict-bearing child processes: seeded hashing and a seeded `random` module."""
-    _SEED_DIR.mkdir(parents=True, exist_ok=True)
-    seed_file = _SEED_DIR / "sitecustomize.py"
-    if not seed_file.exists() or seed_file.read_text(encoding="utf-8") != _SITECUSTOMIZE:
-        seed_file.write_text(_SITECUSTOMIZE, encoding="utf-8")
-    env = dict(os.environ)
-    env["PYTHONHASHSEED"] = "0"
-    env["PYTHONPATH"] = os.pathsep.join(p for p in (str(_SEED_DIR), env.get("PYTHONPATH", "")) if p)
-    return env
-
-
-def run_python(script: str, cwd: Path, timeout: int = 120, deterministic: bool = True, args: list | None = None) -> tuple[int, str, str, float]:
-    """Runs `python <script> [*args]` in cwd. Returns (exit code, stdout, stderr, seconds); exit code 124 means timeout."""
-    start = time.perf_counter()
-    cmd = [sys.executable, script] + (args or [])
-    try:
-        p = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout,
-                           env=deterministic_env() if deterministic else None)
-        return p.returncode, p.stdout, p.stderr, round(time.perf_counter() - start, 3)
-    except subprocess.TimeoutExpired:
-        return 124, "", f"TIMEOUT EXPIRED: exceeded the {timeout}-second limit.", round(time.perf_counter() - start, 3)
-    except Exception as e:
-        return 1, "", f"EXECUTION ERROR: {e}", round(time.perf_counter() - start, 3)
+# ── Deterministic, isolated execution ──────────────────────────────────
+# Every child process that can influence a verdict (acceptance cases, arena suites, suite admission, mutation gate)
+# runs through crucible.sandbox: by default a fresh, digest-pinned Docker container with no network, a read-only
+# filesystem, no host secrets and resource limits, seeded with PYTHONHASHSEED=0 and random.seed(0). What an
+# environment cannot fix is code that depends on wall-clock time or machine speed; suite admission guards against
+# that by requiring identical outcomes across repeated runs against the reference solution.
+def run_python(script: str, cwd: Path, timeout: int = 120, deterministic: bool = True, args: list | None = None,
+               sandbox: Sandbox | None = None) -> tuple[int, str, str, float]:
+    """Runs `python <script> [*args]` in cwd inside the (default) sandbox. Exit code 124 means timeout."""
+    return (sandbox or default_sandbox()).run(script, cwd, timeout=timeout, deterministic=deterministic, args=args)
 
 
 
@@ -281,6 +259,54 @@ if __name__ == "__main__":
     sys.exit(0)
 """
 
+# Round 2 of mock mode: an exact-output suite. It pins every field of every cascade on boundary streams (95.0/90.0
+# thresholds, 500 vs 501 ms window, same-sensor, fan-in, expiry), so the mutation gate admits it.
+MOCK_STRONG_TEST_HARNESS = """
+import sys
+import solution
+
+K = ("trigger_timestamp_ms", "trigger_sensor", "trigger_temp_c", "cascade_timestamp_ms", "cascade_sensor",
+     "cascade_temp_c", "latency_ms")
+CASES = {
+    "mixed": ([(1000, "cpu0", 96.0), (1200, "cpu1", 91.0), (1600, "cpu2", 70.0), (5000, "gpu0", 97.0), (5400, "gpu1", 92.0)],
+              [(1000, "cpu0", 96.0, 1200, "cpu1", 91.0, 200), (5000, "gpu0", 97.0, 5400, "gpu1", 92.0, 400)]),
+    "exact_boundaries": ([(1000, "cpu0", 95.0), (1500, "cpu1", 90.0)], [(1000, "cpu0", 95.0, 1500, "cpu1", 90.0, 500)]),
+    "window_plus_one": ([(1000, "cpu0", 95.0), (1501, "cpu1", 90.0)], []),
+    "below_trigger": ([(1000, "cpu0", 94.9), (1100, "cpu1", 99.0)], []),
+    "below_cascade": ([(1000, "cpu0", 96.0), (1100, "cpu1", 89.9)], []),
+    "same_sensor": ([(1000, "cpu0", 96.0), (1200, "cpu0", 91.0)], []),
+    "fan_in": ([(1000, "a", 96.0), (1100, "b", 97.0), (1300, "c", 91.0)],
+               [(1000, "a", 96.0, 1100, "b", 97.0, 100), (1000, "a", 96.0, 1300, "c", 91.0, 300),
+                (1100, "b", 97.0, 1300, "c", 91.0, 200)]),
+    "empty": ([], []),
+    "expiry": ([(0, "a", 96.0), (400, "b", 96.0), (800, "c", 91.0)],
+               [(0, "a", 96.0, 400, "b", 96.0, 400), (400, "b", 96.0, 800, "c", 91.0, 400)]),
+}
+failed = 0
+for name, (stream, rows) in CASES.items():
+    expected = [dict(zip(K, r)) for r in rows]
+    got = list(solution.process_telemetry(list(stream)))
+    if got != expected:
+        failed += 1
+        print(f"FAIL {name}: expected {expected}, got {got}")
+    else:
+        print(f"PASS {name}")
+sys.exit(1 if failed else 0)
+"""
+
+# Mock round schedule: round 1 is the weak suite, every later round the strong one.
+MOCK_HARNESS_BY_ROUND = {1: MOCK_TEST_HARNESS}
+
+# Inputs only (no expected values): used by the mutation gate to discard equivalent mutants in mock mode.
+MOCK_EQUIVALENCE_CORPUS = [
+    [[1000, "cpu0", 96.0], [1200, "cpu1", 91.0], [1600, "cpu2", 70.0], [5000, "gpu0", 97.0], [5400, "gpu1", 92.0]],
+    [[1000, "cpu0", 95.0], [1500, "cpu1", 90.0]], [[1000, "cpu0", 95.0], [1501, "cpu1", 90.0]],
+    [[1000, "cpu0", 94.9], [1100, "cpu1", 99.0]], [[1000, "cpu0", 96.0], [1100, "cpu1", 89.9]],
+    [[1000, "cpu0", 96.0], [1200, "cpu0", 91.0]], [[1000, "a", 96.0], [1100, "b", 97.0], [1300, "c", 91.0]], [],
+    [[0, "a", 96.0], [400, "b", 96.0], [800, "c", 91.0]],
+    [[t * 37, f"s{t % 4}", 85.0 + (t * 7) % 15] for t in range(200)],
+]
+
 MOCK_SYNTHESIS = (
     "MOCK SYNTHESIS: This is a synthetic synthesis report generated in mock mode. "
     "In live mode, a Lead Systems Architect LLM agent reviews the raw stdout/stderr logs "
@@ -298,14 +324,21 @@ class CrucibleOrchestrator:
     def __init__(self, problem_statement: str, paradigms: list[str], workspace_dir: str = ".crucible_workspace", mock_mode: bool = False, entrypoint: str = "process_telemetry", output_dir: str | None = None, force_iterations: int = 1,
                  verdict_policy: str = "deterministic", acceptance_cases: list[dict] | None = None,
                  reference_solution: str | None = None, stability_runs: int = 3, allow_advisory_only: bool = False,
-                 mutation_gate: bool = False, mutation_threshold: float = 0.60):
+                 mutation_gate: bool | None = None, mutation_threshold: float = 0.60,
+                 equivalence_corpus: list | None = None, invariants: bool = False, sandbox: Sandbox | None = None):
         """
         Verdict policies:
           deterministic  Human-written acceptance cases always decide. An AI-written test suite may also decide, but only
-                         once the trusted reference solution passes it in every one of `stability_runs` runs; otherwise it
-                         is quarantined (it rejects the reference, or its outcome varies) or advisory (no reference to check
-                         it against). Advisory and quarantined suites are still run and reported; they never block.
+                         once (1) the trusted reference solution passes it in every one of `stability_runs` runs and
+                         (2) it kills at least `mutation_threshold` of the viable mutants of that reference (the mutation
+                         gate, on by default whenever a reference exists). Otherwise it is quarantined (it rejects the
+                         reference, its outcome varies, or it is too weak to tell broken code from correct code) or
+                         advisory (no reference to check it against). Advisory and quarantined suites are still run and
+                         reported; they never block.
           legacy         Every AI-written suite blocks (the behaviour before 2026-09-29). Kept to reproduce recorded runs.
+
+        Sandbox: every verdict-bearing process runs in `sandbox` (default: crucible.sandbox.default_sandbox(), i.e.
+        Docker). If that backend is unavailable the constructor raises SandboxUnavailable; it never degrades silently.
         """
         if verdict_policy not in self.VERDICT_POLICIES:
             raise ValueError(f"verdict_policy must be one of {self.VERDICT_POLICIES}")
@@ -315,6 +348,20 @@ class CrucibleOrchestrator:
                 "Deterministic verdicts need ground truth: pass human-written acceptance cases (--acceptance-cases) "
                 "and/or a trusted reference solution (--reference). To run anyway with AI-written tests as advisory "
                 "only, pass --advisory-only (then only the AST gate can reject a candidate).")
+        has_reference = bool(reference_solution) or mock_mode
+        if mutation_gate is None:
+            mutation_gate = verdict_policy == "deterministic" and has_reference
+        if mutation_gate and verdict_policy == "deterministic" and not has_reference:
+            raise ValueError("The mutation gate mutates the trusted reference: pass --reference, or --no-mutation-gate.")
+        if not 0.0 < mutation_threshold <= 1.0:
+            raise ValueError("mutation_threshold must be in (0, 1]")
+        self.sandbox = sandbox or default_sandbox()
+        if self.sandbox.backend == "docker":
+            ok, detail = docker_available()
+            if not ok:
+                raise SandboxUnavailable(
+                    f"Docker sandbox unavailable ({detail}). Refusing to run untrusted code without isolation. "
+                    f"Start Docker, or opt in explicitly with --unsafe-subprocess-sandbox.")
         self.problem_statement = problem_statement
         self.paradigms = paradigms
         self.mock_mode = mock_mode
@@ -324,8 +371,14 @@ class CrucibleOrchestrator:
         self.acceptance_cases = acceptance_cases or []
         self.reference_solution = str(Path(reference_solution).resolve()) if reference_solution else None
         self.stability_runs = max(1, stability_runs)
-        self.mutation_gate = mutation_gate
+        self.mutation_gate = bool(mutation_gate) and verdict_policy == "deterministic"
         self.mutation_threshold = mutation_threshold
+        # Inputs for discarding equivalent mutants: explicit corpus, plus every acceptance case's input.
+        corpus = list(equivalence_corpus or []) + [c["input"] for c in self.acceptance_cases]
+        if not corpus and mock_mode:
+            corpus = MOCK_EQUIVALENCE_CORPUS
+        self.equivalence_corpus = corpus
+        self.invariants = invariants
         self.suite_admission: list[dict] = []
         self.workspace = Path(workspace_dir).resolve()
         self.project_root = self.workspace.parent if self.workspace.name == ".crucible_workspace" else Path.cwd().resolve()
@@ -348,7 +401,7 @@ class CrucibleOrchestrator:
         
         self.run_id = f"crucible-{int(time.time())}"
         self.telemetry = {
-            "schema_version": "1.2.0",
+            "schema_version": "1.3.0",
             "run_id": self.run_id,
             "start_time": datetime.now(timezone.utc).isoformat(),
             "end_time": None,
@@ -360,7 +413,8 @@ class CrucibleOrchestrator:
                 "entrypoint": self.entrypoint,
                 "force_iterations": self.force_iterations,
                 "timeout_seconds": 120,
-                "sandbox_engine": "isolated_subprocess",
+                "sandbox_engine": self.sandbox.backend,
+                "sandbox": self.sandbox.describe(),
                 "verifiers": [
                     "deterministic_exit_code_zero",
                     "120s_watchdog_kill",
@@ -369,7 +423,8 @@ class CrucibleOrchestrator:
                     "cumulative_regression_gate"
                 ] + (["human_acceptance_cases", "suite_admission_vs_reference", "deterministic_environment"]
                      if verdict_policy == "deterministic" else [])
-                  + (["adversarial_mutation_slaughter_gate"] if mutation_gate else []),
+                  + (["adversarial_mutation_slaughter_gate"] if self.mutation_gate else [])
+                  + (["idempotence_invariant"] if invariants else []),
                 "verdict_policy": {
                     "name": verdict_policy,
                     "acceptance_cases": len(self.acceptance_cases),
@@ -378,6 +433,7 @@ class CrucibleOrchestrator:
                     "stability_runs": self.stability_runs,
                     "mutation_gate": self.mutation_gate,
                     "mutation_threshold": self.mutation_threshold if self.mutation_gate else None,
+                    "equivalence_corpus_inputs": len(self.equivalence_corpus) if self.mutation_gate else None,
                     "environment": "PYTHONHASHSEED=0 and random.seed(0) in every verdict-bearing process"
                                    if verdict_policy == "deterministic" else "unseeded (legacy)",
                 }
@@ -588,6 +644,11 @@ class CrucibleOrchestrator:
         print(f"   Total Runtime: {total_duration}s")
         print("=" * 80 + "\n")
 
+    def _run(self, script: str, cwd: Path, *args: str, timeout: int = 120) -> tuple[int, str, str, float]:
+        """Runs a verdict-bearing script in this run's sandbox; seeded unless the legacy policy is in force."""
+        return self.sandbox.run(script, cwd, timeout=timeout, deterministic=self.verdict_policy == "deterministic",
+                                args=list(args))
+
     def _admit_suite(self, suite_path: Path) -> dict:
         """Decides whether an AI-written suite may block candidates. Deterministic given the suite and the reference."""
         if self.verdict_policy == "legacy":
@@ -600,43 +661,24 @@ class CrucibleOrchestrator:
             with tempfile.TemporaryDirectory(prefix="crucible_admit_") as d:
                 shutil.copy(suite_path, Path(d) / "arena_test.py")
                 shutil.copy(self.reference_solution, Path(d) / "solution.py")
-                code, out, err, _ = run_python("arena_test.py", Path(d))
+                code, out, err, _ = self._run("arena_test.py", Path(d))
                 codes.append(code)
                 tails.append(self._sanitize_paths(((err or out).strip().splitlines() or [""])[-1])[:200])
         if all(c == 0 for c in codes):
-            if getattr(self, "mutation_gate", False):
-                gate = MutationSlaughterGate(run_python, threshold=self.mutation_threshold)
-                mut_res = gate.evaluate_suite(suite_path, self.reference_solution)
+            if self.mutation_gate:
+                gate = MutationSlaughterGate(lambda *a, **k: self.sandbox.run(*a, **k), threshold=self.mutation_threshold)
+                mut_res = gate.evaluate_suite(suite_path, Path(self.reference_solution),
+                                              equivalence_corpus=self.equivalence_corpus or None,
+                                              entrypoint=self.entrypoint)
+                record = {"suite": suite_path.name, "reference_exit_codes": codes,
+                          "mutation_slaughter": {**mut_res.summary(), "passed": mut_res.passed_gate,
+                                                 "killed": mut_res.killed_mutants, "total": mut_res.total_mutants}}
                 if not mut_res.passed_gate:
-                    return {
-                        "suite": suite_path.name,
-                        "decision": "quarantined",
-                        "reference_exit_codes": codes,
-                        "mutation_slaughter": {
-                            "slaughter_rate": mut_res.slaughter_rate,
-                            "killed": mut_res.killed_mutants,
-                            "total": mut_res.total_mutants,
-                            "passed": mut_res.passed_gate,
-                            "threshold": self.mutation_threshold,
-                        },
-                        "reason": f"QUARANTINED (TAUTOLOGICAL): {mut_res.reason}"
-                    }
-                else:
-                    return {
-                        "suite": suite_path.name,
-                        "decision": "admitted",
-                        "reference_exit_codes": codes,
-                        "mutation_slaughter": {
-                            "slaughter_rate": mut_res.slaughter_rate,
-                            "killed": mut_res.killed_mutants,
-                            "total": mut_res.total_mutants,
-                            "passed": mut_res.passed_gate,
-                            "threshold": self.mutation_threshold,
-                        },
-                        "reason": f"the trusted reference passes it in all {len(codes)} runs and slaughtered {mut_res.killed_mutants}/{mut_res.total_mutants} mutants ({mut_res.slaughter_rate * 100:.1f}%)"
-                    }
+                    return {**record, "decision": "quarantined", "reason": f"QUARANTINED (TAUTOLOGICAL): {mut_res.reason}"}
+                return {**record, "decision": "admitted",
+                        "reason": f"the trusted reference passes it in all {len(codes)} runs; {mut_res.reason}"}
             return {"suite": suite_path.name, "decision": "admitted", "reference_exit_codes": codes,
-                    "reason": f"the trusted reference passes it in all {len(codes)} runs"}
+                    "reason": f"the trusted reference passes it in all {len(codes)} runs (mutation gate disabled)"}
         if all(c != 0 for c in codes):
             return {"suite": suite_path.name, "decision": "quarantined", "reference_exit_codes": codes,
                     "reason": "the trusted reference fails it, so at least one expectation is wrong",
@@ -713,7 +755,8 @@ class CrucibleOrchestrator:
         test_path = self.workspace / f"arena_test_iter_{iteration}.py"
 
         if self.mock_mode:
-            harness = MOCK_TEST_HARNESS.replace("solution.process_telemetry(", f"solution.{self.entrypoint}(")
+            template = MOCK_HARNESS_BY_ROUND.get(iteration, MOCK_STRONG_TEST_HARNESS)
+            harness = template.replace("solution.process_telemetry(", f"solution.{self.entrypoint}(")
             with open(test_path, "w", encoding="utf-8") as f:
                 f.write(harness)
             return test_path
@@ -755,21 +798,18 @@ class CrucibleOrchestrator:
     })
 
     @staticmethod
-    def _audit_contract(source_path: Path, entrypoint: str | None = None) -> tuple[bool, str]:
+    def _audit_contract(source_path: Path, entrypoint: str | None = None, profile: str = "strict") -> tuple[bool, str]:
         """
-        Deterministic, zero-cost AST verification of a candidate solution.
-        
-        Enforces two structural invariants before any subprocess is spawned:
-          1. ENTRYPOINT CONTRACT: A top-level function matching the required entrypoint name.
-          2. IMPORT GUARD: Static check rejecting direct imports of blocked module families.
-          3. DYNAMIC SECURITY GUARD: Static check rejecting eval, exec, __import__, and os.system.
-        
+        Zero-cost AST lint of a candidate before anything runs (see crucible/contract.py): entrypoint contract,
+        blocked imports, and dynamic-execution / introspection escape hatches. A lint, not a security boundary:
+        isolation comes from the sandbox. Profile 'v1' reproduces the checks used by the recorded pilots.
+
         Returns:
             (passed: bool, reason: str) - reason is empty on success.
         """
         if entrypoint is None:
             entrypoint = CrucibleOrchestrator.REQUIRED_ENTRYPOINT
-        return audit_contract(source_path, entrypoint=entrypoint)
+        return audit_contract(source_path, entrypoint=entrypoint, profile=profile)
 
 
     def _run_acceptance(self, branch_dir: Path) -> tuple[int, str]:
@@ -781,17 +821,8 @@ class CrucibleOrchestrator:
         return code, summary if summary.startswith("{") else (err or out)[-500:]
 
     def _run_script(self, cwd: Path, script: str, *args: str) -> tuple[int, str, str, float]:
-        """Like run_python, but passes arguments; seeded environment unless the legacy policy is in force."""
-        start = time.perf_counter()
-        env = deterministic_env() if self.verdict_policy == "deterministic" else None
-        try:
-            p = subprocess.run([sys.executable, script, *args], cwd=cwd, capture_output=True, text=True,
-                               timeout=120, env=env)
-            return p.returncode, p.stdout, p.stderr, round(time.perf_counter() - start, 3)
-        except subprocess.TimeoutExpired:
-            return 124, "", f"TIMEOUT EXPIRED: {script} exceeded the 120-second limit.", round(time.perf_counter() - start, 3)
-        except Exception as e:
-            return 1, "", f"EXECUTION ERROR in {script}: {e}", round(time.perf_counter() - start, 3)
+        """Runs a verdict-bearing script in this run's sandbox (kept for subclasses and the experiment harness)."""
+        return self._run(script, cwd, *args)
 
     async def _execute_arena(self, test_suites: list[Path], advisory_suites: list[Path] = ()) -> list[BranchResult]:
         """
@@ -807,7 +838,8 @@ class CrucibleOrchestrator:
             solution_size = solution_file.stat().st_size if solution_file.exists() else 0
             
             # ── AST Pre-Execution Gate ──────────────────────────────────
-            ast_passed, ast_reason = self._audit_contract(solution_file, entrypoint=self.entrypoint)
+            ast_passed, ast_reason = self._audit_contract(
+                solution_file, entrypoint=self.entrypoint, profile="v1" if self.verdict_policy == "legacy" else "strict")
             if not ast_passed:
                 print(f"       [x] AST REJECTED: {ast_reason[:80]}...")
                 results.append(BranchResult(
@@ -859,6 +891,15 @@ class CrucibleOrchestrator:
                     branch_status = "TIMEOUT" if code == 124 else "FAIL"
                     print(f"       [-] Failed Suite {idx} (Code: {code}, Duration: {duration}s)")
                     break
+
+            # ── Idempotence invariant (optional, decisive) ───────────────────
+            if self.invariants and branch_exit_code == 0 and self.equivalence_corpus:
+                checker = MetamorphicInvariantChecker(lambda *a, **k: self.sandbox.run(*a, **k))
+                inv = checker.check_idempotence(solution_file, self.entrypoint, inputs=self.equivalence_corpus)
+                if not inv.passed:
+                    branch_exit_code, branch_status = 1, "INVARIANT_FAIL"
+                    cumulative_stderr.append(f"[Invariant] {self._sanitize_paths(inv.details)[:500]}")
+                    print("       [-] Failed idempotence invariant")
 
             # ── Advisory suites: reported, never blocking ──────────────
             advisory = []
@@ -929,10 +970,21 @@ def build_parser() -> argparse.ArgumentParser:
                         help="Times a suite must pass the reference, with identical outcomes, to be admitted (default: 3)")
     parser.add_argument("--advisory-only", action="store_true",
                         help="Run live without acceptance cases or a reference: AI-written suites are advisory only")
-    parser.add_argument("--mutation-gate", action="store_true",
-                        help="Enable the Adversarial Mutation Slaughter Gate to detect and quarantine tautological test suites")
+    gate = parser.add_mutually_exclusive_group()
+    gate.add_argument("--mutation-gate", dest="mutation_gate", action="store_true", default=None,
+                      help="Require the mutation gate (default: on automatically whenever a trusted reference exists)")
+    gate.add_argument("--no-mutation-gate", dest="mutation_gate", action="store_false",
+                      help="Disable the mutation gate: suites are admitted on the reference check alone (not recommended)")
     parser.add_argument("--mutation-threshold", type=float, default=0.60,
-                        help="Minimum fraction of synthetic mutants a suite must kill to be admitted (default: 0.60)")
+                        help="Minimum fraction of viable mutants a suite must kill to be admitted (default: 0.60)")
+    parser.add_argument("--equivalence-corpus", type=str, default=None,
+                        help="JSON list of entrypoint inputs (no expected values) used to discard equivalent mutants; "
+                             "acceptance-case inputs are always added")
+    parser.add_argument("--invariants", action="store_true",
+                        help="Also require idempotence and input purity on the corpus/acceptance inputs (decisive)")
+    parser.add_argument("--unsafe-subprocess-sandbox", action="store_true",
+                        help="Run untrusted code as a plain host subprocess instead of a Docker container. "
+                             "UNSAFE: no network, filesystem or memory isolation (secrets are still scrubbed)")
     return parser
 
 
@@ -967,8 +1019,15 @@ if __name__ == "__main__":
             allow_advisory_only=args.advisory_only,
             mutation_gate=args.mutation_gate,
             mutation_threshold=args.mutation_threshold,
+            equivalence_corpus=(json.loads(Path(args.equivalence_corpus).read_text(encoding="utf-8"))
+                                if args.equivalence_corpus else None),
+            invariants=args.invariants,
+            sandbox=Sandbox(backend="subprocess-unsafe") if args.unsafe_subprocess_sandbox else None,
         )
-    except ValueError as e:
+    except (ValueError, SandboxUnavailable) as e:
         parser.error(str(e))
+    if orchestrator.sandbox.backend != "docker":
+        print("WARNING: --unsafe-subprocess-sandbox: untrusted code runs on the host with no network, filesystem or "
+              "memory isolation.")
     asyncio.run(orchestrator.run(max_iterations=effective_max_iterations))
 

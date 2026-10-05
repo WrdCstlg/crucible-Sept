@@ -17,6 +17,9 @@ import tempfile
 from pathlib import Path
 
 EXP = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(EXP.parent))
+from crucible.sandbox import scrubbed_env  # noqa: E402  (AI-written suites never see API keys)
+
 REFERENCE = EXP / "sla" / "reference.py"
 ALLOWED = {"solution", "sys", "json", "time", "math", "random", "collections", "itertools", "traceback", "typing",
            "dataclasses", "re", "gc", "tracemalloc", "io", "functools", "string", "copy", "unittest", "textwrap",
@@ -41,7 +44,8 @@ def run_suite(suite: Path) -> dict:
         shutil.copy(suite, Path(d) / "arena_test.py")
         shutil.copy(REFERENCE, Path(d) / "solution.py")
         try:
-            p = subprocess.run([sys.executable, "arena_test.py"], cwd=d, capture_output=True, text=True, timeout=120)
+            p = subprocess.run([sys.executable, "arena_test.py"], cwd=d, capture_output=True, text=True, timeout=120,
+                               env=scrubbed_env(deterministic=False))
             code, output = p.returncode, p.stdout + p.stderr
         except subprocess.TimeoutExpired:
             code, output = "timeout", ""

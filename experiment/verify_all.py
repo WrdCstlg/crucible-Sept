@@ -7,6 +7,9 @@
   3. Audit records: every trial's audit.json still matches the fingerprint in its pilot's audit_summary.json.
   4. Observer ledgers: every chain is intact and every observer report is unedited.
   5. Replay: every recorded Crucible verdict reproduces when its recorded code and tests are re-executed (no model calls).
+  6. Problem 5 (the pre-registered study's problem): its frozen set matches bizsla/FROZEN.json, and its grader
+     self-test passes (both oracles agree; all 22 planted bugs are caught). Runs in crucible.sandbox (Docker by
+     default; set CRUCIBLE_SANDBOX=subprocess-unsafe where Docker is unavailable).
 Exit code 1 if anything fails. Runs in CI on every push.
 """
 import hashlib
@@ -51,7 +54,7 @@ def main() -> bool:
             ok &= observe.verify(ledger.parent)
 
     import replay  # imported only here: it loads the Crucible orchestrator
-    for pilot in sorted(p for p in (HERE / "runs").iterdir() if p.is_dir()):
+    for pilot in sorted(p for p in (HERE / "runs").iterdir() if p.is_dir() and p.name.startswith("pilot")):
         crucible_runs = [r for r in sorted(pilot.iterdir()) if r.is_dir() and (r / "results.json").exists()]
         if not crucible_runs:
             continue
@@ -62,6 +65,21 @@ def main() -> bool:
             continue  # e.g. the invalid pilot: its Crucible runs crashed before judging anything
         print(f"[{'pass' if not bad else 'FAIL'}] replay reproduces {total - bad}/{total} recorded Crucible verdicts in {pilot.name}")
         ok &= not bad
+
+    print("--- Problem 5 (bizsla): freeze and grader self-test ---")
+    import importlib.util
+
+    def load(name, path):                    # by path: experiment/sla and experiment/ have modules with these names
+        spec = importlib.util.spec_from_file_location(name, path)
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[name] = mod
+        spec.loader.exec_module(mod)
+        return mod
+    bizgen = load("bizsla_generate_cases", HERE / "bizsla" / "generate_cases.py")
+    ok &= bizgen.check()
+    sys.modules["generate_cases"] = bizgen   # grade.py does `from generate_cases import stress_lines`
+    bizgrade = load("bizsla_grade", HERE / "bizsla" / "grade.py")
+    ok &= bizgrade.self_test()
     print("ALL EVIDENCE VERIFIED" if ok else "VERIFICATION FAILED")
     return ok
 

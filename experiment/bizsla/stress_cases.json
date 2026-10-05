@@ -1,0 +1,50 @@
+[
+ {
+  "id": "S01",
+  "kind": "wide",
+  "seed": 11,
+  "lines": 200000,
+  "tickets": 5000,
+  "holidays": 20000,
+  "span": 1000000000,
+  "title": "200k lines, 5k tickets, 20k holidays, span 10^9",
+  "layer": "stress",
+  "expected_sha256": "197d73bb300af82be2bee61b90b424639f72af646cb973d5148a3990a992f99a",
+  "expected_count": 5000
+ },
+ {
+  "id": "S02",
+  "kind": "sparse",
+  "seed": 12,
+  "lines": 60,
+  "tickets": 6,
+  "span": 1000000000,
+  "title": "60 lines spread over 10^9 minutes",
+  "layer": "stress",
+  "expected_sha256": "e1cba111ac1efed38567c3a632b5c809b75087ca3ed5866c1572a9fe1551b8d8",
+  "expected_count": 6
+ },
+ {
+  "id": "S03",
+  "kind": "dense",
+  "seed": 13,
+  "lines": 200000,
+  "tickets": 50000,
+  "span": 40320,
+  "title": "200k lines, 50k tickets in 4 weeks",
+  "layer": "stress",
+  "expected_sha256": "9079d71a54e2b2b731ae106566f4fa625497607d31bf02a0543edc212391b282",
+  "expected_count": 41547
+ },
+ {
+  "id": "S04",
+  "kind": "toggle",
+  "seed": 14,
+  "lines": 150000,
+  "gap": 900,
+  "title": "one ticket, 150k pause/resume toggles, reverse arrival",
+  "layer": "stress",
+  "expected_sha256": "9b7f78380f8a5e0294e4f3e4adfb32b02460e32c133dbd80c7b8f6bf6af77d01",
+  "expected_count": 1
+ }
+]

@@ -1,0 +1,20 @@
+{
+  "evaluated": {
+    "provider": "google",
+    "model": "gemini-3.8-flash",
+    "api_key_env": "GEMINI_API_KEY",
+    "settings": {"thinking_level": "HIGH", "max_tokens": 65536},
+    "price_per_mtok": {"input": 0.75, "output": 3.75},
+    "max_input_tokens_per_call": 60000,
+    "note": "Same model and thinking level as rig/roles.json. Temperature and seed are deliberately NOT fixed: rig/roles.json (after the pilots) pins temperature 0 + seed 0, which would make repeated runs near-copies rather than independent samples. Price: Standard paid tier from ai.google.dev/gemini-api/docs/pricing, fetched 2026-10-05 and confirmed by the user ($0.75 in / $3.75 out per 1M tokens, thinking included, valid through 2026-12-31). Prices only drive the spend cap, never an outcome."
+  },
+  "competitor": {
+    "provider": "anthropic",
+    "model": "claude-opus-5-5",
+    "api_key_env": "ANTHROPIC_API_KEY",
+    "settings": {"effort": "xhigh", "max_tokens": 64000},
+    "price_per_mtok": {"input": 4.0, "output": 20.0},
+    "max_input_tokens_per_call": 20000,
+    "note": "Same model, effort and price as rig/roles.json. This model rejects sampling parameters, so runs vary naturally."
+  }
+}
