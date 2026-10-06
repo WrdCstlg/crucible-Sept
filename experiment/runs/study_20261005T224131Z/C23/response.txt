@@ -1,0 +1,186 @@
+```python
+import re
+from bisect import bisect_left, bisect_right
+
+_DIGITS = re.compile(r'[0-9]+')
+
+_LIMITS = {'P1': 240, 'P2': 480, 'P3': 1440, 'P4': 2400}
+_EVENTS = {'OPEN', 'PRIORITY', 'PAUSE', 'RESUME', 'CLOSE', 'REOPEN', 'HOLIDAY'}
+
+_NOT_OPENED = 0
+_RUNNING = 1
+_PAUSED = 2
+_CLOSED = 3
+
+_STATUS_NAME = {_RUNNING: 'running', _PAUSED: 'paused', _CLOSED: 'closed'}
+
+
+def compute_sla(stream):
+    holidays = set()
+    tickets = {}
+    now = None
+    seq = 0
+
+    for raw in stream:
+        if not isinstance(raw, str):
+            continue
+        parts = raw.strip().split(',')
+        if len(parts) != 3 and len(parts) != 4:
+            continue
+        f = [p.strip() for p in parts]
+        ms, tid, ev = f[0], f[1], f[2]
+        if not tid or ev not in _EVENTS or not _DIGITS.fullmatch(ms):
+            continue
+        if ev == 'OPEN' or ev == 'PRIORITY':
+            if len(f) != 4 or f[3] not in _LIMITS:
+                continue
+            prio = f[3]
+        else:
+            if len(f) != 3:
+                continue
+            prio = None
+        stripped = ms.lstrip('0') or '0'
+        m = int(stripped)
+        if ev == 'HOLIDAY':
+            if tid != '*':
+                continue
+            holidays.add(m // 1440)
+            continue
+        if tid == '*':
+            continue
+        lst = tickets.get(tid)
+        if lst is None:
+            lst = []
+            tickets[tid] = lst
+        lst.append((m, seq, ev, prio))
+        seq += 1
+        if now is None or m > now:
+            now = m
+
+    if now is None:
+        return []
+
+    # Only weekday holidays matter for business minutes.
+    hol_days = sorted(d for d in holidays if d % 7 < 5)
+    hol_set = set(hol_days)
+    # Weekday indices of holidays, and keys for inverse lookup.
+    hidx = [(d // 7) * 5 + (d % 7) for d in hol_days]
+    keys = [h - i for i, h in enumerate(hidx)]
+
+    def B(t):
+        """Number of business minutes in [0, t)."""
+        d, mod = divmod(t, 1440)
+        w, wd = divmod(d, 7)
+        if wd >= 5:
+            res = w * 2400 + 2400
+            partial = 0
+        else:
+            partial = mod - 540
+            if partial < 0:
+                partial = 0
+            elif partial > 480:
+                partial = 480
+            res = w * 2400 + wd * 480 + partial
+        if hol_days:
+            res -= bisect_left(hol_days, d) * 480
+            if partial and d in hol_set:
+                res -= partial
+        return res
+
+    def first_reaching(target):
+        """Smallest t with B(t) >= target (target >= 1)."""
+        k = target - 1
+        j, off = divmod(k, 480)
+        n = j
+        if keys:
+            n = j + bisect_right(keys, j)
+        w, wd = divmod(n, 5)
+        return (w * 7 + wd) * 1440 + 540 + off + 1
+
+    results = []
+    for tid in sorted(tickets):
+        evs = tickets[tid]
+        evs.sort(key=lambda e: e[0])
+        state = _NOT_OPENED
+        prio = None
+        used = 0
+        last = None
+        blast = 0
+        breached_at = None
+        opened = False
+
+        i = 0
+        n = len(evs)
+        while i < n:
+            m = evs[i][0]
+            bm = None
+            # Advance from last to m (state constant during [last, m)).
+            if state == _RUNNING:
+                bm = B(m)
+                new_used = used + bm - blast
+                if breached_at is None:
+                    lim = _LIMITS[prio]
+                    if new_used > lim:
+                        t = first_reaching(lim - used + blast + 1)
+                        if t < m:
+                            breached_at = t
+                used = new_used
+            last = m
+            # Apply all events at minute m.
+            while i < n and evs[i][0] == m:
+                _, _, ev, p = evs[i]
+                if ev == 'OPEN':
+                    if state == _NOT_OPENED or state == _CLOSED:
+                        state = _RUNNING
+                        prio = p
+                        used = 0
+                        breached_at = None
+                        opened = True
+                elif ev == 'PRIORITY':
+                    if state == _RUNNING or state == _PAUSED:
+                        prio = p
+                elif ev == 'PAUSE':
+                    if state == _RUNNING:
+                        state = _PAUSED
+                elif ev == 'RESUME':
+                    if state == _PAUSED:
+                        state = _RUNNING
+                elif ev == 'CLOSE':
+                    if state == _RUNNING or state == _PAUSED:
+                        state = _CLOSED
+                elif ev == 'REOPEN':
+                    if state == _CLOSED:
+                        state = _RUNNING
+                i += 1
+            # Check breach at minute m after events applied.
+            if state != _NOT_OPENED and breached_at is None and used > _LIMITS[prio]:
+                breached_at = m
+            if state == _RUNNING:
+                blast = bm if bm is not None else B(m)
+
+        if not opened:
+            continue
+
+        # Final advance to now (inclusive check, no events at minutes > last).
+        if state == _RUNNING and now > last:
+            bn = B(now)
+            new_used = used + bn - blast
+            if breached_at is None:
+                lim = _LIMITS[prio]
+                if new_used > lim:
+                    t = first_reaching(lim - used + blast + 1)
+                    if t <= now:
+                        breached_at = t
+            used = new_used
+
+        results.append({
+            'ticket_id': tid,
+            'priority': prio,
+            'used_minutes': used,
+            'breached': breached_at is not None,
+            'breached_at': breached_at,
+            'status': _STATUS_NAME[state],
+        })
+
+    return results
+```

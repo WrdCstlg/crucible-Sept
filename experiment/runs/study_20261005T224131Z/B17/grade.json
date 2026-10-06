@@ -1,0 +1,1852 @@
+{
+  "solution": "experiment/runs/study_20261005T224131Z/B17/solution.py",
+  "sandbox": "docker",
+  "strict_pass": true,
+  "passed": 225,
+  "total": 225,
+  "public_pass": true,
+  "by_layer": {
+    "public": "4/4",
+    "hand": "20/20",
+    "edge": "35/35",
+    "random": "80/80",
+    "holiday": "40/40",
+    "churn": "40/40",
+    "medium": "6/6",
+    "stress": "4/4"
+  },
+  "cases": [
+    {
+      "id": "PUB1",
+      "layer": "public",
+      "title": "SPEC example 1",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "PUB2",
+      "layer": "public",
+      "title": "SPEC example 2",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "PUB3",
+      "layer": "public",
+      "title": "SPEC example 3",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "PUB4",
+      "layer": "public",
+      "title": "SPEC example 4",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "H01",
+      "layer": "hand",
+      "title": "exactly the limit does not breach",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "H02",
+      "layer": "hand",
+      "title": "breach one minute past the limit, still running at now",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "H03",
+      "layer": "hand",
+      "title": "priority raise at the breach minute prevents the breach",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "H04",
+      "layer": "hand",
+      "title": "priority raise one minute late does not undo a breach",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "H05",
+      "layer": "hand",
+      "title": "priority lowered while paused breaches immediately",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "H06",
+      "layer": "hand",
+      "title": "nights and weekends do not count",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "H07",
+      "layer": "hand",
+      "title": "holiday declared after now still applies; duplicate and weekend holidays",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "H08",
+      "layer": "hand",
+      "title": "holiday lines never move now",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "H09",
+      "layer": "hand",
+      "title": "out-of-order arrival, stable order for equal minutes",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "H10",
+      "layer": "hand",
+      "title": "OPEN after CLOSE resets and clears; REOPEN continues and keeps",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "H11",
+      "layer": "hand",
+      "title": "ignored transitions and malformed lines",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "H12",
+      "layer": "hand",
+      "title": "case-sensitive ticket IDs in code-point order",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "H13",
+      "layer": "hand",
+      "title": "empty stream",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "H14",
+      "layer": "hand",
+      "title": "only holidays and garbage",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "H15",
+      "layer": "hand",
+      "title": "breach across a weekend and a Monday holiday",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "H16",
+      "layer": "hand",
+      "title": "paused stops the clock; close after pause adds nothing",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "H17",
+      "layer": "hand",
+      "title": "pausing at the breach minute still breaches",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "H18",
+      "layer": "hand",
+      "title": "leading zeros and whitespace",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "H19",
+      "layer": "hand",
+      "title": "17:00 is not a business minute, 09:00 is",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "H20",
+      "layer": "hand",
+      "title": "breach while the clock is stopped overnight is dated at the next minute after the 241st",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E01",
+      "layer": "edge",
+      "title": "open 539 close 1019",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E02",
+      "layer": "edge",
+      "title": "open 539 close 1020",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E03",
+      "layer": "edge",
+      "title": "open 539 close 1021",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E04",
+      "layer": "edge",
+      "title": "open 539 close 1980",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E05",
+      "layer": "edge",
+      "title": "open 540 close 1019",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E06",
+      "layer": "edge",
+      "title": "open 540 close 1020",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E07",
+      "layer": "edge",
+      "title": "open 540 close 1021",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E08",
+      "layer": "edge",
+      "title": "open 540 close 1980",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E09",
+      "layer": "edge",
+      "title": "open 1019 close 1020",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E10",
+      "layer": "edge",
+      "title": "open 1019 close 1021",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E11",
+      "layer": "edge",
+      "title": "open 1019 close 1980",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E12",
+      "layer": "edge",
+      "title": "open 1020 close 1021",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E13",
+      "layer": "edge",
+      "title": "open 1020 close 1980",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E14",
+      "layer": "edge",
+      "title": "open and close in the same minute",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E15",
+      "layer": "edge",
+      "title": "close then open in the same minute resets",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E16",
+      "layer": "edge",
+      "title": "open on Saturday, close Monday",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E17",
+      "layer": "edge",
+      "title": "Friday holiday across a breach",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E18",
+      "layer": "edge",
+      "title": "every event on NOT_OPENED is ignored",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E19",
+      "layer": "edge",
+      "title": "second OPEN while running is ignored",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E20",
+      "layer": "edge",
+      "title": "RESUME while running, REOPEN while paused are ignored",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E21",
+      "layer": "edge",
+      "title": "PAUSE on closed, CLOSE on closed ignored",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E22",
+      "layer": "edge",
+      "title": "priority churn below and above used",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E23",
+      "layer": "edge",
+      "title": "breach exactly at a REOPEN minute",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E24",
+      "layer": "edge",
+      "title": "P4 limit crossed after five days",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E25",
+      "layer": "edge",
+      "title": "P3 limit crossed after three days",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E26",
+      "layer": "edge",
+      "title": "holiday on every weekday of week 0",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E27",
+      "layer": "edge",
+      "title": "duplicate identical lines",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E28",
+      "layer": "edge",
+      "title": "many tickets, one minute",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E29",
+      "layer": "edge",
+      "title": "tab and space trimming",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E30",
+      "layer": "edge",
+      "title": "unicode and comma-in-id lines are handled",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E31",
+      "layer": "edge",
+      "title": "large gap (8 weeks)",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E32",
+      "layer": "edge",
+      "title": "priority raise at the breach minute after a night",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E33",
+      "layer": "edge",
+      "title": "priority raise at the breach minute after a weekend",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E34",
+      "layer": "edge",
+      "title": "mixed-case event names are malformed",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "E35",
+      "layer": "edge",
+      "title": "ticket '*' cannot open",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R001",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R002",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R003",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R004",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R005",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R006",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R007",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R008",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R009",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R010",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R011",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R012",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R013",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R014",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R015",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R016",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R017",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R018",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R019",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R020",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R021",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R022",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R023",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R024",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R025",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R026",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R027",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R028",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R029",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R030",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R031",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R032",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R033",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R034",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R035",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R036",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R037",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R038",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R039",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R040",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R041",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R042",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R043",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.001
+    },
+    {
+      "id": "R044",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R045",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R046",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R047",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R048",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R049",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R050",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R051",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R052",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R053",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R054",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R055",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R056",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R057",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R058",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R059",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R060",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R061",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R062",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R063",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R064",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R065",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R066",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R067",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R068",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R069",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R070",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R071",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R072",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R073",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R074",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R075",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R076",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R077",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R078",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R079",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "R080",
+      "layer": "random",
+      "title": "random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL01",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL02",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL03",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL04",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL05",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL06",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL07",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL08",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL09",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL10",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL11",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL12",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL13",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL14",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL15",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL16",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL17",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL18",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL19",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL20",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL21",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL22",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL23",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL24",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL25",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL26",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL27",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL28",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL29",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL30",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL31",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL32",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL33",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL34",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL35",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL36",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL37",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL38",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL39",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "HOL40",
+      "layer": "holiday",
+      "title": "holiday-heavy random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH01",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH02",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH03",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH04",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH05",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH06",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH07",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH08",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH09",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH10",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH11",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH12",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH13",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH14",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH15",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH16",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH17",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH18",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH19",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH20",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH21",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH22",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH23",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH24",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH25",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH26",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH27",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH28",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH29",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH30",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH31",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH32",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH33",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH34",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH35",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH36",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH37",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH38",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH39",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "CH40",
+      "layer": "churn",
+      "title": "priority churn random",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "M01",
+      "layer": "medium",
+      "title": "medium (brute-force checked)",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.004
+    },
+    {
+      "id": "M02",
+      "layer": "medium",
+      "title": "medium (brute-force checked)",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.005
+    },
+    {
+      "id": "M03",
+      "layer": "medium",
+      "title": "medium (brute-force checked)",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.007
+    },
+    {
+      "id": "M04",
+      "layer": "medium",
+      "title": "medium (brute-force checked)",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.003
+    },
+    {
+      "id": "M05",
+      "layer": "medium",
+      "title": "medium (brute-force checked)",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.003
+    },
+    {
+      "id": "M06",
+      "layer": "medium",
+      "title": "medium (brute-force checked)",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.003
+    },
+    {
+      "id": "S01",
+      "layer": "stress",
+      "title": "200k lines, 5k tickets, 20k holidays, span 10^9",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.826
+    },
+    {
+      "id": "S02",
+      "layer": "stress",
+      "title": "60 lines spread over 10^9 minutes",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.0
+    },
+    {
+      "id": "S03",
+      "layer": "stress",
+      "title": "200k lines, 50k tickets in 4 weeks",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.745
+    },
+    {
+      "id": "S04",
+      "layer": "stress",
+      "title": "one ticket, 150k pause/resume toggles, reverse arrival",
+      "pass": true,
+      "reason": null,
+      "seconds": 0.285
+    }
+  ]
+}

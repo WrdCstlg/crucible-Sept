@@ -1,0 +1,286 @@
+from bisect import bisect_left, bisect_right
+from collections import defaultdict
+
+
+def _raw_biz_mins(m: int) -> int:
+    d = m // 1440
+    mod = m % 1440
+    weeks = d // 7
+    rem_days = d % 7
+    full_day_biz = min(rem_days, 5) * 480
+    if rem_days < 5:
+        if mod < 540:
+            today_biz = 0
+        elif mod < 1020:
+            today_biz = mod - 540
+        else:
+            today_biz = 480
+    else:
+        today_biz = 0
+    return weeks * 2400 + full_day_biz + today_biz
+
+
+def _biz_mins(m: int, sorted_holidays: list) -> int:
+    d = m // 1440
+    ans = _raw_biz_mins(m)
+    idx = bisect_left(sorted_holidays, d)
+    ans -= idx * 480
+    if idx < len(sorted_holidays) and sorted_holidays[idx] == d:
+        mod = m % 1440
+        if mod < 540:
+            today_biz = 0
+        elif mod < 1020:
+            today_biz = mod - 540
+        else:
+            today_biz = 480
+        ans -= today_biz
+    return ans
+
+
+def _raw_biz_days_count(d: int) -> int:
+    if d < 0:
+        return 0
+    return (d // 7) * 5 + min((d % 7) + 1, 5)
+
+
+def _count_biz_days(d1: int, d2: int, sorted_holidays: list) -> int:
+    if d1 > d2:
+        return 0
+    raw = _raw_biz_days_count(d2) - _raw_biz_days_count(d1 - 1)
+    holidays = bisect_right(sorted_holidays, d2) - bisect_left(sorted_holidays, d1)
+    return raw - holidays
+
+
+def _find_minute_for_k(
+    m_start: int, K: int, sorted_holidays: list, holiday_set: set
+) -> int:
+    d_start = m_start // 1440
+    is_biz_day = (d_start % 7 < 5) and (d_start not in holiday_set)
+
+    if not is_biz_day:
+        left_on_d_start = 0
+    else:
+        mod = m_start % 1440
+        if mod < 540:
+            left_on_d_start = 480
+        elif mod < 1020:
+            left_on_d_start = 1020 - mod
+        else:
+            left_on_d_start = 0
+
+    if K <= left_on_d_start:
+        mod = m_start % 1440
+        if mod < 540:
+            return d_start * 1440 + 540 + K
+        else:
+            return d_start * 1440 + mod + K
+
+    rem_k = K - left_on_d_start
+    n_days = (rem_k - 1) // 480 + 1
+    mins_on_final_day = rem_k - (n_days - 1) * 480
+
+    low = d_start + 1
+    high = d_start + 1 + len(sorted_holidays) + (n_days // 5 + 2) * 7
+    while low < high:
+        mid = (low + high) // 2
+        if _count_biz_days(d_start + 1, mid, sorted_holidays) >= n_days:
+            high = mid
+        else:
+            low = mid + 1
+
+    target_day = low
+    return target_day * 1440 + 540 + mins_on_final_day
+
+
+LIMITS = {"P1": 240, "P2": 480, "P3": 1440, "P4": 2400}
+
+
+def compute_sla(stream):
+    raw_holidays = set()
+    ticket_events = defaultdict(list)
+    has_ticket_events = False
+    now = 0
+
+    for line_idx, raw_line in enumerate(stream):
+        line = raw_line.strip()
+        if not line:
+            continue
+        parts = [p.strip() for p in line.split(",")]
+        if len(parts) not in (3, 4):
+            continue
+
+        f1, f2, f3 = parts[0], parts[1], parts[2]
+        if not f1 or not all("0" <= c <= "9" for c in f1):
+            continue
+        minute = int(f1)
+        ticket_id = f2
+        if not ticket_id:
+            continue
+
+        event = f3
+        if event in ("OPEN", "PRIORITY"):
+            if len(parts) != 4:
+                continue
+            priority_param = parts[3]
+            if priority_param not in ("P1", "P2", "P3", "P4"):
+                continue
+            if ticket_id == "*":
+                continue
+            has_ticket_events = True
+            if minute > now:
+                now = minute
+            ticket_events[ticket_id].append((minute, line_idx, event, priority_param))
+        elif event in ("PAUSE", "RESUME", "CLOSE", "REOPEN"):
+            if len(parts) != 3:
+                continue
+            if ticket_id == "*":
+                continue
+            has_ticket_events = True
+            if minute > now:
+                now = minute
+            ticket_events[ticket_id].append((minute, line_idx, event, None))
+        elif event == "HOLIDAY":
+            if len(parts) != 3:
+                continue
+            if ticket_id != "*":
+                continue
+            raw_holidays.add(minute // 1440)
+        else:
+            continue
+
+    if not has_ticket_events:
+        return []
+
+    holiday_set = {d for d in raw_holidays if d % 7 < 5}
+    sorted_holidays = sorted(holiday_set)
+
+    results = []
+
+    for ticket_id, events in ticket_events.items():
+        events.sort(key=lambda x: (x[0], x[1]))
+
+        # Group consecutive events occurring at the same minute
+        events_by_minute = []
+        curr_m = None
+        curr_group = []
+        for ev in events:
+            ev_m = ev[0]
+            if ev_m != curr_m:
+                if curr_group:
+                    events_by_minute.append((curr_m, curr_group))
+                curr_m = ev_m
+                curr_group = [ev]
+            else:
+                curr_group.append(ev)
+        if curr_group:
+            events_by_minute.append((curr_m, curr_group))
+
+        state = "NOT_OPENED"
+        priority = None
+        used = 0
+        breached = False
+        breached_at = None
+        had_valid_open = False
+        m_prev = None
+
+        for m_curr, group in events_by_minute:
+            if had_valid_open and m_prev is not None and m_curr > m_prev:
+                if state == "RUNNING":
+                    delta = _biz_mins(m_curr, sorted_holidays) - _biz_mins(
+                        m_prev, sorted_holidays
+                    )
+                    if not breached:
+                        limit = LIMITS[priority]
+                        K = (limit + 1) - used
+                        if delta >= K:
+                            t = _find_minute_for_k(
+                                m_prev, K, sorted_holidays, holiday_set
+                            )
+                            if t < m_curr:
+                                breached = True
+                                breached_at = t
+                    used += delta
+
+            # Apply all events at minute m_curr in stream order
+            for ev in group:
+                _, _, ev_type, ev_p = ev
+                if ev_type == "OPEN":
+                    if state == "NOT_OPENED":
+                        state = "RUNNING"
+                        priority = ev_p
+                        used = 0
+                        breached = False
+                        breached_at = None
+                        had_valid_open = True
+                    elif state == "CLOSED":
+                        state = "RUNNING"
+                        priority = ev_p
+                        used = 0
+                        breached = False
+                        breached_at = None
+                        had_valid_open = True
+                elif ev_type == "PRIORITY":
+                    if state in ("RUNNING", "PAUSED"):
+                        priority = ev_p
+                elif ev_type == "PAUSE":
+                    if state == "RUNNING":
+                        state = "PAUSED"
+                elif ev_type == "RESUME":
+                    if state == "PAUSED":
+                        state = "RUNNING"
+                elif ev_type == "CLOSE":
+                    if state in ("RUNNING", "PAUSED"):
+                        state = "CLOSED"
+                elif ev_type == "REOPEN":
+                    if state == "CLOSED":
+                        state = "RUNNING"
+
+            # Check breach at minute m_curr after all events applied
+            if had_valid_open and not breached:
+                limit = LIMITS[priority]
+                if used > limit:
+                    breached = True
+                    breached_at = m_curr
+
+            if had_valid_open:
+                m_prev = m_curr
+
+        if not had_valid_open:
+            continue
+
+        # Advance from m_prev to now
+        if m_prev is not None and now > m_prev:
+            if state == "RUNNING":
+                delta = _biz_mins(now, sorted_holidays) - _biz_mins(
+                    m_prev, sorted_holidays
+                )
+                if not breached:
+                    limit = LIMITS[priority]
+                    K = (limit + 1) - used
+                    if delta >= K:
+                        t = _find_minute_for_k(
+                            m_prev, K, sorted_holidays, holiday_set
+                        )
+                        breached = True
+                        breached_at = t
+                used += delta
+
+        status_map = {
+            "RUNNING": "running",
+            "PAUSED": "paused",
+            "CLOSED": "closed",
+        }
+
+        results.append(
+            {
+                "ticket_id": ticket_id,
+                "priority": priority,
+                "used_minutes": used,
+                "breached": breached,
+                "breached_at": breached_at,
+                "status": status_map[state],
+            }
+        )
+
+    results.sort(key=lambda x: x["ticket_id"])
+    return results

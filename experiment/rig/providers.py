@@ -66,10 +66,30 @@ def _key(cfg, default_env):
     return value
 
 
+def request_timeout_s(cfg) -> float | None:
+    """Per-request client timeout in seconds: settings.request_timeout_s, else CRUCIBLE_REQUEST_TIMEOUT_S, else None.
+
+    None keeps each SDK's default (google-genai has none). Added after the live study, where two arm-B runs hung on
+    a single Gemini call until the 45-minute run limit (experiment/STUDY_RESULTS.md, Deviations). Opt-in, so the
+    recorded study configuration replays unchanged.
+    """
+    raw = cfg.get("settings", {}).get("request_timeout_s")
+    if raw is None:
+        raw = os.environ.get("CRUCIBLE_REQUEST_TIMEOUT_S", "").strip() or None
+    if raw is None:
+        return None
+    value = float(raw)
+    if value <= 0:
+        raise ValueError("request timeout must be positive")
+    return value
+
+
 def _anthropic(cfg, system, prompt):
     import anthropic
     s = cfg.get("settings", {})
-    client = anthropic.Anthropic(api_key=_key(cfg, "ANTHROPIC_API_KEY"))
+    timeout = request_timeout_s(cfg)
+    client = anthropic.Anthropic(api_key=_key(cfg, "ANTHROPIC_API_KEY"),
+                                 **({"timeout": timeout} if timeout else {}))
     kwargs = {"model": cfg["model"], "max_tokens": s.get("max_tokens", 64000), "system": system,
               "messages": [{"role": "user", "content": prompt}]}
     if s.get("effort"):
@@ -85,7 +105,9 @@ def _google(cfg, system, prompt):
     from google import genai
     from google.genai import types
     s = cfg.get("settings", {})
-    client = genai.Client(api_key=_key(cfg, "GEMINI_API_KEY"))
+    timeout = request_timeout_s(cfg)
+    client = genai.Client(api_key=_key(cfg, "GEMINI_API_KEY"),
+                          **({"http_options": types.HttpOptions(timeout=int(timeout * 1000))} if timeout else {}))
     config = types.GenerateContentConfig(system_instruction=system, max_output_tokens=s.get("max_tokens", 65536))
     if "thinking_level" in s:
         config.thinking_config = types.ThinkingConfig(thinking_level=types.ThinkingLevel(s["thinking_level"]))
@@ -110,7 +132,9 @@ def _openai_compatible(cfg, system, prompt):
     from openai import OpenAI
     s = cfg.get("settings", {})
     base_url = os.environ.get(cfg.get("base_url_env", ""), "").strip() or cfg.get("base_url")
-    client = OpenAI(api_key=_key(cfg, "OPENAI_API_KEY"), base_url=base_url or None)
+    timeout = request_timeout_s(cfg)
+    client = OpenAI(api_key=_key(cfg, "OPENAI_API_KEY"), base_url=base_url or None,
+                    **({"timeout": timeout} if timeout else {}))
     kwargs = {"model": cfg["model"], "messages": [{"role": "system", "content": system}, {"role": "user", "content": prompt}]}
     if "max_tokens" in s:
         kwargs["max_tokens"] = s["max_tokens"]

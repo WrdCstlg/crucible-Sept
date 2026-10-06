@@ -1,7 +1,7 @@
 # Comparison across pilots
 
 > [!IMPORTANT]
-> **These pilots are history, not evidence about rates.** Each arm had n ≤ 5, on a problem both models mostly solved. A "5/5" shows the result can be reproduced, not what the pass rate is, and no statistical comparison between arms is valid from these numbers. (After the pilots, `rig/roles.json` pinned Gemini to temperature 0 and seed 0. That would make repeated runs near-copies, so the study's roles unpin it.) The question is tested by the pre-registered study ([`PREREGISTRATION.md`](PREREGISTRATION.md)), which uses a harder problem, independent samples, n = 80 and fixed tests.
+> **These pilots are history, not evidence about rates.** Each arm had n ≤ 5, on a problem both models mostly solved. A "5/5" shows the result can be reproduced, not what the pass rate is, and no statistical comparison between arms is valid from these numbers. (After the pilots, `rig/roles.json` pinned Gemini to temperature 0 and seed 0. That would make repeated runs near-copies, so the study's roles unpin it.) The question is tested by the pre-registered study ([`PREREGISTRATION.md`](PREREGISTRATION.md)), which uses a harder problem, independent samples, n = 80 and fixed tests. **It has run:** [`STUDY_RESULTS.md`](STUDY_RESULTS.md). On that problem Crucible gave the cheaper model no measurable gain (B 18/20 vs C 30/30, p = 0.155; vs A 29/30, p = 0.556), with every arm near the ceiling.
 
 Every number below comes from `summary.json`, `audit.json`, `observer_report.json` and `suite_check.json` in the run folders named. All pilots used the same frozen 39-case test set (frozen 2026-09-29T17:52:07Z).
 

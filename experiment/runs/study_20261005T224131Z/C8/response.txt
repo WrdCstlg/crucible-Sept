@@ -1,0 +1,177 @@
+```python
+import re
+from bisect import bisect_left, bisect_right
+
+_LIMITS = {"P1": 240, "P2": 480, "P3": 1440, "P4": 2400}
+_EVENTS = frozenset(("OPEN", "PRIORITY", "PAUSE", "RESUME", "CLOSE", "REOPEN", "HOLIDAY"))
+_DIGITS = re.compile(r"[0-9]+")
+
+_NOT_OPENED, _RUNNING, _PAUSED, _CLOSED = 0, 1, 2, 3
+_STATUS = {_RUNNING: "running", _PAUSED: "paused", _CLOSED: "closed"}
+
+
+def _to_int(s):
+    """Convert an ASCII digit string to int, robust to very long inputs."""
+    s = s.lstrip("0")
+    if not s:
+        return 0
+    if len(s) <= 4000:
+        return int(s)
+    v = 0
+    for i in range(0, len(s), 4000):
+        c = s[i:i + 4000]
+        v = v * (10 ** len(c)) + int(c)
+    return v
+
+
+def compute_sla(stream):
+    tickets = {}
+    holidays = set()
+    now = None
+
+    for line in stream:
+        if not isinstance(line, str):
+            continue
+        parts = line.strip().split(",")
+        n = len(parts)
+        if n != 3 and n != 4:
+            continue
+        ms = parts[0].strip()
+        if not _DIGITS.fullmatch(ms):
+            continue
+        tid = parts[1].strip()
+        if not tid:
+            continue
+        ev = parts[2].strip()
+        if ev not in _EVENTS:
+            continue
+        if ev == "OPEN" or ev == "PRIORITY":
+            if n != 4:
+                continue
+            p = parts[3].strip()
+            if p not in _LIMITS:
+                continue
+        else:
+            if n != 3:
+                continue
+            p = None
+        if ev == "HOLIDAY":
+            if tid != "*":
+                continue
+            holidays.add(_to_int(ms) // 1440)
+            continue
+        if tid == "*":
+            continue
+        m = _to_int(ms)
+        if now is None or m > now:
+            now = m
+        lst = tickets.get(tid)
+        if lst is None:
+            lst = []
+            tickets[tid] = lst
+        lst.append((m, ev, p))
+
+    if now is None:
+        return []
+
+    hol = sorted(d for d in holidays if d % 7 < 5)
+    holset = set(hol)
+    adj = [(h // 7) * 5 + (h % 7) - i for i, h in enumerate(hol)]
+
+    def B(t):
+        # number of business minutes x with 0 <= x < t
+        d, mod = divmod(t, 1440)
+        q, wd = divmod(d, 7)
+        wdays = q * 5 + (wd if wd < 5 else 5)
+        cnt = (wdays - bisect_left(hol, d)) * 480
+        if wd < 5 and mod > 540 and d not in holset:
+            cnt += (mod - 540) if mod < 1020 else 480
+        return cnt
+
+    def first_reach(T):
+        # smallest t with B(t) >= T, for T >= 1
+        k = T - 1
+        j, r = divmod(k, 480)
+        w = j + bisect_right(adj, j)
+        q, rem = divmod(w, 5)
+        d = q * 7 + rem
+        return d * 1440 + 540 + r + 1
+
+    result = []
+    for tid in sorted(tickets):
+        evs = tickets[tid]
+        evs.sort(key=lambda e: e[0])
+        state = _NOT_OPENED
+        prio = None
+        limit = 0
+        used = 0
+        blast = 0
+        breached_at = None
+        i = 0
+        n = len(evs)
+        while i < n:
+            m = evs[i][0]
+            if state == _RUNNING:
+                bm = B(m)
+                newused = used + bm - blast
+                if breached_at is None and newused > limit:
+                    tb = first_reach(blast + limit - used + 1)
+                    if tb < m:
+                        breached_at = tb
+                used = newused
+                blast = bm
+                blast_valid = True
+            else:
+                blast_valid = False
+            while i < n and evs[i][0] == m:
+                _, ev, p = evs[i]
+                i += 1
+                if ev == "OPEN":
+                    if state == _NOT_OPENED or state == _CLOSED:
+                        state = _RUNNING
+                        prio = p
+                        limit = _LIMITS[p]
+                        used = 0
+                        breached_at = None
+                elif ev == "PRIORITY":
+                    if state == _RUNNING or state == _PAUSED:
+                        prio = p
+                        limit = _LIMITS[p]
+                elif ev == "PAUSE":
+                    if state == _RUNNING:
+                        state = _PAUSED
+                elif ev == "RESUME":
+                    if state == _PAUSED:
+                        state = _RUNNING
+                elif ev == "CLOSE":
+                    if state == _RUNNING or state == _PAUSED:
+                        state = _CLOSED
+                elif ev == "REOPEN":
+                    if state == _CLOSED:
+                        state = _RUNNING
+            if state != _NOT_OPENED and breached_at is None and used > limit:
+                breached_at = m
+            if state == _RUNNING and not blast_valid:
+                blast = B(m)
+
+        if state == _NOT_OPENED:
+            continue
+
+        if state == _RUNNING:
+            bn = B(now)
+            newused = used + bn - blast
+            if breached_at is None and newused > limit:
+                breached_at = first_reach(blast + limit - used + 1)
+            used = newused
+
+        result.append({
+            "ticket_id": tid,
+            "priority": prio,
+            "used_minutes": used,
+            "breached": breached_at is not None,
+            "breached_at": breached_at,
+            "status": _STATUS[state],
+        })
+
+    return result
+```

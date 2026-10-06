@@ -1,0 +1,201 @@
+import re
+from bisect import bisect_left, bisect_right
+from operator import itemgetter
+
+_DIGITS_RE = re.compile(r'[0-9]+')
+_LIMITS = {'P1': 240, 'P2': 480, 'P3': 1440, 'P4': 2400}
+_EVENTS_4 = frozenset(('OPEN', 'PRIORITY'))
+_EVENTS_3 = frozenset(('PAUSE', 'RESUME', 'CLOSE', 'REOPEN'))
+
+_NOT, _RUN, _PAU, _CLO = 0, 1, 2, 3
+_STATUS = {_RUN: 'running', _PAU: 'paused', _CLO: 'closed'}
+
+
+def _to_int(ms):
+    """Convert a string of ASCII digits to int, robust against the
+    int max-str-digits limit of recent CPython versions."""
+    try:
+        return int(ms)
+    except ValueError:
+        pass
+    s = ms.lstrip('0') or '0'
+    try:
+        return int(s)
+    except ValueError:
+        pass
+    result = 0
+    step = 1000
+    for k in range(0, len(s), step):
+        chunk = s[k:k + step]
+        result = result * (10 ** len(chunk)) + int(chunk)
+    return result
+
+
+def compute_sla(stream):
+    events = {}
+    hol_days = set()
+    now = None
+    seq_has_ticket = False
+
+    for line in stream:
+        if not isinstance(line, str):
+            continue
+        s = line.strip()
+        if not s:
+            continue
+        parts = s.split(',')
+        n = len(parts)
+        if n != 3 and n != 4:
+            continue
+        parts = [p.strip() for p in parts]
+        ms, tid, ev = parts[0], parts[1], parts[2]
+        if not _DIGITS_RE.fullmatch(ms):
+            continue
+        if not tid:
+            continue
+        if ev == 'HOLIDAY':
+            if n != 3 or tid != '*':
+                continue
+            hol_days.add(_to_int(ms) // 1440)
+            continue
+        if tid == '*':
+            continue
+        if ev in _EVENTS_4:
+            if n != 4:
+                continue
+            pr = parts[3]
+            if pr not in _LIMITS:
+                continue
+        elif ev in _EVENTS_3:
+            if n != 3:
+                continue
+            pr = None
+        else:
+            continue
+        m = _to_int(ms)
+        seq_has_ticket = True
+        if now is None or m > now:
+            now = m
+        lst = events.get(tid)
+        if lst is None:
+            lst = []
+            events[tid] = lst
+        lst.append((m, ev, pr))
+
+    if not seq_has_ticket:
+        return []
+
+    # Holiday structures in "business-day index" space.
+    H = []
+    for d in hol_days:
+        w, wd = divmod(d, 7)
+        if wd < 5:
+            H.append(w * 5 + wd)
+    H.sort()
+    G = [h - i for i, h in enumerate(H)]
+    hol_set = set(H)
+
+    def B(t):
+        """Number of business minutes in [0, t)."""
+        d, r = divmod(t, 1440)
+        w, wd = divmod(d, 7)
+        if wd < 5:
+            bdf = w * 5 + wd
+            if bdf in hol_set:
+                partial = 0
+            else:
+                partial = r - 540
+                if partial < 0:
+                    partial = 0
+                elif partial > 480:
+                    partial = 480
+        else:
+            bdf = w * 5 + 5
+            partial = 0
+        return (bdf - bisect_left(H, bdf)) * 480 + partial
+
+    def inv(K):
+        """Smallest t with B(t) >= K (K >= 1)."""
+        j = K - 1
+        q, off = divmod(j, 480)
+        p = q + bisect_right(G, q)
+        w, wd = divmod(p, 5)
+        return (w * 7 + wd) * 1440 + 540 + off + 1
+
+    LIM = _LIMITS
+    results = []
+    key0 = itemgetter(0)
+
+    for tid in sorted(events):
+        evs = events[tid]
+        evs.sort(key=key0)
+        state = _NOT
+        prio = None
+        used = 0
+        breached_at = None
+        Bcur = 0
+        i = 0
+        n = len(evs)
+        while i < n:
+            m = evs[i][0]
+            # Advance from previous event minute to m.
+            if state == _RUN:
+                bm = B(m)
+                if breached_at is None:
+                    tb = inv(Bcur + LIM[prio] - used + 1)
+                    if tb < m:
+                        breached_at = tb
+                used += bm - Bcur
+            # Apply all events at minute m in stream order.
+            while i < n and evs[i][0] == m:
+                _, ev, pr = evs[i]
+                i += 1
+                if ev == 'OPEN':
+                    if state == _NOT or state == _CLO:
+                        state = _RUN
+                        prio = pr
+                        used = 0
+                        breached_at = None
+                elif ev == 'PRIORITY':
+                    if state == _RUN or state == _PAU:
+                        prio = pr
+                elif ev == 'PAUSE':
+                    if state == _RUN:
+                        state = _PAU
+                elif ev == 'RESUME':
+                    if state == _PAU:
+                        state = _RUN
+                elif ev == 'CLOSE':
+                    if state == _RUN or state == _PAU:
+                        state = _CLO
+                elif ev == 'REOPEN':
+                    if state == _CLO:
+                        state = _RUN
+            # Check breach at minute m after events applied.
+            if state != _NOT:
+                if breached_at is None and used > LIM[prio]:
+                    breached_at = m
+                if state == _RUN:
+                    Bcur = B(m)
+
+        if state == _NOT:
+            continue
+
+        if state == _RUN:
+            bn = B(now)
+            if breached_at is None:
+                tb = inv(Bcur + LIM[prio] - used + 1)
+                if tb <= now:
+                    breached_at = tb
+            used += bn - Bcur
+
+        results.append({
+            "ticket_id": tid,
+            "priority": prio,
+            "used_minutes": used,
+            "breached": breached_at is not None,
+            "breached_at": breached_at,
+            "status": _STATUS[state],
+        })
+
+    return results

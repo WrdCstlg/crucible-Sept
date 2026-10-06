@@ -1,0 +1,2649 @@
+{
+  "config": {
+    "started_utc": "2026-10-05T22:41:31.527030+00:00",
+    "mock": false,
+    "prereg": {
+      "sha256": "428a412cd7ba8cbedca27a2cebc416b9ee13e6850fefa999f34f187773b1d86e",
+      "commit": "7c9587e2d07bbd2185202860bec4dbbb0e70a52a",
+      "committed_at": "2026-10-05T18:40:59-04:00"
+    },
+    "roles_file": "experiment/study/roles_study.json",
+    "roles_sha256": "c709344779d2c3df22cafe1840d6808ede39f7e804e72095b14575cd860d69d7",
+    "freeze_sha256": {
+      "SPEC.md": "9444103987a8f913bf3e294a7b14fe0aa2589a77c579db22b69dd445eab2e53c",
+      "hand_cases.json": "31828c4b2db00be30d70a60eb4f59ec28c7c932f82782ab27616da6fe7959942",
+      "public_cases.json": "8e4a02d36da0f5103e38d9c0cf794295bad097af5b340154a01be5d928277b36",
+      "generated_cases.json": "6b09223e234c90ac741bb30d896f9c6192087175de2635dac2d15cf22db21ecb",
+      "stress_cases.json": "2670f442034e6a141c615f8720cf94fb3a87d11ad957e244b90a659e7abd20fe",
+      "reference.py": "1cb7d39a3c91518cefdce48bf40f12450790eb1a7857ad78f12878ccbd2e1edb",
+      "brute_force.py": "071896a0349231f94fbd953796229886e068a11e0959acdef96c45cd3eb4972c",
+      "generate_cases.py": "453e3151bb57e37b779d71a4857d1f1168f4c597ae3a4135f8bfe0c7f5149cf8"
+    },
+    "runs_planned": {
+      "A": 30,
+      "B": 20,
+      "C": 30
+    },
+    "cap_usd": 100.0,
+    "worst_case_per_run": {
+      "A": 0.2908,
+      "B": 2.9076,
+      "C": 1.36
+    },
+    "sandbox": {
+      "backend": "docker",
+      "image": "python:3.12-slim@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d",
+      "network": "none",
+      "rootfs": "read-only",
+      "code_mount": "read-only",
+      "tmpfs_mb": 64,
+      "user": "65534:65534",
+      "capabilities": "all dropped",
+      "no_new_privileges": true,
+      "memory_mb": 1024,
+      "cpus": 1.0,
+      "pids_limit": 128,
+      "env": "allowlist only"
+    },
+    "hidden_cases": 225,
+    "labels": {
+      "A": "A: gemini-3.8-flash, 1 call",
+      "B": "B: gemini-3.8-flash in Crucible",
+      "C": "C: claude-opus-5-5, 1 call"
+    },
+    "gate_threshold": 0.6
+  },
+  "spent_usd": 27.3666,
+  "budget_halted": null,
+  "not_run": [],
+  "analysis": {
+    "arms": {
+      "A": {
+        "planned": 30,
+        "valid": 30,
+        "harness_errors": 0,
+        "strict_passes": 29,
+        "rate": 0.967,
+        "wilson95": [
+          0.833,
+          0.994
+        ],
+        "mean_cases_passed": 222.5,
+        "cost_usd": 4.5009
+      },
+      "B": {
+        "planned": 20,
+        "valid": 20,
+        "harness_errors": 0,
+        "strict_passes": 18,
+        "rate": 0.9,
+        "wilson95": [
+          0.699,
+          0.972
+        ],
+        "mean_cases_passed": 202.5,
+        "cost_usd": 8.6921
+      },
+      "C": {
+        "planned": 30,
+        "valid": 30,
+        "harness_errors": 0,
+        "strict_passes": 30,
+        "rate": 1.0,
+        "wilson95": [
+          0.886,
+          1.0
+        ],
+        "mean_cases_passed": 225.0,
+        "cost_usd": 8.3584
+      }
+    },
+    "H1_B_vs_C": {
+      "p_two_sided": 0.1551,
+      "rate_difference": -0.1,
+      "min_detectable_gap_80pct": 1.0,
+      "verdict": "no detectable difference (p = 0.155); with these n, gaps under ~100% could not be detected at 80% power"
+    },
+    "H2_B_vs_A": {
+      "p_two_sided": 0.55612,
+      "rate_difference": -0.067,
+      "min_detectable_gap_80pct": 1.0,
+      "verdict": "no detectable difference (p = 0.556); with these n, gaps under ~100% could not be detected at 80% power"
+    },
+    "H3_crucible_vs_hidden": {
+      "candidates": 38,
+      "promoted": 36,
+      "promoted_but_fail_hidden": 2,
+      "rejected_but_pass_hidden": 0,
+      "false_promotion_wilson95": [
+        0.015,
+        0.181
+      ]
+    },
+    "H4_gate_out_of_sample": {
+      "suites": 18,
+      "admitted": 11,
+      "false_security": 0,
+      "lost_signal": 0,
+      "agreement": "18/18",
+      "agreement_wilson95": [
+        0.824,
+        1.0
+      ],
+      "criterion_met": true
+    },
+    "integrity": {
+      "harness_error_limit": "10% of planned runs per arm",
+      "arms_over_limit": [],
+      "compromised": false
+    }
+  },
+  "runs": [
+    {
+      "run": "A1",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.14356,
+      "seconds": 132.9,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A10",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.14449,
+      "seconds": 134.9,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A11",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.1552,
+      "seconds": 149.4,
+      "strict_pass": false,
+      "cases_passed": 149,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "50/80",
+        "holiday": "17/40",
+        "churn": "21/40",
+        "medium": "4/6",
+        "stress": "2/4"
+      },
+      "first_failure": "R001: expected {'ticket_id': 't1', 'priority': 'P3', 'used_minutes': 960, 'breached': False, 'breached_at': None, 'status': 'closed'}, got {'ticket_id': 't1', 'priority': 'P3', 'used_minutes': 1440, 'breached': False, 'breached_at': None, 'status': 'closed'}"
+    },
+    {
+      "run": "A12",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.14464,
+      "seconds": 147.1,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A13",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.13785,
+      "seconds": 145.1,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A14",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.15055,
+      "seconds": 153.9,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A15",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.15437,
+      "seconds": 156.9,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A16",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.14675,
+      "seconds": 148.6,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A17",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.14486,
+      "seconds": 142.7,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A18",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.16875,
+      "seconds": 172.1,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A19",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.17138,
+      "seconds": 185.3,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A2",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.15386,
+      "seconds": 146.0,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A20",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.1375,
+      "seconds": 127.5,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A21",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.15831,
+      "seconds": 224.7,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A22",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.14953,
+      "seconds": 141.9,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A23",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.13711,
+      "seconds": 267.6,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A24",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.14597,
+      "seconds": 139.8,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A25",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.16187,
+      "seconds": 164.7,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A26",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.16493,
+      "seconds": 162.3,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A27",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.14205,
+      "seconds": 152.4,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A28",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.14281,
+      "seconds": 268.3,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A29",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.13907,
+      "seconds": 264.9,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A3",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.15359,
+      "seconds": 143.5,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A30",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.14654,
+      "seconds": 127.8,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A4",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.14355,
+      "seconds": 137.2,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A5",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.14405,
+      "seconds": 135.5,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A6",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.139,
+      "seconds": 123.2,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A7",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.15594,
+      "seconds": 107.4,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A8",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.16307,
+      "seconds": 152.0,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "A9",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.15979,
+      "seconds": 148.9,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "B1",
+      "arm": "B",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.4507,
+      "seconds": 412.2,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "B10",
+      "arm": "B",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.46771,
+      "seconds": 463.5,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "B11",
+      "arm": "B",
+      "status": "timeout",
+      "error": "no meta",
+      "harness_error": false,
+      "cost_usd": null,
+      "seconds": 2700.1,
+      "strict_pass": false,
+      "cases_passed": 0,
+      "cases_total": null,
+      "by_layer": null,
+      "first_failure": null
+    },
+    {
+      "run": "B12",
+      "arm": "B",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.47342,
+      "seconds": 473.0,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "B13",
+      "arm": "B",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.46865,
+      "seconds": 425.2,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "B14",
+      "arm": "B",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.47466,
+      "seconds": 452.3,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "B15",
+      "arm": "B",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.46053,
+      "seconds": 418.5,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "B16",
+      "arm": "B",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.51847,
+      "seconds": 498.7,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "B17",
+      "arm": "B",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.50284,
+      "seconds": 680.0,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "B18",
+      "arm": "B",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.45329,
+      "seconds": 532.7,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "B19",
+      "arm": "B",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.46777,
+      "seconds": 543.8,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "B2",
+      "arm": "B",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.52128,
+      "seconds": 444.4,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "B20",
+      "arm": "B",
+      "status": "timeout",
+      "error": "no meta",
+      "harness_error": false,
+      "cost_usd": null,
+      "seconds": 2700.1,
+      "strict_pass": false,
+      "cases_passed": 0,
+      "cases_total": null,
+      "by_layer": null,
+      "first_failure": null
+    },
+    {
+      "run": "B3",
+      "arm": "B",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.50776,
+      "seconds": 516.7,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "B4",
+      "arm": "B",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.46636,
+      "seconds": 394.7,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "B5",
+      "arm": "B",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.45783,
+      "seconds": 439.9,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "B6",
+      "arm": "B",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.50553,
+      "seconds": 513.4,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "B7",
+      "arm": "B",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.48704,
+      "seconds": 443.6,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "B8",
+      "arm": "B",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.49823,
+      "seconds": 499.2,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "B9",
+      "arm": "B",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.50999,
+      "seconds": 641.3,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C1",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.27537,
+      "seconds": 122.7,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C10",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.30685,
+      "seconds": 135.3,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C11",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.22649,
+      "seconds": 98.5,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C12",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.20347,
+      "seconds": 87.3,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C13",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.26839,
+      "seconds": 120.4,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C14",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.29547,
+      "seconds": 133.1,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C15",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.34853,
+      "seconds": 154.9,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C16",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.24827,
+      "seconds": 107.2,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C17",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.28039,
+      "seconds": 124.7,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C18",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.27267,
+      "seconds": 120.9,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C19",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.27165,
+      "seconds": 119.4,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C2",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.26335,
+      "seconds": 119.1,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C20",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.30893,
+      "seconds": 137.7,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C21",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.29411,
+      "seconds": 129.5,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C22",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.27689,
+      "seconds": 120.4,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C23",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.26237,
+      "seconds": 117.1,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C24",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.24917,
+      "seconds": 111.1,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C25",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.27207,
+      "seconds": 120.0,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C26",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.33597,
+      "seconds": 148.3,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C27",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.31369,
+      "seconds": 137.9,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C28",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.26483,
+      "seconds": 116.8,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C29",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.28311,
+      "seconds": 125.6,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C3",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.30153,
+      "seconds": 133.9,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C30",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.24579,
+      "seconds": 106.7,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C4",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.29925,
+      "seconds": 134.1,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C5",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.26407,
+      "seconds": 117.2,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C6",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.26353,
+      "seconds": 116.1,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C7",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.29261,
+      "seconds": 128.3,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C8",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.26741,
+      "seconds": 119.2,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    },
+    {
+      "run": "C9",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "cost_usd": 0.30217,
+      "seconds": 134.9,
+      "strict_pass": true,
+      "cases_passed": 225,
+      "cases_total": 225,
+      "by_layer": {
+        "public": "4/4",
+        "hand": "20/20",
+        "edge": "35/35",
+        "random": "80/80",
+        "holiday": "40/40",
+        "churn": "40/40",
+        "medium": "6/6",
+        "stress": "4/4"
+      },
+      "first_failure": null
+    }
+  ],
+  "b_candidates": [
+    {
+      "run": "B1",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B1",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B10",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B10",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B12",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B12",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B13",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B13",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B14",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B14",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": false,
+      "cases_passed": 149
+    },
+    {
+      "run": "B15",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B15",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B16",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B16",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": false,
+      "cases_passed": 224
+    },
+    {
+      "run": "B17",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B17",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B18",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B18",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B19",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B19",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B2",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B2",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B20",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": null,
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B20",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": null,
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B3",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B3",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B4",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B4",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B5",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B5",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B6",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B6",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B7",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B7",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B8",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B8",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B9",
+      "candidate": "round1_branch_1",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    },
+    {
+      "run": "B9",
+      "candidate": "round1_branch_2",
+      "crucible_verdict": "PASS",
+      "hidden_pass": true,
+      "cases_passed": 225
+    }
+  ],
+  "gate_out_of_sample": [
+    {
+      "suite": "B1/round1_crucible_tests",
+      "baseline_passes_reference": false,
+      "gate_admits": false,
+      "code": [
+        0,
+        0
+      ],
+      "output": [
+        0,
+        0
+      ],
+      "input": [
+        0,
+        0
+      ],
+      "planted_bugs_caught": [
+        0,
+        21
+      ],
+      "independently_strong": false,
+      "agree": true
+    },
+    {
+      "suite": "B10/round1_crucible_tests",
+      "baseline_passes_reference": false,
+      "gate_admits": false,
+      "code": [
+        0,
+        0
+      ],
+      "output": [
+        0,
+        0
+      ],
+      "input": [
+        0,
+        0
+      ],
+      "planted_bugs_caught": [
+        0,
+        21
+      ],
+      "independently_strong": false,
+      "agree": true
+    },
+    {
+      "suite": "B12/round1_crucible_tests",
+      "baseline_passes_reference": false,
+      "gate_admits": false,
+      "code": [
+        0,
+        0
+      ],
+      "output": [
+        0,
+        0
+      ],
+      "input": [
+        0,
+        0
+      ],
+      "planted_bugs_caught": [
+        0,
+        21
+      ],
+      "independently_strong": false,
+      "agree": true
+    },
+    {
+      "suite": "B13/round1_crucible_tests",
+      "baseline_passes_reference": true,
+      "gate_admits": true,
+      "code": [
+        38,
+        39
+      ],
+      "output": [
+        10,
+        10
+      ],
+      "input": [
+        7,
+        7
+      ],
+      "planted_bugs_caught": [
+        19,
+        21
+      ],
+      "independently_strong": true,
+      "agree": true
+    },
+    {
+      "suite": "B14/round1_crucible_tests",
+      "baseline_passes_reference": true,
+      "gate_admits": true,
+      "code": [
+        39,
+        39
+      ],
+      "output": [
+        10,
+        10
+      ],
+      "input": [
+        7,
+        7
+      ],
+      "planted_bugs_caught": [
+        21,
+        21
+      ],
+      "independently_strong": true,
+      "agree": true
+    },
+    {
+      "suite": "B15/round1_crucible_tests",
+      "baseline_passes_reference": false,
+      "gate_admits": false,
+      "code": [
+        0,
+        0
+      ],
+      "output": [
+        0,
+        0
+      ],
+      "input": [
+        0,
+        0
+      ],
+      "planted_bugs_caught": [
+        0,
+        21
+      ],
+      "independently_strong": false,
+      "agree": true
+    },
+    {
+      "suite": "B16/round1_crucible_tests",
+      "baseline_passes_reference": false,
+      "gate_admits": false,
+      "code": [
+        0,
+        0
+      ],
+      "output": [
+        0,
+        0
+      ],
+      "input": [
+        0,
+        0
+      ],
+      "planted_bugs_caught": [
+        0,
+        21
+      ],
+      "independently_strong": false,
+      "agree": true
+    },
+    {
+      "suite": "B17/round1_crucible_tests",
+      "baseline_passes_reference": true,
+      "gate_admits": true,
+      "code": [
+        37,
+        39
+      ],
+      "output": [
+        10,
+        10
+      ],
+      "input": [
+        7,
+        7
+      ],
+      "planted_bugs_caught": [
+        20,
+        21
+      ],
+      "independently_strong": true,
+      "agree": true
+    },
+    {
+      "suite": "B18/round1_crucible_tests",
+      "baseline_passes_reference": false,
+      "gate_admits": false,
+      "code": [
+        0,
+        0
+      ],
+      "output": [
+        0,
+        0
+      ],
+      "input": [
+        0,
+        0
+      ],
+      "planted_bugs_caught": [
+        0,
+        21
+      ],
+      "independently_strong": false,
+      "agree": true
+    },
+    {
+      "suite": "B19/round1_crucible_tests",
+      "baseline_passes_reference": true,
+      "gate_admits": true,
+      "code": [
+        38,
+        39
+      ],
+      "output": [
+        10,
+        10
+      ],
+      "input": [
+        5,
+        7
+      ],
+      "planted_bugs_caught": [
+        18,
+        21
+      ],
+      "independently_strong": true,
+      "agree": true
+    },
+    {
+      "suite": "B2/round1_crucible_tests",
+      "baseline_passes_reference": true,
+      "gate_admits": true,
+      "code": [
+        38,
+        39
+      ],
+      "output": [
+        10,
+        10
+      ],
+      "input": [
+        7,
+        7
+      ],
+      "planted_bugs_caught": [
+        19,
+        21
+      ],
+      "independently_strong": true,
+      "agree": true
+    },
+    {
+      "suite": "B3/round1_crucible_tests",
+      "baseline_passes_reference": true,
+      "gate_admits": true,
+      "code": [
+        37,
+        39
+      ],
+      "output": [
+        10,
+        10
+      ],
+      "input": [
+        6,
+        7
+      ],
+      "planted_bugs_caught": [
+        20,
+        21
+      ],
+      "independently_strong": true,
+      "agree": true
+    },
+    {
+      "suite": "B4/round1_crucible_tests",
+      "baseline_passes_reference": true,
+      "gate_admits": true,
+      "code": [
+        36,
+        39
+      ],
+      "output": [
+        10,
+        10
+      ],
+      "input": [
+        7,
+        7
+      ],
+      "planted_bugs_caught": [
+        19,
+        21
+      ],
+      "independently_strong": true,
+      "agree": true
+    },
+    {
+      "suite": "B5/round1_crucible_tests",
+      "baseline_passes_reference": true,
+      "gate_admits": true,
+      "code": [
+        36,
+        39
+      ],
+      "output": [
+        10,
+        10
+      ],
+      "input": [
+        6,
+        7
+      ],
+      "planted_bugs_caught": [
+        18,
+        21
+      ],
+      "independently_strong": true,
+      "agree": true
+    },
+    {
+      "suite": "B6/round1_crucible_tests",
+      "baseline_passes_reference": false,
+      "gate_admits": false,
+      "code": [
+        0,
+        0
+      ],
+      "output": [
+        0,
+        0
+      ],
+      "input": [
+        0,
+        0
+      ],
+      "planted_bugs_caught": [
+        0,
+        21
+      ],
+      "independently_strong": false,
+      "agree": true
+    },
+    {
+      "suite": "B7/round1_crucible_tests",
+      "baseline_passes_reference": true,
+      "gate_admits": true,
+      "code": [
+        38,
+        39
+      ],
+      "output": [
+        10,
+        10
+      ],
+      "input": [
+        7,
+        7
+      ],
+      "planted_bugs_caught": [
+        19,
+        21
+      ],
+      "independently_strong": true,
+      "agree": true
+    },
+    {
+      "suite": "B8/round1_crucible_tests",
+      "baseline_passes_reference": true,
+      "gate_admits": true,
+      "code": [
+        38,
+        39
+      ],
+      "output": [
+        10,
+        10
+      ],
+      "input": [
+        7,
+        7
+      ],
+      "planted_bugs_caught": [
+        19,
+        21
+      ],
+      "independently_strong": true,
+      "agree": true
+    },
+    {
+      "suite": "B9/round1_crucible_tests",
+      "baseline_passes_reference": true,
+      "gate_admits": true,
+      "code": [
+        39,
+        39
+      ],
+      "output": [
+        10,
+        10
+      ],
+      "input": [
+        7,
+        7
+      ],
+      "planted_bugs_caught": [
+        19,
+        21
+      ],
+      "independently_strong": true,
+      "agree": true
+    }
+  ]
+}

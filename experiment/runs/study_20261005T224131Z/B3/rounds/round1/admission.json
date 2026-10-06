@@ -1,0 +1,5 @@
+{
+  "suite": "arena_test_iter_1.py",
+  "decision": "advisory",
+  "reason": "no trusted reference to validate it against; reported, never blocking"
+}

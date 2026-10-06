@@ -1,0 +1,185 @@
+import re
+from bisect import bisect_left, bisect_right
+
+_LIMITS = {"P1": 240, "P2": 480, "P3": 1440, "P4": 2400}
+_SIMPLE_EVENTS = frozenset(("PAUSE", "RESUME", "CLOSE", "REOPEN"))
+_DIGITS = re.compile(r"[0-9]+")
+
+_RUN, _PAU, _CLO = 1, 2, 3
+_STATUS_NAME = {_RUN: "running", _PAU: "paused", _CLO: "closed"}
+
+
+def _parse_int(s):
+    s = s.lstrip("0")
+    if not s:
+        return 0
+    try:
+        return int(s)
+    except ValueError:
+        # Extremely long digit strings (beyond int max str digits limit).
+        v = 0
+        for i in range(0, len(s), 1000):
+            c = s[i:i + 1000]
+            v = v * (10 ** len(c)) + int(c)
+        return v
+
+
+def compute_sla(stream):
+    events = []
+    holidays = set()
+
+    # ---------- Parsing ----------
+    for line in stream:
+        if not isinstance(line, str):
+            continue
+        parts = line.strip().split(",")
+        np_ = len(parts)
+        if np_ != 3 and np_ != 4:
+            continue
+        f1 = parts[0].strip()
+        tid = parts[1].strip()
+        ev = parts[2].strip()
+        if not tid or _DIGITS.fullmatch(f1) is None:
+            continue
+        if ev == "OPEN" or ev == "PRIORITY":
+            if np_ != 4 or tid == "*":
+                continue
+            pr = parts[3].strip()
+            if pr not in _LIMITS:
+                continue
+        elif ev in _SIMPLE_EVENTS:
+            if np_ != 3 or tid == "*":
+                continue
+            pr = None
+        elif ev == "HOLIDAY":
+            if np_ != 3 or tid != "*":
+                continue
+            holidays.add(_parse_int(f1) // 1440)
+            continue
+        else:
+            continue
+        events.append((_parse_int(f1), tid, ev, pr))
+
+    if not events:
+        return []
+
+    events.sort(key=lambda e: e[0])  # stable sort
+
+    # ---------- Calendar ----------
+    Hs = sorted(d for d in holidays if d % 7 < 5)
+    nH = len(Hs)
+    A = [(h // 7) * 2400 + (h % 7) * 480 - 480 * i for i, h in enumerate(Hs)]
+
+    def B(t):
+        """Number of business minutes in [0, t)."""
+        d, mod = divmod(t, 1440)
+        w, wd = divmod(d, 7)
+        if wd < 5:
+            if mod > 540:
+                partial = mod - 540
+                if partial > 480:
+                    partial = 480
+            else:
+                partial = 0
+            res = w * 2400 + wd * 480 + partial
+        else:
+            res = w * 2400 + 2400
+            partial = 0
+        if nH:
+            k = bisect_left(Hs, d)
+            res -= 480 * k
+            if partial and k < nH and Hs[k] == d:
+                res -= partial
+        return res
+
+    def inv(K):
+        """Minute of the K-th (0-indexed) business minute."""
+        j = bisect_right(A, K)
+        J = K + 480 * j
+        w, r = divmod(J, 2400)
+        dd, off = divmod(r, 480)
+        return w * 10080 + dd * 1440 + 540 + off
+
+    LIM = _LIMITS
+    # ticket record: [status, priority, used, cp, Bcp, breached_at]
+    tickets = {}
+    n = len(events)
+    i = 0
+    while i < n:
+        m = events[i][0]
+        Bm = B(m)
+        touched = []
+        while i < n and events[i][0] == m:
+            _, tid, ev, pr = events[i]
+            i += 1
+            tk = tickets.get(tid)
+            if tk is None:
+                if ev == "OPEN":
+                    tk = [_RUN, pr, 0, m, Bm, None]
+                    tickets[tid] = tk
+                    touched.append(tk)
+                continue
+            if tk[3] != m:
+                # advance from cp to m, checking breach in (cp, m)
+                if tk[0] == _RUN:
+                    if tk[5] is None:
+                        T = tk[4] + LIM[tk[1]] - tk[2] + 1
+                        if Bm >= T:
+                            t = inv(T - 1) + 1
+                            if t < m:
+                                tk[5] = t
+                    tk[2] += Bm - tk[4]
+                tk[3] = m
+                tk[4] = Bm
+                touched.append(tk)
+            st = tk[0]
+            if ev == "OPEN":
+                if st == _CLO:
+                    tk[0] = _RUN
+                    tk[1] = pr
+                    tk[2] = 0
+                    tk[5] = None
+            elif ev == "PRIORITY":
+                if st == _RUN or st == _PAU:
+                    tk[1] = pr
+            elif ev == "PAUSE":
+                if st == _RUN:
+                    tk[0] = _PAU
+            elif ev == "RESUME":
+                if st == _PAU:
+                    tk[0] = _RUN
+            elif ev == "CLOSE":
+                if st == _RUN or st == _PAU:
+                    tk[0] = _CLO
+            else:  # REOPEN
+                if st == _CLO:
+                    tk[0] = _RUN
+        for tk in touched:
+            if tk[5] is None and tk[2] > LIM[tk[1]]:
+                tk[5] = m
+
+    now = events[-1][0]
+    Bnow = B(now)
+    for tk in tickets.values():
+        if tk[3] != now:
+            if tk[0] == _RUN:
+                if tk[5] is None:
+                    T = tk[4] + LIM[tk[1]] - tk[2] + 1
+                    if Bnow >= T:
+                        tk[5] = inv(T - 1) + 1
+                tk[2] += Bnow - tk[4]
+            tk[3] = now
+            tk[4] = Bnow
+
+    result = []
+    for tid in sorted(tickets):
+        tk = tickets[tid]
+        result.append({
+            "ticket_id": tid,
+            "priority": tk[1],
+            "used_minutes": tk[2],
+            "breached": tk[5] is not None,
+            "breached_at": tk[5],
+            "status": _STATUS_NAME[tk[0]],
+        })
+    return result

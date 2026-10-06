@@ -1,0 +1,188 @@
+from bisect import bisect_left
+from collections import defaultdict
+from itertools import groupby
+
+LIMITS = {
+    'P1': 240,
+    'P2': 480,
+    'P3': 1440,
+    'P4': 2400,
+}
+
+
+def compute_sla(stream):
+    raw_holidays = set()
+    ticket_events = defaultdict(list)
+    now = None
+
+    for line in stream:
+        line = line.strip()
+        if not line:
+            continue
+        parts = line.split(',')
+        if len(parts) not in (3, 4):
+            continue
+
+        f0 = parts[0].strip()
+        if not f0 or not all('0' <= c <= '9' for c in f0):
+            continue
+        m = int(f0)
+
+        ticket_id = parts[1].strip()
+        event = parts[2].strip()
+
+        if event == 'HOLIDAY':
+            if len(parts) != 3 or ticket_id != '*':
+                continue
+            raw_holidays.add(m // 1440)
+        elif event in ('OPEN', 'PRIORITY'):
+            if len(parts) != 4 or ticket_id == '*' or not ticket_id:
+                continue
+            p = parts[3].strip()
+            if p not in LIMITS:
+                continue
+            if now is None or m > now:
+                now = m
+            ticket_events[ticket_id].append((m, event, p))
+        elif event in ('PAUSE', 'RESUME', 'CLOSE', 'REOPEN'):
+            if len(parts) != 3 or ticket_id == '*' or not ticket_id:
+                continue
+            if now is None or m > now:
+                now = m
+            ticket_events[ticket_id].append((m, event, None))
+
+    if now is None:
+        return []
+
+    # Business holidays: only holidays falling on Monday..Friday (0..4) affect business days
+    sorted_holidays = sorted(d for d in raw_holidays if (d % 7) < 5)
+    holiday_set = set(sorted_holidays)
+    num_holidays = len(sorted_holidays)
+
+    def business_minutes_before(t):
+        if t <= 0:
+            return 0
+        day = t // 1440
+        mod = t % 1440
+        b_days = (day // 7) * 5 + min(day % 7, 5) - bisect_left(sorted_holidays, day)
+        ans = b_days * 480
+        if (day % 7 < 5) and (day not in holiday_set):
+            ans += max(0, min(mod, 1020) - 540)
+        return ans
+
+    def business_minutes_between(t1, t2):
+        if t1 >= t2:
+            return 0
+        return business_minutes_before(t2) - business_minutes_before(t1)
+
+    def find_business_day(b_idx):
+        low = 0
+        high = (b_idx // 5 + 1) * 7 + num_holidays * 2 + 14
+        while low < high:
+            mid = (low + high) // 2
+            day = mid + 1
+            b_days = (day // 7) * 5 + min(day % 7, 5) - bisect_left(sorted_holidays, day)
+            if b_days >= b_idx + 1:
+                high = mid
+            else:
+                low = mid + 1
+        return low
+
+    def minute_when_target_reached(target):
+        full_days = target // 480
+        rem = target % 480
+        if rem == 0:
+            b_idx = full_days - 1
+            d = find_business_day(b_idx)
+            return d * 1440 + 1020
+        else:
+            b_idx = full_days
+            d = find_business_day(b_idx)
+            return d * 1440 + 540 + rem
+
+    results = []
+
+    for ticket_id in sorted(ticket_events.keys()):
+        events = ticket_events[ticket_id]
+        events.sort(key=lambda x: x[0])
+
+        state = 'NOT_OPENED'
+        priority = None
+        used = 0
+        breached = False
+        breached_at = None
+        had_valid_open = False
+        prev_m = None
+
+        for m, group in groupby(events, key=lambda x: x[0]):
+            ev_list = [(ev_type, p) for _, ev_type, p in group]
+
+            if prev_m is not None:
+                if state == 'RUNNING':
+                    b = business_minutes_between(prev_m, m)
+                    if not breached:
+                        needed = LIMITS[priority] + 1 - used
+                        if b >= needed:
+                            m_breach = minute_when_target_reached(business_minutes_before(prev_m) + needed)
+                            if m_breach < m and m_breach <= now:
+                                breached = True
+                                breached_at = m_breach
+                    used += b
+
+            # Apply all events occurring at minute m in stream order
+            for ev_type, p in ev_list:
+                if ev_type == 'OPEN':
+                    if state in ('NOT_OPENED', 'CLOSED'):
+                        state = 'RUNNING'
+                        priority = p
+                        used = 0
+                        breached = False
+                        breached_at = None
+                        had_valid_open = True
+                elif ev_type == 'PRIORITY':
+                    if state in ('RUNNING', 'PAUSED'):
+                        priority = p
+                elif ev_type == 'PAUSE':
+                    if state == 'RUNNING':
+                        state = 'PAUSED'
+                elif ev_type == 'RESUME':
+                    if state == 'PAUSED':
+                        state = 'RUNNING'
+                elif ev_type == 'CLOSE':
+                    if state in ('RUNNING', 'PAUSED'):
+                        state = 'CLOSED'
+                elif ev_type == 'REOPEN':
+                    if state == 'CLOSED':
+                        state = 'RUNNING'
+
+            # Breach check after all events at minute m have been applied
+            if had_valid_open and not breached and used > LIMITS[priority]:
+                breached = True
+                breached_at = m
+
+            prev_m = m
+
+        # Advance from last event minute to "now"
+        if prev_m is not None and prev_m < now:
+            if state == 'RUNNING':
+                b = business_minutes_between(prev_m, now)
+                if not breached:
+                    needed = LIMITS[priority] + 1 - used
+                    if b >= needed:
+                        m_breach = minute_when_target_reached(business_minutes_before(prev_m) + needed)
+                        if m_breach <= now:
+                            breached = True
+                            breached_at = m_breach
+                used += b
+
+        if had_valid_open:
+            results.append({
+                'ticket_id': ticket_id,
+                'priority': priority,
+                'used_minutes': used,
+                'breached': breached,
+                'breached_at': breached_at,
+                'status': state.lower(),
+            })
+
+    return results

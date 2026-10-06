@@ -183,6 +183,14 @@ def test_analysis_null_result_states_detectable_gap_not_equivalence():
     assert v.startswith("no detectable difference") and "could not be detected at 80% power" in v
 
 
+def test_analysis_power_statement_is_meaningful_at_the_ceiling():
+    """Regression for the live study's shape (B 18/20, C 30/30): the old code printed 'gaps under ~100%'."""
+    rows = _rows("B", 18, 2) + _rows("C", 30, 0) + _rows("A", 29, 1)
+    h1 = run_study.analyze(rows, [], [], {"A": 30, "B": 20, "C": 30})["H1_B_vs_C"]
+    assert h1["min_detectable_gap_80pct"] == stats.min_detectable_gap(1.0, 20, 30, direction="down") < 0.5
+    assert "~100%" not in h1["verdict"] and "B below C's 100%" in h1["verdict"]
+
+
 def test_analysis_flags_compromised_when_harness_errors_exceed_ten_percent():
     rows = _rows("B", 10, 7, harness=3) + _rows("C", 15, 15) + _rows("A", 15, 15)
     an = run_study.analyze(rows, [], [], {"A": 30, "B": 20, "C": 30})

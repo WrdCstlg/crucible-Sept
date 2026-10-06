@@ -1,0 +1,73 @@
+[
+  {
+    "id": "PUB1",
+    "input": [
+      "540,A,OPEN,P2",
+      "600,A,CLOSE"
+    ],
+    "expected": [
+      {
+        "ticket_id": "A",
+        "priority": "P2",
+        "used_minutes": 60,
+        "breached": false,
+        "breached_at": null,
+        "status": "closed"
+      }
+    ]
+  },
+  {
+    "id": "PUB2",
+    "input": [
+      "6720,B,OPEN,P1",
+      "10680,B,PAUSE"
+    ],
+    "expected": [
+      {
+        "ticket_id": "B",
+        "priority": "P1",
+        "used_minutes": 120,
+        "breached": false,
+        "breached_at": null,
+        "status": "paused"
+      }
+    ]
+  },
+  {
+    "id": "PUB3",
+    "input": [
+      "540,C,OPEN,P1",
+      "900,C,CLOSE"
+    ],
+    "expected": [
+      {
+        "ticket_id": "C",
+        "priority": "P1",
+        "used_minutes": 360,
+        "breached": true,
+        "breached_at": 781,
+        "status": "closed"
+      }
+    ]
+  },
+  {
+    "id": "PUB4",
+    "input": [
+      "540,D,OPEN,P3",
+      "2040,D,PAUSE",
+      "open,D,RESUME",
+      "2100,D,RESUME,P1",
+      "5,*,HOLIDAY"
+    ],
+    "expected": [
+      {
+        "ticket_id": "D",
+        "priority": "P3",
+        "used_minutes": 60,
+        "breached": false,
+        "breached_at": null,
+        "status": "paused"
+      }
+    ]
+  }
+]

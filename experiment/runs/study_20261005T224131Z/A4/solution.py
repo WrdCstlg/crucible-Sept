@@ -1,0 +1,197 @@
+from bisect import bisect_left
+from collections import defaultdict
+from itertools import groupby
+
+LIMITS = {
+    'P1': 240,
+    'P2': 480,
+    'P3': 1440,
+    'P4': 2400,
+}
+
+VALID_EVENTS = {'OPEN', 'PRIORITY', 'PAUSE', 'RESUME', 'CLOSE', 'REOPEN', 'HOLIDAY'}
+VALID_PRIORITIES = {'P1', 'P2', 'P3', 'P4'}
+
+
+def _base_business_minutes(m):
+    """Compute base business minutes in [0, m) ignoring holidays."""
+    w = m // 10080
+    rem = m % 10080
+    d = rem // 1440
+    minute_of_day = rem % 1440
+
+    full_days = min(d, 5)
+    ans = w * 2400 + full_days * 480
+    if d < 5 and minute_of_day > 540:
+        ans += min(minute_of_day, 1020) - 540
+    return ans
+
+
+def compute_sla(stream):
+    holidays = set()
+    ticket_events = defaultdict(list)
+    has_any_ticket_event = False
+    now = 0
+
+    for line in stream:
+        trimmed = line.strip()
+        if not trimmed:
+            continue
+        parts = trimmed.split(',')
+        if len(parts) not in (3, 4):
+            continue
+
+        f1 = parts[0].strip()
+        f2 = parts[1].strip()
+        f3 = parts[2].strip()
+
+        # Field 1: ASCII digits only, non-empty
+        if not f1 or not f1.isascii() or not f1.isdigit():
+            continue
+        m = int(f1)
+
+        # Field 2: non-empty ticket ID
+        if not f2:
+            continue
+
+        # Field 3: valid event name
+        if f3 not in VALID_EVENTS:
+            continue
+
+        if f3 == 'HOLIDAY':
+            if len(parts) != 3 or f2 != '*':
+                continue
+            holidays.add(m // 1440)
+        else:
+            if f2 == '*':
+                continue
+            if f3 in ('OPEN', 'PRIORITY'):
+                if len(parts) != 4:
+                    continue
+                f4 = parts[3].strip()
+                if f4 not in VALID_PRIORITIES:
+                    continue
+                has_any_ticket_event = True
+                if m > now:
+                    now = m
+                ticket_events[f2].append((m, f3, f4))
+            else:
+                if len(parts) != 3:
+                    continue
+                has_any_ticket_event = True
+                if m > now:
+                    now = m
+                ticket_events[f2].append((m, f3, None))
+
+    if not has_any_ticket_event:
+        return []
+
+    # Calendar preprocessing
+    eff_holidays = sorted(d for d in holidays if (d % 7) < 5)
+    eff_holidays_set = set(eff_holidays)
+
+    def total_business_minutes(m):
+        base = _base_business_minutes(m)
+        d = m // 1440
+        minute_of_day = m % 1440
+
+        idx = bisect_left(eff_holidays, d)
+        deduction = idx * 480
+
+        if d in eff_holidays_set and minute_of_day > 540:
+            deduction += min(minute_of_day, 1020) - 540
+
+        return base - deduction
+
+    results = []
+
+    for ticket_id, events in ticket_events.items():
+        # Stable sort by minute (preserves original stream order for equal minutes)
+        events.sort(key=lambda x: x[0])
+
+        state = 'NOT_OPENED'
+        priority = None
+        used = 0
+        breached = False
+        breached_at = None
+        has_been_opened = False
+        t_prev = None
+
+        def advance(target_m):
+            nonlocal used, breached, breached_at, t_prev
+            if state == 'RUNNING':
+                delta = total_business_minutes(target_m) - total_business_minutes(t_prev)
+                if not breached:
+                    limit = LIMITS[priority]
+                    if used + delta > limit:
+                        target_biz = total_business_minutes(t_prev) + (limit + 1 - used)
+                        low = t_prev
+                        high = target_m
+                        while low < high:
+                            mid = (low + high) // 2
+                            if total_business_minutes(mid) >= target_biz:
+                                high = mid
+                            else:
+                                low = mid + 1
+                        if low < target_m:
+                            breached = True
+                            breached_at = low
+                used += delta
+            t_prev = target_m
+
+        for m, group in groupby(events, key=lambda x: x[0]):
+            ev_list = list(group)
+
+            if has_been_opened:
+                advance(m)
+
+            for _, ev_type, p_arg in ev_list:
+                if ev_type == 'OPEN':
+                    if state in ('NOT_OPENED', 'CLOSED'):
+                        state = 'RUNNING'
+                        priority = p_arg
+                        used = 0
+                        breached = False
+                        breached_at = None
+                        has_been_opened = True
+                        t_prev = m
+                elif ev_type == 'PRIORITY':
+                    if state in ('RUNNING', 'PAUSED'):
+                        priority = p_arg
+                elif ev_type == 'PAUSE':
+                    if state == 'RUNNING':
+                        state = 'PAUSED'
+                elif ev_type == 'RESUME':
+                    if state == 'PAUSED':
+                        state = 'RUNNING'
+                elif ev_type == 'CLOSE':
+                    if state in ('RUNNING', 'PAUSED'):
+                        state = 'CLOSED'
+                elif ev_type == 'REOPEN':
+                    if state == 'CLOSED':
+                        state = 'RUNNING'
+
+            if has_been_opened and not breached:
+                if used > LIMITS[priority]:
+                    breached = True
+                    breached_at = m
+
+        if has_been_opened:
+            if t_prev < now:
+                advance(now)
+                if not breached:
+                    if used > LIMITS[priority]:
+                        breached = True
+                        breached_at = now
+
+            results.append({
+                "ticket_id": ticket_id,
+                "priority": priority,
+                "used_minutes": used,
+                "breached": breached,
+                "breached_at": breached_at,
+                "status": state.lower()
+            })
+
+    results.sort(key=lambda d: d["ticket_id"])
+    return results

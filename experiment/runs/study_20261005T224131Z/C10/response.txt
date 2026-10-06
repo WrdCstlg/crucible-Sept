@@ -1,0 +1,193 @@
+```python
+from bisect import bisect_left
+
+_LIMITS = {"P1": 240, "P2": 480, "P3": 1440, "P4": 2400}
+_EVENTS = frozenset(("OPEN", "PRIORITY", "PAUSE", "RESUME", "CLOSE", "REOPEN", "HOLIDAY"))
+_DIGITS = frozenset("0123456789")
+
+_NOT_OPENED = 0
+_RUNNING = 1
+_PAUSED = 2
+_CLOSED = 3
+_STATUS = {_RUNNING: "running", _PAUSED: "paused", _CLOSED: "closed"}
+
+
+def _to_int(s):
+    s = s.lstrip("0") or "0"
+    try:
+        return int(s)
+    except ValueError:
+        # Extremely long digit strings (int max str digits limit); convert in chunks.
+        v = 0
+        for i in range(0, len(s), 1000):
+            c = s[i:i + 1000]
+            v = v * (10 ** len(c)) + int(c)
+        return v
+
+
+def _parse(line):
+    if not isinstance(line, str):
+        return None
+    s = line.strip()
+    if not s:
+        return None
+    parts = s.split(",")
+    if len(parts) != 3 and len(parts) != 4:
+        return None
+    parts = [p.strip() for p in parts]
+    f1, tid, ev = parts[0], parts[1], parts[2]
+    if not f1 or not _DIGITS.issuperset(f1):
+        return None
+    if not tid:
+        return None
+    if ev not in _EVENTS:
+        return None
+    if ev == "OPEN" or ev == "PRIORITY":
+        if len(parts) != 4 or parts[3] not in _LIMITS:
+            return None
+        prio = parts[3]
+    else:
+        if len(parts) != 3:
+            return None
+        prio = None
+    if ev == "HOLIDAY":
+        if tid != "*":
+            return None
+    elif tid == "*":
+        return None
+    return _to_int(f1), tid, ev, prio
+
+
+def compute_sla(stream):
+    holidays = set()
+    tickets = {}
+    now = None
+
+    for line in stream:
+        parsed = _parse(line)
+        if parsed is None:
+            continue
+        minute, tid, ev, prio = parsed
+        if ev == "HOLIDAY":
+            holidays.add(minute // 1440)
+            continue
+        lst = tickets.get(tid)
+        if lst is None:
+            lst = []
+            tickets[tid] = lst
+        lst.append((minute, ev, prio))
+        if now is None or minute > now:
+            now = minute
+
+    if now is None:
+        return []
+
+    hol = sorted(d for d in holidays if d % 7 < 5)
+    hol_set = set(hol)
+    H = len(hol)
+
+    def B(t):
+        # number of business minutes in [0, t)
+        d, r = divmod(t, 1440)
+        q, w = divmod(d, 7)
+        biz = q * 5 + (w if w < 5 else 5) - bisect_left(hol, d)
+        res = biz * 480
+        if w < 5 and r > 540 and d not in hol_set:
+            res += (r - 540) if r < 1020 else 480
+        return res
+
+    def nth(n):
+        # minute of the n-th (0-indexed) business minute overall
+        k, off = divmod(n, 480)
+        target = k + 1
+        lo = (k // 5) * 7 + k % 5          # predicate false here
+        j2 = k + H
+        hi = (j2 // 5) * 7 + j2 % 5 + 1    # predicate true here
+        while hi - lo > 1:
+            mid = (lo + hi) // 2
+            q, w = divmod(mid, 7)
+            if q * 5 + (w if w < 5 else 5) - bisect_left(hol, mid) >= target:
+                hi = mid
+            else:
+                lo = mid
+        D = hi - 1
+        return D * 1440 + 540 + off
+
+    results = []
+    for tid, evs in tickets.items():
+        evs.sort(key=lambda e: e[0])  # stable
+        state = _NOT_OPENED
+        prio = None
+        used = 0
+        B_last = 0
+        breached_at = None
+        opened = False
+        i = 0
+        n = len(evs)
+        while i < n:
+            m = evs[i][0]
+            Bm = B(m)
+            if state == _RUNNING:
+                used_m = used + Bm - B_last
+                if breached_at is None:
+                    lim = _LIMITS[prio]
+                    if used_m > lim:
+                        t_star = nth(lim - used + B_last) + 1
+                        if t_star < m:
+                            breached_at = t_star
+                used = used_m
+            B_last = Bm
+            while i < n and evs[i][0] == m:
+                _, ev, p = evs[i]
+                i += 1
+                if ev == "OPEN":
+                    if state == _NOT_OPENED or state == _CLOSED:
+                        state = _RUNNING
+                        prio = p
+                        used = 0
+                        breached_at = None
+                        opened = True
+                elif ev == "PRIORITY":
+                    if state == _RUNNING or state == _PAUSED:
+                        prio = p
+                elif ev == "PAUSE":
+                    if state == _RUNNING:
+                        state = _PAUSED
+                elif ev == "RESUME":
+                    if state == _PAUSED:
+                        state = _RUNNING
+                elif ev == "CLOSE":
+                    if state == _RUNNING or state == _PAUSED:
+                        state = _CLOSED
+                elif ev == "REOPEN":
+                    if state == _CLOSED:
+                        state = _RUNNING
+            if breached_at is None and state != _NOT_OPENED and used > _LIMITS[prio]:
+                breached_at = m
+
+        if not opened:
+            continue
+
+        if state == _RUNNING:
+            Bn = B(now)
+            used_now = used + Bn - B_last
+            if breached_at is None:
+                lim = _LIMITS[prio]
+                if used_now > lim:
+                    t_star = nth(lim - used + B_last) + 1
+                    if t_star <= now:
+                        breached_at = t_star
+            used = used_now
+
+        results.append({
+            "ticket_id": tid,
+            "priority": prio,
+            "used_minutes": int(used),
+            "breached": breached_at is not None,
+            "breached_at": breached_at,
+            "status": _STATUS[state],
+        })
+
+    results.sort(key=lambda d: d["ticket_id"])
+    return results
+```

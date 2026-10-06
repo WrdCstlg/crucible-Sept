@@ -1,0 +1,84 @@
+{
+  "model": "gemini-3.8-flash",
+  "seconds": 462.3,
+  "agent_calls": 4,
+  "calls": [
+    {
+      "role": "gen",
+      "provider": "google",
+      "model": "gemini-3.8-flash",
+      "seconds": 150.9,
+      "usage": {
+        "input_tokens": 2134,
+        "output_tokens": 41119,
+        "thinking_tokens": 39130
+      },
+      "cost_usd": 0.1558,
+      "stop_reason": "STOP",
+      "tool_calls": 0
+    },
+    {
+      "role": "gen",
+      "provider": "google",
+      "model": "gemini-3.8-flash",
+      "seconds": 159.2,
+      "usage": {
+        "input_tokens": 2136,
+        "output_tokens": 42334,
+        "thinking_tokens": 40040
+      },
+      "cost_usd": 0.16035,
+      "stop_reason": "STOP",
+      "tool_calls": 0
+    },
+    {
+      "role": "qa",
+      "provider": "google",
+      "model": "gemini-3.8-flash",
+      "seconds": 134.0,
+      "usage": {
+        "input_tokens": 2188,
+        "output_tokens": 37864,
+        "thinking_tokens": 30201
+      },
+      "cost_usd": 0.14363,
+      "stop_reason": "STOP",
+      "tool_calls": 0
+    },
+    {
+      "role": "synth",
+      "provider": "google",
+      "model": "gemini-3.8-flash",
+      "seconds": 12.3,
+      "usage": {
+        "input_tokens": 167,
+        "output_tokens": 2082,
+        "thinking_tokens": 1416
+      },
+      "cost_usd": 0.00793,
+      "stop_reason": "STOP",
+      "tool_calls": 0
+    }
+  ],
+  "rounds_run": 1,
+  "crucible_status": "PASSED",
+  "winners": [
+    "branch_1",
+    "branch_2"
+  ],
+  "graded_branch": "branch_1",
+  "crucible_verdicts": {
+    "round1_branch_1": "PASS",
+    "round1_branch_2": "PASS"
+  },
+  "verdict_policy": "deterministic",
+  "acceptance_cases": "SPEC.md examples (4)",
+  "cost_usd": 0.46771,
+  "arm": "B",
+  "runner": "study",
+  "spec": "SPEC.md",
+  "roles_provider": {
+    "evaluated": "google",
+    "competitor": "anthropic"
+  }
+}

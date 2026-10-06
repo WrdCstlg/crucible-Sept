@@ -1,0 +1,240 @@
+import bisect
+from collections import defaultdict
+
+
+def compute_sla(stream):
+    holiday_set_raw = set()
+    ticket_events_by_id = defaultdict(list)
+    has_ticket_events = False
+    max_ticket_minute = -1
+
+    for line in stream:
+        raw_line = line.strip()
+        if not raw_line:
+            continue
+        parts = raw_line.split(",")
+        if len(parts) not in (3, 4):
+            continue
+        fields = [p.strip() for p in parts]
+
+        minute_str = fields[0]
+        if not minute_str or not all("0" <= c <= "9" for c in minute_str):
+            continue
+        minute = int(minute_str)
+
+        ticket_id = fields[1]
+        if not ticket_id:
+            continue
+
+        event = fields[2]
+        if event not in (
+            "OPEN",
+            "PRIORITY",
+            "PAUSE",
+            "RESUME",
+            "CLOSE",
+            "REOPEN",
+            "HOLIDAY",
+        ):
+            continue
+
+        if event in ("OPEN", "PRIORITY"):
+            if len(fields) != 4:
+                continue
+            priority = fields[3]
+            if priority not in ("P1", "P2", "P3", "P4"):
+                continue
+        else:
+            if len(fields) != 3:
+                continue
+            priority = None
+
+        if event == "HOLIDAY":
+            if ticket_id != "*":
+                continue
+            holiday_set_raw.add(minute // 1440)
+        else:
+            if ticket_id == "*":
+                continue
+            has_ticket_events = True
+            if minute > max_ticket_minute:
+                max_ticket_minute = minute
+            ticket_events_by_id[ticket_id].append((minute, event, priority))
+
+    if not has_ticket_events:
+        return []
+
+    now = max_ticket_minute
+
+    holiday_days = sorted(d for d in holiday_set_raw if d % 7 < 5)
+    holiday_set = set(holiday_days)
+
+    def count_weekdays(A, B):
+        if A >= B:
+            return 0
+        N = B - A
+        weeks = N // 7
+        rem = N % 7
+        w = A % 7
+        cnt = 0
+        for i in range(rem):
+            if (w + i) % 7 < 5:
+                cnt += 1
+        return weeks * 5 + cnt
+
+    def count_business_days(A, B):
+        if A >= B:
+            return 0
+        weekdays = count_weekdays(A, B)
+        idx1 = bisect.bisect_left(holiday_days, A)
+        idx2 = bisect.bisect_left(holiday_days, B)
+        return weekdays - (idx2 - idx1)
+
+    def count_biz_minutes(t1, t2):
+        if t1 >= t2:
+            return 0
+        d1 = t1 // 1440
+        d2 = t2 // 1440
+
+        if d1 == d2:
+            if (d1 % 7 < 5) and (d1 not in holiday_set):
+                start = max(t1, 1440 * d1 + 540)
+                end = min(t2, 1440 * d1 + 1020)
+                return max(0, end - start)
+            return 0
+
+        total = 0
+        if (d1 % 7 < 5) and (d1 not in holiday_set):
+            start = max(t1, 1440 * d1 + 540)
+            end = 1440 * d1 + 1020
+            if end > start:
+                total += end - start
+
+        if d2 > d1 + 1:
+            biz_days = count_business_days(d1 + 1, d2)
+            total += biz_days * 480
+
+        if (d2 % 7 < 5) and (d2 not in holiday_set):
+            start = 1440 * d2 + 540
+            end = min(t2, 1440 * d2 + 1020)
+            if end > start:
+                total += end - start
+
+        return total
+
+    def find_kth_biz_minute(t1, k):
+        d1 = t1 // 1440
+        biz_d1 = 0
+        if (d1 % 7 < 5) and (d1 not in holiday_set):
+            start = max(t1, 1440 * d1 + 540)
+            end = 1440 * d1 + 1020
+            if end > start:
+                biz_d1 = end - start
+                if k <= biz_d1:
+                    return start + (k - 1)
+
+        k -= biz_d1
+        d_start = d1 + 1
+
+        full_days_needed = (k - 1) // 480
+        rem_minutes = k - full_days_needed * 480
+        B = full_days_needed + 1
+
+        low = d_start
+        high = d_start + (B // 5 + 2) * 7 + len(holiday_days) * 2
+        ans_D = high
+
+        while low <= high:
+            mid = (low + high) // 2
+            if count_business_days(d_start, mid + 1) >= B:
+                ans_D = mid
+                high = mid - 1
+            else:
+                low = mid + 1
+
+        return 1440 * ans_D + 540 + (rem_minutes - 1)
+
+    PRIORITY_LIMITS = {"P1": 240, "P2": 480, "P3": 1440, "P4": 2400}
+    STATUS_MAP = {"RUNNING": "running", "PAUSED": "paused", "CLOSED": "closed"}
+
+    results = []
+
+    for ticket_id in sorted(ticket_events_by_id.keys()):
+        raw_events = ticket_events_by_id[ticket_id]
+        raw_events.sort(key=lambda x: x[0])
+
+        events_by_minute = defaultdict(list)
+        for minute, ev, p in raw_events:
+            events_by_minute[minute].append((ev, p))
+
+        timeline = list(events_by_minute.keys())
+        if not timeline or timeline[-1] < now:
+            timeline.append(now)
+
+        state = "NOT_OPENED"
+        priority = None
+        used_minutes = 0
+        breached = False
+        breached_at = None
+        ever_valid_opened = False
+
+        for i, t in enumerate(timeline):
+            if i > 0:
+                t_prev = timeline[i - 1]
+                if state == "RUNNING":
+                    biz = count_biz_minutes(t_prev, t)
+                    if not breached:
+                        limit = PRIORITY_LIMITS[priority]
+                        k = limit + 1 - used_minutes
+                        if biz >= k:
+                            m = find_kth_biz_minute(t_prev, k)
+                            if m + 1 < t:
+                                breached = True
+                                breached_at = m + 1
+                    used_minutes += biz
+
+            if t in events_by_minute:
+                for ev, p in events_by_minute[t]:
+                    if ev == "OPEN":
+                        if state in ("NOT_OPENED", "CLOSED"):
+                            state = "RUNNING"
+                            priority = p
+                            used_minutes = 0
+                            breached = False
+                            breached_at = None
+                            ever_valid_opened = True
+                    elif ev == "PRIORITY":
+                        if state in ("RUNNING", "PAUSED"):
+                            priority = p
+                    elif ev == "PAUSE":
+                        if state == "RUNNING":
+                            state = "PAUSED"
+                    elif ev == "RESUME":
+                        if state == "PAUSED":
+                            state = "RUNNING"
+                    elif ev == "CLOSE":
+                        if state in ("RUNNING", "PAUSED"):
+                            state = "CLOSED"
+                    elif ev == "REOPEN":
+                        if state == "CLOSED":
+                            state = "RUNNING"
+
+            if ever_valid_opened and not breached and priority is not None:
+                limit = PRIORITY_LIMITS[priority]
+                if used_minutes > limit:
+                    breached = True
+                    breached_at = t
+
+        if ever_valid_opened:
+            results.append(
+                {
+                    "ticket_id": ticket_id,
+                    "priority": priority,
+                    "used_minutes": used_minutes,
+                    "breached": breached,
+                    "breached_at": breached_at,
+                    "status": STATUS_MAP[state],
+                }
+            )
+
+    return results

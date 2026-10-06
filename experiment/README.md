@@ -5,7 +5,7 @@ This folder is the study that puts the Crucible tool ([`docs/CRUCIBLE.md`](../do
 **Status.**
 - **The pilots (Problems 1–4, `experiment/sla`, `experiment/runs/pilot_*`) are history, not evidence about rates.** They had n ≤ 5 per arm, on a problem the cheaper model alone already solved as well as the stronger one, so Crucible had no gap to close and no statistical comparison is possible.
 - **The study that answers the question is pre-registered:** [`PREREGISTRATION.md`](PREREGISTRATION.md). It uses a harder problem (`bizsla/`), independent samples, n = 80 (A 30 / B 20 / C 30), exact Fisher tests with a power statement, and fixed exclusion and publication rules. The harness has been tested end to end on a zero-cost mock provider.
-- **The live run is waiting** on the user confirming a spend cap. Until its results are committed under `runs/study_*`, the question remains open.
+- **The live study has run and is published:** [`STUDY_RESULTS.md`](STUDY_RESULTS.md) (write-up) and [`runs/study_20261005T224131Z/`](runs/study_20261005T224131Z/RESULTS.md) (raw evidence). 80 of 80 runs, 0 harness errors, $27.37 of a $100 cap. **Answer for this problem: no.** B (cheap model in Crucible) 18/20, A (cheap alone) 29/30, C (strong alone) 30/30; no significant difference (H1 p = 0.155, H2 p = 0.556) because every arm was near the ceiling. H4: the mutation gate quarantined all 7 of 18 AI-written suites that encoded wrong answers and admitted no weak suite.
 
 Pilot results are in [`COMPARISON.md`](COMPARISON.md), and the narrative is in the [case study](../case-study/CASE_STUDY.md).
 

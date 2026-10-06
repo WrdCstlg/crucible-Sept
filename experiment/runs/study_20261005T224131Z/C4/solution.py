@@ -1,0 +1,204 @@
+import re
+from bisect import bisect_left, bisect_right
+
+_LIMITS = {"P1": 240, "P2": 480, "P3": 1440, "P4": 2400}
+_EVENTS = {"OPEN", "PRIORITY", "PAUSE", "RESUME", "CLOSE", "REOPEN", "HOLIDAY"}
+_DIGITS = re.compile(r"[0-9]+")
+
+_NOT_OPENED, _RUNNING, _PAUSED, _CLOSED = 0, 1, 2, 3
+_STATUS = {_RUNNING: "running", _PAUSED: "paused", _CLOSED: "closed"}
+
+
+def _to_int(s):
+    s = s.lstrip("0") or "0"
+    try:
+        return int(s)
+    except ValueError:
+        # Extremely long digit strings (int max str digits limit); convert in chunks.
+        v = 0
+        for i in range(0, len(s), 1000):
+            chunk = s[i:i + 1000]
+            v = v * (10 ** len(chunk)) + int(chunk)
+        return v
+
+
+class _Ticket(object):
+    __slots__ = ("state", "prio", "used", "blast", "breached_at", "last")
+
+    def __init__(self):
+        self.state = _NOT_OPENED
+        self.prio = None
+        self.used = 0
+        self.blast = 0
+        self.breached_at = None
+        self.last = None
+
+
+def compute_sla(stream):
+    holidays = set()
+    evs = []
+
+    for raw in stream:
+        if not isinstance(raw, str):
+            continue
+        line = raw.strip()
+        if not line:
+            continue
+        parts = line.split(",")
+        n = len(parts)
+        if n != 3 and n != 4:
+            continue
+        f1 = parts[0].strip()
+        tid = parts[1].strip()
+        ev = parts[2].strip()
+        if not f1 or _DIGITS.fullmatch(f1) is None:
+            continue
+        if not tid:
+            continue
+        if ev not in _EVENTS:
+            continue
+        if ev == "OPEN" or ev == "PRIORITY":
+            if n != 4:
+                continue
+            p = parts[3].strip()
+            if p not in _LIMITS:
+                continue
+        else:
+            if n != 3:
+                continue
+            p = None
+        if ev == "HOLIDAY":
+            if tid != "*":
+                continue
+            holidays.add(_to_int(f1) // 1440)
+        else:
+            if tid == "*":
+                continue
+            evs.append((_to_int(f1), tid, ev, p))
+
+    if not evs:
+        return []
+
+    evs.sort(key=lambda e: e[0])
+    now = evs[-1][0]
+
+    # Weekday indices of holiday days that fall on weekdays.
+    hw = sorted({(d // 7) * 5 + (d % 7) for d in holidays if d % 7 < 5})
+    hset = set(hw)
+    keys = [hw[i] - i for i in range(len(hw))]
+
+    def B(t):
+        """Number of business minutes in [0, t)."""
+        d, r = divmod(t, 1440)
+        q, dow = divmod(d, 7)
+        if dow < 5:
+            wi = q * 5 + dow
+            h = bisect_left(hw, wi)
+            total = (wi - h) * 480
+            if r > 540 and wi not in hset:
+                extra = r - 540
+                if extra > 480:
+                    extra = 480
+                total += extra
+            return total
+        wb = q * 5 + 5
+        h = bisect_left(hw, wb)
+        return (wb - h) * 480
+
+    def inv(K):
+        """Smallest t with B(t) >= K (K >= 1)."""
+        k = K - 1
+        j, off = divmod(k, 480)
+        c = bisect_right(keys, j)
+        w = j + c
+        wq, wr = divmod(w, 5)
+        day = wq * 7 + wr
+        return day * 1440 + 540 + off + 1
+
+    tickets = {}
+    LIM = _LIMITS
+
+    nevs = len(evs)
+    i = 0
+    while i < nevs:
+        m = evs[i][0]
+        Bm = B(m)
+        touched = []
+        j = i
+        while j < nevs and evs[j][0] == m:
+            _, tid, ev, p = evs[j]
+            j += 1
+            tk = tickets.get(tid)
+            if tk is None:
+                tk = _Ticket()
+                tickets[tid] = tk
+            if tk.last != m:
+                # Advance ticket from its last event minute to m.
+                if tk.state == _RUNNING:
+                    newused = tk.used + Bm - tk.blast
+                    if tk.breached_at is None:
+                        L = LIM[tk.prio]
+                        if newused > L:
+                            t = inv(L - tk.used + tk.blast + 1)
+                            if t < m:
+                                tk.breached_at = t
+                    tk.used = newused
+                tk.blast = Bm
+                tk.last = m
+                touched.append(tk)
+            st = tk.state
+            if ev == "OPEN":
+                if st == _NOT_OPENED or st == _CLOSED:
+                    tk.state = _RUNNING
+                    tk.prio = p
+                    tk.used = 0
+                    tk.breached_at = None
+            elif ev == "PRIORITY":
+                if st == _RUNNING or st == _PAUSED:
+                    tk.prio = p
+            elif ev == "PAUSE":
+                if st == _RUNNING:
+                    tk.state = _PAUSED
+            elif ev == "RESUME":
+                if st == _PAUSED:
+                    tk.state = _RUNNING
+            elif ev == "CLOSE":
+                if st == _RUNNING or st == _PAUSED:
+                    tk.state = _CLOSED
+            elif ev == "REOPEN":
+                if st == _CLOSED:
+                    tk.state = _RUNNING
+        for tk in touched:
+            if (tk.state != _NOT_OPENED and tk.breached_at is None
+                    and tk.used > LIM[tk.prio]):
+                tk.breached_at = m
+        i = j
+
+    Bnow = None
+    result = []
+    for tid in sorted(tickets):
+        tk = tickets[tid]
+        if tk.state == _NOT_OPENED:
+            continue
+        if tk.state == _RUNNING and tk.last != now:
+            if Bnow is None:
+                Bnow = B(now)
+            newused = tk.used + Bnow - tk.blast
+            if tk.breached_at is None:
+                L = LIM[tk.prio]
+                if newused > L:
+                    t = inv(L - tk.used + tk.blast + 1)
+                    if t <= now:
+                        tk.breached_at = t
+            tk.used = newused
+            tk.blast = Bnow
+            tk.last = now
+        result.append({
+            "ticket_id": tid,
+            "priority": tk.prio,
+            "used_minutes": int(tk.used),
+            "breached": tk.breached_at is not None,
+            "breached_at": tk.breached_at,
+            "status": _STATUS[tk.state],
+        })
+    return result

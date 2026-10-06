@@ -3,3 +3,4 @@
 experiment/sla/** -text
 experiment/runs/** -text
 experiment/bizsla/** -text
+experiment/PREREGISTRATION.md -text

@@ -387,7 +387,7 @@ What the attribution check showed (`experiment/attribution.py` reproduces it):
 - **Check each AI-written test suite against my hand cases** before it's allowed into the regression gate.
 - **Use a different model family for test writing** than for code writing, to reduce shared blind spots.
 
-### Update (October 2026): the follow-up study is built and pre-registered, not yet run
+### Update (October 2026): the follow-up study, pre-registered and run
 
 <!-- EDIT: rewrite in your voice if you like; every fact below is checked by code in the repository. -->
 
@@ -400,9 +400,13 @@ What the attribution check showed (`experiment/attribution.py` reproduces it):
 - **A pre-registration** ([`experiment/PREREGISTRATION.md`](../experiment/PREREGISTRATION.md)): n = 80 (30/20/30), exact Fisher tests, a power statement, exclusion rules, a hard spend cap, and a commitment to publish whatever comes out.
 - **The AI-written test problem, tackled in the tool:**
   - no AI-written suite can decide a verdict until a three-axis mutation gate admits it;
-  - on the 11 suites recorded in these pilots, the gate matched an independent yardstick on all 11. That figure is in-sample.
+  - on 11 suites from these pilots (7 recorded AI-written suites and 4 hand-written controls), the gate matched an independent yardstick on all 11. That figure is in-sample.
 - **Model-written code now runs in a Docker sandbox** with no network, a read-only filesystem and no host environment.
-- **The live run is the remaining step.** Until it is published, the question this case study set out to ask is still open.
+- **The live run happened, and the answer for this problem is no** ([`experiment/STUDY_RESULTS.md`](../experiment/STUDY_RESULTS.md)). 80 of 80 runs, 0 harness errors, $27.37 of a $100 cap:
+  - cheap model alone 29/30, cheap model in Crucible 18/20, strong model alone 30/30; no significant difference (p = 0.155 and 0.556);
+  - the harder problem still wasn't hard enough: every arm sat near the ceiling, so the process had nothing to add, and it cost about as much as the strong model;
+  - both Crucible failures were API calls that hung until the 45-minute limit, not wrong code; they count as failures, as pre-registered.
+- **The AI-written test problem was real out of sample:** 7 of 18 fresh AI-written suites (39%) encoded a wrong answer. The gate quarantined all 7 and admitted no weak suite (18/18 agreement). No weak-but-reference-passing suite turned up, so that half of the gate is still only tested in-sample.
 
 ---
 
@@ -416,7 +420,7 @@ What the attribution check showed (`experiment/attribution.py` reproduces it):
 | **A Gemini-based coding agent** (Google Antigravity) | Built the original Crucible pipeline and README, and applied fixes after each review |
 | **Claude (Anthropic), via Claude Code** | Independent audits of the repository and run logs; the experiment harness (reference implementations, test generator, grader, arm runners); analysis |
 | **An AI assistant** | Helped me draft the spec design, which I reviewed and own <!-- EDIT: describe this in your own terms --> |
-| **Claude (Anthropic), via Google Antigravity** (October 2026) | The follow-up: the Docker sandbox, the three-axis mutation gate and its validation, the Problem 5 spec draft, oracles, hand cases, grader and planted bugs, the statistics module, the pre-registration draft and the study harness. The competitor arm is also a Claude model; that threat to validity is stated in the pre-registration. |
+| **Claude (Anthropic), via Google Antigravity** (October 2026) | The follow-up: the Docker sandbox, the three-axis mutation gate and its validation, the Problem 5 spec draft, oracles, hand cases, grader and planted bugs, the statistics module, the pre-registration draft, the study harness, running the live study and drafting the results write-up. The competitor arm is also a Claude model; that threat to validity is stated in the pre-registration and the results. |
 
 ---
 

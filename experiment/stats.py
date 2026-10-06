@@ -61,11 +61,24 @@ def power_two_proportions(p1: float, n1: int, p2: float, n2: int, alpha: float =
 
 
 def min_detectable_gap(p_base: float, n1: int, n2: int, power: float = 0.8, alpha: float = 0.05,
-                       step: float = 0.01) -> float:
-    """Smallest d such that p_base + d (arm 1) vs p_base (arm 2) is detected with >= power. 1.0 if none."""
+                       step: float = 0.01, direction: str = "auto") -> float:
+    """Smallest d > 0 such that arm 1 at p_base +/- d vs arm 2 at p_base is detected with >= power. 1.0 if none.
+
+    direction: "up" (arm 1 better), "down" (arm 1 worse) or "auto" (the side with more room: down when
+    p_base > 0.5). Searching only upward from a base at the ceiling (p_base = 1.0) has no room at all and used to
+    return 1.0, which wrongly reported that no gap was detectable; see experiment/STUDY_RESULTS.md, Deviations.
+    """
+    if not 0.0 <= p_base <= 1.0:
+        raise ValueError("p_base must be in [0, 1]")
+    if direction == "auto":
+        direction = "down" if p_base > 0.5 else "up"
+    if direction not in ("up", "down"):
+        raise ValueError("direction must be 'up', 'down' or 'auto'")
+    sign = 1.0 if direction == "up" else -1.0
     d = step
-    while p_base + d <= 1.0 + 1e-9:
-        if power_two_proportions(min(1.0, p_base + d), n1, p_base, n2, alpha) >= power:
+    while -1e-9 <= p_base + sign * d <= 1.0 + 1e-9:
+        p1 = min(1.0, max(0.0, p_base + sign * d))
+        if power_two_proportions(p1, n1, p_base, n2, alpha) >= power:
             return round(d, 4)
         d += step
     return 1.0

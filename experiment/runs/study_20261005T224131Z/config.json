@@ -1,0 +1,54 @@
+{
+  "started_utc": "2026-10-05T22:41:31.527030+00:00",
+  "mock": false,
+  "prereg": {
+    "sha256": "428a412cd7ba8cbedca27a2cebc416b9ee13e6850fefa999f34f187773b1d86e",
+    "commit": "7c9587e2d07bbd2185202860bec4dbbb0e70a52a",
+    "committed_at": "2026-10-05T18:40:59-04:00"
+  },
+  "roles_file": "experiment/study/roles_study.json",
+  "roles_sha256": "c709344779d2c3df22cafe1840d6808ede39f7e804e72095b14575cd860d69d7",
+  "freeze_sha256": {
+    "SPEC.md": "9444103987a8f913bf3e294a7b14fe0aa2589a77c579db22b69dd445eab2e53c",
+    "hand_cases.json": "31828c4b2db00be30d70a60eb4f59ec28c7c932f82782ab27616da6fe7959942",
+    "public_cases.json": "8e4a02d36da0f5103e38d9c0cf794295bad097af5b340154a01be5d928277b36",
+    "generated_cases.json": "6b09223e234c90ac741bb30d896f9c6192087175de2635dac2d15cf22db21ecb",
+    "stress_cases.json": "2670f442034e6a141c615f8720cf94fb3a87d11ad957e244b90a659e7abd20fe",
+    "reference.py": "1cb7d39a3c91518cefdce48bf40f12450790eb1a7857ad78f12878ccbd2e1edb",
+    "brute_force.py": "071896a0349231f94fbd953796229886e068a11e0959acdef96c45cd3eb4972c",
+    "generate_cases.py": "453e3151bb57e37b779d71a4857d1f1168f4c597ae3a4135f8bfe0c7f5149cf8"
+  },
+  "runs_planned": {
+    "A": 30,
+    "B": 20,
+    "C": 30
+  },
+  "cap_usd": 100.0,
+  "worst_case_per_run": {
+    "A": 0.2908,
+    "B": 2.9076,
+    "C": 1.36
+  },
+  "sandbox": {
+    "backend": "docker",
+    "image": "python:3.12-slim@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d",
+    "network": "none",
+    "rootfs": "read-only",
+    "code_mount": "read-only",
+    "tmpfs_mb": 64,
+    "user": "65534:65534",
+    "capabilities": "all dropped",
+    "no_new_privileges": true,
+    "memory_mb": 1024,
+    "cpus": 1.0,
+    "pids_limit": 128,
+    "env": "allowlist only"
+  },
+  "hidden_cases": 225,
+  "labels": {
+    "A": "A: gemini-3.8-flash, 1 call",
+    "B": "B: gemini-3.8-flash in Crucible",
+    "C": "C: claude-opus-5-5, 1 call"
+  },
+  "gate_threshold": 0.6
+}

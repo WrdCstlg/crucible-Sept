@@ -286,12 +286,15 @@ def analyze(rows, b_candidates, gate_rows, n_planned):
             return {"p_two_sided": None, "verdict": "undefined (an arm has no valid runs)"}
         p = stats.fisher_exact(X["strict_passes"], X["valid"] - X["strict_passes"],
                                Y["strict_passes"], Y["valid"] - Y["strict_passes"])
-        gap = stats.min_detectable_gap(max(min(Y["rate"], 0.95), 0.05), X["valid"], Y["valid"])
+        base = Y["rate"]
+        direction = "down" if base > 0.5 else "up"
+        gap = stats.min_detectable_gap(base, X["valid"], Y["valid"], direction=direction)
         if p < 0.05:
             verdict = f"{x} {'higher' if X['rate'] > Y['rate'] else 'lower'} than {y} (p = {p:.4f})"
         else:
-            verdict = (f"no detectable difference (p = {p:.3f}); with these n, gaps under ~{gap:.0%} could not be "
-                       "detected at 80% power")
+            side = "below" if direction == "down" else "above"
+            verdict = (f"no detectable difference (p = {p:.3f}); with these n, gaps under ~{gap:.0%} ({x} {side} "
+                       f"{y}'s {base:.0%}) could not be detected at 80% power")
         return {"p_two_sided": round(p, 5), "rate_difference": round(X["rate"] - Y["rate"], 3),
                 "min_detectable_gap_80pct": gap, "verdict": verdict}
 

@@ -59,3 +59,30 @@ def test_invalid_inputs_are_refused():
         stats.wilson(1, 0)
     with pytest.raises(ValueError):
         stats.wilson(11, 10)
+    with pytest.raises(ValueError):
+        stats.min_detectable_gap(1.2, 20, 30)
+    with pytest.raises(ValueError):
+        stats.min_detectable_gap(0.5, 20, 30, direction="sideways")
+
+
+@pytest.mark.parametrize("base,n1,n2,direction", [
+    (1.0, 20, 30, "down"),      # the study's H1 situation: strong arm at the ceiling
+    (0.97, 30, 30, "down"),
+    (0.3, 30, 30, "up"),
+])
+def test_min_detectable_gap_is_minimal_and_actually_reaches_power(base, n1, n2, direction):
+    d = stats.min_detectable_gap(base, n1, n2, direction=direction)
+    assert 0 < d < 1.0
+    sign = 1 if direction == "up" else -1
+    p_at = stats.power_two_proportions(min(1.0, max(0.0, base + sign * d)), n1, base, n2)
+    p_before = stats.power_two_proportions(min(1.0, max(0.0, base + sign * (d - 0.01))), n1, base, n2)
+    assert p_at >= 0.8 > p_before, (d, p_at, p_before)
+
+
+def test_ceiling_base_no_longer_reports_nothing_detectable():
+    """Regression: searching only upward from 100% has no room and returned 1.0 ("gaps under ~100%")."""
+    assert stats.min_detectable_gap(1.0, 20, 30, direction="up") == 1.0        # truly no room upward
+    down = stats.min_detectable_gap(1.0, 20, 30)                                 # auto -> down
+    assert down == stats.min_detectable_gap(1.0, 20, 30, direction="down")
+    assert down <= 0.3
+    assert stats.min_detectable_gap(0.2, 30, 30) == stats.min_detectable_gap(0.2, 30, 30, direction="up")

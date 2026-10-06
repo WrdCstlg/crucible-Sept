@@ -1,0 +1,236 @@
+from bisect import bisect_left
+from collections import defaultdict
+
+
+def compute_sla(stream):
+    limits = {
+        "P1": 240,
+        "P2": 480,
+        "P3": 1440,
+        "P4": 2400,
+    }
+
+    holiday_days = set()
+    ticket_events = defaultdict(list)
+    has_ticket_events = False
+    now = -1
+
+    for stream_idx, line in enumerate(stream):
+        trimmed = line.strip()
+        if not trimmed:
+            continue
+        parts = trimmed.split(",")
+        if len(parts) not in (3, 4):
+            continue
+
+        f0 = parts[0].strip()
+        f1 = parts[1].strip()
+        f2 = parts[2].strip()
+
+        # field 1: minute (ASCII digits 0-9)
+        if not f0 or not f0.isascii() or not f0.isdigit():
+            continue
+        minute = int(f0)
+
+        # field 2: ticket ID (non-empty)
+        if not f1:
+            continue
+        ticket_id = f1
+
+        # field 3: event
+        event = f2
+        if event not in (
+            "OPEN",
+            "PRIORITY",
+            "PAUSE",
+            "RESUME",
+            "CLOSE",
+            "REOPEN",
+            "HOLIDAY",
+        ):
+            continue
+
+        if event == "HOLIDAY":
+            if len(parts) != 3 or ticket_id != "*":
+                continue
+            holiday_days.add(minute // 1440)
+        else:
+            if ticket_id == "*":
+                continue
+            if event in ("OPEN", "PRIORITY"):
+                if len(parts) != 4:
+                    continue
+                f3 = parts[3].strip()
+                if f3 not in ("P1", "P2", "P3", "P4"):
+                    continue
+                priority_arg = f3
+            else:
+                if len(parts) != 3:
+                    continue
+                priority_arg = None
+
+            has_ticket_events = True
+            if minute > now:
+                now = minute
+            ticket_events[ticket_id].append(
+                (minute, stream_idx, event, priority_arg)
+            )
+
+    if not has_ticket_events:
+        return []
+
+    # Calendar preparation
+    weekday_holidays = sorted([d for d in holiday_days if d % 7 < 5])
+    weekday_holidays_set = set(weekday_holidays)
+    num_wk_holidays = len(weekday_holidays)
+
+    def business_minutes_up_to(m):
+        if m <= 0:
+            return 0
+        d = m // 1440
+        rem = m % 1440
+        weekday_days = (d // 7) * 5 + min(d % 7, 5)
+        num_holidays = bisect_left(weekday_holidays, d)
+        bus_days = weekday_days - num_holidays
+        ans = bus_days * 480
+        if (d % 7 < 5) and (d not in weekday_holidays_set):
+            ans += max(0, min(rem, 1020) - 540)
+        return ans
+
+    def find_minute_for_target(target):
+        if target <= 0:
+            return 0
+        full_days = target // 480
+        rem_mins = target % 480
+        if rem_mins == 0:
+            K = full_days - 1
+            rem = 1020
+        else:
+            K = full_days
+            rem = 540 + rem_mins
+
+        low = 1
+        high = ((K + 1) // 5 + 1) * 7 + num_wk_holidays * 3 + 14
+        target_count = K + 1
+        while low < high:
+            mid = (low + high) // 2
+            cnt = (mid // 7) * 5 + min(mid % 7, 5) - bisect_left(
+                weekday_holidays, mid
+            )
+            if cnt >= target_count:
+                high = mid
+            else:
+                low = mid + 1
+        d = low - 1
+        return d * 1440 + rem
+
+    NOT_OPENED = 0
+    RUNNING = 1
+    PAUSED = 2
+    CLOSED = 3
+
+    results = []
+
+    for ticket_id, raw_events in ticket_events.items():
+        # Stable sort by minute, then stream index
+        raw_events.sort(key=lambda x: (x[0], x[1]))
+
+        # Group events by minute
+        events_by_minute = []
+        for m, _, ev, pri in raw_events:
+            if events_by_minute and events_by_minute[-1][0] == m:
+                events_by_minute[-1][1].append((ev, pri))
+            else:
+                events_by_minute.append((m, [(ev, pri)]))
+
+        state = NOT_OPENED
+        priority = None
+        used_minutes = 0
+        breached_at = None
+        had_valid_open = False
+        last_minute = 0
+
+        for m_curr, ev_list in events_by_minute:
+            # Advance from last_minute to m_curr
+            if last_minute < m_curr:
+                bus_mins = (
+                    business_minutes_up_to(m_curr)
+                    - business_minutes_up_to(last_minute)
+                )
+                if state == RUNNING:
+                    if breached_at is None:
+                        rem = limits[priority] - used_minutes + 1
+                        if bus_mins >= rem:
+                            t_breach = find_minute_for_target(
+                                business_minutes_up_to(last_minute) + rem
+                            )
+                            if t_breach < m_curr:
+                                breached_at = t_breach
+                    used_minutes += bus_mins
+                last_minute = m_curr
+
+            # Apply all events at minute m_curr
+            for ev, p_arg in ev_list:
+                if ev == "OPEN":
+                    if state == NOT_OPENED or state == CLOSED:
+                        state = RUNNING
+                        priority = p_arg
+                        used_minutes = 0
+                        breached_at = None
+                        had_valid_open = True
+                elif ev == "PRIORITY":
+                    if state == RUNNING or state == PAUSED:
+                        priority = p_arg
+                elif ev == "PAUSE":
+                    if state == RUNNING:
+                        state = PAUSED
+                elif ev == "RESUME":
+                    if state == PAUSED:
+                        state = RUNNING
+                elif ev == "CLOSE":
+                    if state == RUNNING or state == PAUSED:
+                        state = CLOSED
+                elif ev == "REOPEN":
+                    if state == CLOSED:
+                        state = RUNNING
+
+            # Check breach at minute m_curr after all events applied
+            if breached_at is None and state != NOT_OPENED:
+                if used_minutes > limits[priority]:
+                    breached_at = m_curr
+
+        # Advance to "now"
+        if last_minute < now:
+            bus_mins = (
+                business_minutes_up_to(now)
+                - business_minutes_up_to(last_minute)
+            )
+            if state == RUNNING:
+                if breached_at is None:
+                    rem = limits[priority] - used_minutes + 1
+                    if bus_mins >= rem:
+                        t_breach = find_minute_for_target(
+                            business_minutes_up_to(last_minute) + rem
+                        )
+                        if t_breach <= now:
+                            breached_at = t_breach
+                used_minutes += bus_mins
+            last_minute = now
+
+        if had_valid_open:
+            status_map = {
+                RUNNING: "running",
+                PAUSED: "paused",
+                CLOSED: "closed",
+            }
+            results.append({
+                "ticket_id": ticket_id,
+                "priority": priority,
+                "used_minutes": used_minutes,
+                "breached": breached_at is not None,
+                "breached_at": breached_at,
+                "status": status_map[state],
+            })
+
+    results.sort(key=lambda x: x["ticket_id"])
+    return results

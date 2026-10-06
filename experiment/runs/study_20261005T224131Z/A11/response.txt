@@ -1,0 +1,221 @@
+```python
+from bisect import bisect_left
+from itertools import groupby
+
+LIMITS = {
+    'P1': 240,
+    'P2': 480,
+    'P3': 1440,
+    'P4': 2400,
+}
+
+
+def _parse_line(raw_line):
+    line = raw_line.strip()
+    if not line:
+        return None
+    parts = line.split(',')
+    if len(parts) not in (3, 4):
+        return None
+    parts = [p.strip() for p in parts]
+
+    f1, f2, f3 = parts[0], parts[1], parts[2]
+
+    if not f1 or not all('0' <= c <= '9' for c in f1):
+        return None
+    minute = int(f1)
+
+    if not f2:
+        return None
+
+    if f3 not in {'OPEN', 'PRIORITY', 'PAUSE', 'RESUME', 'CLOSE', 'REOPEN', 'HOLIDAY'}:
+        return None
+
+    if f3 in {'OPEN', 'PRIORITY'}:
+        if len(parts) != 4:
+            return None
+        f4 = parts[3]
+        if f4 not in {'P1', 'P2', 'P3', 'P4'}:
+            return None
+        if f2 == '*':
+            return None
+        return (minute, f2, f3, f4)
+
+    elif f3 == 'HOLIDAY':
+        if len(parts) != 3:
+            return None
+        if f2 != '*':
+            return None
+        return (minute, f2, f3, None)
+
+    else:
+        if len(parts) != 3:
+            return None
+        if f2 == '*':
+            return None
+        return (minute, f2, f3, None)
+
+
+def compute_sla(stream):
+    holidays = set()
+    ticket_events = {}
+    now = None
+
+    for raw_line in stream:
+        parsed = _parse_line(raw_line)
+        if parsed is None:
+            continue
+        minute, ticket_id, event, arg = parsed
+        if event == 'HOLIDAY':
+            holidays.add(minute // 1440)
+        else:
+            if now is None or minute > now:
+                now = minute
+            if ticket_id not in ticket_events:
+                ticket_events[ticket_id] = []
+            ticket_events[ticket_id].append((minute, event, arg))
+
+    if now is None:
+        return []
+
+    weekday_holidays = sorted(d for d in holidays if d % 7 < 5)
+
+    def business_minutes(m):
+        if m <= 0:
+            return 0
+        w = m // 10080
+        rem = m % 10080
+        day_in_week = rem // 1440
+        min_in_day = rem % 1440
+
+        biz = w * 2400
+        full_biz_days = min(day_in_week, 5)
+        biz += full_biz_days * 480
+
+        if day_in_week < 5:
+            if min_in_day > 540:
+                biz += min(480, min_in_day - 540)
+
+        d = m // 1440
+        k = bisect_left(weekday_holidays, d)
+        biz -= k * 480
+
+        if k < len(weekday_holidays) and weekday_holidays[k] == d:
+            if min_in_day > 540:
+                biz -= min(480, min_in_day - 540)
+
+        return biz
+
+    def find_minute_after(m0, K):
+        target = business_minutes(m0) + K
+        d0 = m0 // 1440
+        idx = bisect_left(weekday_holidays, d0)
+        remaining_holidays = len(weekday_holidays) - idx
+        num_weeks = (6 + remaining_holidays + 4) // 5 + 1
+        low = m0 + 1
+        high = m0 + num_weeks * 10080
+
+        while low < high:
+            mid = (low + high) // 2
+            if business_minutes(mid) >= target:
+                high = mid
+            else:
+                low = mid + 1
+        return low
+
+    results = []
+
+    for ticket_id in sorted(ticket_events.keys()):
+        events = ticket_events[ticket_id]
+        events.sort(key=lambda e: e[0])
+
+        has_opened = False
+        status = 'not_opened'
+        priority = None
+        used_minutes = 0
+        breached = False
+        breached_at = None
+        last_m = None
+
+        for m, min_events in groupby(events, key=lambda e: e[0]):
+            min_events = list(min_events)
+
+            if has_opened and last_m is not None and m > last_m:
+                if status == 'running':
+                    biz = business_minutes(m) - business_minutes(last_m)
+                    if biz > 0:
+                        if not breached:
+                            limit = LIMITS[priority]
+                            K = (limit + 1) - used_minutes
+                            if K <= biz:
+                                t = find_minute_after(last_m, K)
+                                if t < m:
+                                    breached = True
+                                    breached_at = t
+                        used_minutes += biz
+                last_m = m
+            elif last_m is None:
+                last_m = m
+
+            for _, event, arg in min_events:
+                if event == 'OPEN':
+                    if status == 'not_opened':
+                        has_opened = True
+                        status = 'running'
+                        priority = arg
+                        used_minutes = 0
+                        breached = False
+                        breached_at = None
+                    elif status == 'closed':
+                        status = 'running'
+                        priority = arg
+                        used_minutes = 0
+                        breached = False
+                        breached_at = None
+                elif event == 'PRIORITY':
+                    if status in ('running', 'paused'):
+                        priority = arg
+                elif event == 'PAUSE':
+                    if status == 'running':
+                        status = 'paused'
+                elif event == 'RESUME':
+                    if status == 'paused':
+                        status = 'running'
+                elif event == 'CLOSE':
+                    if status in ('running', 'paused'):
+                        status = 'closed'
+                elif event == 'REOPEN':
+                    if status == 'closed':
+                        status = 'running'
+
+            if has_opened and not breached:
+                if used_minutes > LIMITS[priority]:
+                    breached = True
+                    breached_at = m
+
+        if has_opened:
+            if last_m is not None and last_m < now:
+                if status == 'running':
+                    biz = business_minutes(now) - business_minutes(last_m)
+                    if biz > 0:
+                        if not breached:
+                            limit = LIMITS[priority]
+                            K = (limit + 1) - used_minutes
+                            if K <= biz:
+                                t = find_minute_after(last_m, K)
+                                breached = True
+                                breached_at = t
+                        used_minutes += biz
+                last_m = now
+
+            results.append({
+                'ticket_id': ticket_id,
+                'priority': priority,
+                'used_minutes': used_minutes,
+                'breached': breached,
+                'breached_at': breached_at,
+                'status': status,
+            })
+
+    return results
+```

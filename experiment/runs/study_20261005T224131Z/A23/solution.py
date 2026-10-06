@@ -1,0 +1,196 @@
+from bisect import bisect_left
+
+
+def compute_sla(stream):
+    LIMITS = {"P1": 240, "P2": 480, "P3": 1440, "P4": 2400}
+    VALID_EVENTS_3 = {"PAUSE", "RESUME", "CLOSE", "REOPEN"}
+    VALID_EVENTS_4 = {"OPEN", "PRIORITY"}
+    VALID_PRIORITIES = {"P1", "P2", "P3", "P4"}
+
+    NOT_OPENED = 0
+    RUNNING = 1
+    PAUSED = 2
+    CLOSED = 3
+
+    STATUS_MAP = {
+        RUNNING: "running",
+        PAUSED: "paused",
+        CLOSED: "closed",
+    }
+
+    holidays = set()
+    ticket_events_map = {}
+    max_now = None
+    seq = 0
+
+    for raw_line in stream:
+        line = raw_line.strip()
+        if not line:
+            continue
+        parts = [p.strip() for p in line.split(",")]
+        if len(parts) not in (3, 4):
+            continue
+
+        m_str = parts[0]
+        if not m_str or not all("0" <= c <= "9" for c in m_str):
+            continue
+        minute = int(m_str)
+
+        ticket_id = parts[1]
+        if not ticket_id:
+            continue
+
+        event = parts[2]
+
+        if event == "HOLIDAY":
+            if len(parts) != 3 or ticket_id != "*":
+                continue
+            holidays.add(minute // 1440)
+            continue
+
+        if ticket_id == "*":
+            continue
+
+        if event in VALID_EVENTS_4:
+            if len(parts) != 4:
+                continue
+            prio = parts[3]
+            if prio not in VALID_PRIORITIES:
+                continue
+            ticket_events_map.setdefault(ticket_id, []).append(
+                (minute, seq, event, prio)
+            )
+            seq += 1
+            if max_now is None or minute > max_now:
+                max_now = minute
+        elif event in VALID_EVENTS_3:
+            if len(parts) != 3:
+                continue
+            ticket_events_map.setdefault(ticket_id, []).append(
+                (minute, seq, event, None)
+            )
+            seq += 1
+            if max_now is None or minute > max_now:
+                max_now = minute
+
+    if max_now is None:
+        return []
+
+    now = max_now
+
+    # Calendar preparation
+    valid_holidays = sorted({d for d in holidays if d % 7 < 5})
+    valid_holidays_set = set(valid_holidays)
+
+    def business_minutes(m):
+        d = m // 1440
+        rem = m % 1440
+        weeks = d // 7
+        rem_days = d % 7
+        full_b_days = weeks * 5 + (rem_days if rem_days < 5 else 5)
+        k = bisect_left(valid_holidays, d)
+        b_mins = (full_b_days - k) * 480
+        if rem_days < 5 and d not in valid_holidays_set:
+            if rem > 540:
+                b_mins += (1020 if rem > 1020 else rem) - 540
+        return b_mins
+
+    results = []
+
+    for ticket_id, raw_events in ticket_events_map.items():
+        raw_events.sort(key=lambda x: (x[0], x[1]))
+
+        # Group consecutive events at the same minute
+        groups = []
+        for m, _, ev, prio in raw_events:
+            if not groups or groups[-1][0] != m:
+                groups.append((m, [(ev, prio)]))
+            else:
+                groups[-1][1].append((ev, prio))
+
+        if groups[-1][0] < now:
+            groups.append((now, []))
+
+        has_valid_open = False
+        state = NOT_OPENED
+        priority = None
+        used_time = 0
+        breached = False
+        breached_at = None
+
+        prev_t = None
+        prev_bm = None
+
+        for curr_t, events in groups:
+            if prev_t is None:
+                # First group
+                curr_bm = business_minutes(curr_t)
+            else:
+                curr_bm = business_minutes(curr_t)
+                if state == RUNNING:
+                    delta = curr_bm - prev_bm
+                    if not breached:
+                        limit = LIMITS[priority]
+                        if used_time + delta > limit:
+                            target = prev_bm + limit + 1 - used_time
+                            low = prev_t + 1
+                            high = curr_t
+                            while low < high:
+                                mid = (low + high) // 2
+                                if business_minutes(mid) >= target:
+                                    high = mid
+                                else:
+                                    low = mid + 1
+                            t_breach = low
+                            if t_breach < curr_t:
+                                breached = True
+                                breached_at = t_breach
+                    used_time += delta
+
+            # Apply all events at curr_t in stream order
+            for ev, p_arg in events:
+                if ev == "OPEN":
+                    if state == NOT_OPENED or state == CLOSED:
+                        state = RUNNING
+                        priority = p_arg
+                        used_time = 0
+                        breached = False
+                        breached_at = None
+                        has_valid_open = True
+                elif ev == "PRIORITY":
+                    if state in (RUNNING, PAUSED):
+                        priority = p_arg
+                elif ev == "PAUSE":
+                    if state == RUNNING:
+                        state = PAUSED
+                elif ev == "RESUME":
+                    if state == PAUSED:
+                        state = RUNNING
+                elif ev == "CLOSE":
+                    if state in (RUNNING, PAUSED):
+                        state = CLOSED
+                elif ev == "REOPEN":
+                    if state == CLOSED:
+                        state = RUNNING
+
+            # Check breach at curr_t after all events have been applied
+            if has_valid_open and not breached:
+                if used_time > LIMITS[priority]:
+                    breached = True
+                    breached_at = curr_t
+
+            prev_t = curr_t
+            prev_bm = curr_bm
+
+        if has_valid_open:
+            results.append({
+                "ticket_id": ticket_id,
+                "priority": priority,
+                "used_minutes": used_time,
+                "breached": breached,
+                "breached_at": breached_at,
+                "status": STATUS_MAP[state],
+            })
+
+    results.sort(key=lambda x: x["ticket_id"])
+    return results

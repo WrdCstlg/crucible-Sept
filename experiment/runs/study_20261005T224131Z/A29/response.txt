@@ -1,0 +1,198 @@
+```python
+from bisect import bisect_left
+from collections import defaultdict
+
+
+def compute_sla(stream):
+    VALID_EVENTS = {'OPEN', 'PRIORITY', 'PAUSE', 'RESUME', 'CLOSE', 'REOPEN', 'HOLIDAY'}
+    VALID_PRIORITIES = {'P1', 'P2', 'P3', 'P4'}
+    LIMITS = {'P1': 240, 'P2': 480, 'P3': 1440, 'P4': 2400}
+
+    holiday_days = set()
+    ticket_events = defaultdict(list)
+    now = None
+
+    for line in stream:
+        line = line.strip()
+        if not line:
+            continue
+
+        parts = [p.strip() for p in line.split(',')]
+        num_parts = len(parts)
+        if num_parts not in (3, 4):
+            continue
+
+        m_str = parts[0]
+        ticket_id = parts[1]
+        event = parts[2]
+
+        if not (m_str and m_str.isascii() and m_str.isdigit()):
+            continue
+        minute = int(m_str)
+
+        if not ticket_id:
+            continue
+
+        if event not in VALID_EVENTS:
+            continue
+
+        if event in ('OPEN', 'PRIORITY'):
+            if num_parts != 4:
+                continue
+            prio = parts[3]
+            if prio not in VALID_PRIORITIES:
+                continue
+        else:
+            if num_parts != 3:
+                continue
+            prio = None
+
+        if event == 'HOLIDAY':
+            if ticket_id != '*':
+                continue
+            day = minute // 1440
+            if day % 7 < 5:
+                holiday_days.add(day)
+        else:
+            if ticket_id == '*':
+                continue
+            if now is None or minute > now:
+                now = minute
+            ticket_events[ticket_id].append((minute, event, prio))
+
+    if now is None:
+        return []
+
+    weekday_holidays = sorted(holiday_days)
+
+    def raw_bmin(m):
+        d = m // 1440
+        mod = m % 1440
+        full_weeks = d // 7
+        rem_days = d % 7
+        total = full_weeks * 2400 + min(rem_days, 5) * 480
+        if rem_days < 5:
+            total += max(0, min(mod - 540, 480))
+        return total
+
+    def business_minutes(m):
+        raw = raw_bmin(m)
+        d = m // 1440
+        idx = bisect_left(weekday_holidays, d)
+        deduction = idx * 480
+        if d in holiday_days:
+            mod = m % 1440
+            deduction += max(0, min(mod - 540, 480))
+        return raw - deduction
+
+    def find_breach_minute(t_start, t_end, k):
+        target = business_minutes(t_start) + k
+        low = t_start + 1
+        high = t_end
+        while low < high:
+            mid = (low + high) // 2
+            if business_minutes(mid) >= target:
+                high = mid
+            else:
+                low = mid + 1
+        return low
+
+    result = []
+
+    for ticket_id, raw_events in ticket_events.items():
+        raw_events.sort(key=lambda x: x[0])
+
+        events_by_minute = []
+        cur_m = None
+        cur_list = []
+        for ev in raw_events:
+            m = ev[0]
+            if m == cur_m:
+                cur_list.append((ev[1], ev[2]))
+            else:
+                if cur_list:
+                    events_by_minute.append((cur_m, cur_list))
+                cur_m = m
+                cur_list = [(ev[1], ev[2])]
+        if cur_list:
+            events_by_minute.append((cur_m, cur_list))
+
+        state = 'NOT_OPENED'
+        priority = None
+        used_time = 0
+        breached = False
+        breached_at = None
+        has_valid_open = False
+        prev_minute = None
+
+        for minute, ev_list in events_by_minute:
+            if prev_minute is not None and minute > prev_minute:
+                if state == 'RUNNING':
+                    delta = business_minutes(minute) - business_minutes(prev_minute)
+                    if not breached:
+                        limit = LIMITS[priority]
+                        k = limit + 1 - used_time
+                        if delta >= k:
+                            t_star = find_breach_minute(prev_minute, minute, k)
+                            if t_star < minute:
+                                breached = True
+                                breached_at = t_star
+                    used_time += delta
+
+            for ev_type, ev_arg in ev_list:
+                if ev_type == 'OPEN':
+                    if state in ('NOT_OPENED', 'CLOSED'):
+                        state = 'RUNNING'
+                        priority = ev_arg
+                        used_time = 0
+                        breached = False
+                        breached_at = None
+                        has_valid_open = True
+                elif ev_type == 'PRIORITY':
+                    if state in ('RUNNING', 'PAUSED'):
+                        priority = ev_arg
+                elif ev_type == 'PAUSE':
+                    if state == 'RUNNING':
+                        state = 'PAUSED'
+                elif ev_type == 'RESUME':
+                    if state == 'PAUSED':
+                        state = 'RUNNING'
+                elif ev_type == 'CLOSE':
+                    if state in ('RUNNING', 'PAUSED'):
+                        state = 'CLOSED'
+                elif ev_type == 'REOPEN':
+                    if state == 'CLOSED':
+                        state = 'RUNNING'
+
+            if not breached and has_valid_open and state != 'NOT_OPENED':
+                if used_time > LIMITS[priority]:
+                    breached = True
+                    breached_at = minute
+
+            prev_minute = minute
+
+        if prev_minute is not None and now > prev_minute:
+            if state == 'RUNNING':
+                delta = business_minutes(now) - business_minutes(prev_minute)
+                if not breached:
+                    limit = LIMITS[priority]
+                    k = limit + 1 - used_time
+                    if delta >= k:
+                        t_star = find_breach_minute(prev_minute, now, k)
+                        breached = True
+                        breached_at = t_star
+                used_time += delta
+
+        if has_valid_open:
+            result.append({
+                "ticket_id": ticket_id,
+                "priority": priority,
+                "used_minutes": used_time,
+                "breached": breached,
+                "breached_at": breached_at,
+                "status": state.lower()
+            })
+
+    result.sort(key=lambda x: x["ticket_id"])
+    return result
+```

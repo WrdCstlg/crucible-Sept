@@ -1,0 +1,221 @@
+from bisect import bisect_left
+from collections import defaultdict
+
+LIMITS = {
+    'P1': 240,
+    'P2': 480,
+    'P3': 1440,
+    'P4': 2400,
+}
+
+VALID_EVENTS = {'OPEN', 'PRIORITY', 'PAUSE', 'RESUME', 'CLOSE', 'REOPEN', 'HOLIDAY'}
+VALID_PRIORITIES = {'P1', 'P2', 'P3', 'P4'}
+
+
+def _create_calendar(holiday_days):
+    weekday_holidays = {d for d in holiday_days if (d % 7) < 5}
+    H = sorted(weekday_holidays)
+    holiday_set = weekday_holidays
+    b_left = bisect_left
+
+    def business_minutes(t):
+        d, rem = divmod(t, 1440)
+        weeks, rem_days = divmod(d, 7)
+        full_days_bm = weeks * 2400 + (rem_days if rem_days < 5 else 5) * 480
+
+        if rem_days < 5:
+            if rem <= 540:
+                day_bm = 0
+            elif rem >= 1020:
+                day_bm = 480
+            else:
+                day_bm = rem - 540
+        else:
+            day_bm = 0
+
+        idx = b_left(H, d)
+        return full_days_bm + day_bm - idx * 480 - (day_bm if d in holiday_set else 0)
+
+    return business_minutes
+
+
+def compute_sla(stream):
+    holiday_days = set()
+    ticket_events = defaultdict(list)
+    now = None
+
+    for stream_idx, raw_line in enumerate(stream):
+        line = raw_line.strip()
+        if not line:
+            continue
+
+        parts = line.split(',')
+        n_parts = len(parts)
+        if n_parts not in (3, 4):
+            continue
+
+        f1 = parts[0].strip()
+        f2 = parts[1].strip()
+        f3 = parts[2].strip()
+
+        if not f1 or not all('0' <= c <= '9' for c in f1):
+            continue
+        minute = int(f1)
+
+        if not f2:
+            continue
+
+        if f3 not in VALID_EVENTS:
+            continue
+
+        if f3 == 'HOLIDAY':
+            if n_parts != 3 or f2 != '*':
+                continue
+            holiday_days.add(minute // 1440)
+        else:
+            if f2 == '*':
+                continue
+            if f3 in ('OPEN', 'PRIORITY'):
+                if n_parts != 4:
+                    continue
+                f4 = parts[3].strip()
+                if f4 not in VALID_PRIORITIES:
+                    continue
+                ticket_events[f2].append((minute, stream_idx, f3, f4))
+            else:
+                if n_parts != 3:
+                    continue
+                ticket_events[f2].append((minute, stream_idx, f3, None))
+
+            if now is None or minute > now:
+                now = minute
+
+    if now is None:
+        return []
+
+    bm = _create_calendar(holiday_days)
+    results = []
+
+    for ticket_id in sorted(ticket_events.keys()):
+        events = ticket_events[ticket_id]
+        events.sort(key=lambda x: (x[0], x[1]))
+
+        events_by_minute = defaultdict(list)
+        for m, _, ev_type, param in events:
+            events_by_minute[m].append((ev_type, param))
+
+        sorted_minutes = list(events_by_minute.keys())
+        if now > sorted_minutes[-1]:
+            sorted_minutes.append(now)
+
+        state = 'NOT_OPENED'
+        priority = None
+        used_time = 0
+        breached = False
+        breached_at = None
+        ever_opened = False
+
+        # Apply events at the first minute
+        m_0 = sorted_minutes[0]
+        for ev_type, ev_param in events_by_minute.get(m_0, []):
+            if ev_type == 'OPEN':
+                if state in ('NOT_OPENED', 'CLOSED'):
+                    state = 'RUNNING'
+                    priority = ev_param
+                    used_time = 0
+                    breached = False
+                    breached_at = None
+                    ever_opened = True
+            elif ev_type == 'PRIORITY':
+                if state in ('RUNNING', 'PAUSED'):
+                    priority = ev_param
+            elif ev_type == 'PAUSE':
+                if state == 'RUNNING':
+                    state = 'PAUSED'
+            elif ev_type == 'RESUME':
+                if state == 'PAUSED':
+                    state = 'RUNNING'
+            elif ev_type == 'CLOSE':
+                if state in ('RUNNING', 'PAUSED'):
+                    state = 'CLOSED'
+            elif ev_type == 'REOPEN':
+                if state == 'CLOSED':
+                    state = 'RUNNING'
+
+        if state != 'NOT_OPENED' and not breached:
+            if used_time > LIMITS[priority]:
+                breached = True
+                breached_at = m_0
+
+        for i in range(len(sorted_minutes) - 1):
+            m_curr = sorted_minutes[i]
+            m_next = sorted_minutes[i + 1]
+
+            if state == 'RUNNING':
+                bm_curr = bm(m_curr)
+                bm_next = bm(m_next)
+                bm_interval = bm_next - bm_curr
+
+                if not breached:
+                    limit = LIMITS[priority]
+                    needed = limit - used_time + 1
+                    if needed <= bm_interval:
+                        target_bm = bm_curr + needed
+                        low = m_curr + 1
+                        high = m_next
+                        while low < high:
+                            mid = (low + high) // 2
+                            if bm(mid) >= target_bm:
+                                high = mid
+                            else:
+                                low = mid + 1
+                        t_breach = low
+                        if t_breach < m_next:
+                            breached = True
+                            breached_at = t_breach
+
+                used_time += bm_interval
+
+            for ev_type, ev_param in events_by_minute.get(m_next, []):
+                if ev_type == 'OPEN':
+                    if state in ('NOT_OPENED', 'CLOSED'):
+                        state = 'RUNNING'
+                        priority = ev_param
+                        used_time = 0
+                        breached = False
+                        breached_at = None
+                        ever_opened = True
+                elif ev_type == 'PRIORITY':
+                    if state in ('RUNNING', 'PAUSED'):
+                        priority = ev_param
+                elif ev_type == 'PAUSE':
+                    if state == 'RUNNING':
+                        state = 'PAUSED'
+                elif ev_type == 'RESUME':
+                    if state == 'PAUSED':
+                        state = 'RUNNING'
+                elif ev_type == 'CLOSE':
+                    if state in ('RUNNING', 'PAUSED'):
+                        state = 'CLOSED'
+                elif ev_type == 'REOPEN':
+                    if state == 'CLOSED':
+                        state = 'RUNNING'
+
+            if state != 'NOT_OPENED' and not breached:
+                if used_time > LIMITS[priority]:
+                    breached = True
+                    breached_at = m_next
+
+        if not ever_opened:
+            continue
+
+        results.append({
+            "ticket_id": ticket_id,
+            "priority": priority,
+            "used_minutes": used_time,
+            "breached": breached,
+            "breached_at": breached_at,
+            "status": state.lower(),
+        })
+
+    return results

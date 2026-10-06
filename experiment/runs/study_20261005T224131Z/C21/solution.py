@@ -1,0 +1,184 @@
+from bisect import bisect_left, bisect_right
+
+_LIMITS = {"P1": 240, "P2": 480, "P3": 1440, "P4": 2400}
+_TICKET_EVENTS = frozenset(("OPEN", "PRIORITY", "PAUSE", "RESUME", "CLOSE", "REOPEN"))
+_STATUS = {1: "running", 2: "paused", 3: "closed"}
+
+
+def _to_int(s):
+    s = s.lstrip("0")
+    if not s:
+        return 0
+    if len(s) <= 4000:
+        return int(s)
+    v = 0
+    for i in range(0, len(s), 4000):
+        chunk = s[i:i + 4000]
+        v = v * (10 ** len(chunk)) + int(chunk)
+    return v
+
+
+def compute_sla(stream):
+    holidays = set()
+    tickets = {}
+    now = None
+
+    for line in stream:
+        if not isinstance(line, str):
+            continue
+        s = line.strip()
+        if not s:
+            continue
+        parts = s.split(",")
+        n = len(parts)
+        if n != 3 and n != 4:
+            continue
+        parts = [p.strip() for p in parts]
+        ms, tid, ev = parts[0], parts[1], parts[2]
+        if not ms or not (ms.isascii() and ms.isdigit()):
+            continue
+        if not tid:
+            continue
+        if ev == "HOLIDAY":
+            if n != 3 or tid != "*":
+                continue
+            holidays.add(_to_int(ms) // 1440)
+            continue
+        if ev not in _TICKET_EVENTS:
+            continue
+        if tid == "*":
+            continue
+        if ev == "OPEN" or ev == "PRIORITY":
+            if n != 4:
+                continue
+            p = parts[3]
+            if p not in _LIMITS:
+                continue
+        else:
+            if n != 3:
+                continue
+            p = None
+        m = _to_int(ms)
+        lst = tickets.get(tid)
+        if lst is None:
+            lst = []
+            tickets[tid] = lst
+        lst.append((m, ev, p))
+        if now is None or m > now:
+            now = m
+
+    if now is None:
+        return []
+
+    # Holiday weekdays only (weekend holidays have no business minutes).
+    hd = sorted(d for d in holidays if d % 7 < 5)
+    nh = len(hd)
+    bstarts = [(d // 7) * 2400 + (d % 7) * 480 - 480 * i for i, d in enumerate(hd)]
+
+    def B(t):
+        """Number of business minutes x with 0 <= x < t."""
+        D = t // 1440
+        week, dd = divmod(D, 7)
+        if dd >= 5:
+            w = week * 2400 + 2400
+            x = 0
+        else:
+            x = t - D * 1440 - 540
+            if x < 0:
+                x = 0
+            elif x > 480:
+                x = 480
+            w = week * 2400 + dd * 480 + x
+        idx = bisect_left(hd, D)
+        w -= 480 * idx
+        if idx < nh and hd[idx] == D:
+            w -= x
+        return w
+
+    def Binv(k):
+        """Minute of the k-th (0-indexed) business minute."""
+        j = bisect_right(bstarts, k)
+        w = k + 480 * j
+        week, r = divmod(w, 2400)
+        day, mod = divmod(r, 480)
+        return week * 10080 + day * 1440 + 540 + mod
+
+    results = []
+    for tid in sorted(tickets):
+        evs = tickets[tid]
+        evs.sort(key=lambda e: e[0])
+        state = 0  # 0 NOT_OPENED, 1 RUNNING, 2 PAUSED, 3 CLOSED
+        prio = None
+        limit = 0
+        used = 0
+        breached_at = None
+        cur = 0
+        i = 0
+        n = len(evs)
+        while i < n:
+            t = evs[i][0]
+            if state == 1 and t > cur:
+                bc = B(cur)
+                bt = B(t)
+                if breached_at is None:
+                    k = bc + limit - used
+                    if bt > k:
+                        mm = Binv(k)
+                        if mm + 1 < t:
+                            breached_at = mm + 1
+                used += bt - bc
+            cur = t
+            while i < n and evs[i][0] == t:
+                _, ev, p = evs[i]
+                if ev == "OPEN":
+                    if state == 0 or state == 3:
+                        state = 1
+                        prio = p
+                        limit = _LIMITS[p]
+                        used = 0
+                        breached_at = None
+                elif ev == "PRIORITY":
+                    if state == 1 or state == 2:
+                        prio = p
+                        limit = _LIMITS[p]
+                elif ev == "PAUSE":
+                    if state == 1:
+                        state = 2
+                elif ev == "RESUME":
+                    if state == 2:
+                        state = 1
+                elif ev == "CLOSE":
+                    if state == 1 or state == 2:
+                        state = 3
+                elif ev == "REOPEN":
+                    if state == 3:
+                        state = 1
+                i += 1
+            if state != 0 and breached_at is None and used > limit:
+                breached_at = t
+
+        if state == 0:
+            continue
+
+        if state == 1 and now > cur:
+            bc = B(cur)
+            bn = B(now)
+            if breached_at is None:
+                k = bc + limit - used
+                if bn > k:
+                    mm = Binv(k)
+                    if mm + 1 <= now:
+                        breached_at = mm + 1
+            used += bn - bc
+            cur = now
+
+        results.append({
+            "ticket_id": tid,
+            "priority": prio,
+            "used_minutes": used,
+            "breached": breached_at is not None,
+            "breached_at": breached_at,
+            "status": _STATUS[state],
+        })
+
+    return results
