@@ -1,0 +1,10565 @@
+{
+ "problem": "payroll",
+ "entry": "compute_pay",
+ "public": [
+  {
+   "id": "P1",
+   "title": "rounding, daily overtime, meal penalty",
+   "args": [
+    [
+     [
+      "2026-03-02 08:07",
+      "2026-03-02 18:08"
+     ]
+    ],
+    2000
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 2000,
+      "meal_penalties": 1,
+      "overtime_minutes": 135,
+      "overtime_pay": 6750,
+      "regular_minutes": 480,
+      "regular_pay": 16000,
+      "total_pay": 24750,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "P2",
+   "title": "midnight shift, overlap, invalid, empty",
+   "args": [
+    [
+     [
+      "2026-03-08 22:00",
+      "2026-03-09 03:00"
+     ],
+     [
+      "2026-03-09 02:00",
+      "2026-03-09 06:00"
+     ],
+     [
+      "2026-03-09 25:00",
+      "2026-03-09 26:00"
+     ],
+     [
+      "2026-03-09 09:00",
+      "2026-03-09 09:05"
+     ]
+    ],
+    1500
+   ],
+   "expected": {
+    "ignored": [
+     1,
+     2,
+     3
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 300,
+      "regular_pay": 7500,
+      "total_pay": 7500,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "P3",
+   "title": "weekly overtime",
+   "args": [
+    [
+     [
+      "2026-03-02 09:00",
+      "2026-03-02 18:00"
+     ],
+     [
+      "2026-03-03 09:00",
+      "2026-03-03 18:00"
+     ],
+     [
+      "2026-03-04 09:00",
+      "2026-03-04 18:00"
+     ],
+     [
+      "2026-03-05 09:00",
+      "2026-03-05 18:00"
+     ],
+     [
+      "2026-03-06 09:00",
+      "2026-03-06 18:00"
+     ],
+     [
+      "2026-03-07 09:00",
+      "2026-03-07 15:00"
+     ]
+    ],
+    1000
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 6000,
+      "meal_penalties": 6,
+      "overtime_minutes": 660,
+      "overtime_pay": 16500,
+      "regular_minutes": 2400,
+      "regular_pay": 40000,
+      "total_pay": 62500,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "P4",
+   "title": "seventh day",
+   "args": [
+    [
+     [
+      "2026-03-02 09:00",
+      "2026-03-02 13:00"
+     ],
+     [
+      "2026-03-03 09:00",
+      "2026-03-03 13:00"
+     ],
+     [
+      "2026-03-04 09:00",
+      "2026-03-04 13:00"
+     ],
+     [
+      "2026-03-05 09:00",
+      "2026-03-05 13:00"
+     ],
+     [
+      "2026-03-06 09:00",
+      "2026-03-06 13:00"
+     ],
+     [
+      "2026-03-07 09:00",
+      "2026-03-07 13:00"
+     ],
+     [
+      "2026-03-08 08:00",
+      "2026-03-08 18:00"
+     ]
+    ],
+    1200
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 120,
+      "double_pay": 4800,
+      "meal_pay": 1200,
+      "meal_penalties": 1,
+      "overtime_minutes": 480,
+      "overtime_pay": 14400,
+      "regular_minutes": 1440,
+      "regular_pay": 28800,
+      "total_pay": 49200,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  }
+ ],
+ "hidden": [
+  {
+   "id": "H01",
+   "title": "7-minute rule at both boundaries",
+   "args": [
+    [
+     [
+      "2026-03-02 09:07",
+      "2026-03-02 09:52"
+     ],
+     [
+      "2026-03-02 10:08",
+      "2026-03-02 10:38"
+     ],
+     [
+      "2026-03-02 11:22",
+      "2026-03-02 11:23"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 90,
+      "regular_pay": 900,
+      "total_pay": 900,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "H02",
+   "title": "rounding moves a start into the next day and the next week",
+   "args": [
+    [
+     [
+      "2026-03-02 23:53",
+      "2026-03-03 02:00"
+     ],
+     [
+      "2026-03-08 23:55",
+      "2026-03-09 00:20"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 120,
+      "regular_pay": 1200,
+      "total_pay": 1200,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 15,
+      "regular_pay": 150,
+      "total_pay": 150,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "H03",
+   "title": "invalid timestamps",
+   "args": [
+    [
+     [
+      "2026-02-29 09:00",
+      "2026-02-29 10:00"
+     ],
+     [
+      "2026-3-02 09:00",
+      "2026-03-02 10:00"
+     ],
+     [
+      "2026-03-02T09:00",
+      "2026-03-02 10:00"
+     ],
+     [
+      "2026-03-02 09:00",
+      "2026-03-02 09:00"
+     ],
+     [
+      "2026-03-02 10:00",
+      "2026-03-02 09:00"
+     ],
+     [
+      "２026-03-02 09:00",
+      "2026-03-02 10:00"
+     ],
+     [
+      "2026-03-02 09:60",
+      "2026-03-02 10:00"
+     ],
+     [
+      "2028-02-29 09:00",
+      "2028-02-29 10:00"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [
+     0,
+     1,
+     2,
+     3,
+     4,
+     5,
+     6
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 60,
+      "regular_pay": 600,
+      "total_pay": 600,
+      "week_start": "2028-02-28"
+     }
+    ]
+   }
+  },
+  {
+   "id": "H04",
+   "title": "overlaps are dropped, not merged; touching is fine",
+   "args": [
+    [
+     [
+      "2026-03-02 09:00",
+      "2026-03-02 12:00"
+     ],
+     [
+      "2026-03-02 11:00",
+      "2026-03-02 13:00"
+     ],
+     [
+      "2026-03-02 12:05",
+      "2026-03-02 14:00"
+     ],
+     [
+      "2026-03-02 13:00",
+      "2026-03-02 13:30"
+     ],
+     [
+      "2026-03-02 15:01",
+      "2026-03-02 15:07"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [
+     1,
+     3,
+     4
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 300,
+      "regular_pay": 3000,
+      "total_pay": 3000,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "H05",
+   "title": "sorting ties: duplicates and equal starts (shorter end first)",
+   "args": [
+    [
+     [
+      "2026-03-03 09:00",
+      "2026-03-03 10:00"
+     ],
+     [
+      "2026-03-03 09:00",
+      "2026-03-03 10:00"
+     ],
+     [
+      "2026-03-02 09:00",
+      "2026-03-02 09:30"
+     ],
+     [
+      "2026-03-04 09:00",
+      "2026-03-04 11:00"
+     ],
+     [
+      "2026-03-04 09:00",
+      "2026-03-04 09:30"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [
+     1,
+     3
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 120,
+      "regular_pay": 1200,
+      "total_pay": 1200,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "H06",
+   "title": "double time after 12 hours",
+   "args": [
+    [
+     [
+      "2026-03-03 06:00",
+      "2026-03-03 20:00"
+     ]
+    ],
+    1001
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 120,
+      "double_pay": 4004,
+      "meal_pay": 1001,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 6006,
+      "regular_minutes": 480,
+      "regular_pay": 8008,
+      "total_pay": 19019,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "H07",
+   "title": "pay rounded once per week, not per day",
+   "args": [
+    [
+     [
+      "2026-03-02 09:00",
+      "2026-03-02 09:15"
+     ],
+     [
+      "2026-03-03 09:00",
+      "2026-03-03 09:15"
+     ]
+    ],
+    1001
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 30,
+      "regular_pay": 501,
+      "total_pay": 501,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "H08",
+   "title": "overtime pay rounds half up",
+   "args": [
+    [
+     [
+      "2026-03-02 09:00",
+      "2026-03-02 17:15"
+     ]
+    ],
+    1004
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1004,
+      "meal_penalties": 1,
+      "overtime_minutes": 15,
+      "overtime_pay": 377,
+      "regular_minutes": 480,
+      "regular_pay": 8032,
+      "total_pay": 9413,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "H09",
+   "title": "weekly cap after daily overtime and a split day",
+   "args": [
+    [
+     [
+      "2026-03-02 08:00",
+      "2026-03-02 18:00"
+     ],
+     [
+      "2026-03-03 08:00",
+      "2026-03-03 18:00"
+     ],
+     [
+      "2026-03-04 08:00",
+      "2026-03-04 18:00"
+     ],
+     [
+      "2026-03-05 08:00",
+      "2026-03-05 18:00"
+     ],
+     [
+      "2026-03-06 08:00",
+      "2026-03-06 12:00"
+     ],
+     [
+      "2026-03-06 12:30",
+      "2026-03-06 16:30"
+     ],
+     [
+      "2026-03-07 10:00",
+      "2026-03-07 12:00"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 2400,
+      "meal_penalties": 4,
+      "overtime_minutes": 600,
+      "overtime_pay": 9000,
+      "regular_minutes": 2400,
+      "regular_pay": 24000,
+      "total_pay": 35400,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "H10",
+   "title": "no seventh-day rule with a day off",
+   "args": [
+    [
+     [
+      "2026-03-02 09:00",
+      "2026-03-02 13:00"
+     ],
+     [
+      "2026-03-03 09:00",
+      "2026-03-03 13:00"
+     ],
+     [
+      "2026-03-05 09:00",
+      "2026-03-05 13:00"
+     ],
+     [
+      "2026-03-06 09:00",
+      "2026-03-06 13:00"
+     ],
+     [
+      "2026-03-07 09:00",
+      "2026-03-07 13:00"
+     ],
+     [
+      "2026-03-08 08:00",
+      "2026-03-08 18:00"
+     ]
+    ],
+    1200
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1200,
+      "meal_penalties": 1,
+      "overtime_minutes": 120,
+      "overtime_pay": 3600,
+      "regular_minutes": 1680,
+      "regular_pay": 33600,
+      "total_pay": 38400,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "H11",
+   "title": "seventh day after the weekly cap",
+   "args": [
+    [
+     [
+      "2026-03-02 08:00",
+      "2026-03-02 17:00"
+     ],
+     [
+      "2026-03-03 08:00",
+      "2026-03-03 17:00"
+     ],
+     [
+      "2026-03-04 08:00",
+      "2026-03-04 17:00"
+     ],
+     [
+      "2026-03-05 08:00",
+      "2026-03-05 17:00"
+     ],
+     [
+      "2026-03-06 08:00",
+      "2026-03-06 17:00"
+     ],
+     [
+      "2026-03-07 08:00",
+      "2026-03-07 17:00"
+     ],
+     [
+      "2026-03-08 09:00",
+      "2026-03-08 12:00"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 3600,
+      "meal_penalties": 6,
+      "overtime_minutes": 1020,
+      "overtime_pay": 15300,
+      "regular_minutes": 2400,
+      "regular_pay": 24000,
+      "total_pay": 42900,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "H12",
+   "title": "Sunday night shift into Monday stays in Sunday's week",
+   "args": [
+    [
+     [
+      "2026-03-08 18:00",
+      "2026-03-09 08:00"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 120,
+      "double_pay": 2400,
+      "meal_pay": 600,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 3600,
+      "regular_minutes": 480,
+      "regular_pay": 4800,
+      "total_pay": 11400,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "H13",
+   "title": "no punches",
+   "args": [
+    [],
+    600
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": []
+   }
+  },
+  {
+   "id": "H14",
+   "title": "meal penalty needs one shift over 300 minutes",
+   "args": [
+    [
+     [
+      "2026-03-02 09:00",
+      "2026-03-02 14:00"
+     ],
+     [
+      "2026-03-03 09:00",
+      "2026-03-03 14:15"
+     ],
+     [
+      "2026-03-04 08:00",
+      "2026-03-04 12:40"
+     ],
+     [
+      "2026-03-04 13:00",
+      "2026-03-04 17:40"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 600,
+      "meal_penalties": 1,
+      "overtime_minutes": 90,
+      "overtime_pay": 1350,
+      "regular_minutes": 1095,
+      "regular_pay": 10950,
+      "total_pay": 12900,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "H15",
+   "title": "weeks sorted; a week with only ignored punches is not listed",
+   "args": [
+    [
+     [
+      "2026-03-16 09:00",
+      "2026-03-16 10:00"
+     ],
+     [
+      "2026-03-02 09:00",
+      "2026-03-02 09:30"
+     ],
+     [
+      "2026-03-09 09:00",
+      "2026-03-09 09:00"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [
+     2
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 30,
+      "regular_pay": 300,
+      "total_pay": 300,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 60,
+      "regular_pay": 600,
+      "total_pay": 600,
+      "week_start": "2026-03-16"
+     }
+    ]
+   }
+  },
+  {
+   "id": "H16",
+   "title": "seven consecutive days across two weeks is not a seventh day",
+   "args": [
+    [
+     [
+      "2026-03-04 09:00",
+      "2026-03-04 10:00"
+     ],
+     [
+      "2026-03-05 09:00",
+      "2026-03-05 10:00"
+     ],
+     [
+      "2026-03-06 09:00",
+      "2026-03-06 10:00"
+     ],
+     [
+      "2026-03-07 09:00",
+      "2026-03-07 10:00"
+     ],
+     [
+      "2026-03-08 09:00",
+      "2026-03-08 10:00"
+     ],
+     [
+      "2026-03-09 09:00",
+      "2026-03-09 10:00"
+     ],
+     [
+      "2026-03-10 09:00",
+      "2026-03-10 10:00"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 300,
+      "regular_pay": 3000,
+      "total_pay": 3000,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 120,
+      "regular_pay": 1200,
+      "total_pay": 1200,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "H17",
+   "title": "a day with two long shifts earns one penalty",
+   "args": [
+    [
+     [
+      "2026-03-02 00:00",
+      "2026-03-02 06:00"
+     ],
+     [
+      "2026-03-02 12:00",
+      "2026-03-02 18:00"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 600,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 3600,
+      "regular_minutes": 480,
+      "regular_pay": 4800,
+      "total_pay": 9000,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "H18",
+   "title": "seventh day: short week, long Sunday",
+   "args": [
+    [
+     [
+      "2026-03-02 09:00",
+      "2026-03-02 10:00"
+     ],
+     [
+      "2026-03-03 09:00",
+      "2026-03-03 10:00"
+     ],
+     [
+      "2026-03-04 09:00",
+      "2026-03-04 10:00"
+     ],
+     [
+      "2026-03-05 09:00",
+      "2026-03-05 10:00"
+     ],
+     [
+      "2026-03-06 09:00",
+      "2026-03-06 10:00"
+     ],
+     [
+      "2026-03-07 09:00",
+      "2026-03-07 10:00"
+     ],
+     [
+      "2026-03-08 08:00",
+      "2026-03-08 17:00"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 60,
+      "double_pay": 1200,
+      "meal_pay": 600,
+      "meal_penalties": 1,
+      "overtime_minutes": 480,
+      "overtime_pay": 7200,
+      "regular_minutes": 360,
+      "regular_pay": 3600,
+      "total_pay": 12600,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R001",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-06 18:03",
+      "2026-03-07 02:58"
+     ],
+     [
+      "2026-03-09 17:09",
+      "2026-03-09 21:10"
+     ],
+     [
+      "2026-03-05 06:14",
+      "2026-03-05 18:18"
+     ],
+     [
+      "2026-03-09 06:06",
+      "2026-03-09 18:09"
+     ],
+     [
+      "2026-13-01 09:00",
+      "2026-03-08 11:10"
+     ],
+     [
+      "2026-03-01 13:02",
+      "2026-03-02 02:58"
+     ],
+     [
+      "2026-03-08 23:17",
+      "2026-03-09 04:26"
+     ],
+     [
+      "2026-03-07 08:14",
+      "2026-03-07 08:18"
+     ],
+     [
+      "2026-03-08 09:13",
+      "2026-03-08 23:10"
+     ],
+     [
+      "2026-03-04 00:11",
+      "2026-03-04 00:21"
+     ],
+     [
+      "2026-03-03 06:13",
+      "2026-03-03 11:18"
+     ],
+     [
+      "2026-03-05 18:33",
+      "2026-03-06 02:49"
+     ],
+     [
+      "2026-03-02 03:43",
+      "2026-03-02 12:04"
+     ],
+     [
+      "2026-03-03 11:12",
+      "2026-03-03 16:07"
+     ],
+     [
+      "2026-03-02 22:05",
+      "2026-03-03 10:27"
+     ]
+    ],
+    4999
+   ],
+   "expected": {
+    "ignored": [
+     1,
+     4,
+     7,
+     9,
+     10
+    ],
+    "weeks": [
+     {
+      "double_minutes": 120,
+      "double_pay": 19996,
+      "meal_pay": 4999,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 29994,
+      "regular_minutes": 480,
+      "regular_pay": 39992,
+      "total_pay": 94981,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 1455,
+      "double_pay": 242452,
+      "meal_pay": 19996,
+      "meal_penalties": 4,
+      "overtime_minutes": 780,
+      "overtime_pay": 97481,
+      "regular_minutes": 2205,
+      "regular_pay": 183713,
+      "total_pay": 543642,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 15,
+      "double_pay": 2500,
+      "meal_pay": 4999,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 29994,
+      "regular_minutes": 480,
+      "regular_pay": 39992,
+      "total_pay": 77485,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R002",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-06 23:44",
+      "2026-03-07 07:46"
+     ],
+     [
+      "2026-03-07 13:06",
+      "2026-03-08 01:04"
+     ],
+     [
+      "2026-03-06 23:21",
+      "2026-03-06 23:29"
+     ],
+     [
+      "2026-03-10 06:00",
+      "2026-03-10 11:13"
+     ],
+     [
+      "2026-03-02 03:02",
+      "2026-03-02 12:02"
+     ],
+     [
+      "2026-03-14 23:30",
+      "2026-03-14 23:55"
+     ],
+     [
+      "2026-03-02 00:12",
+      "2026-03-02 02:17"
+     ],
+     [
+      "2026-03-04 06:13",
+      "2026-03-04 11:27"
+     ],
+     [
+      "2026-03-13 06:10",
+      "2026-03-13 08:06"
+     ],
+     [
+      "2026-03-02 00:12",
+      "2026-03-02 02:17"
+     ],
+     [
+      "2026-03-05 18:04",
+      "2026-03-06 02:18"
+     ],
+     [
+      "2026-03-10 11:58",
+      "2026-03-10 12:29"
+     ],
+     [
+      "2026-03-12 09:07",
+      "2026-03-12 21:14"
+     ],
+     [
+      "2026-03-13 08:51",
+      "2026-03-13 17:55"
+     ],
+     [
+      "2026-03-15 13:12",
+      "2026-03-15 22:19"
+     ]
+    ],
+    2000
+   ],
+   "expected": {
+    "ignored": [
+     9
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 10000,
+      "meal_penalties": 5,
+      "overtime_minutes": 450,
+      "overtime_pay": 22500,
+      "regular_minutes": 2235,
+      "regular_pay": 74500,
+      "total_pay": 107000,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 15,
+      "double_pay": 1000,
+      "meal_pay": 8000,
+      "meal_penalties": 4,
+      "overtime_minutes": 480,
+      "overtime_pay": 24000,
+      "regular_minutes": 1815,
+      "regular_pay": 60500,
+      "total_pay": 93500,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R003",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-07 00:00",
+      "2026-03-07 09:07"
+     ],
+     [
+      "2026-03-07 09:11",
+      "2026-03-07 17:21"
+     ],
+     [
+      "2026-03-05 08:00",
+      "2026-03-05 15:54"
+     ],
+     [
+      "2026-03-06 13:14",
+      "2026-03-06 23:15"
+     ],
+     [
+      "2026-03-05 08:00",
+      "2026-03-05 15:54"
+     ],
+     [
+      "2026-03-07 17:28",
+      "2026-03-07 21:21"
+     ],
+     [
+      "2026-03-04 23:26",
+      "2026-03-05 11:23"
+     ],
+     [
+      "2026-03-01 00:42",
+      "2026-03-01 07:47"
+     ],
+     [
+      "2026-03-01 00:00",
+      "2026-03-01 00:35"
+     ]
+    ],
+    1337
+   ],
+   "expected": {
+    "ignored": [
+     2,
+     4
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1337,
+      "meal_penalties": 1,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 450,
+      "regular_pay": 10028,
+      "total_pay": 11365,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 525,
+      "double_pay": 23398,
+      "meal_pay": 4011,
+      "meal_penalties": 3,
+      "overtime_minutes": 600,
+      "overtime_pay": 20055,
+      "regular_minutes": 1440,
+      "regular_pay": 32088,
+      "total_pay": 79552,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R004",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-22 07:00",
+      "2026-03-22 21:06"
+     ],
+     [
+      "2026-03-08 08:05",
+      "2026-03-08 20:07"
+     ],
+     [
+      "2026-03-22 21:21",
+      "2026-03-23 06:26"
+     ],
+     [
+      "2026-03-18 22:11",
+      "2026-03-19 08:17"
+     ],
+     [
+      "2026-03-19 09:06",
+      "2026-03-19 23:12"
+     ],
+     [
+      "2026-03-05 06:01",
+      "2026-03-05 14:15"
+     ],
+     [
+      "2026-03-07 23:30",
+      "2026-03-08 07:41"
+     ],
+     [
+      "2026-03-13 10:04",
+      "2026-03-13 15:17"
+     ],
+     [
+      "2026-03-10 00:07",
+      "2026-03-10 07:04"
+     ],
+     [
+      "2026-03-12 22:11",
+      "2026-03-12 22:36"
+     ],
+     [
+      "2026-03-09 18:04",
+      "2026-03-10 01:10"
+     ],
+     [
+      "2026-03-10 07:04",
+      "2026-03-10 11:00"
+     ],
+     [
+      "2026-03-08 07:48",
+      "2026-03-08 21:43"
+     ],
+     [
+      "2026-03-12 22:43",
+      "2026-03-12 23:07"
+     ],
+     [
+      "2026-03-08 19:07",
+      "2026-03-09 03:00"
+     ],
+     [
+      "2026-03-13 16:02",
+      "2026-03-13 18:07"
+     ],
+     [
+      "2026-03-19 09:17",
+      "2026-03-19 16:18"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [
+     1,
+     8,
+     14,
+     16
+    ],
+    "weeks": [
+     {
+      "double_minutes": 120,
+      "double_pay": 2400,
+      "meal_pay": 1800,
+      "meal_penalties": 3,
+      "overtime_minutes": 270,
+      "overtime_pay": 4050,
+      "regular_minutes": 1440,
+      "regular_pay": 14400,
+      "total_pay": 22650,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1200,
+      "meal_penalties": 2,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 1140,
+      "regular_pay": 11400,
+      "total_pay": 12600,
+      "week_start": "2026-03-09"
+     },
+     {
+      "double_minutes": 810,
+      "double_pay": 16200,
+      "meal_pay": 1800,
+      "meal_penalties": 3,
+      "overtime_minutes": 600,
+      "overtime_pay": 9000,
+      "regular_minutes": 1440,
+      "regular_pay": 14400,
+      "total_pay": 41400,
+      "week_start": "2026-03-16"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R005",
+   "title": "random timesheet",
+   "args": [
+    [],
+    1000
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": []
+   }
+  },
+  {
+   "id": "R006",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-06 09:01",
+      "2026-03-06 17:20"
+     ],
+     [
+      "2026-03-06 17:50",
+      "2026-03-06 22:49"
+     ],
+     [
+      "2026-03-08 09:08",
+      "2026-03-08 14:21"
+     ],
+     [
+      "2026-03-02 09:5a",
+      "2026-03-07 17:40"
+     ]
+    ],
+    1337
+   ],
+   "expected": {
+    "ignored": [
+     3
+    ],
+    "weeks": [
+     {
+      "double_minutes": 75,
+      "double_pay": 3343,
+      "meal_pay": 1337,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 8022,
+      "regular_minutes": 780,
+      "regular_pay": 17381,
+      "total_pay": 30083,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R007",
+   "title": "random timesheet",
+   "args": [
+    [],
+    1004
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": []
+   }
+  },
+  {
+   "id": "R008",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-15 07:01",
+      "2026-03-15 12:08"
+     ],
+     [
+      "2026-03-10 13:03",
+      "2026-03-11 01:01"
+     ],
+     [
+      "2026-03-04 12:06",
+      "2026-03-04 17:10"
+     ],
+     [
+      "2026-03-04 08:06",
+      "2026-03-04 13:06"
+     ],
+     [
+      "2026-03-13 00:00",
+      "2026-03-13 04:59"
+     ],
+     [
+      "2026-03-07 06:12",
+      "2026-03-07 14:17"
+     ],
+     [
+      "2026-03-01 00:08",
+      "2026-03-01 04:15"
+     ],
+     [
+      "2026-03-06 19:20",
+      "2026-03-07 03:32"
+     ],
+     [
+      "2026-03-03 10:14",
+      "2026-03-03 18:24"
+     ],
+     [
+      "2026-03-11 22:04",
+      "2026-03-12 03:06"
+     ],
+     [
+      "2026-03-11 01:16",
+      "2026-03-11 06:19"
+     ],
+     [
+      "2026-03-02 08:07",
+      "2026-03-02 08:41"
+     ],
+     [
+      "2026-03-08 06:02",
+      "2026-03-08 16:02"
+     ],
+     [
+      "2026-03-01 04:45",
+      "2026-03-01 13:38"
+     ],
+     [
+      "2026-03-05 10:47",
+      "2026-03-05 17:53"
+     ],
+     [
+      "2026-03-06 13:14",
+      "2026-03-06 18:20"
+     ],
+     [
+      "2026-03-07 14:17",
+      "2026-03-07 22:39"
+     ],
+     [
+      "2026-03-12 00:05",
+      "2026-03-12 09:09"
+     ],
+     [
+      "2026-03-14 18:11",
+      "2026-03-14 23:13"
+     ],
+     [
+      "2026-03-09 10:07",
+      "2026-03-09 12:14"
+     ],
+     [
+      "2026-03-08 15:02",
+      "2026-03-08 20:14"
+     ],
+     [
+      "2026-03-05 06:02",
+      "2026-03-05 10:02"
+     ],
+     [
+      "2026-03-15 12:23",
+      "2026-03-15 19:23"
+     ]
+    ],
+    1000
+   ],
+   "expected": {
+    "ignored": [
+     2,
+     17,
+     20
+    ],
+    "weeks": [
+     {
+      "double_minutes": 60,
+      "double_pay": 2000,
+      "meal_pay": 1000,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 6000,
+      "regular_minutes": 480,
+      "regular_pay": 8000,
+      "total_pay": 17000,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 465,
+      "double_pay": 15500,
+      "meal_pay": 5000,
+      "meal_penalties": 5,
+      "overtime_minutes": 1170,
+      "overtime_pay": 29250,
+      "regular_minutes": 2265,
+      "regular_pay": 37750,
+      "total_pay": 87500,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 15,
+      "double_pay": 500,
+      "meal_pay": 2000,
+      "meal_penalties": 2,
+      "overtime_minutes": 600,
+      "overtime_pay": 15000,
+      "regular_minutes": 2175,
+      "regular_pay": 36250,
+      "total_pay": 53750,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R009",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-07 13:13",
+      "2026-03-07 23:18"
+     ],
+     [
+      "2026-03-05 13:04",
+      "2026-03-05 23:07"
+     ],
+     [
+      "2026-03-04 06:02",
+      "2026-03-04 10:07"
+     ],
+     [
+      "2026-03-03 06:04",
+      "2026-03-03 08:06"
+     ],
+     [
+      "2026-03-02 13:00",
+      "2026-03-02 17:54"
+     ],
+     [
+      "2026-03-01 22:09",
+      "2026-03-02 02:13"
+     ],
+     [
+      "2026-03-06 22:11",
+      "2026-03-07 03:13"
+     ],
+     [
+      "2026-03-07 03:43",
+      "2026-03-07 16:02"
+     ]
+    ],
+    2000
+   ],
+   "expected": {
+    "ignored": [
+     0
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 240,
+      "regular_pay": 8000,
+      "total_pay": 8000,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 15,
+      "double_pay": 1000,
+      "meal_pay": 4000,
+      "meal_penalties": 2,
+      "overtime_minutes": 360,
+      "overtime_pay": 18000,
+      "regular_minutes": 1920,
+      "regular_pay": 64000,
+      "total_pay": 87000,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R010",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-12 13:15",
+      "2026-03-12 13:44"
+     ],
+     [
+      "2026-03-10 23:12",
+      "2026-03-10 23:41"
+     ],
+     [
+      "2026-03-04 10:14",
+      "2026-03-04 15:33"
+     ],
+     [
+      "2026-03-08 18:06",
+      "2026-03-08 23:09"
+     ],
+     [
+      "2026-03-05 20:22",
+      "2026-03-06 05:23"
+     ],
+     [
+      "2026-03-11 00:09",
+      "2026-03-11 00:12"
+     ],
+     [
+      "2026-03-02 08:07",
+      "2026-03-02 08:44"
+     ],
+     [
+      "2026-03-10 22:12",
+      "2026-03-10 22:38"
+     ],
+     [
+      "2026-03-05 13:02",
+      "2026-03-05 21:22"
+     ],
+     [
+      "2026-03-07 07:05",
+      "2026-03-07 07:11"
+     ],
+     [
+      "2026-03-14 07:08",
+      "2026-03-14 12:27"
+     ],
+     [
+      "2026-03-08 23:09",
+      "2026-03-09 07:28"
+     ],
+     [
+      "2026-03-04 14:33",
+      "2026-03-04 16:27"
+     ],
+     [
+      "2026-03-12 13:04",
+      "2026-03-12 13:15"
+     ],
+     [
+      "2026-03-03 23:30",
+      "2026-03-04 04:27"
+     ]
+    ],
+    1004
+   ],
+   "expected": {
+    "ignored": [
+     4,
+     5,
+     12
+    ],
+    "weeks": [
+     {
+      "double_minutes": 90,
+      "double_pay": 3012,
+      "meal_pay": 3012,
+      "meal_penalties": 3,
+      "overtime_minutes": 255,
+      "overtime_pay": 6401,
+      "regular_minutes": 1635,
+      "regular_pay": 27359,
+      "total_pay": 39784,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1004,
+      "meal_penalties": 1,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 420,
+      "regular_pay": 7028,
+      "total_pay": 8032,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R011",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-02 08:02",
+      "2026-03-02 12:00"
+     ],
+     [
+      "2026-03-02 08:02",
+      "2026-03-02 12:00"
+     ],
+     [
+      "2026-03-07 13:00",
+      "2026-03-08 01:13"
+     ],
+     [
+      "2026-03-02 09:5a",
+      "2026-03-07 20:28"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [
+     1,
+     3
+    ],
+    "weeks": [
+     {
+      "double_minutes": 15,
+      "double_pay": 300,
+      "meal_pay": 600,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 3600,
+      "regular_minutes": 720,
+      "regular_pay": 7200,
+      "total_pay": 11700,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R012",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-01 10:08",
+      "2026-03-01 17:10"
+     ],
+     [
+      "2026-03-03 22:12",
+      "2026-03-04 08:11"
+     ],
+     [
+      "2026-03-01 17:40",
+      "2026-03-02 01:46"
+     ],
+     [
+      "2026-03-02 10:13",
+      "2026-03-02 10:14"
+     ],
+     [
+      "2026-03-02 10:44",
+      "2026-03-02 20:43"
+     ]
+    ],
+    1004
+   ],
+   "expected": {
+    "ignored": [
+     3
+    ],
+    "weeks": [
+     {
+      "double_minutes": 180,
+      "double_pay": 6024,
+      "meal_pay": 1004,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 6024,
+      "regular_minutes": 480,
+      "regular_pay": 8032,
+      "total_pay": 21084,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 2008,
+      "meal_penalties": 2,
+      "overtime_minutes": 240,
+      "overtime_pay": 6024,
+      "regular_minutes": 960,
+      "regular_pay": 16064,
+      "total_pay": 24096,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R013",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-02 07:12",
+      "2026-03-02 21:14"
+     ],
+     [
+      "2026-03-03 18:06",
+      "2026-03-03 18:30"
+     ],
+     [
+      "2026-03-03 19:00",
+      "2026-03-03 19:34"
+     ],
+     [
+      "2026-03-01 00:19",
+      "2026-03-01 10:16"
+     ],
+     [
+      "2026-03-01 00:13",
+      "2026-03-01 00:19"
+     ]
+    ],
+    2000
+   ],
+   "expected": {
+    "ignored": [
+     4
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 2000,
+      "meal_penalties": 1,
+      "overtime_minutes": 120,
+      "overtime_pay": 6000,
+      "regular_minutes": 480,
+      "regular_pay": 16000,
+      "total_pay": 24000,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 120,
+      "double_pay": 8000,
+      "meal_pay": 2000,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 12000,
+      "regular_minutes": 540,
+      "regular_pay": 18000,
+      "total_pay": 40000,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R014",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-20 10:00",
+      "2026-03-20 10:35"
+     ],
+     [
+      "2026-03-08 03:17",
+      "2026-03-08 07:24"
+     ],
+     [
+      "2026-03-22 06:05",
+      "2026-03-22 18:20"
+     ],
+     [
+      "2026-03-05 09:04",
+      "2026-03-05 10:57"
+     ],
+     [
+      "2026-03-01 23:28",
+      "2026-03-02 03:31"
+     ],
+     [
+      "2026-03-21 08:09",
+      "2026-03-21 20:27"
+     ],
+     [
+      "2026-03-03 06:04",
+      "2026-03-03 15:58"
+     ],
+     [
+      "2026-03-20 11:20",
+      "2026-03-20 20:19"
+     ],
+     [
+      "2026-03-09 10:03",
+      "2026-03-09 16:59"
+     ],
+     [
+      "2026-03-13 06:05",
+      "2026-03-13 10:02"
+     ],
+     [
+      "2026-03-17 08:12",
+      "2026-03-17 15:16"
+     ],
+     [
+      "2026-03-09 10:03",
+      "2026-03-09 16:59"
+     ],
+     [
+      "2026-03-16 10:05",
+      "2026-03-16 17:06"
+     ],
+     [
+      "2026-03-08 08:00",
+      "2026-03-08 10:01"
+     ],
+     [
+      "2026-03-13 01:13",
+      "2026-03-13 10:12"
+     ],
+     [
+      "2026-03-10 00:13",
+      "2026-03-10 07:08"
+     ],
+     [
+      "2026-03-06 06:01",
+      "2026-03-06 18:05"
+     ],
+     [
+      "2026-03-17 15:46",
+      "2026-03-17 16:21"
+     ],
+     [
+      "2026-03-12 13:01",
+      "2026-03-13 00:58"
+     ],
+     [
+      "2026-03-07 18:10",
+      "2026-03-08 02:32"
+     ]
+    ],
+    2000
+   ],
+   "expected": {
+    "ignored": [
+     9,
+     11
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 240,
+      "regular_pay": 8000,
+      "total_pay": 8000,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 6000,
+      "meal_penalties": 3,
+      "overtime_minutes": 375,
+      "overtime_pay": 18750,
+      "regular_minutes": 1935,
+      "regular_pay": 64500,
+      "total_pay": 89250,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 8000,
+      "meal_penalties": 4,
+      "overtime_minutes": 300,
+      "overtime_pay": 15000,
+      "regular_minutes": 1800,
+      "regular_pay": 60000,
+      "total_pay": 83000,
+      "week_start": "2026-03-09"
+     },
+     {
+      "double_minutes": 30,
+      "double_pay": 2000,
+      "meal_pay": 10000,
+      "meal_penalties": 5,
+      "overtime_minutes": 570,
+      "overtime_pay": 28500,
+      "regular_minutes": 2310,
+      "regular_pay": 77000,
+      "total_pay": 117500,
+      "week_start": "2026-03-16"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R015",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-02 12:28",
+      "2026-03-02 20:38"
+     ],
+     [
+      "2026-03-01 23:24",
+      "2026-03-02 13:28"
+     ],
+     [
+      "2026-03-03 06:01",
+      "2026-03-03 18:13"
+     ],
+     [
+      "2026-03-03 18:43",
+      "2026-03-04 06:37"
+     ],
+     [
+      "2026-03-02 12:28",
+      "2026-03-02 20:38"
+     ]
+    ],
+    1001
+   ],
+   "expected": {
+    "ignored": [
+     0,
+     4
+    ],
+    "weeks": [
+     {
+      "double_minutes": 120,
+      "double_pay": 4004,
+      "meal_pay": 1001,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 6006,
+      "regular_minutes": 480,
+      "regular_pay": 8008,
+      "total_pay": 19019,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 720,
+      "double_pay": 24024,
+      "meal_pay": 1001,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 6006,
+      "regular_minutes": 480,
+      "regular_pay": 8008,
+      "total_pay": 39039,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R016",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-04 07:05",
+      "2026-03-04 09:01"
+     ],
+     [
+      "2026-03-01 13:04",
+      "2026-03-01 18:10"
+     ],
+     [
+      "2026-03-06 22:09",
+      "2026-03-07 03:01"
+     ],
+     [
+      "2026-03-02 10:02",
+      "2026-03-02 22:07"
+     ],
+     [
+      "2026-03-07 18:22",
+      "2026-03-07 18:51"
+     ],
+     [
+      "2026-03-01 17:10",
+      "2026-03-01 22:07"
+     ],
+     [
+      "2026-03-07 09:10",
+      "2026-03-07 18:07"
+     ],
+     [
+      "2026-03-03 22:10",
+      "2026-03-03 22:41"
+     ],
+     [
+      "2026-03-07 03:46",
+      "2026-03-07 15:51"
+     ],
+     [
+      "2026-03-05 18:10",
+      "2026-03-05 18:18"
+     ]
+    ],
+    1001
+   ],
+   "expected": {
+    "ignored": [
+     5,
+     6,
+     9
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1001,
+      "meal_penalties": 1,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 315,
+      "regular_pay": 5255,
+      "total_pay": 6256,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 30,
+      "double_pay": 1001,
+      "meal_pay": 2002,
+      "meal_penalties": 2,
+      "overtime_minutes": 480,
+      "overtime_pay": 12012,
+      "regular_minutes": 1395,
+      "regular_pay": 23273,
+      "total_pay": 38288,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R017",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-07 22:00",
+      "2026-03-07 22:12"
+     ],
+     [
+      "2026-03-04 13:09",
+      "2026-03-04 22:13"
+     ],
+     [
+      "2026-03-02 22:07",
+      "2026-03-02 22:10"
+     ],
+     [
+      "2026-03-09 13:00",
+      "2026-03-09 14:53"
+     ],
+     [
+      "2026-03-01 09:01",
+      "2026-03-01 09:05"
+     ],
+     [
+      "2026-03-03 23:33",
+      "2026-03-04 11:32"
+     ],
+     [
+      "2026-03-08 11:08",
+      "2026-03-08 21:02"
+     ],
+     [
+      "2026-03-08 07:07",
+      "2026-03-08 11:01"
+     ],
+     [
+      "2026-03-04 22:58",
+      "2026-03-05 08:00"
+     ],
+     [
+      "2026-03-05 13:18",
+      "2026-03-05 21:22"
+     ],
+     [
+      "2026-03-05 09:08",
+      "2026-03-05 14:18"
+     ],
+     [
+      "2026-03-06 13:12",
+      "2026-03-07 01:25"
+     ],
+     [
+      "2026-02-30 09:00",
+      "2026-03-06 00:36"
+     ]
+    ],
+    2000
+   ],
+   "expected": {
+    "ignored": [
+     4,
+     9,
+     12
+    ],
+    "weeks": [
+     {
+      "double_minutes": 720,
+      "double_pay": 48000,
+      "meal_pay": 8000,
+      "meal_penalties": 4,
+      "overtime_minutes": 1200,
+      "overtime_pay": 60000,
+      "regular_minutes": 1770,
+      "regular_pay": 59000,
+      "total_pay": 175000,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 120,
+      "regular_pay": 4000,
+      "total_pay": 4000,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R018",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-07 00:11",
+      "2026-03-07 05:28"
+     ],
+     [
+      "2026-03-02 00:26",
+      "2026-03-02 14:22"
+     ],
+     [
+      "2026-03-03 06:04",
+      "2026-03-03 20:02"
+     ],
+     [
+      "2026-03-06 09:01",
+      "2026-03-06 19:08"
+     ],
+     [
+      "2026-03-01 07:09",
+      "2026-03-01 07:42"
+     ],
+     [
+      "2026-03-07 06:28",
+      "2026-03-07 06:34"
+     ],
+     [
+      "2026-03-02 00:12",
+      "2026-03-02 00:19"
+     ],
+     [
+      "2026-03-06 20:08",
+      "2026-03-06 20:13"
+     ],
+     [
+      "2026-03-04 10:04",
+      "2026-03-04 18:11"
+     ],
+     [
+      "2026-03-05 13:01",
+      "2026-03-05 22:01"
+     ]
+    ],
+    1337
+   ],
+   "expected": {
+    "ignored": [
+     5,
+     6,
+     7
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 30,
+      "regular_pay": 669,
+      "total_pay": 669,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 225,
+      "double_pay": 10028,
+      "meal_pay": 8022,
+      "meal_penalties": 6,
+      "overtime_minutes": 1005,
+      "overtime_pay": 33592,
+      "regular_minutes": 2400,
+      "regular_pay": 53480,
+      "total_pay": 105122,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R019",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-05 07:08",
+      "2026-03-05 12:03"
+     ],
+     [
+      "2026-03-08 00:01",
+      "2026-03-08 13:55"
+     ],
+     [
+      "2026-03-01 13:10",
+      "2026-03-02 03:17"
+     ],
+     [
+      "2026-03-02 04:02",
+      "2026-03-02 12:04"
+     ],
+     [
+      "2026-03-02 06:09",
+      "2026-03-02 10:14"
+     ],
+     [
+      "2026-03-03 22:07",
+      "2026-03-04 02:08"
+     ]
+    ],
+    1000
+   ],
+   "expected": {
+    "ignored": [
+     4
+    ],
+    "weeks": [
+     {
+      "double_minutes": 120,
+      "double_pay": 4000,
+      "meal_pay": 1000,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 6000,
+      "regular_minutes": 480,
+      "regular_pay": 8000,
+      "total_pay": 19000,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 120,
+      "double_pay": 4000,
+      "meal_pay": 2000,
+      "meal_penalties": 2,
+      "overtime_minutes": 240,
+      "overtime_pay": 6000,
+      "regular_minutes": 1500,
+      "regular_pay": 25000,
+      "total_pay": 37000,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R020",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-09 06:05",
+      "2026-03-09 14:17"
+     ],
+     [
+      "2026-03-01 08:10",
+      "2026-03-01 08:19"
+     ],
+     [
+      "2026-03-03 20:03",
+      "2026-03-03 21:59"
+     ],
+     [
+      "2026-03-03 13:02",
+      "2026-03-03 20:03"
+     ],
+     [
+      "2026-03-07 06:05",
+      "2026-03-07 14:24"
+     ],
+     [
+      "2026-03-06 03:45",
+      "2026-03-06 13:41"
+     ],
+     [
+      "2026-03-04 08:14",
+      "2026-03-04 20:35"
+     ],
+     [
+      "2026-03-06 08:07",
+      "2026-03-06 16:23"
+     ],
+     [
+      "2026-03-02 18:03",
+      "2026-03-02 21:56"
+     ],
+     [
+      "2026-03-05 23:30",
+      "2026-03-06 03:30"
+     ],
+     [
+      "2026-03-08 06:01",
+      "2026-03-08 14:05"
+     ]
+    ],
+    1000
+   ],
+   "expected": {
+    "ignored": [
+     1,
+     7
+    ],
+    "weeks": [
+     {
+      "double_minutes": 15,
+      "double_pay": 500,
+      "meal_pay": 5000,
+      "meal_penalties": 5,
+      "overtime_minutes": 930,
+      "overtime_pay": 23250,
+      "regular_minutes": 2400,
+      "regular_pay": 40000,
+      "total_pay": 68750,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1000,
+      "meal_penalties": 1,
+      "overtime_minutes": 15,
+      "overtime_pay": 375,
+      "regular_minutes": 480,
+      "regular_pay": 8000,
+      "total_pay": 9375,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R021",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-04 18:09",
+      "2026-03-05 02:13"
+     ],
+     [
+      "2026-03-01 13:05",
+      "2026-03-01 15:02"
+     ],
+     [
+      "2026-03-02 9:00",
+      "2026-03-07 15:03"
+     ],
+     [
+      "2026-03-02 22:01",
+      "2026-03-03 10:01"
+     ],
+     [
+      "2026-03-06 14:02",
+      "2026-03-06 19:04"
+     ],
+     [
+      "2026-03-01 15:17",
+      "2026-03-01 15:20"
+     ],
+     [
+      "2026-03-07 09:01",
+      "2026-03-07 21:14"
+     ],
+     [
+      "2026-03-04 09:00",
+      "2026-03-04 17:54"
+     ],
+     [
+      "2026-03-06 08:01",
+      "2026-03-06 15:02"
+     ]
+    ],
+    1004
+   ],
+   "expected": {
+    "ignored": [
+     2,
+     4,
+     5
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 120,
+      "regular_pay": 2008,
+      "total_pay": 2008,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 315,
+      "double_pay": 10542,
+      "meal_pay": 4016,
+      "meal_penalties": 4,
+      "overtime_minutes": 720,
+      "overtime_pay": 18072,
+      "regular_minutes": 1860,
+      "regular_pay": 31124,
+      "total_pay": 63754,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R022",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-02 06:07",
+      "2026-03-02 10:10"
+     ],
+     [
+      "2026-03-06 08:45",
+      "2026-03-06 08:52"
+     ],
+     [
+      "2026-03-04 08:10",
+      "2026-03-04 08:43"
+     ],
+     [
+      "2026-03-06 08:02",
+      "2026-03-06 08:30"
+     ],
+     [
+      "2026-03-03 23:34",
+      "2026-03-04 07:55"
+     ],
+     [
+      "2026-03-04 00:14",
+      "2026-03-04 12:17"
+     ]
+    ],
+    1001
+   ],
+   "expected": {
+    "ignored": [
+     1,
+     5
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1001,
+      "meal_penalties": 1,
+      "overtime_minutes": 30,
+      "overtime_pay": 751,
+      "regular_minutes": 795,
+      "regular_pay": 13263,
+      "total_pay": 15015,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R023",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-07 09:11",
+      "2026-03-07 19:15"
+     ],
+     [
+      "2026-03-12 20:01",
+      "2026-03-13 08:16"
+     ],
+     [
+      "2026-03-10 00:03",
+      "2026-03-10 00:28"
+     ],
+     [
+      "2026-03-09 18:06",
+      "2026-03-09 23:03"
+     ],
+     [
+      "2026-03-12 07:03",
+      "2026-03-12 19:16"
+     ],
+     [
+      "2026-03-06 18:05",
+      "2026-03-06 20:02"
+     ],
+     [
+      "2026-03-14 08:02",
+      "2026-03-14 16:02"
+     ],
+     [
+      "2026-03-04 13:22",
+      "2026-03-05 01:42"
+     ],
+     [
+      "2026-03-15 13:09",
+      "2026-03-15 22:08"
+     ],
+     [
+      "2026-03-07 06:06",
+      "2026-03-07 08:11"
+     ],
+     [
+      "2026-03-10 13:14",
+      "2026-03-10 22:19"
+     ],
+     [
+      "2026-03-15 22:23",
+      "2026-03-16 06:35"
+     ],
+     [
+      "2026-03-11 13:12",
+      "2026-03-11 20:11"
+     ],
+     [
+      "2026-03-01 22:01",
+      "2026-03-02 01:55"
+     ],
+     [
+      "2026-03-08 10:00",
+      "2026-03-08 20:01"
+     ],
+     [
+      "2026-03-03 06:05",
+      "2026-03-03 06:09"
+     ],
+     [
+      "2026-03-14 16:32",
+      "2026-03-14 21:32"
+     ],
+     [
+      "2026-03-05 13:10",
+      "2026-03-05 18:26"
+     ],
+     [
+      "2026-03-04 09:14",
+      "2026-03-04 13:07"
+     ],
+     [
+      "2026-03-02 00:11",
+      "2026-03-02 08:07"
+     ],
+     [
+      "2026-03-13 07:09",
+      "2026-03-13 12:03"
+     ],
+     [
+      "2026-03-13 12:18",
+      "2026-03-14 00:27"
+     ],
+     [
+      "2026-03-06 20:47",
+      "2026-03-07 06:44"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [
+     9,
+     19,
+     20
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 240,
+      "regular_pay": 2400,
+      "total_pay": 2400,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 255,
+      "double_pay": 5100,
+      "meal_pay": 3000,
+      "meal_penalties": 5,
+      "overtime_minutes": 720,
+      "overtime_pay": 10800,
+      "regular_minutes": 2250,
+      "regular_pay": 22500,
+      "total_pay": 41400,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 1365,
+      "double_pay": 27300,
+      "meal_pay": 3600,
+      "meal_penalties": 6,
+      "overtime_minutes": 1530,
+      "overtime_pay": 22950,
+      "regular_minutes": 2400,
+      "regular_pay": 24000,
+      "total_pay": 77850,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R024",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-15 13:12",
+      "2026-03-15 21:18"
+     ],
+     [
+      "2026-03-08 22:09",
+      "2026-03-09 06:06"
+     ],
+     [
+      "2026-03-12 09:09",
+      "2026-03-12 17:27"
+     ],
+     [
+      "2026-03-09 13:30",
+      "2026-03-09 15:25"
+     ],
+     [
+      "2026-03-08 01:50",
+      "2026-03-08 13:46"
+     ],
+     [
+      "2026-03-05 13:13",
+      "2026-03-05 17:07"
+     ],
+     [
+      "2026-03-04 13:58",
+      "2026-03-04 19:02"
+     ],
+     [
+      "2026-03-02 18:05",
+      "2026-03-02 23:25"
+     ],
+     [
+      "2026-03-01 07:07",
+      "2026-03-01 07:14"
+     ],
+     [
+      "2026-03-04 13:01",
+      "2026-03-04 13:13"
+     ],
+     [
+      "2026-03-04 01:55",
+      "2026-03-04 15:51"
+     ],
+     [
+      "2026-03-09 08:01",
+      "2026-03-09 13:00"
+     ],
+     [
+      "2026-03-02 09:06",
+      "2026-03-02 18:05"
+     ],
+     [
+      "2026-03-06 13:54",
+      "2026-03-06 18:00"
+     ],
+     [
+      "2026-03-03 13:06",
+      "2026-03-04 01:25"
+     ],
+     [
+      "2026-03-11 08:03",
+      "2026-03-11 08:39"
+     ],
+     [
+      "2026-03-14 00:07",
+      "2026-03-14 04:13"
+     ],
+     [
+      "2026-03-13 23:33",
+      "2026-03-14 04:30"
+     ],
+     [
+      "2026-03-14 04:13",
+      "2026-03-14 04:14"
+     ],
+     [
+      "2026-03-10 13:04",
+      "2026-03-10 17:01"
+     ],
+     [
+      "2026-03-07 13:00",
+      "2026-03-08 01:20"
+     ],
+     [
+      "2026-03-15 13:12",
+      "2026-03-15 21:18"
+     ],
+     [
+      "2026-03-01 06:14",
+      "2026-03-01 14:30"
+     ],
+     [
+      "2026-03-06 09:14",
+      "2026-03-06 13:09"
+     ]
+    ],
+    1000
+   ],
+   "expected": {
+    "ignored": [
+     6,
+     8,
+     9,
+     16,
+     18,
+     21
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1000,
+      "meal_penalties": 1,
+      "overtime_minutes": 15,
+      "overtime_pay": 375,
+      "regular_minutes": 480,
+      "regular_pay": 8000,
+      "total_pay": 9375,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 1005,
+      "double_pay": 33500,
+      "meal_pay": 5000,
+      "meal_penalties": 5,
+      "overtime_minutes": 1665,
+      "overtime_pay": 41625,
+      "regular_minutes": 2400,
+      "regular_pay": 40000,
+      "total_pay": 120125,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 2000,
+      "meal_penalties": 2,
+      "overtime_minutes": 15,
+      "overtime_pay": 375,
+      "regular_minutes": 1965,
+      "regular_pay": 32750,
+      "total_pay": 35125,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R025",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-13 07:05",
+      "2026-03-13 07:31"
+     ],
+     [
+      "2026-03-02 08:14",
+      "2026-03-02 16:29"
+     ],
+     [
+      "2026-03-02 16:44",
+      "2026-03-03 04:42"
+     ],
+     [
+      "2026-03-09 07:13",
+      "2026-03-09 12:28"
+     ],
+     [
+      "2026-03-12 03:07",
+      "2026-03-12 08:00"
+     ],
+     [
+      "2026-03-01 21:13",
+      "2026-03-02 02:22"
+     ],
+     [
+      "2026-03-01 07:08",
+      "2026-03-01 21:06"
+     ],
+     [
+      "2026-03-14 13:04",
+      "2026-03-14 18:02"
+     ],
+     [
+      "2026-03-07 13:42",
+      "2026-03-08 02:03"
+     ],
+     [
+      "2026-03-07 08:04",
+      "2026-03-07 13:12"
+     ],
+     [
+      "2026-03-05 13:12",
+      "2026-03-06 01:17"
+     ],
+     [
+      "2026-03-07 07:22",
+      "2026-03-07 07:29"
+     ],
+     [
+      "2026-03-02  09:00",
+      "2026-03-03 04:07"
+     ],
+     [
+      "2026-03-10 08:13",
+      "2026-03-10 13:11"
+     ],
+     [
+      "2026-03-06 23:30",
+      "2026-03-07 06:37"
+     ],
+     [
+      "2026-03-11 22:00",
+      "2026-03-12 02:52"
+     ]
+    ],
+    1001
+   ],
+   "expected": {
+    "ignored": [
+     12
+    ],
+    "weeks": [
+     {
+      "double_minutes": 405,
+      "double_pay": 13514,
+      "meal_pay": 1001,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 6006,
+      "regular_minutes": 480,
+      "regular_pay": 8008,
+      "total_pay": 28529,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 840,
+      "double_pay": 28028,
+      "meal_pay": 4004,
+      "meal_penalties": 4,
+      "overtime_minutes": 720,
+      "overtime_pay": 18018,
+      "regular_minutes": 1860,
+      "regular_pay": 31031,
+      "total_pay": 81081,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1001,
+      "meal_penalties": 1,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 1530,
+      "regular_pay": 25526,
+      "total_pay": 26527,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R026",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-12 06:02",
+      "2026-03-12 15:08"
+     ],
+     [
+      "2026-03-11 13:00",
+      "2026-03-11 22:53"
+     ],
+     [
+      "2026-03-18 22:03",
+      "2026-03-18 22:31"
+     ],
+     [
+      "2026-03-03 06:06",
+      "2026-03-03 06:30"
+     ],
+     [
+      "2026-03-09 08:46",
+      "2026-03-09 10:43"
+     ],
+     [
+      "2026-03-05 18:13",
+      "2026-03-05 23:20"
+     ],
+     [
+      "2026-03-15 07:19",
+      "2026-03-15 17:20"
+     ],
+     [
+      "2026-03-06 08:01",
+      "2026-03-06 16:21"
+     ],
+     [
+      "2026-03-14 09:01",
+      "2026-03-14 11:07"
+     ],
+     [
+      "2026-03-19 07:03",
+      "2026-03-19 12:06"
+     ],
+     [
+      "2026-03-15 00:03",
+      "2026-03-15 08:19"
+     ],
+     [
+      "2026-03-21 07:12",
+      "2026-03-21 07:13"
+     ],
+     [
+      "",
+      "2026-03-03 02:36"
+     ],
+     [
+      "2026-03-04 00:07",
+      "2026-03-04 14:04"
+     ],
+     [
+      "2026-03-09 08:10",
+      "2026-03-09 08:39"
+     ],
+     [
+      "2026-03-07 22:08",
+      "2026-03-08 12:12"
+     ],
+     [
+      "2026-03-22 08:07",
+      "2026-03-22 08:31"
+     ],
+     [
+      "2026-03-18 21:31",
+      "2026-03-18 23:37"
+     ],
+     [
+      "2026-03-10 08:07",
+      "2026-03-10 16:20"
+     ],
+     [
+      "2026-03-02 07:03",
+      "2026-03-02 12:19"
+     ],
+     [
+      "2026-03-17 08:01",
+      "2026-03-17 19:57"
+     ],
+     [
+      "2026-03-08 22:10",
+      "2026-03-09 10:24"
+     ],
+     [
+      "2026-03-01 23:33",
+      "2026-03-01 23:37"
+     ],
+     [
+      "2026-03-20 07:11",
+      "2026-03-20 07:23"
+     ],
+     [
+      "2026-03-03 07:00",
+      "2026-03-03 09:05"
+     ],
+     [
+      "2026-03-14 00:04",
+      "2026-03-14 08:16"
+     ],
+     [
+      "2026-03-16 13:14",
+      "2026-03-16 13:18"
+     ],
+     [
+      "2026-03-13 19:11",
+      "2026-03-13 19:42"
+     ],
+     [
+      "2026-03-17 20:12",
+      "2026-03-18 10:15"
+     ],
+     [
+      "2026-03-13 08:09",
+      "2026-03-13 18:11"
+     ],
+     [
+      "2026-03-12 15:23",
+      "2026-03-12 20:18"
+     ]
+    ],
+    1337
+   ],
+   "expected": {
+    "ignored": [
+     2,
+     4,
+     6,
+     11,
+     12,
+     14,
+     22,
+     26
+    ],
+    "weeks": [
+     {
+      "double_minutes": 495,
+      "double_pay": 22061,
+      "meal_pay": 6685,
+      "meal_penalties": 5,
+      "overtime_minutes": 975,
+      "overtime_pay": 32589,
+      "regular_minutes": 2205,
+      "regular_pay": 49135,
+      "total_pay": 110470,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 120,
+      "double_pay": 5348,
+      "meal_pay": 8022,
+      "meal_penalties": 6,
+      "overtime_minutes": 1155,
+      "overtime_pay": 38606,
+      "regular_minutes": 2400,
+      "regular_pay": 53480,
+      "total_pay": 105456,
+      "week_start": "2026-03-09"
+     },
+     {
+      "double_minutes": 840,
+      "double_pay": 37436,
+      "meal_pay": 1337,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 8022,
+      "regular_minutes": 945,
+      "regular_pay": 21058,
+      "total_pay": 67853,
+      "week_start": "2026-03-16"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R027",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-02 10:10",
+      "2026-03-02 15:21"
+     ],
+     [
+      "2026-03-02 15:21",
+      "2026-03-02 17:22"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 420,
+      "regular_pay": 4200,
+      "total_pay": 4200,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R028",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-08 22:04",
+      "2026-03-09 08:02"
+     ],
+     [
+      "2026-03-02 14:30",
+      "2026-03-03 00:29"
+     ],
+     [
+      "2026-03-02 09:04",
+      "2026-03-02 14:23"
+     ],
+     [
+      "2026-03-09 10:06",
+      "2026-03-09 17:00"
+     ],
+     [
+      "2026-03-05 00:03",
+      "2026-03-05 00:04"
+     ],
+     [
+      "2026-03-06 16:38",
+      "2026-03-06 16:39"
+     ],
+     [
+      "2026-03-04 01:15",
+      "2026-03-04 06:30"
+     ],
+     [
+      "2026-03-02 14:30",
+      "2026-03-03 00:29"
+     ],
+     [
+      "2026-03-07 22:08",
+      "2026-03-08 10:03"
+     ],
+     [
+      "2026-03-09 08:32",
+      "2026-03-09 15:37"
+     ],
+     [
+      "2026-03-01 07:09",
+      "2026-03-01 07:14"
+     ],
+     [
+      "2026-03-09 00:05",
+      "2026-03-09 09:06"
+     ],
+     [
+      "2026-03-03 18:14",
+      "2026-03-04 01:15"
+     ],
+     [
+      "2026-03-06 09:00",
+      "2026-03-06 15:53"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [
+     3,
+     4,
+     5,
+     7,
+     10,
+     11
+    ],
+    "weeks": [
+     {
+      "double_minutes": 210,
+      "double_pay": 4200,
+      "meal_pay": 3600,
+      "meal_penalties": 6,
+      "overtime_minutes": 780,
+      "overtime_pay": 11700,
+      "regular_minutes": 2400,
+      "regular_pay": 24000,
+      "total_pay": 43500,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 600,
+      "meal_penalties": 1,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 420,
+      "regular_pay": 4200,
+      "total_pay": 4800,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R029",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-03 11:27",
+      "2026-03-03 18:22"
+     ],
+     [
+      "2026-03-02  09:00",
+      "2026-03-03 09:00"
+     ],
+     [
+      "2026-03-03 09:14",
+      "2026-03-03 11:20"
+     ],
+     [
+      "2026-03-01 22:02",
+      "2026-03-02 03:03"
+     ],
+     [
+      "2026-03-01 22:02",
+      "2026-03-02 03:03"
+     ],
+     [
+      "2026-03-02 07:07",
+      "2026-03-02 11:08"
+     ],
+     [
+      "2026-03-02 11:23",
+      "2026-03-02 15:22"
+     ]
+    ],
+    1004
+   ],
+   "expected": {
+    "ignored": [
+     1,
+     4
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 300,
+      "regular_pay": 5020,
+      "total_pay": 5020,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1004,
+      "meal_penalties": 1,
+      "overtime_minutes": 45,
+      "overtime_pay": 1130,
+      "regular_minutes": 960,
+      "regular_pay": 16064,
+      "total_pay": 18198,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R030",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-06 22:05",
+      "2026-03-07 08:04"
+     ],
+     [
+      "2026-03-02 10:02",
+      "2026-03-02 17:56"
+     ],
+     [
+      "2026-03-01 06:04",
+      "2026-03-01 06:05"
+     ],
+     [
+      "2026-03-09 22:09",
+      "2026-03-10 05:02"
+     ],
+     [
+      "2026-03-08 07:00",
+      "2026-03-08 13:56"
+     ],
+     [
+      "2026-03-09 10:07",
+      "2026-03-09 22:09"
+     ],
+     [
+      "2026-03-04 09:02",
+      "2026-03-04 23:04"
+     ],
+     [
+      "2026-03-01 06:35",
+      "2026-03-01 10:33"
+     ],
+     [
+      "2026-03-07 08:04",
+      "2026-03-07 20:26"
+     ],
+     [
+      "2026-03-02 16:56",
+      "2026-03-02 16:59"
+     ],
+     [
+      "2026-03-08 14:03",
+      "2026-03-08 22:04"
+     ],
+     [
+      "2026-03-03 10:03",
+      "2026-03-03 11:58"
+     ],
+     [
+      "2026-03-07 13:10",
+      "2026-03-08 03:03"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [
+     2,
+     9,
+     12
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 240,
+      "regular_pay": 2400,
+      "total_pay": 2400,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 330,
+      "double_pay": 6600,
+      "meal_pay": 3000,
+      "meal_penalties": 5,
+      "overtime_minutes": 960,
+      "overtime_pay": 14400,
+      "regular_minutes": 2400,
+      "regular_pay": 24000,
+      "total_pay": 48000,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 420,
+      "double_pay": 8400,
+      "meal_pay": 600,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 3600,
+      "regular_minutes": 480,
+      "regular_pay": 4800,
+      "total_pay": 17400,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R031",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-06 08:12",
+      "2026-03-06 20:11"
+     ],
+     [
+      "2026-03-03 13:08",
+      "2026-03-03 13:18"
+     ],
+     [
+      "2026-03-05 11:12",
+      "2026-03-05 21:19"
+     ],
+     [
+      "2026-03-02 13:02",
+      "2026-03-03 02:57"
+     ],
+     [
+      "2026-03-04 07:13",
+      "2026-03-04 19:21"
+     ],
+     [
+      "2026-03-01 13:02",
+      "2026-03-01 23:00"
+     ],
+     [
+      "2026-03-05 08:05",
+      "2026-03-05 10:12"
+     ],
+     [
+      "2026-03-03 03:42",
+      "2026-03-03 05:43"
+     ],
+     [
+      "2026-03-07 10:13",
+      "2026-03-07 20:06"
+     ],
+     [
+      "2026-03-07 09:04",
+      "2026-03-07 09:28"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [
+     1
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 600,
+      "meal_penalties": 1,
+      "overtime_minutes": 120,
+      "overtime_pay": 1800,
+      "regular_minutes": 480,
+      "regular_pay": 4800,
+      "total_pay": 7200,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 135,
+      "double_pay": 2700,
+      "meal_pay": 3000,
+      "meal_penalties": 5,
+      "overtime_minutes": 1215,
+      "overtime_pay": 18225,
+      "regular_minutes": 2400,
+      "regular_pay": 24000,
+      "total_pay": 47925,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R032",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-02 23:23",
+      "2026-03-03 11:21"
+     ],
+     [
+      "2026-03-03 15:59",
+      "2026-03-03 21:16"
+     ],
+     [
+      "2026-03-13 17:05",
+      "2026-03-14 00:04"
+     ],
+     [
+      "2026-03-19 17:22",
+      "2026-03-19 17:32"
+     ],
+     [
+      "2026-03-03 07:01",
+      "2026-03-03 15:59"
+     ],
+     [
+      "2026-03-15 01:00",
+      "2026-03-15 09:18"
+     ],
+     [
+      "2026-03-13 07:03",
+      "2026-03-13 16:58"
+     ],
+     [
+      "2026-03-19 10:02",
+      "2026-03-19 17:07"
+     ],
+     [
+      "2026-03-09 18:04",
+      "2026-03-10 06:09"
+     ],
+     [
+      "2026-03-15 17:07",
+      "2026-03-15 17:35"
+     ],
+     [
+      "2026-03-14 22:01",
+      "2026-03-15 02:00"
+     ],
+     [
+      "2026-03-19 10:02",
+      "2026-03-19 17:07"
+     ],
+     [
+      "2026-03-15 08:01",
+      "2026-03-15 18:07"
+     ],
+     [
+      "2026-03-08 09:14",
+      "2026-03-08 09:19"
+     ],
+     [
+      "2026-03-06 19:14",
+      "2026-03-06 19:45"
+     ],
+     [
+      "2026-03-06 09:01",
+      "2026-03-06 18:59"
+     ]
+    ],
+    1001
+   ],
+   "expected": {
+    "ignored": [
+     4,
+     5,
+     9,
+     11,
+     13
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 3003,
+      "meal_penalties": 3,
+      "overtime_minutes": 375,
+      "overtime_pay": 9384,
+      "regular_minutes": 1275,
+      "regular_pay": 21271,
+      "total_pay": 33658,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 315,
+      "double_pay": 10511,
+      "meal_pay": 3003,
+      "meal_penalties": 3,
+      "overtime_minutes": 600,
+      "overtime_pay": 15015,
+      "regular_minutes": 1680,
+      "regular_pay": 28028,
+      "total_pay": 56557,
+      "week_start": "2026-03-09"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1001,
+      "meal_penalties": 1,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 435,
+      "regular_pay": 7257,
+      "total_pay": 8258,
+      "week_start": "2026-03-16"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R033",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-03 04:16",
+      "2026-03-03 11:15"
+     ],
+     [
+      "2026-03-02 9:00",
+      "2026-03-02 17:18"
+     ],
+     [
+      "2026-03-01 23:27",
+      "2026-03-02 07:27"
+     ],
+     [
+      "2026-03-03 07:01",
+      "2026-03-03 12:04"
+     ],
+     [
+      "2026-03-02 18:13",
+      "2026-03-03 04:16"
+     ]
+    ],
+    4999
+   ],
+   "expected": {
+    "ignored": [
+     1,
+     3
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 4999,
+      "meal_penalties": 1,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 480,
+      "regular_pay": 39992,
+      "total_pay": 44991,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 9998,
+      "meal_penalties": 2,
+      "overtime_minutes": 120,
+      "overtime_pay": 14997,
+      "regular_minutes": 900,
+      "regular_pay": 74985,
+      "total_pay": 99980,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R034",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-02 10:09",
+      "2026-03-02 17:14"
+     ],
+     [
+      "2026-03-01 18:02",
+      "2026-03-02 05:58"
+     ],
+     [
+      "2026-03-03 08:03",
+      "2026-03-03 08:04"
+     ],
+     [
+      "2026-03-01 08:00",
+      "2026-03-01 18:02"
+     ],
+     [
+      "2026-03-01 08:00",
+      "2026-03-01 18:02"
+     ],
+     [
+      "2026-03-03 08:19",
+      "2026-03-03 22:15"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [
+     2,
+     4
+    ],
+    "weeks": [
+     {
+      "double_minutes": 600,
+      "double_pay": 12000,
+      "meal_pay": 600,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 3600,
+      "regular_minutes": 480,
+      "regular_pay": 4800,
+      "total_pay": 21000,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 120,
+      "double_pay": 2400,
+      "meal_pay": 1200,
+      "meal_penalties": 2,
+      "overtime_minutes": 240,
+      "overtime_pay": 3600,
+      "regular_minutes": 900,
+      "regular_pay": 9000,
+      "total_pay": 16200,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R035",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-01 10:00",
+      "2026-03-01 20:01"
+     ],
+     [
+      "2026-03-01 20:08",
+      "2026-03-02 04:25"
+     ],
+     [
+      "2026-03-03 18:02",
+      "2026-03-03 23:01"
+     ],
+     [
+      "2026-03-02 00:10",
+      "2026-03-02 08:27"
+     ],
+     [
+      "2026-02-30 09:00",
+      "2026-03-01 15:27"
+     ],
+     [
+      "2026-03-03 23:46",
+      "2026-03-04 00:19"
+     ]
+    ],
+    1001
+   ],
+   "expected": {
+    "ignored": [
+     3,
+     4
+    ],
+    "weeks": [
+     {
+      "double_minutes": 375,
+      "double_pay": 12513,
+      "meal_pay": 1001,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 6006,
+      "regular_minutes": 480,
+      "regular_pay": 8008,
+      "total_pay": 27528,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 330,
+      "regular_pay": 5506,
+      "total_pay": 5506,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R036",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-16 18:00",
+      "2026-03-16 23:08"
+     ],
+     [
+      "2026-03-01 06:13",
+      "2026-03-01 14:28"
+     ],
+     [
+      "2026-03-05 16:31",
+      "2026-03-06 01:37"
+     ],
+     [
+      "2026-03-04 09:36",
+      "2026-03-04 14:40"
+     ],
+     [
+      "2026-03-19 23:29",
+      "2026-03-20 07:42"
+     ],
+     [
+      "2026-03-08 23:32",
+      "2026-03-09 09:28"
+     ],
+     [
+      "2026-03-20 23:30",
+      "2026-03-21 13:36"
+     ],
+     [
+      "2026-03-05 08:11",
+      "2026-03-05 16:16"
+     ],
+     [
+      "2026-03-02 18:09",
+      "2026-03-03 02:04"
+     ],
+     [
+      "2026-03-07 13:04",
+      "2026-03-07 21:09"
+     ],
+     [
+      "2026-03-16 23:53",
+      "2026-03-17 04:49"
+     ],
+     [
+      "2026-03-20 07:49",
+      "2026-03-20 09:54"
+     ],
+     [
+      "2026-03-09 22:07",
+      "2026-03-10 10:02"
+     ],
+     [
+      "2026-03-17 09:02",
+      "2026-03-17 23:01"
+     ],
+     [
+      "2026-03-21 13:04",
+      "2026-03-22 01:09"
+     ],
+     [
+      "2026-03-13 22:08",
+      "2026-03-14 06:20"
+     ],
+     [
+      "2026-03-10 18:01",
+      "2026-03-10 19:59"
+     ],
+     [
+      "2026-03-12 18:08",
+      "2026-03-12 20:05"
+     ],
+     [
+      "2026-03-15 09:06",
+      "2026-03-15 19:03"
+     ],
+     [
+      "2026-03-11 22:11",
+      "2026-03-12 10:13"
+     ],
+     [
+      "2026-03-09 09:43",
+      "2026-03-09 17:46"
+     ],
+     [
+      "2026-03-04 20:47",
+      "2026-03-05 06:40"
+     ],
+     [
+      "2026-03-21 13:43",
+      "2026-03-21 18:39"
+     ],
+     [
+      "2026-03-01 15:28",
+      "2026-03-01 20:32"
+     ],
+     [
+      "2026-03-14 09:05",
+      "2026-03-14 19:05"
+     ],
+     [
+      "2026-03-10 20:14",
+      "2026-03-10 20:37"
+     ],
+     [
+      "2026-03-22 08:13",
+      "2026-03-22 20:15"
+     ],
+     [
+      "2026-03-04 18:09",
+      "2026-03-04 20:02"
+     ],
+     [
+      "2026-03-06 00:01",
+      "2026-03-06 09:00"
+     ],
+     [
+      "2026-03-03 23:29",
+      "2026-03-04 09:36"
+     ],
+     [
+      "2026-03-18 09:11",
+      "2026-03-18 14:18"
+     ]
+    ],
+    1001
+   ],
+   "expected": {
+    "ignored": [
+     14,
+     28
+    ],
+    "weeks": [
+     {
+      "double_minutes": 75,
+      "double_pay": 2503,
+      "meal_pay": 1001,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 6006,
+      "regular_minutes": 480,
+      "regular_pay": 8008,
+      "total_pay": 17518,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 600,
+      "double_pay": 20020,
+      "meal_pay": 6006,
+      "meal_penalties": 6,
+      "overtime_minutes": 1200,
+      "overtime_pay": 30030,
+      "regular_minutes": 2400,
+      "regular_pay": 40040,
+      "total_pay": 96096,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 600,
+      "double_pay": 20020,
+      "meal_pay": 5005,
+      "meal_penalties": 5,
+      "overtime_minutes": 1080,
+      "overtime_pay": 27027,
+      "regular_minutes": 2160,
+      "regular_pay": 36036,
+      "total_pay": 88088,
+      "week_start": "2026-03-09"
+     },
+     {
+      "double_minutes": 900,
+      "double_pay": 30030,
+      "meal_pay": 5005,
+      "meal_penalties": 5,
+      "overtime_minutes": 975,
+      "overtime_pay": 24399,
+      "regular_minutes": 2355,
+      "regular_pay": 39289,
+      "total_pay": 98723,
+      "week_start": "2026-03-16"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R037",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-02 17:14",
+      "2026-03-02 22:30"
+     ],
+     [
+      "2026-03-02 13:03",
+      "2026-03-02 18:14"
+     ],
+     [
+      "2026-03-05 18:04",
+      "2026-03-06 05:59"
+     ],
+     [
+      "2026-03-06 09:00",
+      "2026-03-06 09:35"
+     ],
+     [
+      "2026-03-13 10:04",
+      "2026-03-13 16:59"
+     ],
+     [
+      "2026-03-07 10:07",
+      "2026-03-07 17:05"
+     ],
+     [
+      "2026-03-06 09:35",
+      "2026-03-06 17:51"
+     ],
+     [
+      "2026-03-07 06:14",
+      "2026-03-07 11:07"
+     ]
+    ],
+    1004
+   ],
+   "expected": {
+    "ignored": [
+     0,
+     5
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 3012,
+      "meal_penalties": 3,
+      "overtime_minutes": 285,
+      "overtime_pay": 7154,
+      "regular_minutes": 1560,
+      "regular_pay": 26104,
+      "total_pay": 36270,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1004,
+      "meal_penalties": 1,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 420,
+      "regular_pay": 7028,
+      "total_pay": 8032,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R038",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-02 22:00",
+      "2026-03-03 10:09"
+     ],
+     [
+      "2026-03-03 13:10",
+      "2026-03-03 15:10"
+     ],
+     [
+      "2026-03-03 15:17",
+      "2026-03-04 01:20"
+     ],
+     [
+      "2026-03-03 13:10",
+      "2026-03-03 15:10"
+     ]
+    ],
+    1337
+   ],
+   "expected": {
+    "ignored": [
+     3
+    ],
+    "weeks": [
+     {
+      "double_minutes": 15,
+      "double_pay": 669,
+      "meal_pay": 2674,
+      "meal_penalties": 2,
+      "overtime_minutes": 480,
+      "overtime_pay": 16044,
+      "regular_minutes": 960,
+      "regular_pay": 21392,
+      "total_pay": 40779,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R039",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-03 07:08",
+      "2026-03-03 15:18"
+     ],
+     [
+      "2026-03-02 00:13",
+      "2026-03-02 00:45"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 600,
+      "meal_penalties": 1,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 510,
+      "regular_pay": 5100,
+      "total_pay": 5700,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R040",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-20 07:03",
+      "2026-03-20 07:35"
+     ],
+     [
+      "2026-03-09 22:13",
+      "2026-03-10 06:09"
+     ],
+     [
+      "2026-03-10 06:01",
+      "2026-03-10 15:05"
+     ],
+     [
+      "2026-03-22 06:02",
+      "2026-03-22 11:10"
+     ],
+     [
+      "2026-03-03 18:01",
+      "2026-03-04 04:04"
+     ],
+     [
+      "2026-03-12 16:00",
+      "2026-03-12 21:18"
+     ],
+     [
+      "2026-03-17 09:08",
+      "2026-03-17 11:08"
+     ],
+     [
+      "2026-03-07 23:30",
+      "2026-03-08 11:46"
+     ],
+     [
+      "2026-03-06 13:09",
+      "2026-03-06 13:39"
+     ],
+     [
+      "2026-03-14 06:08",
+      "2026-03-14 10:11"
+     ],
+     [
+      "2026-03-15 23:22",
+      "2026-03-16 08:24"
+     ],
+     [
+      "2026-03-06 09:14",
+      "2026-03-06 14:09"
+     ],
+     [
+      "2026-03-21 10:02",
+      "2026-03-21 18:02"
+     ],
+     [
+      "2026-03-12 10:14",
+      "2026-03-12 15:15"
+     ],
+     [
+      "2026-03-10 05:09",
+      "2026-03-10 12:02"
+     ],
+     [
+      "2026-03-12 10:14",
+      "2026-03-12 15:15"
+     ],
+     [
+      "2026-03-18 07:09",
+      "2026-03-18 15:03"
+     ],
+     [
+      "2026-03-05 22:11",
+      "2026-03-06 00:04"
+     ],
+     [
+      "2026-03-14 08:04",
+      "2026-03-14 20:22"
+     ],
+     [
+      "2026-03-16 19:25",
+      "2026-03-17 03:46"
+     ],
+     [
+      "2026-03-19 07:05",
+      "2026-03-19 12:10"
+     ],
+     [
+      "2026-03-13 22:10",
+      "2026-03-14 07:04"
+     ],
+     [
+      "2026-03-16 07:01",
+      "2026-03-16 19:18"
+     ],
+     [
+      "2026-03-22 12:10",
+      "2026-03-22 20:17"
+     ]
+    ],
+    1337
+   ],
+   "expected": {
+    "ignored": [
+     2,
+     8,
+     9,
+     14,
+     15,
+     22
+    ],
+    "weeks": [
+     {
+      "double_minutes": 15,
+      "double_pay": 669,
+      "meal_pay": 2674,
+      "meal_penalties": 2,
+      "overtime_minutes": 360,
+      "overtime_pay": 12033,
+      "regular_minutes": 1365,
+      "regular_pay": 30417,
+      "total_pay": 45793,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 15,
+      "double_pay": 669,
+      "meal_pay": 6685,
+      "meal_penalties": 5,
+      "overtime_minutes": 495,
+      "overtime_pay": 16545,
+      "regular_minutes": 2400,
+      "regular_pay": 53480,
+      "total_pay": 77379,
+      "week_start": "2026-03-09"
+     },
+     {
+      "double_minutes": 315,
+      "double_pay": 14039,
+      "meal_pay": 6685,
+      "meal_penalties": 5,
+      "overtime_minutes": 495,
+      "overtime_pay": 16545,
+      "regular_minutes": 1890,
+      "regular_pay": 42116,
+      "total_pay": 79385,
+      "week_start": "2026-03-16"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R041",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-04 18:12",
+      "2026-03-05 01:18"
+     ],
+     [
+      "2026-03-02 00:09",
+      "2026-03-02 12:27"
+     ],
+     [
+      "2026-03-06 06:08",
+      "2026-03-06 16:12"
+     ],
+     [
+      "2026-03-01 11:30",
+      "2026-03-01 13:37"
+     ],
+     [
+      "2026-03-05 00:18",
+      "2026-03-05 05:38"
+     ],
+     [
+      "2026-03-01 06:00",
+      "2026-03-01 11:15"
+     ]
+    ],
+    2000
+   ],
+   "expected": {
+    "ignored": [
+     4
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 2000,
+      "meal_penalties": 1,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 435,
+      "regular_pay": 14500,
+      "total_pay": 16500,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 15,
+      "double_pay": 1000,
+      "meal_pay": 6000,
+      "meal_penalties": 3,
+      "overtime_minutes": 360,
+      "overtime_pay": 18000,
+      "regular_minutes": 1380,
+      "regular_pay": 46000,
+      "total_pay": 71000,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R042",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-04 21:02",
+      "2026-03-05 11:00"
+     ],
+     [
+      "2026-03-08 04:06",
+      "2026-03-08 16:15"
+     ],
+     [
+      "2026-03-02 00:07",
+      "2026-03-02 12:24"
+     ],
+     [
+      "2026-03-08 00:09",
+      "2026-03-08 04:06"
+     ],
+     [
+      "2026-03-04 08:00",
+      "2026-03-04 20:02"
+     ]
+    ],
+    1000
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 1110,
+      "double_pay": 37000,
+      "meal_pay": 3000,
+      "meal_penalties": 3,
+      "overtime_minutes": 720,
+      "overtime_pay": 18000,
+      "regular_minutes": 1440,
+      "regular_pay": 24000,
+      "total_pay": 82000,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R043",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-10 11:02",
+      "2026-03-10 23:01"
+     ],
+     [
+      "2026-03-03 09:11",
+      "2026-03-03 11:13"
+     ],
+     [
+      "2026-03-09 17:59",
+      "2026-03-10 02:13"
+     ],
+     [
+      "2026-03-04 00:05",
+      "2026-03-04 10:11"
+     ],
+     [
+      "2026-03-07 07:13",
+      "2026-03-07 16:19"
+     ],
+     [
+      "2026-03-06 07:07",
+      "2026-03-06 09:08"
+     ],
+     [
+      "2026-03-08 08:08",
+      "2026-03-08 13:07"
+     ],
+     [
+      "2026-03-02 23:33",
+      "2026-03-03 11:47"
+     ],
+     [
+      "2026-03-05 13:08",
+      "2026-03-05 23:03"
+     ],
+     [
+      "2026-03-15 10:02",
+      "2026-03-15 19:56"
+     ],
+     [
+      "2026-03-12 10:06",
+      "2026-03-12 10:32"
+     ],
+     [
+      "2026-03-13 23:32",
+      "2026-03-14 06:29"
+     ],
+     [
+      "2026-03-13 18:08",
+      "2026-03-13 23:02"
+     ],
+     [
+      "2026-03-07 16:19",
+      "2026-03-08 06:13"
+     ],
+     [
+      "2026-03-11 08:01",
+      "2026-03-11 20:13"
+     ],
+     [
+      "2026-03-09 10:01",
+      "2026-03-09 18:59"
+     ],
+     [
+      "2026-03-12 11:17",
+      "2026-03-12 16:17"
+     ],
+     [
+      "2026-03-01 22:08",
+      "2026-03-02 06:12"
+     ],
+     [
+      "2026-03-10 07:05",
+      "2026-03-10 12:02"
+     ],
+     [
+      "2026-03-11 20:43",
+      "2026-03-12 05:44"
+     ],
+     [
+      "2026-03-02 05:12",
+      "2026-03-02 14:05"
+     ],
+     [
+      "2026-03-14 22:05",
+      "2026-03-15 06:11"
+     ]
+    ],
+    1000
+   ],
+   "expected": {
+    "ignored": [
+     0,
+     1,
+     2,
+     20
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1000,
+      "meal_penalties": 1,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 480,
+      "regular_pay": 8000,
+      "total_pay": 9000,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 675,
+      "double_pay": 22500,
+      "meal_pay": 4000,
+      "meal_penalties": 4,
+      "overtime_minutes": 720,
+      "overtime_pay": 18000,
+      "regular_minutes": 2340,
+      "regular_pay": 39000,
+      "total_pay": 83500,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 675,
+      "double_pay": 22500,
+      "meal_pay": 5000,
+      "meal_penalties": 5,
+      "overtime_minutes": 1170,
+      "overtime_pay": 29250,
+      "regular_minutes": 2400,
+      "regular_pay": 40000,
+      "total_pay": 96750,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R044",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-11 22:04",
+      "2026-03-12 02:05"
+     ],
+     [
+      "2026-03-05 18:49",
+      "2026-03-05 19:18"
+     ],
+     [
+      "2026-03-09 18:13",
+      "2026-03-09 20:14"
+     ],
+     [
+      "2026-03-07 00:14",
+      "2026-03-07 00:41"
+     ],
+     [
+      "2026-03-05 18:10",
+      "2026-03-05 18:42"
+     ],
+     [
+      "2026-03-10 08:11",
+      "2026-03-10 13:14"
+     ],
+     [
+      "2026-03-08 00:02",
+      "2026-03-08 14:03"
+     ],
+     [
+      "2026-03-08 15:03",
+      "2026-03-09 03:04"
+     ],
+     [
+      "2026-03-03 22:09",
+      "2026-03-04 10:02"
+     ]
+    ],
+    4999
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 840,
+      "double_pay": 139972,
+      "meal_pay": 9998,
+      "meal_penalties": 2,
+      "overtime_minutes": 465,
+      "overtime_pay": 58113,
+      "regular_minutes": 1050,
+      "regular_pay": 87483,
+      "total_pay": 295566,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 660,
+      "regular_pay": 54989,
+      "total_pay": 54989,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R045",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-06 23:30",
+      "2026-03-07 07:36"
+     ],
+     [
+      "2026-03-01 06:14",
+      "2026-03-01 06:43"
+     ],
+     [
+      "2026-03-01 05:43",
+      "2026-03-01 10:46"
+     ],
+     [
+      "2026-03-06 23:30",
+      "2026-03-07 07:36"
+     ],
+     [
+      "2026-03-09 10:14",
+      "2026-03-09 15:07"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [
+     1,
+     3
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 300,
+      "regular_pay": 3000,
+      "total_pay": 3000,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 600,
+      "meal_penalties": 1,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 480,
+      "regular_pay": 4800,
+      "total_pay": 5400,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 285,
+      "regular_pay": 2850,
+      "total_pay": 2850,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R046",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-02 07:14",
+      "2026-03-02 19:25"
+     ],
+     [
+      "2026-03-08 08:45",
+      "2026-03-08 20:40"
+     ],
+     [
+      "2026-03-11 22:10",
+      "2026-03-12 05:05"
+     ],
+     [
+      "2026-03-04 21:11",
+      "2026-03-04 23:14"
+     ],
+     [
+      "2026-03-13 23:23",
+      "2026-03-13 23:26"
+     ],
+     [
+      "2026-03-02 20:10",
+      "2026-03-03 04:19"
+     ],
+     [
+      "2026-03-04 18:08",
+      "2026-03-04 20:11"
+     ],
+     [
+      "2026-03-05 22:10",
+      "2026-03-06 05:11"
+     ],
+     [
+      "2026-03-06 06:05",
+      "2026-03-06 20:05"
+     ],
+     [
+      "2026-03-06 20:12",
+      "2026-03-06 20:35"
+     ],
+     [
+      "2026-03-08 00:10",
+      "2026-03-08 12:06"
+     ],
+     [
+      "2026-03-03 01:27",
+      "2026-03-03 03:31"
+     ],
+     [
+      "2026-03-15 23:11",
+      "2026-03-16 11:10"
+     ],
+     [
+      "2026-03-13 18:09",
+      "2026-03-13 23:08"
+     ],
+     [
+      "2026-03-15 13:09",
+      "2026-03-15 23:04"
+     ],
+     [
+      "2026-03-03 00:10",
+      "2026-03-03 00:42"
+     ],
+     [
+      "2026-03-07 23:27",
+      "2026-03-08 07:45"
+     ],
+     [
+      "2026-03-01 06:02",
+      "2026-03-01 14:18"
+     ]
+    ],
+    2000
+   ],
+   "expected": {
+    "ignored": [
+     4,
+     10,
+     11,
+     15
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 2000,
+      "meal_penalties": 1,
+      "overtime_minutes": 15,
+      "overtime_pay": 750,
+      "regular_minutes": 480,
+      "regular_pay": 16000,
+      "total_pay": 18750,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 630,
+      "double_pay": 42000,
+      "meal_pay": 10000,
+      "meal_penalties": 5,
+      "overtime_minutes": 915,
+      "overtime_pay": 45750,
+      "regular_minutes": 2400,
+      "regular_pay": 80000,
+      "total_pay": 177750,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 585,
+      "double_pay": 39000,
+      "meal_pay": 4000,
+      "meal_penalties": 2,
+      "overtime_minutes": 240,
+      "overtime_pay": 12000,
+      "regular_minutes": 1185,
+      "regular_pay": 39500,
+      "total_pay": 94500,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R047",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-13-01 09:00",
+      "2026-03-19 23:08"
+     ],
+     [
+      "2026-03-10 23:33",
+      "2026-03-11 06:39"
+     ],
+     [
+      "2026-03-14 13:12",
+      "2026-03-14 13:47"
+     ],
+     [
+      "2026-03-11 06:46",
+      "2026-03-11 20:43"
+     ],
+     [
+      "2026-03-03 23:22",
+      "2026-03-04 06:24"
+     ],
+     [
+      "2026-03-20 13:02",
+      "2026-03-20 21:19"
+     ],
+     [
+      "2026-03-09 05:32",
+      "2026-03-09 15:25"
+     ],
+     [
+      "2026-03-06 08:13",
+      "2026-03-06 13:26"
+     ],
+     [
+      "2026-03-17 06:12",
+      "2026-03-17 20:05"
+     ],
+     [
+      "2026-03-13 07:01",
+      "2026-03-13 21:08"
+     ],
+     [
+      "2026-03-09 00:09",
+      "2026-03-09 05:25"
+     ],
+     [
+      "2026-03-15 09:04",
+      "2026-03-15 14:17"
+     ],
+     [
+      "2026-03-20 22:04",
+      "2026-03-20 22:10"
+     ],
+     [
+      "2026-03-06 12:26",
+      "2026-03-06 20:38"
+     ],
+     [
+      "2026-03-08 23:22",
+      "2026-03-09 11:33"
+     ],
+     [
+      "2026-03-18 16:46",
+      "2026-03-18 23:49"
+     ],
+     [
+      "2026-03-14 14:32",
+      "2026-03-15 04:26"
+     ],
+     [
+      "2026-03-15 13:17",
+      "2026-03-16 01:15"
+     ],
+     [
+      "2026-03-19 08:04",
+      "2026-03-19 15:06"
+     ],
+     [
+      "2026-03-21 09:09",
+      "2026-03-21 16:11"
+     ],
+     [
+      "2026-03-11 06:46",
+      "2026-03-11 20:43"
+     ],
+     [
+      "2026-03-13 21:23",
+      "2026-03-14 04:16"
+     ],
+     [
+      "2026-03-18 06:04",
+      "2026-03-18 16:01"
+     ],
+     [
+      "2026-03-09 11:48",
+      "2026-03-09 16:40"
+     ]
+    ],
+    1004
+   ],
+   "expected": {
+    "ignored": [
+     0,
+     6,
+     10,
+     13,
+     17,
+     20
+    ],
+    "weeks": [
+     {
+      "double_minutes": 15,
+      "double_pay": 502,
+      "meal_pay": 3012,
+      "meal_penalties": 3,
+      "overtime_minutes": 240,
+      "overtime_pay": 6024,
+      "regular_minutes": 1230,
+      "regular_pay": 20582,
+      "total_pay": 30120,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 810,
+      "double_pay": 27108,
+      "meal_pay": 5020,
+      "meal_penalties": 5,
+      "overtime_minutes": 810,
+      "overtime_pay": 20331,
+      "regular_minutes": 2400,
+      "regular_pay": 40160,
+      "total_pay": 92619,
+      "week_start": "2026-03-09"
+     },
+     {
+      "double_minutes": 405,
+      "double_pay": 13554,
+      "meal_pay": 5020,
+      "meal_penalties": 5,
+      "overtime_minutes": 510,
+      "overtime_pay": 12801,
+      "regular_minutes": 2280,
+      "regular_pay": 38152,
+      "total_pay": 69527,
+      "week_start": "2026-03-16"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R048",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-05 14:06",
+      "2026-03-05 16:00"
+     ],
+     [
+      "2026-03-05 00:05",
+      "2026-03-05 14:06"
+     ],
+     [
+      "2026-03-08 07:09",
+      "2026-03-08 17:14"
+     ],
+     [
+      "2026-03-01 13:12",
+      "2026-03-01 18:21"
+     ],
+     [
+      "2026-03-12 06:11",
+      "2026-03-12 18:30"
+     ],
+     [
+      "2026-03-08 17:59",
+      "2026-03-09 08:00"
+     ],
+     [
+      "2026-03-15 13:07",
+      "2026-03-15 23:02"
+     ],
+     [
+      "2026-03-13 18:10",
+      "2026-03-13 18:22"
+     ],
+     [
+      "2026-03-02 07:01",
+      "2026-03-02 08:59"
+     ],
+     [
+      "2026-03-02 08:59",
+      "2026-03-02 09:30"
+     ],
+     [
+      "2026-03-01 18:51",
+      "2026-03-01 22:48"
+     ],
+     [
+      "2026-03-14 23:28",
+      "2026-03-15 04:29"
+     ],
+     [
+      "2026-03-03 10:10",
+      "2026-03-03 22:13"
+     ],
+     [
+      "2026-03-11 00:00",
+      "2026-03-11 12:09"
+     ],
+     [
+      "2026-03-06 22:09",
+      "2026-03-07 10:07"
+     ],
+     [
+      "2026-03-11 12:54",
+      "2026-03-11 18:00"
+     ]
+    ],
+    1000
+   ],
+   "expected": {
+    "ignored": [
+     7
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 60,
+      "overtime_pay": 1500,
+      "regular_minutes": 480,
+      "regular_pay": 8000,
+      "total_pay": 9500,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 960,
+      "double_pay": 32000,
+      "meal_pay": 4000,
+      "meal_penalties": 4,
+      "overtime_minutes": 945,
+      "overtime_pay": 23625,
+      "regular_minutes": 2070,
+      "regular_pay": 34500,
+      "total_pay": 94125,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 330,
+      "double_pay": 11000,
+      "meal_pay": 3000,
+      "meal_penalties": 3,
+      "overtime_minutes": 600,
+      "overtime_pay": 15000,
+      "regular_minutes": 1740,
+      "regular_pay": 29000,
+      "total_pay": 58000,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R049",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-02 07:02",
+      "2026-03-02 12:02"
+     ],
+     [
+      "2026-03-03 08:14",
+      "2026-03-03 15:17"
+     ],
+     [
+      "2026-03-01 18:11",
+      "2026-03-02 02:29"
+     ],
+     [
+      "2026-03-02 12:47",
+      "2026-03-02 22:50"
+     ],
+     [
+      "2026-03-02 02:29",
+      "2026-03-02 12:22"
+     ]
+    ],
+    1000
+   ],
+   "expected": {
+    "ignored": [
+     0
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1000,
+      "meal_penalties": 1,
+      "overtime_minutes": 15,
+      "overtime_pay": 375,
+      "regular_minutes": 480,
+      "regular_pay": 8000,
+      "total_pay": 9375,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 465,
+      "double_pay": 15500,
+      "meal_pay": 2000,
+      "meal_penalties": 2,
+      "overtime_minutes": 240,
+      "overtime_pay": 6000,
+      "regular_minutes": 900,
+      "regular_pay": 15000,
+      "total_pay": 38500,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R050",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-06 12:18",
+      "2026-03-06 22:12"
+     ],
+     [
+      "2026-03-08 13:02",
+      "2026-03-08 19:57"
+     ],
+     [
+      "2026-03-08 19:57",
+      "2026-03-08 19:58"
+     ],
+     [
+      "2026-03-05 23:20",
+      "2026-03-06 04:27"
+     ],
+     [
+      "2026-03-04 09:03",
+      "2026-03-04 09:04"
+     ],
+     [
+      "2026-13-01 09:00",
+      "2026-03-04 22:52"
+     ],
+     [
+      "2026-03-01 06:07",
+      "2026-03-01 16:14"
+     ],
+     [
+      "2026-03-04 10:04",
+      "2026-03-04 18:10"
+     ],
+     [
+      "2026-03-01 16:14",
+      "2026-03-01 18:08"
+     ],
+     [
+      "2026-03-06 00:09",
+      "2026-03-06 12:11"
+     ]
+    ],
+    2000
+   ],
+   "expected": {
+    "ignored": [
+     2,
+     4,
+     5,
+     9
+    ],
+    "weeks": [
+     {
+      "double_minutes": 15,
+      "double_pay": 1000,
+      "meal_pay": 2000,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 12000,
+      "regular_minutes": 480,
+      "regular_pay": 16000,
+      "total_pay": 31000,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 8000,
+      "meal_penalties": 4,
+      "overtime_minutes": 135,
+      "overtime_pay": 6750,
+      "regular_minutes": 1695,
+      "regular_pay": 56500,
+      "total_pay": 71250,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R051",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-08 09:07",
+      "2026-03-08 19:00"
+     ],
+     [
+      "2026-03-09 13:42",
+      "2026-03-09 22:02"
+     ],
+     [
+      "2026-03-09 06:05",
+      "2026-03-09 13:12"
+     ],
+     [
+      "2026-03-02 09:04",
+      "2026-03-02 21:08"
+     ],
+     [
+      "2026-03-05 10:14",
+      "2026-03-06 00:10"
+     ],
+     [
+      "2026-03-04 08:08",
+      "2026-03-04 13:00"
+     ],
+     [
+      "2026-03-06 01:10",
+      "2026-03-06 06:24"
+     ],
+     [
+      "2026-03-04 08:08",
+      "2026-03-04 13:00"
+     ],
+     [
+      "2026-03-04 13:07",
+      "2026-03-04 13:09"
+     ],
+     [
+      "2026-03-03 13:03",
+      "2026-03-03 21:12"
+     ]
+    ],
+    1000
+   ],
+   "expected": {
+    "ignored": [
+     7
+    ],
+    "weeks": [
+     {
+      "double_minutes": 135,
+      "double_pay": 4500,
+      "meal_pay": 5000,
+      "meal_penalties": 5,
+      "overtime_minutes": 750,
+      "overtime_pay": 18750,
+      "regular_minutes": 2400,
+      "regular_pay": 40000,
+      "total_pay": 68250,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 210,
+      "double_pay": 7000,
+      "meal_pay": 1000,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 6000,
+      "regular_minutes": 480,
+      "regular_pay": 8000,
+      "total_pay": 22000,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R052",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-03 08:07",
+      "2026-03-03 17:07"
+     ],
+     [
+      "2026-03-03 16:07",
+      "2026-03-04 06:08"
+     ],
+     [
+      "2026-03-02 07:03",
+      "2026-03-02 17:07"
+     ],
+     [
+      "2026-03-02 17:37",
+      "2026-03-02 22:39"
+     ]
+    ],
+    2000
+   ],
+   "expected": {
+    "ignored": [
+     1
+    ],
+    "weeks": [
+     {
+      "double_minutes": 195,
+      "double_pay": 13000,
+      "meal_pay": 4000,
+      "meal_penalties": 2,
+      "overtime_minutes": 300,
+      "overtime_pay": 15000,
+      "regular_minutes": 960,
+      "regular_pay": 32000,
+      "total_pay": 64000,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R053",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-01 13:32",
+      "2026-03-01 13:35"
+     ],
+     [
+      "2026-13-01 09:00",
+      "2026-03-02 02:50"
+     ],
+     [
+      "2026-03-01 06:11",
+      "2026-03-01 14:32"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [
+     0,
+     1
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 600,
+      "meal_penalties": 1,
+      "overtime_minutes": 15,
+      "overtime_pay": 225,
+      "regular_minutes": 480,
+      "regular_pay": 4800,
+      "total_pay": 5625,
+      "week_start": "2026-02-23"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R054",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-03 10:05",
+      "2026-03-03 22:25"
+     ],
+     [
+      "2026-03-01 13:11",
+      "2026-03-01 13:46"
+     ],
+     [
+      "2026-03-05 18:09",
+      "2026-03-05 18:43"
+     ],
+     [
+      "2026-03-06 18:09",
+      "2026-03-07 06:14"
+     ],
+     [
+      "2026-03-07 06:59",
+      "2026-03-07 16:56"
+     ],
+     [
+      "2026-03-01 09:05",
+      "2026-03-01 14:11"
+     ],
+     [
+      "2026-03-02 00:08",
+      "2026-03-02 05:07"
+     ],
+     [
+      "2026-03-05 18:09",
+      "2026-03-05 18:43"
+     ],
+     [
+      "2026-03-03 21:25",
+      "2026-03-04 11:18"
+     ],
+     [
+      "2026-03-07 17:21",
+      "2026-03-08 07:22"
+     ],
+     [
+      "2026-03-04 00:14",
+      "2026-03-04 00:48"
+     ],
+     [
+      "2026-03-07 06:07",
+      "2026-03-07 18:21"
+     ]
+    ],
+    1004
+   ],
+   "expected": {
+    "ignored": [
+     1,
+     7,
+     8,
+     11
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1004,
+      "meal_penalties": 1,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 315,
+      "regular_pay": 5271,
+      "total_pay": 6275,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 750,
+      "double_pay": 25100,
+      "meal_pay": 3012,
+      "meal_penalties": 3,
+      "overtime_minutes": 720,
+      "overtime_pay": 18072,
+      "regular_minutes": 1785,
+      "regular_pay": 29869,
+      "total_pay": 76053,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R055",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-03 00:10",
+      "2026-03-03 10:08"
+     ],
+     [
+      "2026-03-02 22:06",
+      "2026-03-02 23:59"
+     ],
+     [
+      "2026-03-05 07:03",
+      "2026-03-05 12:04"
+     ],
+     [
+      "2026-03-07 06:02",
+      "2026-03-07 18:20"
+     ],
+     [
+      "2026-03-10 06:05",
+      "2026-03-10 11:15"
+     ],
+     [
+      "2026-03-08 22:09",
+      "2026-03-08 22:45"
+     ],
+     [
+      "2026-03-13 10:07",
+      "2026-03-13 17:03"
+     ],
+     [
+      "2026-03-14 22:19",
+      "2026-03-15 03:25"
+     ],
+     [
+      "2026-03-01 00:10",
+      "2026-03-01 09:13"
+     ],
+     [
+      "2026-03-12 14:54",
+      "2026-03-12 23:05"
+     ],
+     [
+      "2026-03-04 00:00",
+      "2026-03-04 07:01"
+     ],
+     [
+      "2026-03-14 18:09",
+      "2026-03-14 22:04"
+     ],
+     [
+      "2026-03-11 22:09",
+      "2026-03-12 06:26"
+     ],
+     [
+      "2026-03-12 00:13",
+      "2026-03-12 14:09"
+     ],
+     [
+      "2026-03-07 17:20",
+      "2026-03-07 17:23"
+     ]
+    ],
+    4999
+   ],
+   "expected": {
+    "ignored": [
+     13,
+     14
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 4999,
+      "meal_penalties": 1,
+      "overtime_minutes": 60,
+      "overtime_pay": 7499,
+      "regular_minutes": 480,
+      "regular_pay": 39992,
+      "total_pay": 52490,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 15,
+      "double_pay": 2500,
+      "meal_pay": 14997,
+      "meal_penalties": 3,
+      "overtime_minutes": 360,
+      "overtime_pay": 44991,
+      "regular_minutes": 1830,
+      "regular_pay": 152470,
+      "total_pay": 214958,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 24995,
+      "meal_penalties": 5,
+      "overtime_minutes": 75,
+      "overtime_pay": 9373,
+      "regular_minutes": 2175,
+      "regular_pay": 181214,
+      "total_pay": 215582,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R056",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-06 06:07",
+      "2026-03-06 15:10"
+     ],
+     [
+      "2026-03-01 06:09",
+      "2026-03-01 16:15"
+     ],
+     [
+      "2026-03-09 22:08",
+      "2026-03-10 07:15"
+     ],
+     [
+      "2026-03-05 22:18",
+      "2026-03-06 07:20"
+     ],
+     [
+      "2026-03-04 08:07",
+      "2026-03-04 12:03"
+     ],
+     [
+      "2026-03-03 07:37",
+      "2026-03-03 19:45"
+     ],
+     [
+      "2026-03-03 07:02",
+      "2026-03-03 07:37"
+     ],
+     [
+      "2026-03-10 07:30",
+      "2026-03-10 08:00"
+     ],
+     [
+      "2026-03-07 18:14",
+      "2026-03-08 08:08"
+     ],
+     [
+      "2026-03-02 13:13",
+      "2026-03-03 01:07"
+     ],
+     [
+      "2026-03-03 01:22",
+      "2026-03-03 15:24"
+     ],
+     [
+      "2026-03-05 13:08",
+      "2026-03-05 21:18"
+     ],
+     [
+      "2026-03-08 07:09",
+      "2026-03-08 15:05"
+     ],
+     [
+      "2026-03-06 15:25",
+      "2026-03-06 23:25"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [
+     0,
+     5,
+     6,
+     12
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 600,
+      "meal_penalties": 1,
+      "overtime_minutes": 120,
+      "overtime_pay": 1800,
+      "regular_minutes": 480,
+      "regular_pay": 4800,
+      "total_pay": 7200,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 555,
+      "double_pay": 11100,
+      "meal_pay": 3000,
+      "meal_penalties": 5,
+      "overtime_minutes": 1185,
+      "overtime_pay": 17775,
+      "regular_minutes": 2400,
+      "regular_pay": 24000,
+      "total_pay": 55875,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 600,
+      "meal_penalties": 1,
+      "overtime_minutes": 60,
+      "overtime_pay": 900,
+      "regular_minutes": 510,
+      "regular_pay": 5100,
+      "total_pay": 6600,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R057",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-01 22:10",
+      "2026-03-02 03:11"
+     ],
+     [
+      "2026-03-02 03:11",
+      "2026-03-02 15:26"
+     ],
+     [
+      "2026-03-02 18:10",
+      "2026-03-02 22:10"
+     ],
+     [
+      "2026-03-02 09:5a",
+      "2026-03-03 08:54"
+     ]
+    ],
+    1001
+   ],
+   "expected": {
+    "ignored": [
+     3
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 300,
+      "regular_pay": 5005,
+      "total_pay": 5005,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 255,
+      "double_pay": 8509,
+      "meal_pay": 1001,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 6006,
+      "regular_minutes": 480,
+      "regular_pay": 8008,
+      "total_pay": 23524,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R058",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-10 18:13",
+      "2026-03-11 01:07"
+     ],
+     [
+      "2026-03-02 18:34",
+      "2026-03-02 23:29"
+     ],
+     [
+      "2026-03-03 06:03",
+      "2026-03-03 06:30"
+     ],
+     [
+      "2026-03-14 19:06",
+      "2026-03-15 00:28"
+     ],
+     [
+      "2026-03-06 11:17",
+      "2026-03-06 16:22"
+     ],
+     [
+      "2026-03-11 13:13",
+      "2026-03-11 13:18"
+     ],
+     [
+      "2026-03-06 06:04",
+      "2026-03-06 11:10"
+     ],
+     [
+      "2026-03-01 22:03",
+      "2026-03-02 00:09"
+     ],
+     [
+      "2026-03-15 22:03",
+      "2026-03-16 05:06"
+     ],
+     [
+      "2026-03-05 10:14",
+      "2026-03-06 00:21"
+     ],
+     [
+      "2026-03-02 10:09",
+      "2026-03-02 18:04"
+     ],
+     [
+      "2026-03-08 13:02",
+      "2026-03-08 21:05"
+     ],
+     [
+      "2026-03-12 06:07",
+      "2026-03-12 11:23"
+     ],
+     [
+      "2026-03-13 06:08",
+      "2026-03-13 20:11"
+     ],
+     [
+      "2026-03-11 01:14",
+      "2026-03-11 06:16"
+     ],
+     [
+      "2026-03-14 13:14",
+      "2026-03-14 18:36"
+     ],
+     [
+      "2026-03-03 07:15",
+      "2026-03-03 16:20"
+     ],
+     [
+      "2026-03-02 01:09",
+      "2026-03-02 08:06"
+     ],
+     [
+      "2026-03-04 22:09",
+      "2026-03-04 22:10"
+     ]
+    ],
+    1000
+   ],
+   "expected": {
+    "ignored": [
+     5,
+     18
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 135,
+      "regular_pay": 2250,
+      "total_pay": 2250,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 570,
+      "double_pay": 19000,
+      "meal_pay": 5000,
+      "meal_penalties": 5,
+      "overtime_minutes": 705,
+      "overtime_pay": 17625,
+      "regular_minutes": 2400,
+      "regular_pay": 40000,
+      "total_pay": 81625,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 120,
+      "double_pay": 4000,
+      "meal_pay": 5000,
+      "meal_penalties": 5,
+      "overtime_minutes": 420,
+      "overtime_pay": 10500,
+      "regular_minutes": 2400,
+      "regular_pay": 40000,
+      "total_pay": 59500,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R059",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-08 10:07",
+      "2026-03-08 20:09"
+     ],
+     [
+      "2026-03-02 09:14",
+      "2026-03-02 23:15"
+     ],
+     [
+      "2026-03-13 22:26",
+      "2026-03-14 10:36"
+     ],
+     [
+      "2026-03-15 10:12",
+      "2026-03-15 15:13"
+     ],
+     [
+      "2026-03-04 23:25",
+      "2026-03-05 08:18"
+     ],
+     [
+      "2026-03-11 06:23",
+      "2026-03-11 20:23"
+     ],
+     [
+      "2026-03-07 08:09",
+      "2026-03-07 16:14"
+     ],
+     [
+      "2026-03-12 13:10",
+      "2026-03-12 21:30"
+     ],
+     [
+      "2026-03-21 09:02",
+      "2026-03-21 18:07"
+     ],
+     [
+      "2026-03-21 18:37",
+      "2026-03-21 20:37"
+     ],
+     [
+      "2026-03-07 08:09",
+      "2026-03-07 16:14"
+     ],
+     [
+      "2026-03-22 19:01",
+      "2026-03-22 23:59"
+     ],
+     [
+      "2026-03-11 10:00",
+      "2026-03-11 23:58"
+     ],
+     [
+      "2026-03-19 22:00",
+      "2026-03-20 10:01"
+     ],
+     [
+      "2026-03-02 23:15",
+      "2026-03-03 04:18"
+     ],
+     [
+      "2026-03-13 08:01",
+      "2026-03-13 21:56"
+     ],
+     [
+      "2026-03-15 04:50",
+      "2026-03-15 04:54"
+     ],
+     [
+      "2026-03-02 24:00",
+      "2026-03-12 09:45"
+     ],
+     [
+      "2026-03-17 08:11",
+      "2026-03-17 13:24"
+     ],
+     [
+      "2026-03-03 13:11",
+      "2026-03-04 01:15"
+     ],
+     [
+      "2026-03-05 23:20",
+      "2026-03-06 09:19"
+     ],
+     [
+      "2026-03-10 18:01",
+      "2026-03-11 06:08"
+     ],
+     [
+      "2026-03-16 08:04",
+      "2026-03-16 18:04"
+     ],
+     [
+      "2026-03-14 23:29",
+      "2026-03-15 04:43"
+     ],
+     [
+      "2026-03-16 18:11",
+      "2026-03-17 04:14"
+     ],
+     [
+      "2026-03-22 08:02",
+      "2026-03-22 18:01"
+     ],
+     [
+      "2026-03-01 10:00",
+      "2026-03-01 22:08"
+     ]
+    ],
+    1001
+   ],
+   "expected": {
+    "ignored": [
+     10,
+     12,
+     17
+    ],
+    "weeks": [
+     {
+      "double_minutes": 15,
+      "double_pay": 501,
+      "meal_pay": 1001,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 6006,
+      "regular_minutes": 480,
+      "regular_pay": 8008,
+      "total_pay": 15516,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 420,
+      "double_pay": 14014,
+      "meal_pay": 6006,
+      "meal_penalties": 6,
+      "overtime_minutes": 1260,
+      "overtime_pay": 31532,
+      "regular_minutes": 2400,
+      "regular_pay": 40040,
+      "total_pay": 91592,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 975,
+      "double_pay": 32533,
+      "meal_pay": 5005,
+      "meal_penalties": 5,
+      "overtime_minutes": 885,
+      "overtime_pay": 22147,
+      "regular_minutes": 2400,
+      "regular_pay": 40040,
+      "total_pay": 99725,
+      "week_start": "2026-03-09"
+     },
+     {
+      "double_minutes": 660,
+      "double_pay": 22022,
+      "meal_pay": 5005,
+      "meal_penalties": 5,
+      "overtime_minutes": 900,
+      "overtime_pay": 22523,
+      "regular_minutes": 2235,
+      "regular_pay": 37287,
+      "total_pay": 86837,
+      "week_start": "2026-03-16"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R060",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-06 22:07",
+      "2026-03-07 08:14"
+     ],
+     [
+      "2026-03-05 05:58",
+      "2026-03-05 14:58"
+     ],
+     [
+      "2026-03-16 08:33",
+      "2026-03-16 09:09"
+     ],
+     [
+      "2026-03-15 23:23",
+      "2026-03-16 08:26"
+     ],
+     [
+      "2026-03-02 23:20",
+      "2026-03-03 04:41"
+     ],
+     [
+      "2026-03-11 08:10",
+      "2026-03-11 15:14"
+     ],
+     [
+      "2026-03-07 22:03",
+      "2026-03-08 03:02"
+     ],
+     [
+      "2026-03-03 10:06",
+      "2026-03-03 14:12"
+     ],
+     [
+      "2026-03-05 00:07",
+      "2026-03-05 05:13"
+     ],
+     [
+      "2026-03-13 11:08",
+      "2026-03-13 11:35"
+     ],
+     [
+      "2026-03-04 22:34",
+      "2026-03-05 02:38"
+     ],
+     [
+      "2026-03-04 08:08",
+      "2026-03-04 22:04"
+     ],
+     [
+      "2026-03-01 08:05",
+      "2026-03-01 16:11"
+     ],
+     [
+      "2026-03-05 00:07",
+      "2026-03-05 05:13"
+     ],
+     [
+      "2026-03-09 08:04",
+      "2026-03-09 08:33"
+     ],
+     [
+      "2026-03-07 07:14",
+      "2026-03-07 07:40"
+     ],
+     [
+      "2026-03-13 07:07",
+      "2026-03-13 11:08"
+     ],
+     [
+      "2026-03-10 09:13",
+      "2026-03-10 13:18"
+     ]
+    ],
+    2000
+   ],
+   "expected": {
+    "ignored": [
+     8,
+     13,
+     15
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 2000,
+      "meal_penalties": 1,
+      "overtime_minutes": 15,
+      "overtime_pay": 750,
+      "regular_minutes": 480,
+      "regular_pay": 16000,
+      "total_pay": 18750,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 360,
+      "double_pay": 24000,
+      "meal_pay": 8000,
+      "meal_penalties": 4,
+      "overtime_minutes": 435,
+      "overtime_pay": 21750,
+      "regular_minutes": 2325,
+      "regular_pay": 77500,
+      "total_pay": 131250,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 4000,
+      "meal_penalties": 2,
+      "overtime_minutes": 60,
+      "overtime_pay": 3000,
+      "regular_minutes": 1440,
+      "regular_pay": 48000,
+      "total_pay": 55000,
+      "week_start": "2026-03-09"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 45,
+      "regular_pay": 1500,
+      "total_pay": 1500,
+      "week_start": "2026-03-16"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R061",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-07 08:02",
+      "2026-03-07 10:02"
+     ],
+     [
+      "2026-03-02 10:04",
+      "2026-03-02 19:06"
+     ],
+     [
+      "2026-03-05 18:06",
+      "2026-03-05 18:41"
+     ],
+     [
+      "2026-03-06 00:10",
+      "2026-03-06 00:17"
+     ],
+     [
+      "2026-03-01 07:14",
+      "2026-03-01 12:28"
+     ],
+     [
+      "2026-03-03 00:13",
+      "2026-03-03 00:14"
+     ],
+     [
+      "2026-03-07 11:02",
+      "2026-03-07 18:59"
+     ],
+     [
+      "2026-03-06 00:24",
+      "2026-03-06 00:55"
+     ]
+    ],
+    1000
+   ],
+   "expected": {
+    "ignored": [
+     3,
+     5
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1000,
+      "meal_penalties": 1,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 315,
+      "regular_pay": 5250,
+      "total_pay": 6250,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 2000,
+      "meal_penalties": 2,
+      "overtime_minutes": 180,
+      "overtime_pay": 4500,
+      "regular_minutes": 1035,
+      "regular_pay": 17250,
+      "total_pay": 23750,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R062",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-18 07:22",
+      "2026-03-18 11:15"
+     ],
+     [
+      "2026-03-17 22:14",
+      "2026-03-18 07:07"
+     ],
+     [
+      "2026-03-16 07:29",
+      "2026-03-16 15:44"
+     ],
+     [
+      "2026-03-03 07:11",
+      "2026-03-03 11:08"
+     ],
+     [
+      "2026-03-06 10:19",
+      "2026-03-06 14:24"
+     ],
+     [
+      "2026-03-06 00:13",
+      "2026-03-06 09:19"
+     ],
+     [
+      "2026-03-15 23:29",
+      "2026-03-16 07:29"
+     ],
+     [
+      "2026-03-04 09:14",
+      "2026-03-04 16:21"
+     ],
+     [
+      "2026-03-04 16:28",
+      "2026-03-04 16:31"
+     ],
+     [
+      "2026-03-03 12:08",
+      "2026-03-04 00:27"
+     ],
+     [
+      "2026-03-01 15:55",
+      "2026-03-01 16:03"
+     ],
+     [
+      "2026-03-14 14:13",
+      "2026-03-15 02:31"
+     ],
+     [
+      "2026-03-16 18:13",
+      "2026-03-17 04:14"
+     ],
+     [
+      "2026-03-11 13:10",
+      "2026-03-11 23:14"
+     ],
+     [
+      "2026-03-17 04:44",
+      "2026-03-17 16:37"
+     ],
+     [
+      "2026-03-14 13:07",
+      "2026-03-14 13:13"
+     ],
+     [
+      "2026-03-01 13:13",
+      "2026-03-01 15:10"
+     ],
+     [
+      "2026-03-20 22:05",
+      "2026-03-21 08:07"
+     ],
+     [
+      "2026-03-11 00:09",
+      "2026-03-11 12:10"
+     ],
+     [
+      "2026-03-19 22:11",
+      "2026-03-20 10:25"
+     ]
+    ],
+    2000
+   ],
+   "expected": {
+    "ignored": [
+     8,
+     10
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 120,
+      "regular_pay": 4000,
+      "total_pay": 4000,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 330,
+      "double_pay": 22000,
+      "meal_pay": 6000,
+      "meal_penalties": 3,
+      "overtime_minutes": 480,
+      "overtime_pay": 24000,
+      "regular_minutes": 1380,
+      "regular_pay": 46000,
+      "total_pay": 98000,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 630,
+      "double_pay": 42000,
+      "meal_pay": 6000,
+      "meal_penalties": 3,
+      "overtime_minutes": 480,
+      "overtime_pay": 24000,
+      "regular_minutes": 1440,
+      "regular_pay": 48000,
+      "total_pay": 120000,
+      "week_start": "2026-03-09"
+     },
+     {
+      "double_minutes": 900,
+      "double_pay": 60000,
+      "meal_pay": 8000,
+      "meal_penalties": 4,
+      "overtime_minutes": 840,
+      "overtime_pay": 42000,
+      "regular_minutes": 2160,
+      "regular_pay": 72000,
+      "total_pay": 182000,
+      "week_start": "2026-03-16"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R063",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-04 13:03",
+      "2026-03-04 22:57"
+     ],
+     [
+      "2026-03-07 22:02",
+      "2026-03-08 09:59"
+     ],
+     [
+      "2026-03-03 00:04",
+      "2026-03-03 05:10"
+     ],
+     [
+      "2026-03-02 06:13",
+      "2026-03-02 16:13"
+     ],
+     [
+      "2026-03-01 08:38",
+      "2026-03-01 18:42"
+     ],
+     [
+      "2026-03-02 9:00",
+      "2026-03-06 12:49"
+     ],
+     [
+      "2026-03-04 23:57",
+      "2026-03-05 07:00"
+     ],
+     [
+      "2026-03-06 10:03",
+      "2026-03-06 10:29"
+     ],
+     [
+      "2026-03-02 06:13",
+      "2026-03-02 16:13"
+     ],
+     [
+      "2026-03-01 09:11",
+      "2026-03-01 09:38"
+     ],
+     [
+      "2026-03-03 04:10",
+      "2026-03-03 12:15"
+     ]
+    ],
+    1004
+   ],
+   "expected": {
+    "ignored": [
+     5,
+     8,
+     9,
+     10
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1004,
+      "meal_penalties": 1,
+      "overtime_minutes": 120,
+      "overtime_pay": 3012,
+      "regular_minutes": 480,
+      "regular_pay": 8032,
+      "total_pay": 12048,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 5020,
+      "meal_penalties": 5,
+      "overtime_minutes": 480,
+      "overtime_pay": 12048,
+      "regular_minutes": 2205,
+      "regular_pay": 36897,
+      "total_pay": 53965,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R064",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-07 18:08",
+      "2026-03-08 06:06"
+     ],
+     [
+      "2026-03-03 09:07",
+      "2026-03-03 21:24"
+     ],
+     [
+      "2026-03-01 09:01",
+      "2026-03-01 14:01"
+     ],
+     [
+      "2026-03-03 21:39",
+      "2026-03-04 09:45"
+     ],
+     [
+      "2026-03-05 22:06",
+      "2026-03-05 22:32"
+     ],
+     [
+      "2026-03-01 14:08",
+      "2026-03-01 22:24"
+     ],
+     [
+      "2026-03-04 10:10",
+      "2026-03-04 18:12"
+     ],
+     [
+      "2026-03-02 07:13",
+      "2026-03-02 12:07"
+     ],
+     [
+      "2026-03-06 09:01",
+      "2026-03-06 17:21"
+     ],
+     [
+      "2026-03-04 19:12",
+      "2026-03-05 07:06"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 75,
+      "double_pay": 1500,
+      "meal_pay": 600,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 3600,
+      "regular_minutes": 480,
+      "regular_pay": 4800,
+      "total_pay": 10500,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 1215,
+      "double_pay": 24300,
+      "meal_pay": 2400,
+      "meal_penalties": 4,
+      "overtime_minutes": 720,
+      "overtime_pay": 10800,
+      "regular_minutes": 2235,
+      "regular_pay": 22350,
+      "total_pay": 59850,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R065",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-10 23:22",
+      "2026-03-11 07:19"
+     ],
+     [
+      "2026-03-04 23:24",
+      "2026-03-05 08:30"
+     ],
+     [
+      "2026-03-02 22:09",
+      "2026-03-03 08:06"
+     ],
+     [
+      "2026-03-11 08:04",
+      "2026-03-11 16:21"
+     ],
+     [
+      "2026-03-11 18:07",
+      "2026-03-11 22:11"
+     ],
+     [
+      "2026-03-05 11:37",
+      "2026-03-06 01:40"
+     ],
+     [
+      "2026-03-05 09:10",
+      "2026-03-05 11:07"
+     ],
+     [
+      "2026-03-11 22:18",
+      "2026-03-12 10:20"
+     ],
+     [
+      "2026-03-13 07:10",
+      "2026-03-13 14:17"
+     ],
+     [
+      "2026-03-07 09:13",
+      "2026-03-07 09:36"
+     ],
+     [
+      "2026-03-14 06:06",
+      "2026-03-14 16:03"
+     ],
+     [
+      "2026-03-06 20:04",
+      "2026-03-07 01:10"
+     ],
+     [
+      "2026-03-06 18:03",
+      "2026-03-06 20:04"
+     ],
+     [
+      "2026-03-14 17:03",
+      "2026-03-15 05:17"
+     ],
+     [
+      "2026-03-12 10:11",
+      "2026-03-12 18:30"
+     ],
+     [
+      "2026-03-15 09:08",
+      "2026-03-15 14:05"
+     ],
+     [
+      "",
+      "2026-03-10 04:55"
+     ],
+     [
+      "2026-03-15 14:35",
+      "2026-03-16 02:57"
+     ],
+     [
+      "2026-03-03 22:09",
+      "2026-03-04 05:04"
+     ],
+     [
+      "2026-03-05 07:30",
+      "2026-03-05 17:23"
+     ]
+    ],
+    4999
+   ],
+   "expected": {
+    "ignored": [
+     16,
+     19
+    ],
+    "weeks": [
+     {
+      "double_minutes": 240,
+      "double_pay": 39992,
+      "meal_pay": 24995,
+      "meal_penalties": 5,
+      "overtime_minutes": 405,
+      "overtime_pay": 50615,
+      "regular_minutes": 2295,
+      "regular_pay": 191212,
+      "total_pay": 306814,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 1680,
+      "double_pay": 279944,
+      "meal_pay": 29994,
+      "meal_penalties": 6,
+      "overtime_minutes": 1155,
+      "overtime_pay": 144346,
+      "regular_minutes": 2400,
+      "regular_pay": 199960,
+      "total_pay": 654244,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R066",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-03 10:03",
+      "2026-03-03 18:21"
+     ],
+     [
+      "2026-03-03 19:21",
+      "2026-03-04 05:22"
+     ],
+     [
+      "2026-03-09 07:09",
+      "2026-03-09 16:12"
+     ],
+     [
+      "2026-03-07 13:14",
+      "2026-03-07 18:32"
+     ],
+     [
+      "2026-03-06 23:31",
+      "2026-03-07 06:37"
+     ],
+     [
+      "2026-03-05 18:01",
+      "2026-03-05 22:08"
+     ],
+     [
+      "2026-03-02 24:00",
+      "2026-03-02 21:06"
+     ],
+     [
+      "2026-03-01 13:13",
+      "2026-03-01 18:17"
+     ],
+     [
+      "2026-03-08 08:07",
+      "2026-03-08 13:02"
+     ],
+     [
+      "2026-03-09 16:12",
+      "2026-03-09 21:12"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [
+     6
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 300,
+      "regular_pay": 3000,
+      "total_pay": 3000,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 375,
+      "double_pay": 7500,
+      "meal_pay": 1800,
+      "meal_penalties": 3,
+      "overtime_minutes": 240,
+      "overtime_pay": 3600,
+      "regular_minutes": 1770,
+      "regular_pay": 17700,
+      "total_pay": 30600,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 120,
+      "double_pay": 2400,
+      "meal_pay": 600,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 3600,
+      "regular_minutes": 480,
+      "regular_pay": 4800,
+      "total_pay": 11400,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R067",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-02 10:12",
+      "2026-03-03 00:10"
+     ],
+     [
+      "2026-03-01 22:04",
+      "2026-03-02 12:09"
+     ],
+     [
+      "2026-03-04 08:10",
+      "2026-03-04 18:08"
+     ],
+     [
+      "2026-03-03 22:07",
+      "2026-03-04 07:10"
+     ]
+    ],
+    2000
+   ],
+   "expected": {
+    "ignored": [
+     0
+    ],
+    "weeks": [
+     {
+      "double_minutes": 135,
+      "double_pay": 9000,
+      "meal_pay": 2000,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 12000,
+      "regular_minutes": 480,
+      "regular_pay": 16000,
+      "total_pay": 39000,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 4000,
+      "meal_penalties": 2,
+      "overtime_minutes": 195,
+      "overtime_pay": 9750,
+      "regular_minutes": 960,
+      "regular_pay": 32000,
+      "total_pay": 45750,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R068",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-04 08:19",
+      "2026-03-04 22:15"
+     ],
+     [
+      "2026-03-04 12:04",
+      "2026-03-04 22:06"
+     ],
+     [
+      "2026-03-06 00:09",
+      "2026-03-06 05:17"
+     ],
+     [
+      "2026-03-02 09:01",
+      "2026-03-02 17:08"
+     ],
+     [
+      "2026-03-07 08:00",
+      "2026-03-07 17:58"
+     ],
+     [
+      "2026-03-01 06:07",
+      "2026-03-01 06:32"
+     ],
+     [
+      "2026-02-30 09:00",
+      "2026-03-02 03:31"
+     ],
+     [
+      "2026-03-04 08:19",
+      "2026-03-04 22:15"
+     ],
+     [
+      "2026-03-03 23:21",
+      "2026-03-04 09:19"
+     ],
+     [
+      "2026-03-05 10:07",
+      "2026-03-06 00:05"
+     ],
+     [
+      "2026-03-04 10:10",
+      "2026-03-04 12:04"
+     ]
+    ],
+    1000
+   ],
+   "expected": {
+    "ignored": [
+     0,
+     6,
+     7
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 30,
+      "regular_pay": 500,
+      "total_pay": 500,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 120,
+      "double_pay": 4000,
+      "meal_pay": 5000,
+      "meal_penalties": 5,
+      "overtime_minutes": 1020,
+      "overtime_pay": 25500,
+      "regular_minutes": 2400,
+      "regular_pay": 40000,
+      "total_pay": 74500,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R069",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-10 00:07",
+      "2026-03-10 08:09"
+     ],
+     [
+      "2026-03-05 08:00",
+      "2026-03-05 16:06"
+     ],
+     [
+      "2026-03-07 07:31",
+      "2026-03-07 08:02"
+     ],
+     [
+      "2026-03-12 09:08",
+      "2026-03-12 09:42"
+     ],
+     [
+      "2026-03-03 10:40",
+      "2026-03-03 11:13"
+     ],
+     [
+      "2026-03-08 13:12",
+      "2026-03-08 23:15"
+     ],
+     [
+      "2026-03-01 00:11",
+      "2026-03-01 09:12"
+     ],
+     [
+      "2026-03-11 12:05",
+      "2026-03-12 02:12"
+     ],
+     [
+      "2026-03-13 09:07",
+      "2026-03-13 18:12"
+     ],
+     [
+      "2026-03-15 01:24",
+      "2026-03-15 06:26"
+     ],
+     [
+      "2026-03-09 23:34",
+      "2026-03-10 00:03"
+     ],
+     [
+      "2026-03-02 09:03",
+      "2026-03-02 13:10"
+     ],
+     [
+      "2026-03-03 06:13",
+      "2026-03-03 10:10"
+     ],
+     [
+      "2026-03-14 13:02",
+      "2026-03-15 01:24"
+     ],
+     [
+      "2026-03-07 22:13",
+      "2026-03-08 06:22"
+     ],
+     [
+      "2026-03-06 22:12",
+      "2026-03-07 07:16"
+     ],
+     [
+      "2026-03-15 22:03",
+      "2026-03-16 08:00"
+     ],
+     [
+      "2026-03-11 06:14",
+      "2026-03-11 11:35"
+     ],
+     [
+      "2026-03-04 13:06",
+      "2026-03-04 22:06"
+     ],
+     [
+      "2026-03-02 14:10",
+      "2026-03-02 21:16"
+     ]
+    ],
+    1001
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1001,
+      "meal_penalties": 1,
+      "overtime_minutes": 60,
+      "overtime_pay": 1502,
+      "regular_minutes": 480,
+      "regular_pay": 8008,
+      "total_pay": 10511,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 120,
+      "double_pay": 4004,
+      "meal_pay": 6006,
+      "meal_penalties": 6,
+      "overtime_minutes": 1095,
+      "overtime_pay": 27402,
+      "regular_minutes": 2400,
+      "regular_pay": 40040,
+      "total_pay": 77452,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 900,
+      "double_pay": 30030,
+      "meal_pay": 5005,
+      "meal_penalties": 5,
+      "overtime_minutes": 1050,
+      "overtime_pay": 26276,
+      "regular_minutes": 1980,
+      "regular_pay": 33033,
+      "total_pay": 94344,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R070",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-12 08:06",
+      "2026-03-12 08:10"
+     ],
+     [
+      "2026-03-05 08:11",
+      "2026-03-05 16:32"
+     ],
+     [
+      "2026-03-01 09:05",
+      "2026-03-01 13:10"
+     ],
+     [
+      "2026-03-13 18:03",
+      "2026-03-13 18:15"
+     ],
+     [
+      "2026-03-02 09:04",
+      "2026-03-02 17:17"
+     ],
+     [
+      "2026-03-02 18:17",
+      "2026-03-02 23:15"
+     ],
+     [
+      "2026-03-11 13:03",
+      "2026-03-11 20:09"
+     ],
+     [
+      "2026-03-01 08:06",
+      "2026-03-01 08:35"
+     ],
+     [
+      "2026-03-12 08:10",
+      "2026-03-12 15:12"
+     ]
+    ],
+    1004
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 285,
+      "regular_pay": 4769,
+      "total_pay": 4769,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 75,
+      "double_pay": 2510,
+      "meal_pay": 2008,
+      "meal_penalties": 2,
+      "overtime_minutes": 255,
+      "overtime_pay": 6401,
+      "regular_minutes": 960,
+      "regular_pay": 16064,
+      "total_pay": 26983,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 2008,
+      "meal_penalties": 2,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 885,
+      "regular_pay": 14809,
+      "total_pay": 16817,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R071",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-01 10:02",
+      "2026-03-01 19:03"
+     ],
+     [
+      "2026-03-15 08:12",
+      "2026-03-15 17:16"
+     ],
+     [
+      "2026-03-12 13:04",
+      "2026-03-12 15:07"
+     ],
+     [
+      "2026-03-02 11:15",
+      "2026-03-02 19:30"
+     ],
+     [
+      "2026-03-15 04:52",
+      "2026-03-15 10:01"
+     ],
+     [
+      "2026-03-10 19:45",
+      "2026-03-10 21:45"
+     ],
+     [
+      "2026-03-03 10:14",
+      "2026-03-03 12:10"
+     ],
+     [
+      "2026-03-08 12:06",
+      "2026-03-08 19:13"
+     ],
+     [
+      "2026-03-13 08:08",
+      "2026-03-13 16:20"
+     ],
+     [
+      "2026-03-04 22:00",
+      "2026-03-05 02:56"
+     ],
+     [
+      "2026-03-02 08:13",
+      "2026-03-02 10:15"
+     ],
+     [
+      "2026-03-07 23:20",
+      "2026-03-08 07:14"
+     ],
+     [
+      "2026-03-03 12:17",
+      "2026-03-04 02:14"
+     ],
+     [
+      "2026-03-08 06:00",
+      "2026-03-08 11:06"
+     ],
+     [
+      "2026-03-02 9:00",
+      "2026-03-12 16:18"
+     ],
+     [
+      "2026-03-08 07:21",
+      "2026-03-08 17:20"
+     ],
+     [
+      "2026-03-06 08:13",
+      "2026-03-06 16:27"
+     ],
+     [
+      "2026-03-09 09:02",
+      "2026-03-09 12:58"
+     ],
+     [
+      "2026-03-14 23:34",
+      "2026-03-15 04:37"
+     ],
+     [
+      "2026-03-10 10:02",
+      "2026-03-10 19:00"
+     ]
+    ],
+    4999
+   ],
+   "expected": {
+    "ignored": [
+     1,
+     7,
+     13,
+     14
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 4999,
+      "meal_penalties": 1,
+      "overtime_minutes": 60,
+      "overtime_pay": 7499,
+      "regular_minutes": 480,
+      "regular_pay": 39992,
+      "total_pay": 52490,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 240,
+      "double_pay": 39992,
+      "meal_pay": 24995,
+      "meal_penalties": 5,
+      "overtime_minutes": 810,
+      "overtime_pay": 101230,
+      "regular_minutes": 2400,
+      "regular_pay": 199960,
+      "total_pay": 366177,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 14997,
+      "meal_penalties": 3,
+      "overtime_minutes": 180,
+      "overtime_pay": 22496,
+      "regular_minutes": 1935,
+      "regular_pay": 161218,
+      "total_pay": 198711,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R072",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-04 10:04",
+      "2026-03-04 21:59"
+     ],
+     [
+      "2026-03-04 22:29",
+      "2026-03-05 08:36"
+     ],
+     [
+      "2026-03-05 21:34",
+      "2026-03-06 05:31"
+     ],
+     [
+      "2026-03-01 23:25",
+      "2026-03-02 04:24"
+     ],
+     [
+      "2026-03-02 24:00",
+      "2026-03-03 02:43"
+     ],
+     [
+      "2026-03-05 09:05",
+      "2026-03-05 21:27"
+     ],
+     [
+      "2026-03-06 09:02",
+      "2026-03-06 21:07"
+     ],
+     [
+      "2026-03-03 09:01",
+      "2026-03-03 19:08"
+     ],
+     [
+      "2026-03-02 04:54",
+      "2026-03-02 08:56"
+     ]
+    ],
+    2000
+   ],
+   "expected": {
+    "ignored": [
+     4
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 300,
+      "regular_pay": 10000,
+      "total_pay": 10000,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 1110,
+      "double_pay": 74000,
+      "meal_pay": 8000,
+      "meal_penalties": 4,
+      "overtime_minutes": 855,
+      "overtime_pay": 42750,
+      "regular_minutes": 2160,
+      "regular_pay": 72000,
+      "total_pay": 196750,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R073",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-19 15:04",
+      "2026-03-19 19:01"
+     ],
+     [
+      "2026-03-06 08:58",
+      "2026-03-06 18:58"
+     ],
+     [
+      "2026-03-09 23:22",
+      "2026-03-10 11:36"
+     ],
+     [
+      "2026-03-22 07:12",
+      "2026-03-22 09:13"
+     ],
+     [
+      "2026-03-05 00:00",
+      "2026-03-05 11:58"
+     ],
+     [
+      "2026-03-02 04:17",
+      "2026-03-02 13:19"
+     ],
+     [
+      "2026-03-19 08:02",
+      "2026-03-19 15:04"
+     ],
+     [
+      "2026-03-12 03:37",
+      "2026-03-12 03:41"
+     ],
+     [
+      "2026-03-21 06:02",
+      "2026-03-21 18:23"
+     ],
+     [
+      "2026-03-01 22:02",
+      "2026-03-02 03:17"
+     ],
+     [
+      "2026-03-04 09:04",
+      "2026-03-04 19:11"
+     ],
+     [
+      "2026-03-20 12:25",
+      "2026-03-20 17:33"
+     ],
+     [
+      "2026-03-03 18:08",
+      "2026-03-04 01:09"
+     ],
+     [
+      "2026-03-10 09:03",
+      "2026-03-10 09:39"
+     ],
+     [
+      "2026-03-17 06:12",
+      "2026-03-17 13:05"
+     ],
+     [
+      "2026-03-10 10:39",
+      "2026-03-10 18:38"
+     ],
+     [
+      "2026-03-11 13:13",
+      "2026-03-12 03:07"
+     ],
+     [
+      "2026-03-14 11:54",
+      "2026-03-14 12:26"
+     ],
+     [
+      "2026-03-18 18:06",
+      "2026-03-18 18:07"
+     ],
+     [
+      "2026-03-06 00:11",
+      "2026-03-06 08:13"
+     ],
+     [
+      "2026-03-13 09:03",
+      "2026-03-13 23:06"
+     ],
+     [
+      "2026-03-22 08:13",
+      "2026-03-22 20:18"
+     ],
+     [
+      "2026-03-07 00:06",
+      "2026-03-07 12:13"
+     ],
+     [
+      "2026-03-05 12:43",
+      "2026-03-05 17:48"
+     ],
+     [
+      "2026-03-20 10:12",
+      "2026-03-20 12:18"
+     ],
+     [
+      "2026-03-02 24:00",
+      "2026-03-22 05:28"
+     ],
+     [
+      "2026-03-13 23:21",
+      "2026-03-13 23:26"
+     ],
+     [
+      "2026-03-14 07:10",
+      "2026-03-14 11:09"
+     ],
+     [
+      "2026-03-08 08:08",
+      "2026-03-08 08:40"
+     ],
+     [
+      "2026-03-12 08:04",
+      "2026-03-12 08:05"
+     ],
+     [
+      "2026-03-16 13:09",
+      "2026-03-16 21:21"
+     ],
+     [
+      "2026-03-15 06:07",
+      "2026-03-15 10:10"
+     ],
+     [
+      "2026-03-02 06:07",
+      "2026-03-02 18:13"
+     ],
+     [
+      "2026-03-02 19:13",
+      "2026-03-03 05:11"
+     ]
+    ],
+    2000
+   ],
+   "expected": {
+    "ignored": [
+     13,
+     15,
+     18,
+     21,
+     25,
+     29,
+     32
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 2000,
+      "meal_penalties": 1,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 315,
+      "regular_pay": 10500,
+      "total_pay": 12500,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 1095,
+      "double_pay": 73000,
+      "meal_pay": 12000,
+      "meal_penalties": 6,
+      "overtime_minutes": 1545,
+      "overtime_pay": 77250,
+      "regular_minutes": 2400,
+      "regular_pay": 80000,
+      "total_pay": 242250,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 255,
+      "double_pay": 17000,
+      "meal_pay": 6000,
+      "meal_penalties": 3,
+      "overtime_minutes": 720,
+      "overtime_pay": 36000,
+      "regular_minutes": 1980,
+      "regular_pay": 66000,
+      "total_pay": 125000,
+      "week_start": "2026-03-09"
+     },
+     {
+      "double_minutes": 30,
+      "double_pay": 2000,
+      "meal_pay": 8000,
+      "meal_penalties": 4,
+      "overtime_minutes": 420,
+      "overtime_pay": 21000,
+      "regular_minutes": 2385,
+      "regular_pay": 79500,
+      "total_pay": 110500,
+      "week_start": "2026-03-16"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R074",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-08 06:05",
+      "2026-03-08 10:57"
+     ],
+     [
+      "2026-03-15 10:10",
+      "2026-03-15 12:11"
+     ],
+     [
+      "2026-03-05 06:11",
+      "2026-03-05 20:11"
+     ],
+     [
+      "2026-03-18 06:09",
+      "2026-03-18 20:05"
+     ],
+     [
+      "2026-03-11 00:06",
+      "2026-03-11 02:07"
+     ],
+     [
+      "2026-03-17 23:31",
+      "2026-03-18 11:40"
+     ],
+     [
+      "2026-03-04 01:40",
+      "2026-03-04 09:51"
+     ],
+     [
+      "2026-03-01 20:33",
+      "2026-03-02 08:39"
+     ],
+     [
+      "2026-03-16 09:09",
+      "2026-03-16 09:12"
+     ],
+     [
+      "2026-03-05 21:11",
+      "2026-03-06 05:18"
+     ],
+     [
+      "2026-03-18 20:12",
+      "2026-03-18 20:42"
+     ],
+     [
+      "2026-03-03 13:08",
+      "2026-03-04 01:25"
+     ],
+     [
+      "2026-03-02 06:13",
+      "2026-03-02 10:10"
+     ],
+     [
+      "2026-03-02 24:00",
+      "2026-03-07 00:35"
+     ],
+     [
+      "2026-03-22 13:04",
+      "2026-03-23 03:06"
+     ],
+     [
+      "2026-03-07 06:10",
+      "2026-03-07 10:09"
+     ],
+     [
+      "2026-03-01 18:11",
+      "2026-03-01 20:18"
+     ]
+    ],
+    1337
+   ],
+   "expected": {
+    "ignored": [
+     3,
+     8,
+     12,
+     13
+    ],
+    "weeks": [
+     {
+      "double_minutes": 135,
+      "double_pay": 6017,
+      "meal_pay": 1337,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 8022,
+      "regular_minutes": 480,
+      "regular_pay": 10696,
+      "total_pay": 26072,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 615,
+      "double_pay": 27409,
+      "meal_pay": 4011,
+      "meal_penalties": 3,
+      "overtime_minutes": 480,
+      "overtime_pay": 16044,
+      "regular_minutes": 1980,
+      "regular_pay": 44121,
+      "total_pay": 91585,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 240,
+      "regular_pay": 5348,
+      "total_pay": 5348,
+      "week_start": "2026-03-09"
+     },
+     {
+      "double_minutes": 135,
+      "double_pay": 6017,
+      "meal_pay": 2674,
+      "meal_penalties": 2,
+      "overtime_minutes": 480,
+      "overtime_pay": 16044,
+      "regular_minutes": 990,
+      "regular_pay": 22061,
+      "total_pay": 46796,
+      "week_start": "2026-03-16"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R075",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-13 14:09",
+      "2026-03-13 22:07"
+     ],
+     [
+      "2026-03-09 10:33",
+      "2026-03-09 17:38"
+     ],
+     [
+      "2026-03-09 22:02",
+      "2026-03-09 22:39"
+     ],
+     [
+      "2026-03-17 06:57",
+      "2026-03-17 10:56"
+     ],
+     [
+      "2026-03-08 23:29",
+      "2026-03-09 09:33"
+     ],
+     [
+      "2026-02-30 09:00",
+      "2026-03-10 18:22"
+     ],
+     [
+      "2026-03-05 07:08",
+      "2026-03-05 12:10"
+     ],
+     [
+      "2026-03-16 07:00",
+      "2026-03-16 11:00"
+     ],
+     [
+      "2026-03-04 10:11",
+      "2026-03-04 19:06"
+     ],
+     [
+      "2026-03-14 17:31",
+      "2026-03-15 07:28"
+     ],
+     [
+      "2026-03-18 22:07",
+      "2026-03-19 03:23"
+     ],
+     [
+      "2026-03-11 09:03",
+      "2026-03-11 12:59"
+     ],
+     [
+      "2026-03-02 13:02",
+      "2026-03-02 21:59"
+     ],
+     [
+      "2026-03-20 23:24",
+      "2026-03-21 04:22"
+     ],
+     [
+      "2026-03-12 13:10",
+      "2026-03-12 17:09"
+     ],
+     [
+      "2026-03-10 07:06",
+      "2026-03-10 17:12"
+     ],
+     [
+      "2026-03-05 11:10",
+      "2026-03-05 16:11"
+     ],
+     [
+      "2026-03-06 22:06",
+      "2026-03-07 06:03"
+     ],
+     [
+      "2026-03-13 06:05",
+      "2026-03-13 14:09"
+     ],
+     [
+      "2026-03-07 06:03",
+      "2026-03-07 18:17"
+     ],
+     [
+      "2026-03-15 08:07",
+      "2026-03-15 20:25"
+     ],
+     [
+      "2026-03-11 13:59",
+      "2026-03-11 19:12"
+     ],
+     [
+      "2026-03-07 09:04",
+      "2026-03-07 23:08"
+     ],
+     [
+      "2026-03-04 20:06",
+      "2026-03-05 04:24"
+     ],
+     [
+      "2026-03-12 17:54",
+      "2026-03-12 18:02"
+     ],
+     [
+      "2026-03-02 20:59",
+      "2026-03-03 04:06"
+     ],
+     [
+      "2026-03-22 11:25",
+      "2026-03-22 11:34"
+     ],
+     [
+      "2026-03-22 06:06",
+      "2026-03-22 11:18"
+     ],
+     [
+      "2026-03-01 07:13",
+      "2026-03-01 16:17"
+     ],
+     [
+      "2026-03-14 09:04",
+      "2026-03-14 17:24"
+     ],
+     [
+      "2026-03-17 06:11",
+      "2026-03-17 06:12"
+     ]
+    ],
+    4999
+   ],
+   "expected": {
+    "ignored": [
+     5,
+     16,
+     22,
+     24,
+     25,
+     26,
+     30
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 4999,
+      "meal_penalties": 1,
+      "overtime_minutes": 60,
+      "overtime_pay": 7499,
+      "regular_minutes": 480,
+      "regular_pay": 39992,
+      "total_pay": 52490,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 330,
+      "double_pay": 54989,
+      "meal_pay": 24995,
+      "meal_penalties": 5,
+      "overtime_minutes": 960,
+      "overtime_pay": 119976,
+      "regular_minutes": 2400,
+      "regular_pay": 199960,
+      "total_pay": 399920,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 1140,
+      "double_pay": 189962,
+      "meal_pay": 29994,
+      "meal_penalties": 6,
+      "overtime_minutes": 1410,
+      "overtime_pay": 176215,
+      "regular_minutes": 2400,
+      "regular_pay": 199960,
+      "total_pay": 596131,
+      "week_start": "2026-03-09"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 9998,
+      "meal_penalties": 2,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 1410,
+      "regular_pay": 117477,
+      "total_pay": 127475,
+      "week_start": "2026-03-16"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R076",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-03 23:24",
+      "2026-03-04 03:27"
+     ],
+     [
+      "2026-03-01 08:14",
+      "2026-03-01 20:31"
+     ],
+     [
+      "2026-03-04 00:10",
+      "2026-03-04 10:14"
+     ],
+     [
+      "2026-03-02 02:56",
+      "2026-03-02 03:07"
+     ],
+     [
+      "2026-03-02 24:00",
+      "2026-03-04 01:18"
+     ],
+     [
+      "2026-03-06 13:06",
+      "2026-03-06 22:04"
+     ],
+     [
+      "2026-03-02 00:04",
+      "2026-03-02 02:11"
+     ],
+     [
+      "2026-03-05 23:32",
+      "2026-03-06 06:33"
+     ],
+     [
+      "2026-03-07 10:13",
+      "2026-03-07 14:18"
+     ],
+     [
+      "2026-03-04 09:14",
+      "2026-03-04 17:23"
+     ]
+    ],
+    1001
+   ],
+   "expected": {
+    "ignored": [
+     2,
+     3,
+     4
+    ],
+    "weeks": [
+     {
+      "double_minutes": 15,
+      "double_pay": 501,
+      "meal_pay": 1001,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 6006,
+      "regular_minutes": 480,
+      "regular_pay": 8008,
+      "total_pay": 15516,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 3003,
+      "meal_penalties": 3,
+      "overtime_minutes": 75,
+      "overtime_pay": 1877,
+      "regular_minutes": 1995,
+      "regular_pay": 33283,
+      "total_pay": 38163,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R077",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-04 00:09",
+      "2026-03-04 08:16"
+     ],
+     [
+      "2026-03-02 18:02",
+      "2026-03-03 02:57"
+     ],
+     [
+      "2026-13-01 09:00",
+      "2026-03-02 17:43"
+     ],
+     [
+      "2026-03-03 13:13",
+      "2026-03-04 01:20"
+     ],
+     [
+      "2026-03-03 03:12",
+      "2026-03-03 08:11"
+     ],
+     [
+      "2026-03-07 06:10",
+      "2026-03-07 14:21"
+     ]
+    ],
+    1337
+   ],
+   "expected": {
+    "ignored": [
+     0,
+     2
+    ],
+    "weeks": [
+     {
+      "double_minutes": 300,
+      "double_pay": 13370,
+      "meal_pay": 4011,
+      "meal_penalties": 3,
+      "overtime_minutes": 300,
+      "overtime_pay": 10028,
+      "regular_minutes": 1440,
+      "regular_pay": 32088,
+      "total_pay": 59497,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R078",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-05 13:12",
+      "2026-03-05 18:22"
+     ],
+     [
+      "2026-03-06 08:02",
+      "2026-03-06 22:09"
+     ],
+     [
+      "2026-03-05 18:52",
+      "2026-03-06 03:45"
+     ],
+     [
+      "2026-03-03 22:12",
+      "2026-03-04 03:09"
+     ],
+     [
+      "2026-03-07 00:11",
+      "2026-03-07 00:48"
+     ],
+     [
+      "2026-03-02 15:23",
+      "2026-03-02 20:25"
+     ],
+     [
+      "2026-03-01 00:11",
+      "2026-03-01 00:36"
+     ],
+     [
+      "2026-03-02 10:14",
+      "2026-03-02 15:23"
+     ],
+     [
+      "2026-03-03 18:05",
+      "2026-03-03 23:12"
+     ],
+     [
+      "2026-03-04 23:30",
+      "2026-03-05 04:24"
+     ]
+    ],
+    1337
+   ],
+   "expected": {
+    "ignored": [
+     3
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 15,
+      "regular_pay": 334,
+      "total_pay": 334,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 255,
+      "double_pay": 11365,
+      "meal_pay": 5348,
+      "meal_penalties": 4,
+      "overtime_minutes": 615,
+      "overtime_pay": 20556,
+      "regular_minutes": 2085,
+      "regular_pay": 46461,
+      "total_pay": 83730,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R079",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-19 09:13",
+      "2026-03-19 17:32"
+     ],
+     [
+      "2026-03-10 10:00",
+      "2026-03-10 11:59"
+     ],
+     [
+      "2026-03-11 07:12",
+      "2026-03-11 21:13"
+     ],
+     [
+      "2026-03-18 22:02",
+      "2026-03-19 08:07"
+     ],
+     [
+      "2026-03-17 08:08",
+      "2026-03-17 08:17"
+     ],
+     [
+      "2026-03-22 22:43",
+      "2026-03-23 07:02"
+     ],
+     [
+      "2026-03-02 23:23",
+      "2026-03-03 07:19"
+     ],
+     [
+      "2026-03-22 10:00",
+      "2026-03-22 22:13"
+     ],
+     [
+      "2026-03-16 23:19",
+      "2026-03-17 06:14"
+     ],
+     [
+      "2026-03-08 06:47",
+      "2026-03-08 13:51"
+     ],
+     [
+      "2026-03-08 06:04",
+      "2026-03-08 06:40"
+     ],
+     [
+      "2026-03-20 18:12",
+      "2026-03-21 04:14"
+     ],
+     [
+      "2026-03-07 07:10",
+      "2026-03-07 21:13"
+     ],
+     [
+      "2026-03-16 18:03",
+      "2026-03-16 23:04"
+     ],
+     [
+      "2026-03-04 08:08",
+      "2026-03-04 08:18"
+     ],
+     [
+      "2026-03-15 22:12",
+      "2026-03-16 02:15"
+     ],
+     [
+      "2026-03-05 23:23",
+      "2026-03-06 00:00"
+     ],
+     [
+      "2026-03-07 00:01",
+      "2026-03-07 08:10"
+     ],
+     [
+      "2026-03-17 08:47",
+      "2026-03-17 20:56"
+     ],
+     [
+      "2026-03-06 00:00",
+      "2026-03-06 02:00"
+     ],
+     [
+      "2026-03-03 09:04",
+      "2026-03-03 09:14"
+     ],
+     [
+      "2026-03-09 19:13",
+      "2026-03-10 00:05"
+     ],
+     [
+      "2026-03-19 09:07",
+      "2026-03-19 11:05"
+     ],
+     [
+      "2026-03-12 23:20",
+      "2026-03-13 08:23"
+     ],
+     [
+      "2026-03-16 03:00",
+      "2026-03-16 03:02"
+     ],
+     [
+      "2026-03-14 00:07",
+      "2026-03-14 12:14"
+     ],
+     [
+      "2026-03-04 08:18",
+      "2026-03-04 13:21"
+     ],
+     [
+      "2026-03-13 13:02",
+      "2026-03-14 01:02"
+     ],
+     [
+      "2026-03-21 22:04",
+      "2026-03-22 03:03"
+     ],
+     [
+      "2026-03-06 10:11",
+      "2026-03-06 17:10"
+     ],
+     [
+      "2026-03-06 17:17",
+      "2026-03-06 22:38"
+     ],
+     [
+      "2026-03-19 18:32",
+      "2026-03-20 04:29"
+     ],
+     [
+      "2026-03-01 08:06",
+      "2026-03-01 10:12"
+     ],
+     [
+      "2026-03-11 21:28",
+      "2026-03-11 22:01"
+     ],
+     [
+      "2026-03-09 10:11",
+      "2026-03-09 19:06"
+     ]
+    ],
+    2000
+   ],
+   "expected": {
+    "ignored": [
+     0,
+     4,
+     12,
+     14,
+     24,
+     25
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 135,
+      "regular_pay": 4500,
+      "total_pay": 4500,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 150,
+      "double_pay": 10000,
+      "meal_pay": 8000,
+      "meal_penalties": 4,
+      "overtime_minutes": 720,
+      "overtime_pay": 36000,
+      "regular_minutes": 1770,
+      "regular_pay": 59000,
+      "total_pay": 113000,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 240,
+      "double_pay": 16000,
+      "meal_pay": 8000,
+      "meal_penalties": 4,
+      "overtime_minutes": 795,
+      "overtime_pay": 39750,
+      "regular_minutes": 2280,
+      "regular_pay": 76000,
+      "total_pay": 139750,
+      "week_start": "2026-03-09"
+     },
+     {
+      "double_minutes": 765,
+      "double_pay": 51000,
+      "meal_pay": 12000,
+      "meal_penalties": 6,
+      "overtime_minutes": 1740,
+      "overtime_pay": 87000,
+      "regular_minutes": 2400,
+      "regular_pay": 80000,
+      "total_pay": 230000,
+      "week_start": "2026-03-16"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R080",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-07 00:13",
+      "2026-03-07 08:11"
+     ],
+     [
+      "2026-03-05 10:12",
+      "2026-03-05 12:19"
+     ],
+     [
+      "2026-02-30 09:00",
+      "2026-03-05 11:04"
+     ],
+     [
+      "2026-03-04 00:12",
+      "2026-03-04 00:14"
+     ],
+     [
+      "2026-03-02 08:04",
+      "2026-03-02 18:06"
+     ],
+     [
+      "2026-03-01 23:49",
+      "2026-03-02 03:56"
+     ],
+     [
+      "2026-03-03 00:13",
+      "2026-03-03 07:10"
+     ],
+     [
+      "2026-03-06 07:11",
+      "2026-03-06 14:06"
+     ],
+     [
+      "2026-03-01 23:28",
+      "2026-03-01 23:34"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [
+     2,
+     3,
+     8
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 255,
+      "regular_pay": 2550,
+      "total_pay": 2550,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 2400,
+      "meal_penalties": 4,
+      "overtime_minutes": 120,
+      "overtime_pay": 1800,
+      "regular_minutes": 1905,
+      "regular_pay": 19050,
+      "total_pay": 23250,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R081",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-17 16:55",
+      "2026-03-17 21:53"
+     ],
+     [
+      "2026-03-01 13:09",
+      "2026-03-02 03:04"
+     ],
+     [
+      "2026-03-18 00:18",
+      "2026-03-18 08:15"
+     ],
+     [
+      "2026-03-13 15:14",
+      "2026-03-13 20:30"
+     ],
+     [
+      "2026-03-17 09:12",
+      "2026-03-17 16:10"
+     ],
+     [
+      "2026-03-07 06:12",
+      "2026-03-07 06:22"
+     ],
+     [
+      "2026-03-21 23:29",
+      "2026-03-22 07:49"
+     ],
+     [
+      "2026-03-06 07:00",
+      "2026-03-06 14:57"
+     ],
+     [
+      "2026-03-13 09:09",
+      "2026-03-13 14:14"
+     ],
+     [
+      "2026-03-18 00:12",
+      "2026-03-18 00:18"
+     ],
+     [
+      "2026-03-19 19:16",
+      "2026-03-20 07:21"
+     ],
+     [
+      "2026-03-14 08:05",
+      "2026-03-14 08:06"
+     ],
+     [
+      "2026-03-14 08:06",
+      "2026-03-14 20:16"
+     ],
+     [
+      "2026-03-19 18:09",
+      "2026-03-19 18:46"
+     ],
+     [
+      "2026-03-07 07:07",
+      "2026-03-07 07:15"
+     ],
+     [
+      "2026-03-01 09:07",
+      "2026-03-01 14:09"
+     ],
+     [
+      "2026-03-12 22:07",
+      "2026-03-13 06:14"
+     ]
+    ],
+    1000
+   ],
+   "expected": {
+    "ignored": [
+     1,
+     5,
+     9,
+     11
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1000,
+      "meal_penalties": 1,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 315,
+      "regular_pay": 5250,
+      "total_pay": 6250,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1000,
+      "meal_penalties": 1,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 495,
+      "regular_pay": 8250,
+      "total_pay": 9250,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 15,
+      "double_pay": 500,
+      "meal_pay": 3000,
+      "meal_penalties": 3,
+      "overtime_minutes": 390,
+      "overtime_pay": 9750,
+      "regular_minutes": 1440,
+      "regular_pay": 24000,
+      "total_pay": 37250,
+      "week_start": "2026-03-09"
+     },
+     {
+      "double_minutes": 30,
+      "double_pay": 1000,
+      "meal_pay": 4000,
+      "meal_penalties": 4,
+      "overtime_minutes": 495,
+      "overtime_pay": 12375,
+      "regular_minutes": 1920,
+      "regular_pay": 32000,
+      "total_pay": 49375,
+      "week_start": "2026-03-16"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R082",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-04 22:01",
+      "2026-03-05 12:05"
+     ],
+     [
+      "2026-03-06 10:10",
+      "2026-03-06 10:20"
+     ],
+     [
+      "2026-03-03 17:08",
+      "2026-03-03 22:28"
+     ],
+     [
+      "",
+      "2026-03-05 18:49"
+     ],
+     [
+      "2026-03-07 13:06",
+      "2026-03-07 13:12"
+     ],
+     [
+      "2026-03-03 13:06",
+      "2026-03-03 17:08"
+     ],
+     [
+      "2026-03-05 10:05",
+      "2026-03-05 10:32"
+     ],
+     [
+      "2026-03-02 10:01",
+      "2026-03-02 14:57"
+     ],
+     [
+      "2026-03-01 18:06",
+      "2026-03-01 18:38"
+     ],
+     [
+      "2026-03-05 12:05",
+      "2026-03-06 02:12"
+     ],
+     [
+      "2026-03-06 10:35",
+      "2026-03-06 14:30"
+     ]
+    ],
+    1001
+   ],
+   "expected": {
+    "ignored": [
+     1,
+     3,
+     6
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 45,
+      "regular_pay": 751,
+      "total_pay": 751,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 255,
+      "double_pay": 8509,
+      "meal_pay": 3003,
+      "meal_penalties": 3,
+      "overtime_minutes": 570,
+      "overtime_pay": 14264,
+      "regular_minutes": 1995,
+      "regular_pay": 33283,
+      "total_pay": 59059,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R083",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-02 08:07",
+      "2026-03-02 16:09"
+     ],
+     [
+      "2026-03-03 23:26",
+      "2026-03-04 11:36"
+     ],
+     [
+      "2026-03-02 16:09",
+      "2026-03-03 00:27"
+     ],
+     [
+      "2026-03-04 11:51",
+      "2026-03-04 18:52"
+     ],
+     [
+      "2026-03-01 18:02",
+      "2026-03-01 23:00"
+     ],
+     [
+      "2026-03-01 23:07",
+      "2026-03-01 23:34"
+     ],
+     [
+      "2026-03-02 09:5a",
+      "2026-03-01 22:53"
+     ]
+    ],
+    2000
+   ],
+   "expected": {
+    "ignored": [
+     6
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 330,
+      "regular_pay": 11000,
+      "total_pay": 11000,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 270,
+      "double_pay": 18000,
+      "meal_pay": 6000,
+      "meal_penalties": 3,
+      "overtime_minutes": 480,
+      "overtime_pay": 24000,
+      "regular_minutes": 1380,
+      "regular_pay": 46000,
+      "total_pay": 94000,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R084",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-01 18:03",
+      "2026-03-02 06:18"
+     ],
+     [
+      "2026-03-03 09:08",
+      "2026-03-03 21:20"
+     ],
+     [
+      "2026-03-02 18:06",
+      "2026-03-03 01:09"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 15,
+      "double_pay": 300,
+      "meal_pay": 600,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 3600,
+      "regular_minutes": 480,
+      "regular_pay": 4800,
+      "total_pay": 9300,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1200,
+      "meal_penalties": 2,
+      "overtime_minutes": 240,
+      "overtime_pay": 3600,
+      "regular_minutes": 915,
+      "regular_pay": 9150,
+      "total_pay": 13950,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R085",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-09 18:10",
+      "2026-03-09 18:36"
+     ],
+     [
+      "2026-03-02 23:22",
+      "2026-03-03 01:20"
+     ],
+     [
+      "2026-03-04 09:18",
+      "2026-03-04 17:27"
+     ],
+     [
+      "2026-03-03 08:12",
+      "2026-03-03 10:18"
+     ],
+     [
+      "2026-03-07 23:20",
+      "2026-03-08 04:25"
+     ],
+     [
+      "2026-03-05 06:07",
+      "2026-03-05 16:06"
+     ],
+     [
+      "2026-03-01 10:12",
+      "2026-03-01 12:06"
+     ],
+     [
+      "2026-03-06 09:00",
+      "2026-03-06 14:08"
+     ],
+     [
+      "2026-03-08 13:19",
+      "2026-03-08 23:12"
+     ],
+     [
+      "2026-03-08 07:07",
+      "2026-03-08 12:19"
+     ],
+     [
+      "2026-03-04 08:02",
+      "2026-03-04 08:33"
+     ]
+    ],
+    4999
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 105,
+      "regular_pay": 8748,
+      "total_pay": 8748,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 435,
+      "double_pay": 72486,
+      "meal_pay": 24995,
+      "meal_penalties": 5,
+      "overtime_minutes": 645,
+      "overtime_pay": 80609,
+      "regular_minutes": 1830,
+      "regular_pay": 152470,
+      "total_pay": 330560,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 15,
+      "regular_pay": 1250,
+      "total_pay": 1250,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R086",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-03 23:29",
+      "2026-03-04 09:24"
+     ],
+     [
+      "2026-03-04 10:09",
+      "2026-03-04 14:16"
+     ],
+     [
+      "2026-03-01 07:03",
+      "2026-03-01 09:05"
+     ],
+     [
+      "2026-03-02 10:03",
+      "2026-03-02 12:02"
+     ]
+    ],
+    1337
+   ],
+   "expected": {
+    "ignored": [],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 120,
+      "regular_pay": 2674,
+      "total_pay": 2674,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1337,
+      "meal_penalties": 1,
+      "overtime_minutes": 120,
+      "overtime_pay": 4011,
+      "regular_minutes": 840,
+      "regular_pay": 18718,
+      "total_pay": 24066,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R087",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-05 00:08",
+      "2026-03-05 07:02"
+     ],
+     [
+      "2026-03-01 22:12",
+      "2026-03-01 22:18"
+     ],
+     [
+      "2026-03-09 22:56",
+      "2026-03-10 06:49"
+     ],
+     [
+      "2026-03-06 09:00",
+      "2026-03-06 15:58"
+     ],
+     [
+      "2026-03-09 22:04",
+      "2026-03-09 22:11"
+     ],
+     [
+      "",
+      "2026-03-02 22:41"
+     ],
+     [
+      "2026-03-04 13:07",
+      "2026-03-04 17:00"
+     ],
+     [
+      "2026-03-02 18:01",
+      "2026-03-03 04:07"
+     ],
+     [
+      "2026-03-01 23:03",
+      "2026-03-02 06:05"
+     ],
+     [
+      "2026-03-08 06:01",
+      "2026-03-08 11:09"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [
+     1,
+     5
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 600,
+      "meal_penalties": 1,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 420,
+      "regular_pay": 4200,
+      "total_pay": 4800,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 2400,
+      "meal_penalties": 4,
+      "overtime_minutes": 120,
+      "overtime_pay": 1800,
+      "regular_minutes": 1860,
+      "regular_pay": 18600,
+      "total_pay": 22800,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 600,
+      "meal_penalties": 1,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 480,
+      "regular_pay": 4800,
+      "total_pay": 5400,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R088",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-15 01:32",
+      "2026-03-15 09:45"
+     ],
+     [
+      "2026-03-13 07:05",
+      "2026-03-13 17:08"
+     ],
+     [
+      "2026-03-09 22:13",
+      "2026-03-10 07:15"
+     ],
+     [
+      "2026-03-02 19:17",
+      "2026-03-03 09:18"
+     ],
+     [
+      "2026-03-06 18:21",
+      "2026-03-06 23:28"
+     ],
+     [
+      "2026-03-02 07:07",
+      "2026-03-02 19:02"
+     ],
+     [
+      "2026-03-07 06:07",
+      "2026-03-07 15:13"
+     ],
+     [
+      "2026-03-10 22:04",
+      "2026-03-11 03:18"
+     ],
+     [
+      "2026-03-04 10:00",
+      "2026-03-04 10:04"
+     ],
+     [
+      "2026-03-11 22:13",
+      "2026-03-12 10:30"
+     ],
+     [
+      "2026-03-03 00:06",
+      "2026-03-03 02:01"
+     ],
+     [
+      "2026-03-14 23:25",
+      "2026-03-15 01:32"
+     ],
+     [
+      "2026-03-08 14:49",
+      "2026-03-08 21:45"
+     ],
+     [
+      "2026-03-05 09:01",
+      "2026-03-05 14:03"
+     ],
+     [
+      "2026-03-12 10:37",
+      "2026-03-12 18:59"
+     ],
+     [
+      "2026-03-06 09:02",
+      "2026-03-06 17:21"
+     ],
+     [
+      "2026-03-15 10:06",
+      "2026-03-15 22:17"
+     ],
+     [
+      "2026-03-09 22:13",
+      "2026-03-10 07:15"
+     ],
+     [
+      "2026-03-13 16:08",
+      "2026-03-13 21:12"
+     ],
+     [
+      "2026-03-08 06:04",
+      "2026-03-08 14:04"
+     ],
+     [
+      "2026-03-02  09:00",
+      "2026-03-05 00:24"
+     ],
+     [
+      "2026-03-01 23:21",
+      "2026-03-02 04:18"
+     ],
+     [
+      "2026-03-12 09:02",
+      "2026-03-12 17:10"
+     ]
+    ],
+    4999
+   ],
+   "expected": {
+    "ignored": [
+     8,
+     10,
+     17,
+     18,
+     20,
+     22
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 300,
+      "regular_pay": 24995,
+      "total_pay": 24995,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 1110,
+      "double_pay": 184963,
+      "meal_pay": 19996,
+      "meal_penalties": 4,
+      "overtime_minutes": 795,
+      "overtime_pay": 99355,
+      "regular_minutes": 2220,
+      "regular_pay": 184963,
+      "total_pay": 489277,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 765,
+      "double_pay": 127475,
+      "meal_pay": 29994,
+      "meal_penalties": 6,
+      "overtime_minutes": 945,
+      "overtime_pay": 118101,
+      "regular_minutes": 2355,
+      "regular_pay": 196211,
+      "total_pay": 471781,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R089",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-01 20:39",
+      "2026-03-01 21:14"
+     ],
+     [
+      "2026-03-05 10:13",
+      "2026-03-06 00:16"
+     ],
+     [
+      "2026-03-14 23:30",
+      "2026-03-15 06:27"
+     ],
+     [
+      "2026-03-05 00:04",
+      "2026-03-05 00:14"
+     ],
+     [
+      "2026-03-03 00:07",
+      "2026-03-03 00:15"
+     ],
+     [
+      "2026-03-02 13:21",
+      "2026-03-02 22:16"
+     ],
+     [
+      "2026-03-15 08:07",
+      "2026-03-15 18:06"
+     ],
+     [
+      "2026-03-07 15:04",
+      "2026-03-08 00:01"
+     ],
+     [
+      "2026-03-12 00:04",
+      "2026-03-12 05:07"
+     ],
+     [
+      "2026-03-07 08:03",
+      "2026-03-07 15:04"
+     ],
+     [
+      "2026-03-15 06:27",
+      "2026-03-15 11:29"
+     ],
+     [
+      "2026-03-08 06:02",
+      "2026-03-08 11:02"
+     ],
+     [
+      "2026-03-06 08:12",
+      "2026-03-06 08:13"
+     ],
+     [
+      "2026-03-11 08:14",
+      "2026-03-11 08:38"
+     ],
+     [
+      "2026-03-04 18:10",
+      "2026-03-04 23:04"
+     ],
+     [
+      "2026-03-13 18:05",
+      "2026-03-13 18:06"
+     ],
+     [
+      "2026-03-11 07:11",
+      "2026-03-11 09:14"
+     ],
+     [
+      "2026-03-02 08:04",
+      "2026-03-02 13:21"
+     ],
+     [
+      "2026-03-10 22:07",
+      "2026-03-11 02:04"
+     ],
+     [
+      "2026-03-08 11:17",
+      "2026-03-08 23:10"
+     ],
+     [
+      "2026-03-09 13:10",
+      "2026-03-10 01:10"
+     ],
+     [
+      "2026-03-02 9:00",
+      "2026-03-11 22:07"
+     ],
+     [
+      "2026-03-01 08:11",
+      "2026-03-01 20:24"
+     ],
+     [
+      "2026-03-13 18:51",
+      "2026-03-14 04:52"
+     ],
+     [
+      "2026-03-12 05:37",
+      "2026-03-12 10:32"
+     ],
+     [
+      "2026-03-10 02:10",
+      "2026-03-10 02:11"
+     ]
+    ],
+    2000
+   ],
+   "expected": {
+    "ignored": [
+     6,
+     12,
+     13,
+     15,
+     21,
+     25
+    ],
+    "weeks": [
+     {
+      "double_minutes": 45,
+      "double_pay": 3000,
+      "meal_pay": 2000,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 12000,
+      "regular_minutes": 480,
+      "regular_pay": 16000,
+      "total_pay": 33000,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 810,
+      "double_pay": 54000,
+      "meal_pay": 8000,
+      "meal_penalties": 4,
+      "overtime_minutes": 960,
+      "overtime_pay": 48000,
+      "regular_minutes": 2220,
+      "regular_pay": 74000,
+      "total_pay": 184000,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 6000,
+      "meal_penalties": 3,
+      "overtime_minutes": 780,
+      "overtime_pay": 39000,
+      "regular_minutes": 2220,
+      "regular_pay": 74000,
+      "total_pay": 119000,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R090",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-06 00:00",
+      "2026-03-06 08:22"
+     ],
+     [
+      "2026-03-21 07:09",
+      "2026-03-21 21:10"
+     ],
+     [
+      "2026-03-08 21:37",
+      "2026-03-08 23:38"
+     ],
+     [
+      "2026-03-12 22:12",
+      "2026-03-13 05:19"
+     ],
+     [
+      "2026-03-06 08:52",
+      "2026-03-06 16:52"
+     ],
+     [
+      "2026-03-11 18:06",
+      "2026-03-11 23:11"
+     ],
+     [
+      "2026-03-15 10:00",
+      "2026-03-15 14:00"
+     ],
+     [
+      "2026-03-18 00:05",
+      "2026-03-18 10:08"
+     ],
+     [
+      "2026-03-04 09:07",
+      "2026-03-04 09:08"
+     ],
+     [
+      "2026-03-14 04:18",
+      "2026-03-14 16:25"
+     ],
+     [
+      "2026-03-14 00:14",
+      "2026-03-14 05:18"
+     ],
+     [
+      "2026-03-08 13:11",
+      "2026-03-08 21:22"
+     ],
+     [
+      "2026-03-13 05:26",
+      "2026-03-13 14:21"
+     ],
+     [
+      "2026-03-03 06:00",
+      "2026-03-03 14:15"
+     ],
+     [
+      "2026-03-20 18:14",
+      "2026-03-21 06:24"
+     ],
+     [
+      "2026-03-04 09:08",
+      "2026-03-04 18:06"
+     ],
+     [
+      "2026-03-13 10:04",
+      "2026-03-13 18:12"
+     ],
+     [
+      "2026-03-19 10:12",
+      "2026-03-19 15:08"
+     ],
+     [
+      "2026-03-03 14:15",
+      "2026-03-03 14:47"
+     ]
+    ],
+    4999
+   ],
+   "expected": {
+    "ignored": [
+     9,
+     16
+    ],
+    "weeks": [
+     {
+      "double_minutes": 255,
+      "double_pay": 42492,
+      "meal_pay": 19996,
+      "meal_penalties": 4,
+      "overtime_minutes": 480,
+      "overtime_pay": 59988,
+      "regular_minutes": 1920,
+      "regular_pay": 159968,
+      "total_pay": 282444,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 14997,
+      "meal_penalties": 3,
+      "overtime_minutes": 45,
+      "overtime_pay": 5624,
+      "regular_minutes": 1755,
+      "regular_pay": 146221,
+      "total_pay": 166842,
+      "week_start": "2026-03-09"
+     },
+     {
+      "double_minutes": 135,
+      "double_pay": 22496,
+      "meal_pay": 14997,
+      "meal_penalties": 3,
+      "overtime_minutes": 615,
+      "overtime_pay": 76860,
+      "regular_minutes": 1740,
+      "regular_pay": 144971,
+      "total_pay": 259324,
+      "week_start": "2026-03-16"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R091",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-03 23:23",
+      "2026-03-04 13:24"
+     ],
+     [
+      "2026-03-04 23:27",
+      "2026-03-05 04:20"
+     ],
+     [
+      "2026-03-11 05:47",
+      "2026-03-11 15:51"
+     ],
+     [
+      "2026-03-11 00:11",
+      "2026-03-11 05:32"
+     ],
+     [
+      "2026-03-05 07:00",
+      "2026-03-05 14:55"
+     ],
+     [
+      "2026-03-13 06:04",
+      "2026-03-13 14:24"
+     ],
+     [
+      "2026-03-06 00:04",
+      "2026-03-06 08:15"
+     ],
+     [
+      "2026/03/02 09:00",
+      "2026-03-14 15:38"
+     ],
+     [
+      "2026-03-05 04:27",
+      "2026-03-05 11:20"
+     ],
+     [
+      "2026-03-07 00:11",
+      "2026-03-07 05:15"
+     ]
+    ],
+    1001
+   ],
+   "expected": {
+    "ignored": [
+     4,
+     7
+    ],
+    "weeks": [
+     {
+      "double_minutes": 120,
+      "double_pay": 4004,
+      "meal_pay": 3003,
+      "meal_penalties": 3,
+      "overtime_minutes": 255,
+      "overtime_pay": 6381,
+      "regular_minutes": 1950,
+      "regular_pay": 32533,
+      "total_pay": 45921,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 195,
+      "double_pay": 6507,
+      "meal_pay": 2002,
+      "meal_penalties": 2,
+      "overtime_minutes": 270,
+      "overtime_pay": 6757,
+      "regular_minutes": 960,
+      "regular_pay": 16016,
+      "total_pay": 31282,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R092",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-03 07:20",
+      "2026-03-03 12:14"
+     ],
+     [
+      "2026-03-01 19:50",
+      "2026-03-02 04:04"
+     ],
+     [
+      "2026-03-04 08:12",
+      "2026-03-04 13:09"
+     ],
+     [
+      "2026-03-02 22:13",
+      "2026-03-03 08:20"
+     ],
+     [
+      "2026-03-03 18:09",
+      "2026-03-04 04:14"
+     ],
+     [
+      "2026-03-06 00:07",
+      "2026-03-06 08:07"
+     ],
+     [
+      "2026-03-01 07:04",
+      "2026-03-01 19:20"
+     ],
+     [
+      "2026-03-07 23:25",
+      "2026-03-08 00:00"
+     ]
+    ],
+    1001
+   ],
+   "expected": {
+    "ignored": [
+     0
+    ],
+    "weeks": [
+     {
+      "double_minutes": 510,
+      "double_pay": 17017,
+      "meal_pay": 1001,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 6006,
+      "regular_minutes": 480,
+      "regular_pay": 8008,
+      "total_pay": 32032,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 3003,
+      "meal_penalties": 3,
+      "overtime_minutes": 240,
+      "overtime_pay": 6006,
+      "regular_minutes": 1770,
+      "regular_pay": 29530,
+      "total_pay": 38539,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R093",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-03 10:11",
+      "2026-03-03 15:13"
+     ],
+     [
+      "2026-03-02 20:33",
+      "2026-03-03 03:29"
+     ],
+     [
+      "2026-03-02 09:12",
+      "2026-03-02 21:33"
+     ],
+     [
+      "2026-03-02 09:5a",
+      "2026-03-02 04:54"
+     ]
+    ],
+    4999
+   ],
+   "expected": {
+    "ignored": [
+     1,
+     3
+    ],
+    "weeks": [
+     {
+      "double_minutes": 15,
+      "double_pay": 2500,
+      "meal_pay": 4999,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 29994,
+      "regular_minutes": 780,
+      "regular_pay": 64987,
+      "total_pay": 102480,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R094",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-11 06:30",
+      "2026-03-11 06:36"
+     ],
+     [
+      "2026-03-14 06:57",
+      "2026-03-14 17:01"
+     ],
+     [
+      "2026-03-10 09:04",
+      "2026-03-10 13:00"
+     ],
+     [
+      "2026-03-03 13:11",
+      "2026-03-03 22:11"
+     ],
+     [
+      "2026-03-02 00:44",
+      "2026-03-02 12:58"
+     ],
+     [
+      "2026-03-04 23:25",
+      "2026-03-05 04:42"
+     ],
+     [
+      "2026-03-02 13:12",
+      "2026-03-02 18:10"
+     ],
+     [
+      "2026-03-14 23:22",
+      "2026-03-15 09:15"
+     ],
+     [
+      "2026-03-10 13:15",
+      "2026-03-11 03:11"
+     ],
+     [
+      "2026-03-08 09:10",
+      "2026-03-08 14:07"
+     ],
+     [
+      "2026-03-01 23:32",
+      "2026-03-01 23:44"
+     ],
+     [
+      "2026-03-11 06:05",
+      "2026-03-11 06:15"
+     ],
+     [
+      "2026-03-06 23:29",
+      "2026-03-07 06:30"
+     ],
+     [
+      "2026-03-09 10:08",
+      "2026-03-09 19:10"
+     ],
+     [
+      "2026-03-13 18:09",
+      "2026-03-14 06:27"
+     ],
+     [
+      "2026-03-05 05:42",
+      "2026-03-05 14:00"
+     ],
+     [
+      "2026-03-15 07:00",
+      "2026-03-15 08:55"
+     ],
+     [
+      "2026-03-08 14:07",
+      "2026-03-08 18:09"
+     ]
+    ],
+    1337
+   ],
+   "expected": {
+    "ignored": [
+     0,
+     16
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 15,
+      "regular_pay": 334,
+      "total_pay": 334,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 315,
+      "double_pay": 14039,
+      "meal_pay": 6685,
+      "meal_penalties": 5,
+      "overtime_minutes": 630,
+      "overtime_pay": 21058,
+      "regular_minutes": 2400,
+      "regular_pay": 53480,
+      "total_pay": 95262,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 855,
+      "double_pay": 38105,
+      "meal_pay": 5348,
+      "meal_penalties": 4,
+      "overtime_minutes": 780,
+      "overtime_pay": 26072,
+      "regular_minutes": 1935,
+      "regular_pay": 43118,
+      "total_pay": 112643,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R095",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-14 07:02",
+      "2026-03-14 15:13"
+     ],
+     [
+      "2026-03-02 23:29",
+      "2026-03-02 23:30"
+     ],
+     [
+      "2026-03-04 09:07",
+      "2026-03-04 17:26"
+     ],
+     [
+      "2026-03-06 18:05",
+      "2026-03-06 21:59"
+     ],
+     [
+      "2026-03-12 23:22",
+      "2026-03-12 23:46"
+     ],
+     [
+      "2026-03-09 06:28",
+      "2026-03-09 08:28"
+     ],
+     [
+      "2026-03-03 13:07",
+      "2026-03-03 20:09"
+     ],
+     [
+      "2026-03-10 06:05",
+      "2026-03-10 14:20"
+     ],
+     [
+      "2026-03-05 23:25",
+      "2026-03-06 03:20"
+     ],
+     [
+      "2026-03-03 13:07",
+      "2026-03-03 20:09"
+     ],
+     [
+      "2026-03-08 18:14",
+      "2026-03-09 06:28"
+     ],
+     [
+      "2026-03-04 16:26",
+      "2026-03-04 18:32"
+     ],
+     [
+      "2026-03-13 20:15",
+      "2026-03-14 06:08"
+     ],
+     [
+      "2026-03-03 21:09",
+      "2026-03-03 23:05"
+     ],
+     [
+      "2026-02-30 09:00",
+      "2026-03-14 04:39"
+     ],
+     [
+      "2026-03-08 03:25",
+      "2026-03-08 13:31"
+     ],
+     [
+      "2026-03-07 13:10",
+      "2026-03-08 03:10"
+     ],
+     [
+      "2026-03-10 14:50",
+      "2026-03-10 23:54"
+     ],
+     [
+      "2026-03-13 10:09",
+      "2026-03-13 20:08"
+     ],
+     [
+      "2026-03-15 18:01",
+      "2026-03-16 06:02"
+     ]
+    ],
+    2000
+   ],
+   "expected": {
+    "ignored": [
+     1,
+     9,
+     11,
+     14
+    ],
+    "weeks": [
+     {
+      "double_minutes": 735,
+      "double_pay": 49000,
+      "meal_pay": 8000,
+      "meal_penalties": 4,
+      "overtime_minutes": 570,
+      "overtime_pay": 28500,
+      "regular_minutes": 2385,
+      "regular_pay": 79500,
+      "total_pay": 165000,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 810,
+      "double_pay": 54000,
+      "meal_pay": 8000,
+      "meal_penalties": 4,
+      "overtime_minutes": 735,
+      "overtime_pay": 36750,
+      "regular_minutes": 2070,
+      "regular_pay": 69000,
+      "total_pay": 167750,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R096",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026/03/02 09:00",
+      "2026-03-01 17:58"
+     ],
+     [
+      "2026-03-03 22:14",
+      "2026-03-04 08:10"
+     ],
+     [
+      "2026-03-05 13:12",
+      "2026-03-06 01:19"
+     ],
+     [
+      "2026-03-02 00:09",
+      "2026-03-02 04:08"
+     ],
+     [
+      "2026-03-07 22:43",
+      "2026-03-08 02:37"
+     ],
+     [
+      "2026-03-07 10:11",
+      "2026-03-07 22:28"
+     ],
+     [
+      "2026-03-02 04:15",
+      "2026-03-02 04:39"
+     ],
+     [
+      "2026-03-06 09:07",
+      "2026-03-06 11:08"
+     ],
+     [
+      "2026-03-04 10:05",
+      "2026-03-04 15:04"
+     ],
+     [
+      "2026-03-06 11:23",
+      "2026-03-06 15:24"
+     ],
+     [
+      "2026-03-06 02:04",
+      "2026-03-06 07:08"
+     ],
+     [
+      "2026-03-04 15:49",
+      "2026-03-05 00:50"
+     ],
+     [
+      "2026-03-01 09:00",
+      "2026-03-01 17:15"
+     ],
+     [
+      "2026-03-09 15:22",
+      "2026-03-10 00:22"
+     ],
+     [
+      "2026-03-09 09:01",
+      "2026-03-09 14:22"
+     ],
+     [
+      "2026-03-01 17:30",
+      "2026-03-02 05:26"
+     ],
+     [
+      "2026-03-03 18:02",
+      "2026-03-03 23:14"
+     ]
+    ],
+    1004
+   ],
+   "expected": {
+    "ignored": [
+     0,
+     1,
+     3,
+     6
+    ],
+    "weeks": [
+     {
+      "double_minutes": 495,
+      "double_pay": 16566,
+      "meal_pay": 1004,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 6024,
+      "regular_minutes": 480,
+      "regular_pay": 8032,
+      "total_pay": 31626,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 360,
+      "double_pay": 12048,
+      "meal_pay": 5020,
+      "meal_penalties": 5,
+      "overtime_minutes": 930,
+      "overtime_pay": 23343,
+      "regular_minutes": 2235,
+      "regular_pay": 37399,
+      "total_pay": 77810,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 135,
+      "double_pay": 4518,
+      "meal_pay": 1004,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 6024,
+      "regular_minutes": 480,
+      "regular_pay": 8032,
+      "total_pay": 19578,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R097",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-06 12:35",
+      "2026-03-06 14:41"
+     ],
+     [
+      "2026-03-02 24:00",
+      "2026-03-08 08:53"
+     ],
+     [
+      "2026-03-02 00:05",
+      "2026-03-02 10:04"
+     ],
+     [
+      "2026-03-08 10:13",
+      "2026-03-08 20:11"
+     ],
+     [
+      "2026-03-06 00:14",
+      "2026-03-06 12:28"
+     ],
+     [
+      "2026-03-03 17:15",
+      "2026-03-03 17:16"
+     ],
+     [
+      "2026-03-01 13:13",
+      "2026-03-01 22:08"
+     ],
+     [
+      "2026-03-07 13:01",
+      "2026-03-07 21:54"
+     ],
+     [
+      "2026-03-09 13:07",
+      "2026-03-09 13:37"
+     ],
+     [
+      "2026-03-05 08:01",
+      "2026-03-05 13:05"
+     ],
+     [
+      "2026-03-04 18:08",
+      "2026-03-05 08:01"
+     ],
+     [
+      "2026-03-05 00:13",
+      "2026-03-05 14:10"
+     ],
+     [
+      "2026-03-03 10:07",
+      "2026-03-03 18:15"
+     ]
+    ],
+    4999
+   ],
+   "expected": {
+    "ignored": [
+     1,
+     5,
+     11
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 4999,
+      "meal_penalties": 1,
+      "overtime_minutes": 60,
+      "overtime_pay": 7499,
+      "regular_minutes": 480,
+      "regular_pay": 39992,
+      "total_pay": 52490,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 375,
+      "double_pay": 62488,
+      "meal_pay": 29994,
+      "meal_penalties": 6,
+      "overtime_minutes": 1455,
+      "overtime_pay": 181839,
+      "regular_minutes": 2400,
+      "regular_pay": 199960,
+      "total_pay": 474281,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 0,
+      "meal_penalties": 0,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 30,
+      "regular_pay": 2500,
+      "total_pay": 2500,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R098",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-13 00:08",
+      "2026-03-13 08:18"
+     ],
+     [
+      "2026-03-10 05:02",
+      "2026-03-10 10:16"
+     ],
+     [
+      "2026-03-09 23:34",
+      "2026-03-10 04:55"
+     ],
+     [
+      "2026-03-12 23:28",
+      "2026-03-13 04:26"
+     ],
+     [
+      "2026-03-03 11:25",
+      "2026-03-03 18:32"
+     ],
+     [
+      "2026-03-15 00:00",
+      "2026-03-15 08:08"
+     ],
+     [
+      "2026-03-10 09:08",
+      "2026-03-10 14:12"
+     ],
+     [
+      "2026-03-02 22:12",
+      "2026-03-03 10:25"
+     ],
+     [
+      "2026-03-01 13:32",
+      "2026-03-02 03:32"
+     ],
+     [
+      "2026-03-10 14:57",
+      "2026-03-10 20:00"
+     ],
+     [
+      "2026-03-06 07:06",
+      "2026-03-06 15:18"
+     ],
+     [
+      "2026-03-03 19:08",
+      "2026-03-03 19:31"
+     ],
+     [
+      "2026-03-14 13:12",
+      "2026-03-14 17:08"
+     ],
+     [
+      "2026-03-01 08:14",
+      "2026-03-01 13:17"
+     ],
+     [
+      "2026-03-05 18:12",
+      "2026-03-06 06:20"
+     ],
+     [
+      "2026-03-13 05:11",
+      "2026-03-13 09:04"
+     ],
+     [
+      "2026-03-15 08:38",
+      "2026-03-15 15:32"
+     ],
+     [
+      "2026-03-08 18:10",
+      "2026-03-09 04:06"
+     ],
+     [
+      "2026-03-11 06:13",
+      "2026-03-11 06:16"
+     ],
+     [
+      "2026-03-03 09:09",
+      "2026-03-03 19:08"
+     ]
+    ],
+    2000
+   ],
+   "expected": {
+    "ignored": [
+     0,
+     6,
+     18,
+     19
+    ],
+    "weeks": [
+     {
+      "double_minutes": 420,
+      "double_pay": 28000,
+      "meal_pay": 2000,
+      "meal_penalties": 1,
+      "overtime_minutes": 240,
+      "overtime_pay": 12000,
+      "regular_minutes": 480,
+      "regular_pay": 16000,
+      "total_pay": 58000,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 15,
+      "double_pay": 1000,
+      "meal_pay": 10000,
+      "meal_penalties": 5,
+      "overtime_minutes": 600,
+      "overtime_pay": 30000,
+      "regular_minutes": 2355,
+      "regular_pay": 78500,
+      "total_pay": 119500,
+      "week_start": "2026-03-02"
+     },
+     {
+      "double_minutes": 180,
+      "double_pay": 12000,
+      "meal_pay": 6000,
+      "meal_penalties": 3,
+      "overtime_minutes": 375,
+      "overtime_pay": 18750,
+      "regular_minutes": 2055,
+      "regular_pay": 68500,
+      "total_pay": 105250,
+      "week_start": "2026-03-09"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R099",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-02 18:05",
+      "2026-03-03 06:09"
+     ],
+     [
+      "2026-03-03 06:16",
+      "2026-03-03 11:14"
+     ],
+     [
+      "2026-03-02 18:05",
+      "2026-03-03 06:09"
+     ],
+     [
+      "2026-03-01 00:12",
+      "2026-03-01 08:17"
+     ],
+     [
+      "2026-03-03 13:04",
+      "2026-03-03 21:10"
+     ]
+    ],
+    600
+   ],
+   "expected": {
+    "ignored": [
+     2
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 600,
+      "meal_penalties": 1,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 480,
+      "regular_pay": 4800,
+      "total_pay": 5400,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 90,
+      "double_pay": 1800,
+      "meal_pay": 1200,
+      "meal_penalties": 2,
+      "overtime_minutes": 480,
+      "overtime_pay": 7200,
+      "regular_minutes": 960,
+      "regular_pay": 9600,
+      "total_pay": 19800,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  },
+  {
+   "id": "R100",
+   "title": "random timesheet",
+   "args": [
+    [
+     [
+      "2026-03-02 23:31",
+      "2026-03-03 11:49"
+     ],
+     [
+      "2026-03-07 13:14",
+      "2026-03-07 13:17"
+     ],
+     [
+      "2026-03-01 06:13",
+      "2026-03-01 11:34"
+     ],
+     [
+      "2026-03-03 22:11",
+      "2026-03-03 22:35"
+     ],
+     [
+      "2026-03-06 16:27",
+      "2026-03-07 04:39"
+     ],
+     [
+      "2026-03-06 09:06",
+      "2026-03-06 17:27"
+     ],
+     [
+      "2026-03-05 18:14",
+      "2026-03-06 02:15"
+     ],
+     [
+      "2026-03-07 13:24",
+      "2026-03-08 03:17"
+     ]
+    ],
+    1337
+   ],
+   "expected": {
+    "ignored": [
+     1,
+     4
+    ],
+    "weeks": [
+     {
+      "double_minutes": 0,
+      "double_pay": 0,
+      "meal_pay": 1337,
+      "meal_penalties": 1,
+      "overtime_minutes": 0,
+      "overtime_pay": 0,
+      "regular_minutes": 315,
+      "regular_pay": 7019,
+      "total_pay": 8356,
+      "week_start": "2026-02-23"
+     },
+     {
+      "double_minutes": 120,
+      "double_pay": 5348,
+      "meal_pay": 5348,
+      "meal_penalties": 4,
+      "overtime_minutes": 510,
+      "overtime_pay": 17047,
+      "regular_minutes": 1935,
+      "regular_pay": 43118,
+      "total_pay": 70861,
+      "week_start": "2026-03-02"
+     }
+    ]
+   }
+  }
+ ],
+ "stress": []
+}

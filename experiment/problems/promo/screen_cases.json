@@ -1,0 +1,9068 @@
+{
+ "problem": "promo",
+ "entry": "price_cart",
+ "public": [
+  {
+   "id": "P1",
+   "title": "order matters",
+   "args": [
+    {
+     "tea": {
+      "price": 450,
+      "category": "drink"
+     },
+     "mug": {
+      "price": 1200,
+      "category": "home"
+     }
+    },
+    [
+     {
+      "sku": "tea",
+      "qty": 3
+     },
+     {
+      "sku": "mug",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "D10",
+      "type": "percent",
+      "category": "drink",
+      "percent": 10,
+      "min_qty": 3,
+      "priority": 1
+     },
+     {
+      "id": "T5",
+      "type": "threshold",
+      "min_subtotal": 2500,
+      "amount_off": 500,
+      "priority": 2
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "T5"
+    ],
+    "lines": [
+     1086,
+     964
+    ],
+    "total": 2050
+   }
+  },
+  {
+   "id": "P2",
+   "title": "buy 2 get 1",
+   "args": [
+    {
+     "a": {
+      "price": 500,
+      "category": "x"
+     },
+     "b": {
+      "price": 300,
+      "category": "x"
+     },
+     "c": {
+      "price": 300,
+      "category": "x"
+     }
+    },
+    [
+     {
+      "sku": "a",
+      "qty": 2
+     },
+     {
+      "sku": "b",
+      "qty": 1
+     },
+     {
+      "sku": "c",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "B21",
+      "type": "bxgy",
+      "skus": [
+       "a",
+       "b",
+       "c"
+      ],
+      "buy": 2,
+      "get": 1,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "B21"
+    ],
+    "lines": [
+     1000,
+     0,
+     600
+    ],
+    "total": 1600
+   }
+  },
+  {
+   "id": "P3",
+   "title": "bundle allocation",
+   "args": [
+    {
+     "burger": {
+      "price": 650,
+      "category": "food"
+     },
+     "fries": {
+      "price": 300,
+      "category": "food"
+     },
+     "soda": {
+      "price": 250,
+      "category": "drink"
+     }
+    },
+    [
+     {
+      "sku": "burger",
+      "qty": 2
+     },
+     {
+      "sku": "fries",
+      "qty": 1
+     },
+     {
+      "sku": "soda",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "MEAL",
+      "type": "bundle",
+      "skus": [
+       "burger",
+       "fries",
+       "soda"
+      ],
+      "price": 900,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "MEAL"
+    ],
+    "lines": [
+     1138,
+     225,
+     437
+    ],
+    "total": 1800
+   }
+  },
+  {
+   "id": "P4",
+   "title": "group conflict, tie by id",
+   "args": [
+    {
+     "x": {
+      "price": 1000,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "x",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "B",
+      "type": "percent",
+      "category": "c",
+      "percent": 10,
+      "min_qty": 1,
+      "priority": 1,
+      "group": "g"
+     },
+     {
+      "id": "A",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 100,
+      "priority": 1,
+      "group": "g"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "A"
+    ],
+    "lines": [
+     900
+    ],
+    "total": 900
+   }
+  }
+ ],
+ "hidden": [
+  {
+   "id": "H01",
+   "title": "percent floors per unit",
+   "args": [
+    {
+     "p": {
+      "price": 999,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "p",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "P15",
+      "type": "percent",
+      "category": "c",
+      "percent": 15,
+      "min_qty": 2,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "P15"
+    ],
+    "lines": [
+     1700
+    ],
+    "total": 1700
+   }
+  },
+  {
+   "id": "H02",
+   "title": "percent skips claimed units",
+   "args": [
+    {
+     "a": {
+      "price": 1000,
+      "category": "c"
+     },
+     "b": {
+      "price": 1000,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "a",
+      "qty": 1
+     },
+     {
+      "sku": "b",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "BND",
+      "type": "bundle",
+      "skus": [
+       "a",
+       "b"
+      ],
+      "price": 1500,
+      "priority": 1
+     },
+     {
+      "id": "PC",
+      "type": "percent",
+      "category": "c",
+      "percent": 50,
+      "min_qty": 1,
+      "priority": 2
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "PC"
+    ],
+    "lines": [
+     500,
+     500
+    ],
+    "total": 1000
+   }
+  },
+  {
+   "id": "H03",
+   "title": "bxgy: last claimed units are free, ties by unit order",
+   "args": [
+    {
+     "x": {
+      "price": 400,
+      "category": "k"
+     },
+     "y": {
+      "price": 400,
+      "category": "k"
+     },
+     "z": {
+      "price": 100,
+      "category": "k"
+     }
+    },
+    [
+     {
+      "sku": "z",
+      "qty": 1
+     },
+     {
+      "sku": "x",
+      "qty": 2
+     },
+     {
+      "sku": "y",
+      "qty": 2
+     },
+     {
+      "sku": "z",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "B",
+      "type": "bxgy",
+      "skus": [
+       "x",
+       "y",
+       "z"
+      ],
+      "buy": 1,
+      "get": 1,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "B"
+    ],
+    "lines": [
+     0,
+     800,
+     400,
+     0
+    ],
+    "total": 1200
+   }
+  },
+  {
+   "id": "H04",
+   "title": "bxgy leaves a remainder for a later percent",
+   "args": [
+    {
+     "s": {
+      "price": 1000,
+      "category": "shoe"
+     }
+    },
+    [
+     {
+      "sku": "s",
+      "qty": 3
+     }
+    ],
+    [
+     {
+      "id": "B",
+      "type": "bxgy",
+      "skus": [
+       "s"
+      ],
+      "buy": 1,
+      "get": 1,
+      "priority": 1
+     },
+     {
+      "id": "P",
+      "type": "percent",
+      "category": "shoe",
+      "percent": 20,
+      "min_qty": 1,
+      "priority": 2
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "B",
+     "P"
+    ],
+    "lines": [
+     1800
+    ],
+    "total": 1800
+   }
+  },
+  {
+   "id": "H05",
+   "title": "threshold allocation with a zero-price unit",
+   "args": [
+    {
+     "a": {
+      "price": 0,
+      "category": "c"
+     },
+     "b": {
+      "price": 333,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "a",
+      "qty": 1
+     },
+     {
+      "sku": "b",
+      "qty": 3
+     }
+    ],
+    [
+     {
+      "id": "T",
+      "type": "threshold",
+      "min_subtotal": 999,
+      "amount_off": 100,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "T"
+    ],
+    "lines": [
+     0,
+     899
+    ],
+    "total": 899
+   }
+  },
+  {
+   "id": "H06",
+   "title": "threshold capped at the subtotal",
+   "args": [
+    {
+     "a": {
+      "price": 150,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "a",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "T",
+      "type": "threshold",
+      "min_subtotal": 300,
+      "amount_off": 1000,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "T"
+    ],
+    "lines": [
+     0
+    ],
+    "total": 0
+   }
+  },
+  {
+   "id": "H07",
+   "title": "exclusive promotion stands alone",
+   "args": [
+    {
+     "a": {
+      "price": 1000,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "a",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "X",
+      "type": "percent",
+      "category": "c",
+      "percent": 30,
+      "min_qty": 1,
+      "priority": 1,
+      "exclusive": true
+     },
+     {
+      "id": "Y",
+      "type": "percent",
+      "category": "c",
+      "percent": 20,
+      "min_qty": 1,
+      "priority": 1
+     },
+     {
+      "id": "Z",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 300,
+      "priority": 2
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "Y",
+     "Z"
+    ],
+    "lines": [
+     1300
+    ],
+    "total": 1300
+   }
+  },
+  {
+   "id": "H08",
+   "title": "fewer promotions beat the id order",
+   "args": [
+    {
+     "a": {
+      "price": 1000,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "a",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "A",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 50,
+      "priority": 1
+     },
+     {
+      "id": "B",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 50,
+      "priority": 2
+     },
+     {
+      "id": "C",
+      "type": "threshold",
+      "min_subtotal": 1000,
+      "amount_off": 100,
+      "priority": 3
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "C"
+    ],
+    "lines": [
+     900
+    ],
+    "total": 900
+   }
+  },
+  {
+   "id": "H09",
+   "title": "ids compare by code point",
+   "args": [
+    {
+     "a": {
+      "price": 500,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "a",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "b",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 100,
+      "priority": 1,
+      "group": "g"
+     },
+     {
+      "id": "B",
+      "type": "percent",
+      "category": "c",
+      "percent": 20,
+      "min_qty": 1,
+      "priority": 1,
+      "group": "g"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "B"
+    ],
+    "lines": [
+     400
+    ],
+    "total": 400
+   }
+  },
+  {
+   "id": "H10",
+   "title": "applied by priority, not by id",
+   "args": [
+    {
+     "a": {
+      "price": 1000,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "a",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "Z1",
+      "type": "percent",
+      "category": "c",
+      "percent": 50,
+      "min_qty": 1,
+      "priority": 1
+     },
+     {
+      "id": "A1",
+      "type": "threshold",
+      "min_subtotal": 600,
+      "amount_off": 200,
+      "priority": 2
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "Z1"
+    ],
+    "lines": [
+     500
+    ],
+    "total": 500
+   }
+  },
+  {
+   "id": "H11",
+   "title": "equal priority applied by id",
+   "args": [
+    {
+     "a": {
+      "price": 1000,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "a",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "b2",
+      "type": "percent",
+      "category": "c",
+      "percent": 50,
+      "min_qty": 1,
+      "priority": 1
+     },
+     {
+      "id": "a2",
+      "type": "threshold",
+      "min_subtotal": 600,
+      "amount_off": 200,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "a2",
+     "b2"
+    ],
+    "lines": [
+     400
+    ],
+    "total": 400
+   }
+  },
+  {
+   "id": "H12",
+   "title": "bundle repeats while units remain",
+   "args": [
+    {
+     "a": {
+      "price": 600,
+      "category": "c"
+     },
+     "b": {
+      "price": 400,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "a",
+      "qty": 1
+     },
+     {
+      "sku": "b",
+      "qty": 1
+     },
+     {
+      "sku": "a",
+      "qty": 1
+     },
+     {
+      "sku": "b",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "M",
+      "type": "bundle",
+      "skus": [
+       "a",
+       "b"
+      ],
+      "price": 900,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "M"
+    ],
+    "lines": [
+     540,
+     360,
+     540,
+     360
+    ],
+    "total": 1800
+   }
+  },
+  {
+   "id": "H13",
+   "title": "bundle allocation ties by unit order, not sku order",
+   "args": [
+    {
+     "burger": {
+      "price": 650,
+      "category": "food"
+     },
+     "fries": {
+      "price": 300,
+      "category": "food"
+     },
+     "soda": {
+      "price": 250,
+      "category": "drink"
+     }
+    },
+    [
+     {
+      "sku": "soda",
+      "qty": 1
+     },
+     {
+      "sku": "burger",
+      "qty": 1
+     },
+     {
+      "sku": "fries",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "MEAL",
+      "type": "bundle",
+      "skus": [
+       "burger",
+       "fries",
+       "soda"
+      ],
+      "price": 900,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "MEAL"
+    ],
+    "lines": [
+     188,
+     487,
+     225
+    ],
+    "total": 900
+   }
+  },
+  {
+   "id": "H14",
+   "title": "no promotions",
+   "args": [
+    {
+     "a": {
+      "price": 100,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "a",
+      "qty": 3
+     }
+    ],
+    []
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     300
+    ],
+    "total": 300
+   }
+  },
+  {
+   "id": "H15",
+   "title": "buy 2 get 2 with a partial group",
+   "args": [
+    {
+     "a": {
+      "price": 300,
+      "category": "k"
+     },
+     "b": {
+      "price": 200,
+      "category": "k"
+     },
+     "c": {
+      "price": 100,
+      "category": "k"
+     }
+    },
+    [
+     {
+      "sku": "a",
+      "qty": 1
+     },
+     {
+      "sku": "b",
+      "qty": 2
+     },
+     {
+      "sku": "c",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "B22",
+      "type": "bxgy",
+      "skus": [
+       "a",
+       "b",
+       "c"
+      ],
+      "buy": 2,
+      "get": 2,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "B22"
+    ],
+    "lines": [
+     300,
+     200,
+     100
+    ],
+    "total": 600
+   }
+  },
+  {
+   "id": "H16",
+   "title": "group conflict with an ungrouped promotion",
+   "args": [
+    {
+     "a": {
+      "price": 1000,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "a",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "G1",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 100,
+      "priority": 1,
+      "group": "g"
+     },
+     {
+      "id": "G2",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 200,
+      "priority": 1,
+      "group": "g"
+     },
+     {
+      "id": "N",
+      "type": "percent",
+      "category": "c",
+      "percent": 10,
+      "min_qty": 1,
+      "priority": 0
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "N",
+     "G2"
+    ],
+    "lines": [
+     700
+    ],
+    "total": 700
+   }
+  },
+  {
+   "id": "H17",
+   "title": "threshold after bxgy: free units get no share",
+   "args": [
+    {
+     "a": {
+      "price": 500,
+      "category": "k"
+     }
+    },
+    [
+     {
+      "sku": "a",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "B",
+      "type": "bxgy",
+      "skus": [
+       "a"
+      ],
+      "buy": 1,
+      "get": 1,
+      "priority": 1
+     },
+     {
+      "id": "T",
+      "type": "threshold",
+      "min_subtotal": 400,
+      "amount_off": 100,
+      "priority": 2
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "B",
+     "T"
+    ],
+    "lines": [
+     400
+    ],
+    "total": 400
+   }
+  },
+  {
+   "id": "H18",
+   "title": "min_qty counts units across lines",
+   "args": [
+    {
+     "a": {
+      "price": 250,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "a",
+      "qty": 1
+     },
+     {
+      "sku": "a",
+      "qty": 3
+     }
+    ],
+    [
+     {
+      "id": "P",
+      "type": "percent",
+      "category": "c",
+      "percent": 10,
+      "min_qty": 4,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "P"
+    ],
+    "lines": [
+     225,
+     675
+    ],
+    "total": 900
+   }
+  },
+  {
+   "id": "H19",
+   "title": "100 percent",
+   "args": [
+    {
+     "a": {
+      "price": 199,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "a",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "F",
+      "type": "percent",
+      "category": "c",
+      "percent": 100,
+      "min_qty": 2,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "F"
+    ],
+    "lines": [
+     0
+    ],
+    "total": 0
+   }
+  },
+  {
+   "id": "H20",
+   "title": "bundle stops when it would not lower the price",
+   "args": [
+    {
+     "a": {
+      "price": 400,
+      "category": "c1"
+     },
+     "b": {
+      "price": 400,
+      "category": "c2"
+     }
+    },
+    [
+     {
+      "sku": "a",
+      "qty": 1
+     },
+     {
+      "sku": "b",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "M",
+      "type": "bundle",
+      "skus": [
+       "a",
+       "b"
+      ],
+      "price": 800,
+      "priority": 1
+     },
+     {
+      "id": "P",
+      "type": "percent",
+      "category": "c1",
+      "percent": 50,
+      "min_qty": 1,
+      "priority": 2,
+      "group": "g"
+     },
+     {
+      "id": "T",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 1,
+      "priority": 3,
+      "group": "g"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "P"
+    ],
+    "lines": [
+     200,
+     400
+    ],
+    "total": 600
+   }
+  },
+  {
+   "id": "R001",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 250,
+      "category": "b"
+     },
+     "s1": {
+      "price": 99,
+      "category": "a"
+     },
+     "s2": {
+      "price": 0,
+      "category": "a"
+     },
+     "s3": {
+      "price": 250,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 2
+     },
+     {
+      "sku": "s2",
+      "qty": 1
+     },
+     {
+      "sku": "s2",
+      "qty": 4
+     }
+    ],
+    [
+     {
+      "id": "x1",
+      "type": "bxgy",
+      "skus": [
+       "s1"
+      ],
+      "buy": 2,
+      "get": 1,
+      "priority": 1
+     },
+     {
+      "id": "M",
+      "type": "percent",
+      "category": "b",
+      "percent": 10,
+      "min_qty": 4,
+      "priority": 3
+     },
+     {
+      "id": "b",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 333,
+      "priority": 1
+     },
+     {
+      "id": "b0",
+      "type": "percent",
+      "category": "a",
+      "percent": 50,
+      "min_qty": 3,
+      "priority": 0,
+      "group": "g1"
+     },
+     {
+      "id": "A1",
+      "type": "percent",
+      "category": "b",
+      "percent": 15,
+      "min_qty": 2,
+      "priority": 0
+     },
+     {
+      "id": "Q7",
+      "type": "threshold",
+      "min_subtotal": 5000,
+      "amount_off": 10000,
+      "priority": 0,
+      "group": "g1"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "b0"
+    ],
+    "lines": [
+     100,
+     0,
+     0
+    ],
+    "total": 100
+   }
+  },
+  {
+   "id": "R002",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 333,
+      "category": "c"
+     },
+     "s1": {
+      "price": 100,
+      "category": "c"
+     },
+     "s2": {
+      "price": 999,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 5
+     }
+    ],
+    []
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     500
+    ],
+    "total": 500
+   }
+  },
+  {
+   "id": "R003",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 400,
+      "category": "a"
+     },
+     "s1": {
+      "price": 199,
+      "category": "c"
+     },
+     "s2": {
+      "price": 1999,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s2",
+      "qty": 5
+     },
+     {
+      "sku": "s2",
+      "qty": 5
+     },
+     {
+      "sku": "s2",
+      "qty": 4
+     },
+     {
+      "sku": "s1",
+      "qty": 2
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     }
+    ],
+    [
+     {
+      "id": "A1",
+      "type": "bundle",
+      "skus": [
+       "s0",
+       "s1"
+      ],
+      "price": 1500,
+      "priority": 3
+     },
+     {
+      "id": "b0",
+      "type": "threshold",
+      "min_subtotal": 5000,
+      "amount_off": 100,
+      "priority": 3
+     },
+     {
+      "id": "x1",
+      "type": "bundle",
+      "skus": [
+       "s0",
+       "s1"
+      ],
+      "price": 0,
+      "priority": 3,
+      "group": "g1"
+     },
+     {
+      "id": "Z9",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 50,
+      "priority": 2,
+      "exclusive": true
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "b0",
+     "x1"
+    ],
+    "lines": [
+     399,
+     9960,
+     9964,
+     7972,
+     0,
+     1995
+    ],
+    "total": 30290
+   }
+  },
+  {
+   "id": "R004",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 150,
+      "category": "b"
+     },
+     "s1": {
+      "price": 1999,
+      "category": "a"
+     },
+     "s2": {
+      "price": 150,
+      "category": "c"
+     },
+     "s3": {
+      "price": 250,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 3
+     },
+     {
+      "sku": "s1",
+      "qty": 2
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     },
+     {
+      "sku": "s3",
+      "qty": 3
+     },
+     {
+      "sku": "s2",
+      "qty": 5
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     }
+    ],
+    [
+     {
+      "id": "A",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 100,
+      "priority": 3,
+      "group": "g2"
+     },
+     {
+      "id": "Q7",
+      "type": "bxgy",
+      "skus": [
+       "s2",
+       "s1",
+       "s0"
+      ],
+      "buy": 2,
+      "get": 1,
+      "priority": 3,
+      "group": "g1"
+     },
+     {
+      "id": "M",
+      "type": "threshold",
+      "min_subtotal": 2000,
+      "amount_off": 1,
+      "priority": 2
+     },
+     {
+      "id": "b0",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 333,
+      "priority": 2
+     },
+     {
+      "id": "a",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 333,
+      "priority": 0,
+      "exclusive": true
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "M",
+     "b0",
+     "A",
+     "Q7"
+    ],
+    "lines": [
+     5796,
+     3864,
+     725,
+     726,
+     290,
+     290
+    ],
+    "total": 11691
+   }
+  },
+  {
+   "id": "R005",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 250,
+      "category": "b"
+     },
+     "s1": {
+      "price": 1200,
+      "category": "c"
+     },
+     "s2": {
+      "price": 500,
+      "category": "b"
+     },
+     "s3": {
+      "price": 0,
+      "category": "a"
+     },
+     "s4": {
+      "price": 999,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s3",
+      "qty": 1
+     },
+     {
+      "sku": "s2",
+      "qty": 1
+     },
+     {
+      "sku": "s1",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "Z9",
+      "type": "bxgy",
+      "skus": [
+       "s2",
+       "s0",
+       "s1"
+      ],
+      "buy": 2,
+      "get": 1,
+      "priority": 2
+     },
+     {
+      "id": "AB",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 100,
+      "priority": 2
+     },
+     {
+      "id": "b",
+      "type": "percent",
+      "category": "a",
+      "percent": 100,
+      "min_qty": 2,
+      "priority": 0
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "AB"
+    ],
+    "lines": [
+     0,
+     471,
+     1129
+    ],
+    "total": 1600
+   }
+  },
+  {
+   "id": "R006",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 500,
+      "category": "b"
+     },
+     "s1": {
+      "price": 100,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 2
+     },
+     {
+      "sku": "s1",
+      "qty": 1
+     },
+     {
+      "sku": "s0",
+      "qty": 4
+     },
+     {
+      "sku": "s1",
+      "qty": 4
+     },
+     {
+      "sku": "s1",
+      "qty": 1
+     },
+     {
+      "sku": "s0",
+      "qty": 3
+     }
+    ],
+    []
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     1000,
+     100,
+     2000,
+     400,
+     100,
+     1500
+    ],
+    "total": 5100
+   }
+  },
+  {
+   "id": "R007",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 99,
+      "category": "c"
+     },
+     "s1": {
+      "price": 99,
+      "category": "b"
+     },
+     "s2": {
+      "price": 500,
+      "category": "b"
+     },
+     "s3": {
+      "price": 250,
+      "category": "b"
+     },
+     "s4": {
+      "price": 1999,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s3",
+      "qty": 3
+     },
+     {
+      "sku": "s4",
+      "qty": 5
+     },
+     {
+      "sku": "s2",
+      "qty": 1
+     },
+     {
+      "sku": "s1",
+      "qty": 4
+     }
+    ],
+    [
+     {
+      "id": "b0",
+      "type": "bxgy",
+      "skus": [
+       "s4",
+       "s2",
+       "s3",
+       "s0"
+      ],
+      "buy": 2,
+      "get": 2,
+      "priority": 2,
+      "group": "g2"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "b0"
+    ],
+    "lines": [
+     250,
+     7996,
+     0,
+     396
+    ],
+    "total": 8642
+   }
+  },
+  {
+   "id": "R008",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 1999,
+      "category": "b"
+     },
+     "s1": {
+      "price": 150,
+      "category": "c"
+     },
+     "s2": {
+      "price": 400,
+      "category": "a"
+     },
+     "s3": {
+      "price": 150,
+      "category": "b"
+     },
+     "s4": {
+      "price": 999,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s2",
+      "qty": 3
+     },
+     {
+      "sku": "s1",
+      "qty": 5
+     },
+     {
+      "sku": "s1",
+      "qty": 4
+     },
+     {
+      "sku": "s2",
+      "qty": 3
+     }
+    ],
+    [
+     {
+      "id": "a",
+      "type": "bxgy",
+      "skus": [
+       "s4"
+      ],
+      "buy": 3,
+      "get": 1,
+      "priority": 2
+     },
+     {
+      "id": "B",
+      "type": "bxgy",
+      "skus": [
+       "s2",
+       "s0",
+       "s1"
+      ],
+      "buy": 3,
+      "get": 1,
+      "priority": 2,
+      "group": "g1",
+      "exclusive": true
+     },
+     {
+      "id": "m",
+      "type": "percent",
+      "category": "a",
+      "percent": 50,
+      "min_qty": 3,
+      "priority": 0
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "m"
+    ],
+    "lines": [
+     600,
+     750,
+     600,
+     600
+    ],
+    "total": 2550
+   }
+  },
+  {
+   "id": "R009",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 1999,
+      "category": "a"
+     },
+     "s1": {
+      "price": 0,
+      "category": "a"
+     },
+     "s2": {
+      "price": 99,
+      "category": "b"
+     },
+     "s3": {
+      "price": 150,
+      "category": "b"
+     },
+     "s4": {
+      "price": 250,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s3",
+      "qty": 4
+     },
+     {
+      "sku": "s0",
+      "qty": 4
+     },
+     {
+      "sku": "s1",
+      "qty": 2
+     },
+     {
+      "sku": "s4",
+      "qty": 2
+     },
+     {
+      "sku": "s0",
+      "qty": 1
+     },
+     {
+      "sku": "s4",
+      "qty": 3
+     }
+    ],
+    [
+     {
+      "id": "B",
+      "type": "bxgy",
+      "skus": [
+       "s1",
+       "s2"
+      ],
+      "buy": 1,
+      "get": 2,
+      "priority": 1
+     },
+     {
+      "id": "a",
+      "type": "threshold",
+      "min_subtotal": 2000,
+      "amount_off": 50,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "a"
+    ],
+    "lines": [
+     596,
+     7963,
+     0,
+     498,
+     1991,
+     747
+    ],
+    "total": 11795
+   }
+  },
+  {
+   "id": "R010",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 199,
+      "category": "b"
+     },
+     "s1": {
+      "price": 100,
+      "category": "b"
+     },
+     "s2": {
+      "price": 100,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s2",
+      "qty": 3
+     },
+     {
+      "sku": "s2",
+      "qty": 3
+     }
+    ],
+    [
+     {
+      "id": "x1",
+      "type": "percent",
+      "category": "a",
+      "percent": 100,
+      "min_qty": 4,
+      "priority": 2,
+      "exclusive": true
+     },
+     {
+      "id": "B",
+      "type": "bxgy",
+      "skus": [
+       "s0"
+      ],
+      "buy": 3,
+      "get": 2,
+      "priority": 2
+     },
+     {
+      "id": "AB",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 100,
+      "priority": 0
+     },
+     {
+      "id": "A",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 50,
+      "priority": 2,
+      "group": "g1"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "AB",
+     "A"
+    ],
+    "lines": [
+     225,
+     225
+    ],
+    "total": 450
+   }
+  },
+  {
+   "id": "R011",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 1999,
+      "category": "b"
+     },
+     "s1": {
+      "price": 199,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 3
+     },
+     {
+      "sku": "s1",
+      "qty": 2
+     },
+     {
+      "sku": "s1",
+      "qty": 4
+     },
+     {
+      "sku": "s1",
+      "qty": 2
+     },
+     {
+      "sku": "s0",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "A",
+      "type": "bundle",
+      "skus": [
+       "s0",
+       "s1"
+      ],
+      "price": 500,
+      "priority": 2,
+      "group": "g1"
+     },
+     {
+      "id": "Z9",
+      "type": "threshold",
+      "min_subtotal": 5000,
+      "amount_off": 333,
+      "priority": 0,
+      "group": "g1"
+     },
+     {
+      "id": "A1",
+      "type": "bundle",
+      "skus": [
+       "s0",
+       "s1"
+      ],
+      "price": 500,
+      "priority": 2,
+      "group": "g1"
+     },
+     {
+      "id": "b",
+      "type": "percent",
+      "category": "a",
+      "percent": 15,
+      "min_qty": 4,
+      "priority": 2
+     },
+     {
+      "id": "M",
+      "type": "threshold",
+      "min_subtotal": 1000,
+      "amount_off": 10000,
+      "priority": 0
+     },
+     {
+      "id": "x1",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 10000,
+      "priority": 3
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "M"
+    ],
+    "lines": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "total": 0
+   }
+  },
+  {
+   "id": "R012",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 333,
+      "category": "c"
+     },
+     "s1": {
+      "price": 99,
+      "category": "c"
+     },
+     "s2": {
+      "price": 150,
+      "category": "c"
+     },
+     "s3": {
+      "price": 199,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 4
+     },
+     {
+      "sku": "s2",
+      "qty": 3
+     },
+     {
+      "sku": "s2",
+      "qty": 4
+     },
+     {
+      "sku": "s2",
+      "qty": 1
+     },
+     {
+      "sku": "s2",
+      "qty": 5
+     }
+    ],
+    [
+     {
+      "id": "x1",
+      "type": "percent",
+      "category": "a",
+      "percent": 33,
+      "min_qty": 4,
+      "priority": 3,
+      "exclusive": true
+     },
+     {
+      "id": "A1",
+      "type": "bxgy",
+      "skus": [
+       "s0",
+       "s3"
+      ],
+      "buy": 2,
+      "get": 2,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "A1"
+    ],
+    "lines": [
+     666,
+     450,
+     600,
+     150,
+     750
+    ],
+    "total": 2616
+   }
+  },
+  {
+   "id": "R013",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 999,
+      "category": "b"
+     },
+     "s1": {
+      "price": 500,
+      "category": "b"
+     },
+     "s2": {
+      "price": 199,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s2",
+      "qty": 1
+     },
+     {
+      "sku": "s1",
+      "qty": 4
+     },
+     {
+      "sku": "s2",
+      "qty": 5
+     },
+     {
+      "sku": "s0",
+      "qty": 3
+     }
+    ],
+    [
+     {
+      "id": "A",
+      "type": "bundle",
+      "skus": [
+       "s0",
+       "s2"
+      ],
+      "price": 750,
+      "priority": 2
+     },
+     {
+      "id": "b",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 1000,
+      "priority": 3
+     },
+     {
+      "id": "Z9",
+      "type": "percent",
+      "category": "b",
+      "percent": 33,
+      "min_qty": 1,
+      "priority": 2
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "A",
+     "Z9",
+     "b"
+    ],
+    "lines": [
+     94,
+     1004,
+     488,
+     1406
+    ],
+    "total": 2992
+   }
+  },
+  {
+   "id": "R014",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 1200,
+      "category": "c"
+     },
+     "s1": {
+      "price": 500,
+      "category": "a"
+     },
+     "s2": {
+      "price": 1200,
+      "category": "c"
+     },
+     "s3": {
+      "price": 100,
+      "category": "b"
+     },
+     "s4": {
+      "price": 199,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 2
+     },
+     {
+      "sku": "s2",
+      "qty": 1
+     },
+     {
+      "sku": "s2",
+      "qty": 4
+     },
+     {
+      "sku": "s4",
+      "qty": 2
+     },
+     {
+      "sku": "s2",
+      "qty": 3
+     },
+     {
+      "sku": "s4",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "A",
+      "type": "percent",
+      "category": "b",
+      "percent": 25,
+      "min_qty": 4,
+      "priority": 2
+     },
+     {
+      "id": "M",
+      "type": "threshold",
+      "min_subtotal": 5000,
+      "amount_off": 1,
+      "priority": 2
+     },
+     {
+      "id": "b",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 1,
+      "priority": 3
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "M",
+     "b"
+    ],
+    "lines": [
+     2398,
+     1200,
+     4800,
+     398,
+     3600,
+     199
+    ],
+    "total": 12595
+   }
+  },
+  {
+   "id": "R015",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 499,
+      "category": "a"
+     },
+     "s1": {
+      "price": 150,
+      "category": "a"
+     },
+     "s2": {
+      "price": 499,
+      "category": "a"
+     },
+     "s3": {
+      "price": 199,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 3
+     }
+    ],
+    [
+     {
+      "id": "Q7",
+      "type": "threshold",
+      "min_subtotal": 1000,
+      "amount_off": 100,
+      "priority": 0
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "Q7"
+    ],
+    "lines": [
+     1397
+    ],
+    "total": 1397
+   }
+  },
+  {
+   "id": "R016",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 400,
+      "category": "c"
+     },
+     "s1": {
+      "price": 100,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 1
+     },
+     {
+      "sku": "s1",
+      "qty": 5
+     },
+     {
+      "sku": "s1",
+      "qty": 4
+     }
+    ],
+    [
+     {
+      "id": "a",
+      "type": "bxgy",
+      "skus": [
+       "s1"
+      ],
+      "buy": 3,
+      "get": 2,
+      "priority": 3,
+      "group": "g2"
+     },
+     {
+      "id": "m",
+      "type": "bxgy",
+      "skus": [
+       "s0"
+      ],
+      "buy": 3,
+      "get": 1,
+      "priority": 0
+     },
+     {
+      "id": "A",
+      "type": "bxgy",
+      "skus": [
+       "s0"
+      ],
+      "buy": 2,
+      "get": 1,
+      "priority": 1
+     },
+     {
+      "id": "AB",
+      "type": "percent",
+      "category": "b",
+      "percent": 10,
+      "min_qty": 3,
+      "priority": 3
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "a"
+    ],
+    "lines": [
+     100,
+     500,
+     0
+    ],
+    "total": 600
+   }
+  },
+  {
+   "id": "R017",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 1999,
+      "category": "a"
+     },
+     "s1": {
+      "price": 0,
+      "category": "b"
+     },
+     "s2": {
+      "price": 99,
+      "category": "a"
+     },
+     "s3": {
+      "price": 99,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s2",
+      "qty": 2
+     },
+     {
+      "sku": "s3",
+      "qty": 2
+     },
+     {
+      "sku": "s1",
+      "qty": 2
+     },
+     {
+      "sku": "s2",
+      "qty": 5
+     },
+     {
+      "sku": "s2",
+      "qty": 2
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     }
+    ],
+    [
+     {
+      "id": "m",
+      "type": "bxgy",
+      "skus": [
+       "s2",
+       "s3"
+      ],
+      "buy": 3,
+      "get": 2,
+      "priority": 2
+     },
+     {
+      "id": "Z9",
+      "type": "bundle",
+      "skus": [
+       "s1",
+       "s0",
+       "s3"
+      ],
+      "price": 750,
+      "priority": 1
+     },
+     {
+      "id": "AB",
+      "type": "bxgy",
+      "skus": [
+       "s1"
+      ],
+      "buy": 3,
+      "get": 1,
+      "priority": 1,
+      "group": "g1"
+     },
+     {
+      "id": "M",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 333,
+      "priority": 0,
+      "group": "g2"
+     },
+     {
+      "id": "x1",
+      "type": "percent",
+      "category": "a",
+      "percent": 25,
+      "min_qty": 1,
+      "priority": 1,
+      "group": "g2"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "Z9",
+     "x1",
+     "m"
+    ],
+    "lines": [
+     150,
+     70,
+     0,
+     225,
+     150,
+     5930
+    ],
+    "total": 6525
+   }
+  },
+  {
+   "id": "R018",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 150,
+      "category": "a"
+     },
+     "s1": {
+      "price": 99,
+      "category": "b"
+     },
+     "s2": {
+      "price": 400,
+      "category": "a"
+     },
+     "s3": {
+      "price": 400,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 1
+     },
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s1",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "AB",
+      "type": "threshold",
+      "min_subtotal": 5000,
+      "amount_off": 10000,
+      "priority": 3,
+      "exclusive": true
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     99,
+     450,
+     198
+    ],
+    "total": 747
+   }
+  },
+  {
+   "id": "R019",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 250,
+      "category": "b"
+     },
+     "s1": {
+      "price": 0,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "Z9",
+      "type": "threshold",
+      "min_subtotal": 1000,
+      "amount_off": 333,
+      "priority": 3
+     },
+     {
+      "id": "A",
+      "type": "percent",
+      "category": "a",
+      "percent": 5,
+      "min_qty": 4,
+      "priority": 3
+     },
+     {
+      "id": "a",
+      "type": "bxgy",
+      "skus": [
+       "s0",
+       "s1"
+      ],
+      "buy": 1,
+      "get": 1,
+      "priority": 2
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     250
+    ],
+    "total": 250
+   }
+  },
+  {
+   "id": "R020",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 100,
+      "category": "c"
+     },
+     "s1": {
+      "price": 500,
+      "category": "b"
+     },
+     "s2": {
+      "price": 499,
+      "category": "a"
+     },
+     "s3": {
+      "price": 99,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 1
+     },
+     {
+      "sku": "s2",
+      "qty": 5
+     },
+     {
+      "sku": "s0",
+      "qty": 4
+     }
+    ],
+    [
+     {
+      "id": "A1",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 10000,
+      "priority": 1
+     },
+     {
+      "id": "a",
+      "type": "bundle",
+      "skus": [
+       "s1",
+       "s0"
+      ],
+      "price": 900,
+      "priority": 3
+     },
+     {
+      "id": "Q7",
+      "type": "bxgy",
+      "skus": [
+       "s1"
+      ],
+      "buy": 2,
+      "get": 1,
+      "priority": 1,
+      "group": "g2"
+     },
+     {
+      "id": "Z9",
+      "type": "threshold",
+      "min_subtotal": 2000,
+      "amount_off": 50,
+      "priority": 2
+     },
+     {
+      "id": "m",
+      "type": "percent",
+      "category": "b",
+      "percent": 25,
+      "min_qty": 4,
+      "priority": 1
+     },
+     {
+      "id": "x1",
+      "type": "bundle",
+      "skus": [
+       "s0",
+       "s3"
+      ],
+      "price": 1500,
+      "priority": 0
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "A1"
+    ],
+    "lines": [
+     0,
+     0,
+     0
+    ],
+    "total": 0
+   }
+  },
+  {
+   "id": "R021",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 0,
+      "category": "b"
+     },
+     "s1": {
+      "price": 99,
+      "category": "c"
+     },
+     "s2": {
+      "price": 999,
+      "category": "c"
+     },
+     "s3": {
+      "price": 499,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s3",
+      "qty": 1
+     },
+     {
+      "sku": "s2",
+      "qty": 5
+     },
+     {
+      "sku": "s1",
+      "qty": 5
+     },
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s0",
+      "qty": 3
+     }
+    ],
+    [
+     {
+      "id": "B",
+      "type": "bxgy",
+      "skus": [
+       "s2",
+       "s3",
+       "s1"
+      ],
+      "buy": 3,
+      "get": 1,
+      "priority": 1
+     },
+     {
+      "id": "m",
+      "type": "bxgy",
+      "skus": [
+       "s1"
+      ],
+      "buy": 2,
+      "get": 1,
+      "priority": 0,
+      "group": "g1"
+     },
+     {
+      "id": "A1",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 1000,
+      "priority": 2,
+      "group": "g1"
+     },
+     {
+      "id": "b0",
+      "type": "threshold",
+      "min_subtotal": 2000,
+      "amount_off": 10000,
+      "priority": 2
+     },
+     {
+      "id": "A",
+      "type": "bundle",
+      "skus": [
+       "s2",
+       "s0"
+      ],
+      "price": 1500,
+      "priority": 3
+     },
+     {
+      "id": "x1",
+      "type": "threshold",
+      "min_subtotal": 5000,
+      "amount_off": 1000,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "b0"
+    ],
+    "lines": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "total": 0
+   }
+  },
+  {
+   "id": "R022",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 333,
+      "category": "a"
+     },
+     "s1": {
+      "price": 1200,
+      "category": "b"
+     },
+     "s2": {
+      "price": 999,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 5
+     },
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s0",
+      "qty": 4
+     },
+     {
+      "sku": "s0",
+      "qty": 4
+     }
+    ],
+    [
+     {
+      "id": "m",
+      "type": "percent",
+      "category": "c",
+      "percent": 5,
+      "min_qty": 4,
+      "priority": 1
+     },
+     {
+      "id": "b0",
+      "type": "bundle",
+      "skus": [
+       "s1",
+       "s0"
+      ],
+      "price": 750,
+      "priority": 0
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     1665,
+     999,
+     1332,
+     1332
+    ],
+    "total": 5328
+   }
+  },
+  {
+   "id": "R023",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 99,
+      "category": "b"
+     },
+     "s1": {
+      "price": 500,
+      "category": "c"
+     },
+     "s2": {
+      "price": 499,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s2",
+      "qty": 1
+     },
+     {
+      "sku": "s2",
+      "qty": 3
+     },
+     {
+      "sku": "s1",
+      "qty": 4
+     }
+    ],
+    []
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     499,
+     1497,
+     2000
+    ],
+    "total": 3996
+   }
+  },
+  {
+   "id": "R024",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 199,
+      "category": "a"
+     },
+     "s1": {
+      "price": 1200,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s1",
+      "qty": 3
+     },
+     {
+      "sku": "s0",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "Z9",
+      "type": "threshold",
+      "min_subtotal": 1000,
+      "amount_off": 1,
+      "priority": 0
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "Z9"
+    ],
+    "lines": [
+     597,
+     3599,
+     398
+    ],
+    "total": 4594
+   }
+  },
+  {
+   "id": "R025",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 150,
+      "category": "a"
+     },
+     "s1": {
+      "price": 199,
+      "category": "a"
+     },
+     "s2": {
+      "price": 333,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 4
+     },
+     {
+      "sku": "s1",
+      "qty": 2
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     }
+    ],
+    [
+     {
+      "id": "A",
+      "type": "bxgy",
+      "skus": [
+       "s2",
+       "s1"
+      ],
+      "buy": 1,
+      "get": 2,
+      "priority": 2
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "A"
+    ],
+    "lines": [
+     398,
+     0,
+     750,
+     750
+    ],
+    "total": 1898
+   }
+  },
+  {
+   "id": "R026",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 500,
+      "category": "b"
+     },
+     "s1": {
+      "price": 499,
+      "category": "a"
+     },
+     "s2": {
+      "price": 499,
+      "category": "c"
+     },
+     "s3": {
+      "price": 199,
+      "category": "b"
+     },
+     "s4": {
+      "price": 999,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 1
+     },
+     {
+      "sku": "s3",
+      "qty": 1
+     },
+     {
+      "sku": "s4",
+      "qty": 4
+     },
+     {
+      "sku": "s3",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "A1",
+      "type": "percent",
+      "category": "b",
+      "percent": 100,
+      "min_qty": 1,
+      "priority": 2
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "A1"
+    ],
+    "lines": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "total": 0
+   }
+  },
+  {
+   "id": "R027",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 499,
+      "category": "c"
+     },
+     "s1": {
+      "price": 99,
+      "category": "c"
+     },
+     "s2": {
+      "price": 0,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "A1",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 50,
+      "priority": 2
+     },
+     {
+      "id": "B",
+      "type": "threshold",
+      "min_subtotal": 5000,
+      "amount_off": 10000,
+      "priority": 3
+     },
+     {
+      "id": "M",
+      "type": "percent",
+      "category": "c",
+      "percent": 33,
+      "min_qty": 4,
+      "priority": 1
+     },
+     {
+      "id": "b0",
+      "type": "threshold",
+      "min_subtotal": 2000,
+      "amount_off": 100,
+      "priority": 3
+     },
+     {
+      "id": "A",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 333,
+      "priority": 3,
+      "group": "g2"
+     },
+     {
+      "id": "Z9",
+      "type": "percent",
+      "category": "b",
+      "percent": 5,
+      "min_qty": 4,
+      "priority": 0
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "A1",
+     "A"
+    ],
+    "lines": [
+     615
+    ],
+    "total": 615
+   }
+  },
+  {
+   "id": "R028",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 999,
+      "category": "a"
+     },
+     "s1": {
+      "price": 1999,
+      "category": "b"
+     },
+     "s2": {
+      "price": 250,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s2",
+      "qty": 1
+     },
+     {
+      "sku": "s0",
+      "qty": 2
+     },
+     {
+      "sku": "s2",
+      "qty": 3
+     },
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s0",
+      "qty": 4
+     }
+    ],
+    [
+     {
+      "id": "AB",
+      "type": "percent",
+      "category": "b",
+      "percent": 25,
+      "min_qty": 1,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     250,
+     1998,
+     750,
+     2997,
+     3996
+    ],
+    "total": 9991
+   }
+  },
+  {
+   "id": "R029",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 250,
+      "category": "b"
+     },
+     "s1": {
+      "price": 1999,
+      "category": "c"
+     },
+     "s2": {
+      "price": 99,
+      "category": "b"
+     },
+     "s3": {
+      "price": 400,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s3",
+      "qty": 3
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     }
+    ],
+    [
+     {
+      "id": "Q7",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 1,
+      "priority": 1
+     },
+     {
+      "id": "x1",
+      "type": "bxgy",
+      "skus": [
+       "s2"
+      ],
+      "buy": 1,
+      "get": 2,
+      "priority": 1,
+      "group": "g1"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "Q7"
+    ],
+    "lines": [
+     750,
+     1199,
+     1250
+    ],
+    "total": 3199
+   }
+  },
+  {
+   "id": "R030",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 400,
+      "category": "b"
+     },
+     "s1": {
+      "price": 250,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 1
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     },
+     {
+      "sku": "s1",
+      "qty": 5
+     },
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s1",
+      "qty": 3
+     }
+    ],
+    [
+     {
+      "id": "a",
+      "type": "percent",
+      "category": "c",
+      "percent": 15,
+      "min_qty": 4,
+      "priority": 3,
+      "group": "g1"
+     },
+     {
+      "id": "B",
+      "type": "percent",
+      "category": "c",
+      "percent": 100,
+      "min_qty": 1,
+      "priority": 1,
+      "group": "g2",
+      "exclusive": true
+     },
+     {
+      "id": "A",
+      "type": "percent",
+      "category": "c",
+      "percent": 100,
+      "min_qty": 4,
+      "priority": 0
+     },
+     {
+      "id": "m",
+      "type": "bxgy",
+      "skus": [
+       "s0",
+       "s1"
+      ],
+      "buy": 3,
+      "get": 1,
+      "priority": 3,
+      "group": "g1"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "A"
+    ],
+    "lines": [
+     0,
+     2000,
+     0,
+     1200,
+     0
+    ],
+    "total": 3200
+   }
+  },
+  {
+   "id": "R031",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 199,
+      "category": "c"
+     },
+     "s1": {
+      "price": 333,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 5
+     }
+    ],
+    [
+     {
+      "id": "B",
+      "type": "threshold",
+      "min_subtotal": 1000,
+      "amount_off": 100,
+      "priority": 1,
+      "group": "g1"
+     },
+     {
+      "id": "M",
+      "type": "percent",
+      "category": "c",
+      "percent": 5,
+      "min_qty": 3,
+      "priority": 0,
+      "group": "g1"
+     },
+     {
+      "id": "Z9",
+      "type": "percent",
+      "category": "c",
+      "percent": 25,
+      "min_qty": 3,
+      "priority": 1
+     },
+     {
+      "id": "A",
+      "type": "bxgy",
+      "skus": [
+       "s1"
+      ],
+      "buy": 1,
+      "get": 1,
+      "priority": 0
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "A"
+    ],
+    "lines": [
+     999
+    ],
+    "total": 999
+   }
+  },
+  {
+   "id": "R032",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 999,
+      "category": "b"
+     },
+     "s1": {
+      "price": 150,
+      "category": "b"
+     },
+     "s2": {
+      "price": 100,
+      "category": "b"
+     },
+     "s3": {
+      "price": 199,
+      "category": "c"
+     },
+     "s4": {
+      "price": 150,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 1
+     },
+     {
+      "sku": "s0",
+      "qty": 2
+     },
+     {
+      "sku": "s2",
+      "qty": 4
+     }
+    ],
+    [
+     {
+      "id": "AB",
+      "type": "percent",
+      "category": "a",
+      "percent": 15,
+      "min_qty": 4,
+      "priority": 3,
+      "group": "g1"
+     },
+     {
+      "id": "b0",
+      "type": "bundle",
+      "skus": [
+       "s0",
+       "s3"
+      ],
+      "price": 900,
+      "priority": 1,
+      "group": "g2"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     999,
+     1998,
+     400
+    ],
+    "total": 3397
+   }
+  },
+  {
+   "id": "R033",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 400,
+      "category": "b"
+     },
+     "s1": {
+      "price": 0,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 5
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     },
+     {
+      "sku": "s1",
+      "qty": 4
+     },
+     {
+      "sku": "s1",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "m",
+      "type": "percent",
+      "category": "b",
+      "percent": 25,
+      "min_qty": 3,
+      "priority": 1
+     },
+     {
+      "id": "b0",
+      "type": "percent",
+      "category": "b",
+      "percent": 5,
+      "min_qty": 4,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "b0",
+     "m"
+    ],
+    "lines": [
+     0,
+     1425,
+     0,
+     0
+    ],
+    "total": 1425
+   }
+  },
+  {
+   "id": "R034",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 499,
+      "category": "c"
+     },
+     "s1": {
+      "price": 99,
+      "category": "a"
+     },
+     "s2": {
+      "price": 1200,
+      "category": "b"
+     },
+     "s3": {
+      "price": 199,
+      "category": "c"
+     },
+     "s4": {
+      "price": 500,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 5
+     },
+     {
+      "sku": "s3",
+      "qty": 3
+     },
+     {
+      "sku": "s3",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "b",
+      "type": "threshold",
+      "min_subtotal": 2000,
+      "amount_off": 333,
+      "priority": 2
+     },
+     {
+      "id": "m",
+      "type": "bundle",
+      "skus": [
+       "s2",
+       "s4",
+       "s0"
+      ],
+      "price": 500,
+      "priority": 2,
+      "group": "g1",
+      "exclusive": true
+     },
+     {
+      "id": "Z9",
+      "type": "bxgy",
+      "skus": [
+       "s2",
+       "s3",
+       "s1"
+      ],
+      "buy": 3,
+      "get": 2,
+      "priority": 1,
+      "group": "g2",
+      "exclusive": true
+     },
+     {
+      "id": "B",
+      "type": "percent",
+      "category": "c",
+      "percent": 10,
+      "min_qty": 4,
+      "priority": 0
+     },
+     {
+      "id": "M",
+      "type": "percent",
+      "category": "a",
+      "percent": 50,
+      "min_qty": 3,
+      "priority": 0
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "B",
+     "b"
+    ],
+    "lines": [
+     1997,
+     480,
+     160
+    ],
+    "total": 2637
+   }
+  },
+  {
+   "id": "R035",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 100,
+      "category": "b"
+     },
+     "s1": {
+      "price": 1200,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 4
+     },
+     {
+      "sku": "s0",
+      "qty": 1
+     },
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s1",
+      "qty": 3
+     },
+     {
+      "sku": "s0",
+      "qty": 4
+     }
+    ],
+    [
+     {
+      "id": "M",
+      "type": "threshold",
+      "min_subtotal": 1000,
+      "amount_off": 1,
+      "priority": 2
+     },
+     {
+      "id": "B",
+      "type": "bxgy",
+      "skus": [
+       "s0"
+      ],
+      "buy": 3,
+      "get": 2,
+      "priority": 2,
+      "group": "g1"
+     },
+     {
+      "id": "A1",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 1,
+      "priority": 2
+     },
+     {
+      "id": "m",
+      "type": "bundle",
+      "skus": [
+       "s0",
+       "s1"
+      ],
+      "price": 750,
+      "priority": 2
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "m"
+    ],
+    "lines": [
+     274,
+     100,
+     300,
+     2076,
+     400
+    ],
+    "total": 3150
+   }
+  },
+  {
+   "id": "R036",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 999,
+      "category": "b"
+     },
+     "s1": {
+      "price": 100,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 2
+     }
+    ],
+    []
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     1998
+    ],
+    "total": 1998
+   }
+  },
+  {
+   "id": "R037",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 250,
+      "category": "a"
+     },
+     "s1": {
+      "price": 400,
+      "category": "b"
+     },
+     "s2": {
+      "price": 500,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 1
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     }
+    ],
+    [
+     {
+      "id": "a",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 1000,
+      "priority": 0
+     },
+     {
+      "id": "M",
+      "type": "threshold",
+      "min_subtotal": 1000,
+      "amount_off": 50,
+      "priority": 2,
+      "group": "g1",
+      "exclusive": true
+     },
+     {
+      "id": "A1",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 1,
+      "priority": 0,
+      "group": "g1"
+     },
+     {
+      "id": "b0",
+      "type": "percent",
+      "category": "a",
+      "percent": 10,
+      "min_qty": 4,
+      "priority": 1
+     },
+     {
+      "id": "Q7",
+      "type": "bundle",
+      "skus": [
+       "s2",
+       "s0"
+      ],
+      "price": 1000,
+      "priority": 0
+     },
+     {
+      "id": "m",
+      "type": "percent",
+      "category": "a",
+      "percent": 15,
+      "min_qty": 1,
+      "priority": 1,
+      "group": "g1"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "a",
+     "b0",
+     "m"
+    ],
+    "lines": [
+     158,
+     382
+    ],
+    "total": 540
+   }
+  },
+  {
+   "id": "R038",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 1200,
+      "category": "a"
+     },
+     "s1": {
+      "price": 1999,
+      "category": "b"
+     },
+     "s2": {
+      "price": 400,
+      "category": "b"
+     },
+     "s3": {
+      "price": 499,
+      "category": "b"
+     },
+     "s4": {
+      "price": 99,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s2",
+      "qty": 5
+     },
+     {
+      "sku": "s2",
+      "qty": 5
+     },
+     {
+      "sku": "s0",
+      "qty": 4
+     }
+    ],
+    [
+     {
+      "id": "a",
+      "type": "bxgy",
+      "skus": [
+       "s3",
+       "s2",
+       "s4"
+      ],
+      "buy": 2,
+      "get": 2,
+      "priority": 1,
+      "group": "g2"
+     },
+     {
+      "id": "AB",
+      "type": "percent",
+      "category": "a",
+      "percent": 50,
+      "min_qty": 3,
+      "priority": 0
+     },
+     {
+      "id": "A",
+      "type": "percent",
+      "category": "c",
+      "percent": 5,
+      "min_qty": 3,
+      "priority": 1,
+      "group": "g1"
+     },
+     {
+      "id": "Q7",
+      "type": "bundle",
+      "skus": [
+       "s0",
+       "s2",
+       "s3"
+      ],
+      "price": 0,
+      "priority": 1,
+      "group": "g1"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "AB",
+     "a"
+    ],
+    "lines": [
+     1600,
+     800,
+     2400
+    ],
+    "total": 4800
+   }
+  },
+  {
+   "id": "R039",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 1999,
+      "category": "b"
+     },
+     "s1": {
+      "price": 199,
+      "category": "c"
+     },
+     "s2": {
+      "price": 333,
+      "category": "a"
+     },
+     "s3": {
+      "price": 1999,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s2",
+      "qty": 4
+     },
+     {
+      "sku": "s2",
+      "qty": 5
+     }
+    ],
+    []
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     1332,
+     1665
+    ],
+    "total": 2997
+   }
+  },
+  {
+   "id": "R040",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 1200,
+      "category": "a"
+     },
+     "s1": {
+      "price": 100,
+      "category": "c"
+     },
+     "s2": {
+      "price": 333,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s2",
+      "qty": 2
+     },
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s2",
+      "qty": 3
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     }
+    ],
+    [
+     {
+      "id": "A",
+      "type": "percent",
+      "category": "b",
+      "percent": 10,
+      "min_qty": 4,
+      "priority": 0,
+      "group": "g2"
+     },
+     {
+      "id": "b0",
+      "type": "percent",
+      "category": "a",
+      "percent": 5,
+      "min_qty": 1,
+      "priority": 0,
+      "group": "g1",
+      "exclusive": true
+     },
+     {
+      "id": "m",
+      "type": "bxgy",
+      "skus": [
+       "s0"
+      ],
+      "buy": 2,
+      "get": 2,
+      "priority": 1
+     },
+     {
+      "id": "b",
+      "type": "bxgy",
+      "skus": [
+       "s0",
+       "s1"
+      ],
+      "buy": 3,
+      "get": 1,
+      "priority": 3
+     },
+     {
+      "id": "M",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 1,
+      "priority": 3
+     },
+     {
+      "id": "Q7",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 100,
+      "priority": 0,
+      "group": "g1"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "Q7",
+     "m",
+     "M"
+    ],
+    "lines": [
+     660,
+     1189,
+     990,
+     3569
+    ],
+    "total": 6408
+   }
+  },
+  {
+   "id": "R041",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 500,
+      "category": "c"
+     },
+     "s1": {
+      "price": 400,
+      "category": "a"
+     },
+     "s2": {
+      "price": 250,
+      "category": "c"
+     },
+     "s3": {
+      "price": 100,
+      "category": "b"
+     },
+     "s4": {
+      "price": 199,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s2",
+      "qty": 5
+     },
+     {
+      "sku": "s3",
+      "qty": 5
+     },
+     {
+      "sku": "s2",
+      "qty": 1
+     },
+     {
+      "sku": "s2",
+      "qty": 5
+     }
+    ],
+    [
+     {
+      "id": "Q7",
+      "type": "threshold",
+      "min_subtotal": 5000,
+      "amount_off": 333,
+      "priority": 0,
+      "group": "g2"
+     },
+     {
+      "id": "a",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 100,
+      "priority": 0,
+      "exclusive": true
+     },
+     {
+      "id": "b",
+      "type": "percent",
+      "category": "a",
+      "percent": 33,
+      "min_qty": 2,
+      "priority": 3
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "a"
+    ],
+    "lines": [
+     1210,
+     485,
+     242,
+     1213
+    ],
+    "total": 3150
+   }
+  },
+  {
+   "id": "R042",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 999,
+      "category": "a"
+     },
+     "s1": {
+      "price": 999,
+      "category": "b"
+     },
+     "s2": {
+      "price": 150,
+      "category": "b"
+     },
+     "s3": {
+      "price": 150,
+      "category": "c"
+     },
+     "s4": {
+      "price": 999,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s4",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "m",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 1,
+      "priority": 3
+     },
+     {
+      "id": "b0",
+      "type": "bxgy",
+      "skus": [
+       "s4"
+      ],
+      "buy": 2,
+      "get": 2,
+      "priority": 1,
+      "group": "g1"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "m"
+    ],
+    "lines": [
+     1997
+    ],
+    "total": 1997
+   }
+  },
+  {
+   "id": "R043",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 333,
+      "category": "b"
+     },
+     "s1": {
+      "price": 1200,
+      "category": "b"
+     },
+     "s2": {
+      "price": 500,
+      "category": "c"
+     },
+     "s3": {
+      "price": 999,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 4
+     },
+     {
+      "sku": "s3",
+      "qty": 5
+     },
+     {
+      "sku": "s2",
+      "qty": 2
+     },
+     {
+      "sku": "s0",
+      "qty": 2
+     },
+     {
+      "sku": "s1",
+      "qty": 4
+     },
+     {
+      "sku": "s3",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "a",
+      "type": "percent",
+      "category": "c",
+      "percent": 50,
+      "min_qty": 4,
+      "priority": 0
+     },
+     {
+      "id": "b",
+      "type": "bundle",
+      "skus": [
+       "s2",
+       "s0"
+      ],
+      "price": 500,
+      "priority": 3
+     },
+     {
+      "id": "Q7",
+      "type": "bxgy",
+      "skus": [
+       "s1",
+       "s2"
+      ],
+      "buy": 1,
+      "get": 2,
+      "priority": 1,
+      "group": "g1"
+     },
+     {
+      "id": "Z9",
+      "type": "bxgy",
+      "skus": [
+       "s3"
+      ],
+      "buy": 2,
+      "get": 2,
+      "priority": 3
+     },
+     {
+      "id": "M",
+      "type": "percent",
+      "category": "a",
+      "percent": 25,
+      "min_qty": 1,
+      "priority": 1,
+      "exclusive": true
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "Q7",
+     "Z9"
+    ],
+    "lines": [
+     1332,
+     2997,
+     0,
+     666,
+     2400,
+     999
+    ],
+    "total": 8394
+   }
+  },
+  {
+   "id": "R044",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 499,
+      "category": "a"
+     },
+     "s1": {
+      "price": 150,
+      "category": "a"
+     },
+     "s2": {
+      "price": 1200,
+      "category": "c"
+     },
+     "s3": {
+      "price": 400,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 2
+     },
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s2",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "b",
+      "type": "bundle",
+      "skus": [
+       "s1",
+       "s3",
+       "s2"
+      ],
+      "price": 500,
+      "priority": 3
+     },
+     {
+      "id": "AB",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 10000,
+      "priority": 1
+     },
+     {
+      "id": "x1",
+      "type": "threshold",
+      "min_subtotal": 2000,
+      "amount_off": 10000,
+      "priority": 2
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "AB"
+    ],
+    "lines": [
+     0,
+     0,
+     0
+    ],
+    "total": 0
+   }
+  },
+  {
+   "id": "R045",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 150,
+      "category": "c"
+     },
+     "s1": {
+      "price": 499,
+      "category": "b"
+     },
+     "s2": {
+      "price": 499,
+      "category": "a"
+     },
+     "s3": {
+      "price": 500,
+      "category": "c"
+     },
+     "s4": {
+      "price": 400,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 2
+     },
+     {
+      "sku": "s4",
+      "qty": 5
+     },
+     {
+      "sku": "s2",
+      "qty": 1
+     },
+     {
+      "sku": "s4",
+      "qty": 1
+     }
+    ],
+    []
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     300,
+     2000,
+     499,
+     400
+    ],
+    "total": 3199
+   }
+  },
+  {
+   "id": "R046",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 99,
+      "category": "c"
+     },
+     "s1": {
+      "price": 99,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 3
+     },
+     {
+      "sku": "s1",
+      "qty": 1
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     }
+    ],
+    []
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     297,
+     99,
+     495
+    ],
+    "total": 891
+   }
+  },
+  {
+   "id": "R047",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 100,
+      "category": "c"
+     },
+     "s1": {
+      "price": 99,
+      "category": "a"
+     },
+     "s2": {
+      "price": 1200,
+      "category": "c"
+     },
+     "s3": {
+      "price": 400,
+      "category": "b"
+     },
+     "s4": {
+      "price": 999,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 1
+     },
+     {
+      "sku": "s1",
+      "qty": 4
+     },
+     {
+      "sku": "s3",
+      "qty": 4
+     },
+     {
+      "sku": "s3",
+      "qty": 5
+     },
+     {
+      "sku": "s2",
+      "qty": 5
+     },
+     {
+      "sku": "s3",
+      "qty": 3
+     }
+    ],
+    [
+     {
+      "id": "m",
+      "type": "bxgy",
+      "skus": [
+       "s4",
+       "s1"
+      ],
+      "buy": 1,
+      "get": 2,
+      "priority": 1,
+      "group": "g1",
+      "exclusive": true
+     },
+     {
+      "id": "b0",
+      "type": "bxgy",
+      "skus": [
+       "s2",
+       "s0"
+      ],
+      "buy": 1,
+      "get": 2,
+      "priority": 1,
+      "group": "g1"
+     },
+     {
+      "id": "Q7",
+      "type": "bxgy",
+      "skus": [
+       "s1",
+       "s3"
+      ],
+      "buy": 1,
+      "get": 1,
+      "priority": 3
+     },
+     {
+      "id": "a",
+      "type": "bxgy",
+      "skus": [
+       "s0",
+       "s3",
+       "s4"
+      ],
+      "buy": 3,
+      "get": 1,
+      "priority": 2
+     },
+     {
+      "id": "B",
+      "type": "bxgy",
+      "skus": [
+       "s2",
+       "s3",
+       "s4"
+      ],
+      "buy": 1,
+      "get": 1,
+      "priority": 3,
+      "exclusive": true
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "b0",
+     "Q7"
+    ],
+    "lines": [
+     0,
+     99,
+     1600,
+     1600,
+     3600,
+     0
+    ],
+    "total": 6899
+   }
+  },
+  {
+   "id": "R048",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 1999,
+      "category": "c"
+     },
+     "s1": {
+      "price": 1999,
+      "category": "c"
+     },
+     "s2": {
+      "price": 500,
+      "category": "b"
+     },
+     "s3": {
+      "price": 1200,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s3",
+      "qty": 3
+     },
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s1",
+      "qty": 3
+     },
+     {
+      "sku": "s2",
+      "qty": 4
+     },
+     {
+      "sku": "s2",
+      "qty": 1
+     },
+     {
+      "sku": "s3",
+      "qty": 5
+     }
+    ],
+    [
+     {
+      "id": "B",
+      "type": "percent",
+      "category": "c",
+      "percent": 10,
+      "min_qty": 2,
+      "priority": 0
+     },
+     {
+      "id": "A1",
+      "type": "bundle",
+      "skus": [
+       "s0",
+       "s3"
+      ],
+      "price": 0,
+      "priority": 3
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "B",
+     "A1"
+    ],
+    "lines": [
+     0,
+     0,
+     5400,
+     2000,
+     500,
+     5400
+    ],
+    "total": 13300
+   }
+  },
+  {
+   "id": "R049",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 150,
+      "category": "c"
+     },
+     "s1": {
+      "price": 150,
+      "category": "c"
+     },
+     "s2": {
+      "price": 400,
+      "category": "b"
+     },
+     "s3": {
+      "price": 333,
+      "category": "a"
+     },
+     "s4": {
+      "price": 1999,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s4",
+      "qty": 3
+     },
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s4",
+      "qty": 3
+     }
+    ],
+    [
+     {
+      "id": "A1",
+      "type": "bxgy",
+      "skus": [
+       "s4",
+       "s0",
+       "s3"
+      ],
+      "buy": 1,
+      "get": 1,
+      "priority": 2,
+      "group": "g1"
+     },
+     {
+      "id": "AB",
+      "type": "threshold",
+      "min_subtotal": 5000,
+      "amount_off": 100,
+      "priority": 2,
+      "group": "g2"
+     },
+     {
+      "id": "m",
+      "type": "bundle",
+      "skus": [
+       "s0",
+       "s2",
+       "s4"
+      ],
+      "price": 199,
+      "priority": 3,
+      "group": "g2",
+      "exclusive": true
+     },
+     {
+      "id": "A",
+      "type": "percent",
+      "category": "a",
+      "percent": 10,
+      "min_qty": 1,
+      "priority": 1
+     },
+     {
+      "id": "x1",
+      "type": "percent",
+      "category": "c",
+      "percent": 50,
+      "min_qty": 1,
+      "priority": 1,
+      "group": "g2"
+     },
+     {
+      "id": "b0",
+      "type": "bundle",
+      "skus": [
+       "s0",
+       "s3",
+       "s1"
+      ],
+      "price": 1000,
+      "priority": 2,
+      "group": "g1"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "x1",
+     "A1"
+    ],
+    "lines": [
+     3000,
+     75,
+     1000
+    ],
+    "total": 4075
+   }
+  },
+  {
+   "id": "R050",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 333,
+      "category": "a"
+     },
+     "s1": {
+      "price": 333,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 4
+     },
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s1",
+      "qty": 4
+     },
+     {
+      "sku": "s0",
+      "qty": 1
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     }
+    ],
+    [
+     {
+      "id": "m",
+      "type": "threshold",
+      "min_subtotal": 1000,
+      "amount_off": 10000,
+      "priority": 2
+     },
+     {
+      "id": "Z9",
+      "type": "threshold",
+      "min_subtotal": 2000,
+      "amount_off": 100,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "m"
+    ],
+    "lines": [
+     0,
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "total": 0
+   }
+  },
+  {
+   "id": "R051",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 250,
+      "category": "c"
+     },
+     "s1": {
+      "price": 333,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 2
+     },
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s0",
+      "qty": 1
+     },
+     {
+      "sku": "s1",
+      "qty": 2
+     },
+     {
+      "sku": "s1",
+      "qty": 5
+     },
+     {
+      "sku": "s1",
+      "qty": 3
+     }
+    ],
+    [
+     {
+      "id": "a",
+      "type": "bxgy",
+      "skus": [
+       "s1"
+      ],
+      "buy": 2,
+      "get": 2,
+      "priority": 0,
+      "group": "g1"
+     },
+     {
+      "id": "m",
+      "type": "bxgy",
+      "skus": [
+       "s0"
+      ],
+      "buy": 2,
+      "get": 2,
+      "priority": 2,
+      "group": "g2"
+     },
+     {
+      "id": "A",
+      "type": "bundle",
+      "skus": [
+       "s0",
+       "s1"
+      ],
+      "price": 1500,
+      "priority": 3
+     },
+     {
+      "id": "x1",
+      "type": "bundle",
+      "skus": [
+       "s0",
+       "s1"
+      ],
+      "price": 900,
+      "priority": 3
+     },
+     {
+      "id": "b0",
+      "type": "percent",
+      "category": "a",
+      "percent": 100,
+      "min_qty": 4,
+      "priority": 0
+     },
+     {
+      "id": "A1",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 1,
+      "priority": 1,
+      "exclusive": true
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "a",
+     "m"
+    ],
+    "lines": [
+     666,
+     500,
+     0,
+     666,
+     666,
+     0
+    ],
+    "total": 2498
+   }
+  },
+  {
+   "id": "R052",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 0,
+      "category": "c"
+     },
+     "s1": {
+      "price": 999,
+      "category": "c"
+     },
+     "s2": {
+      "price": 100,
+      "category": "b"
+     },
+     "s3": {
+      "price": 1200,
+      "category": "b"
+     },
+     "s4": {
+      "price": 99,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 5
+     },
+     {
+      "sku": "s4",
+      "qty": 1
+     },
+     {
+      "sku": "s2",
+      "qty": 2
+     },
+     {
+      "sku": "s2",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "a",
+      "type": "bxgy",
+      "skus": [
+       "s1"
+      ],
+      "buy": 3,
+      "get": 1,
+      "priority": 0
+     },
+     {
+      "id": "A",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 100,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     0,
+     99,
+     200,
+     100
+    ],
+    "total": 399
+   }
+  },
+  {
+   "id": "R053",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 500,
+      "category": "c"
+     },
+     "s1": {
+      "price": 333,
+      "category": "a"
+     },
+     "s2": {
+      "price": 99,
+      "category": "c"
+     },
+     "s3": {
+      "price": 150,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s2",
+      "qty": 5
+     },
+     {
+      "sku": "s0",
+      "qty": 4
+     },
+     {
+      "sku": "s3",
+      "qty": 3
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     },
+     {
+      "sku": "s3",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "m",
+      "type": "threshold",
+      "min_subtotal": 5000,
+      "amount_off": 100,
+      "priority": 3,
+      "group": "g2",
+      "exclusive": true
+     },
+     {
+      "id": "a",
+      "type": "threshold",
+      "min_subtotal": 2000,
+      "amount_off": 10000,
+      "priority": 1,
+      "group": "g2"
+     },
+     {
+      "id": "Z9",
+      "type": "percent",
+      "category": "b",
+      "percent": 15,
+      "min_qty": 2,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "a"
+    ],
+    "lines": [
+     0,
+     0,
+     0,
+     0,
+     0
+    ],
+    "total": 0
+   }
+  },
+  {
+   "id": "R054",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 250,
+      "category": "b"
+     },
+     "s1": {
+      "price": 1200,
+      "category": "c"
+     },
+     "s2": {
+      "price": 500,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s2",
+      "qty": 3
+     },
+     {
+      "sku": "s1",
+      "qty": 2
+     },
+     {
+      "sku": "s1",
+      "qty": 5
+     },
+     {
+      "sku": "s2",
+      "qty": 1
+     },
+     {
+      "sku": "s0",
+      "qty": 3
+     }
+    ],
+    [
+     {
+      "id": "m",
+      "type": "percent",
+      "category": "a",
+      "percent": 25,
+      "min_qty": 4,
+      "priority": 3
+     },
+     {
+      "id": "a",
+      "type": "threshold",
+      "min_subtotal": 1000,
+      "amount_off": 100,
+      "priority": 0
+     },
+     {
+      "id": "A",
+      "type": "threshold",
+      "min_subtotal": 2000,
+      "amount_off": 333,
+      "priority": 1
+     },
+     {
+      "id": "Q7",
+      "type": "threshold",
+      "min_subtotal": 1000,
+      "amount_off": 50,
+      "priority": 1
+     },
+     {
+      "id": "b",
+      "type": "threshold",
+      "min_subtotal": 5000,
+      "amount_off": 333,
+      "priority": 3
+     },
+     {
+      "id": "b0",
+      "type": "bxgy",
+      "skus": [
+       "s2"
+      ],
+      "buy": 3,
+      "get": 1,
+      "priority": 2,
+      "exclusive": true
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "a",
+     "A",
+     "Q7",
+     "b"
+    ],
+    "lines": [
+     1391,
+     2222,
+     5558,
+     464,
+     699
+    ],
+    "total": 10334
+   }
+  },
+  {
+   "id": "R055",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 333,
+      "category": "c"
+     },
+     "s1": {
+      "price": 100,
+      "category": "c"
+     },
+     "s2": {
+      "price": 500,
+      "category": "b"
+     },
+     "s3": {
+      "price": 199,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s3",
+      "qty": 5
+     },
+     {
+      "sku": "s3",
+      "qty": 5
+     }
+    ],
+    [
+     {
+      "id": "A1",
+      "type": "percent",
+      "category": "a",
+      "percent": 100,
+      "min_qty": 2,
+      "priority": 1,
+      "group": "g2"
+     },
+     {
+      "id": "b0",
+      "type": "percent",
+      "category": "c",
+      "percent": 15,
+      "min_qty": 3,
+      "priority": 1,
+      "group": "g1"
+     },
+     {
+      "id": "Z9",
+      "type": "bxgy",
+      "skus": [
+       "s0",
+       "s2"
+      ],
+      "buy": 2,
+      "get": 1,
+      "priority": 1,
+      "group": "g1"
+     },
+     {
+      "id": "M",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 100,
+      "priority": 0
+     },
+     {
+      "id": "m",
+      "type": "threshold",
+      "min_subtotal": 2000,
+      "amount_off": 100,
+      "priority": 1,
+      "group": "g2"
+     },
+     {
+      "id": "A",
+      "type": "bxgy",
+      "skus": [
+       "s0",
+       "s2"
+      ],
+      "buy": 3,
+      "get": 2,
+      "priority": 1,
+      "group": "g1"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "A1"
+    ],
+    "lines": [
+     0,
+     0
+    ],
+    "total": 0
+   }
+  },
+  {
+   "id": "R056",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 1200,
+      "category": "c"
+     },
+     "s1": {
+      "price": 199,
+      "category": "b"
+     },
+     "s2": {
+      "price": 100,
+      "category": "a"
+     },
+     "s3": {
+      "price": 1999,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s2",
+      "qty": 3
+     },
+     {
+      "sku": "s1",
+      "qty": 1
+     },
+     {
+      "sku": "s3",
+      "qty": 1
+     },
+     {
+      "sku": "s3",
+      "qty": 1
+     },
+     {
+      "sku": "s3",
+      "qty": 1
+     },
+     {
+      "sku": "s3",
+      "qty": 3
+     }
+    ],
+    []
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     300,
+     199,
+     1999,
+     1999,
+     1999,
+     5997
+    ],
+    "total": 12493
+   }
+  },
+  {
+   "id": "R057",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 150,
+      "category": "a"
+     },
+     "s1": {
+      "price": 99,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 1
+     },
+     {
+      "sku": "s0",
+      "qty": 2
+     },
+     {
+      "sku": "s0",
+      "qty": 1
+     }
+    ],
+    []
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     99,
+     300,
+     150
+    ],
+    "total": 549
+   }
+  },
+  {
+   "id": "R058",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 499,
+      "category": "c"
+     },
+     "s1": {
+      "price": 150,
+      "category": "a"
+     },
+     "s2": {
+      "price": 250,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 2
+     }
+    ],
+    []
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     998
+    ],
+    "total": 998
+   }
+  },
+  {
+   "id": "R059",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 1200,
+      "category": "c"
+     },
+     "s1": {
+      "price": 250,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s0",
+      "qty": 1
+     },
+     {
+      "sku": "s1",
+      "qty": 3
+     }
+    ],
+    [
+     {
+      "id": "Z9",
+      "type": "bxgy",
+      "skus": [
+       "s0"
+      ],
+      "buy": 2,
+      "get": 2,
+      "priority": 0
+     },
+     {
+      "id": "m",
+      "type": "bxgy",
+      "skus": [
+       "s0"
+      ],
+      "buy": 1,
+      "get": 1,
+      "priority": 1
+     },
+     {
+      "id": "a",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 333,
+      "priority": 1,
+      "group": "g2"
+     },
+     {
+      "id": "B",
+      "type": "bxgy",
+      "skus": [
+       "s0"
+      ],
+      "buy": 3,
+      "get": 1,
+      "priority": 0
+     },
+     {
+      "id": "b",
+      "type": "bxgy",
+      "skus": [
+       "s0"
+      ],
+      "buy": 1,
+      "get": 1,
+      "priority": 3
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "Z9",
+     "a"
+    ],
+    "lines": [
+     2146,
+     0,
+     671
+    ],
+    "total": 2817
+   }
+  },
+  {
+   "id": "R060",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 1200,
+      "category": "a"
+     },
+     "s1": {
+      "price": 100,
+      "category": "a"
+     },
+     "s2": {
+      "price": 250,
+      "category": "c"
+     },
+     "s3": {
+      "price": 400,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 3
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     },
+     {
+      "sku": "s3",
+      "qty": 3
+     }
+    ],
+    []
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     300,
+     6000,
+     1200
+    ],
+    "total": 7500
+   }
+  },
+  {
+   "id": "R061",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 499,
+      "category": "b"
+     },
+     "s1": {
+      "price": 100,
+      "category": "c"
+     },
+     "s2": {
+      "price": 999,
+      "category": "c"
+     },
+     "s3": {
+      "price": 199,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s3",
+      "qty": 3
+     },
+     {
+      "sku": "s2",
+      "qty": 3
+     },
+     {
+      "sku": "s3",
+      "qty": 4
+     }
+    ],
+    [
+     {
+      "id": "AB",
+      "type": "bundle",
+      "skus": [
+       "s1",
+       "s0",
+       "s2"
+      ],
+      "price": 750,
+      "priority": 1,
+      "group": "g1"
+     },
+     {
+      "id": "a",
+      "type": "bxgy",
+      "skus": [
+       "s1",
+       "s2"
+      ],
+      "buy": 2,
+      "get": 2,
+      "priority": 1
+     },
+     {
+      "id": "x1",
+      "type": "percent",
+      "category": "a",
+      "percent": 10,
+      "min_qty": 2,
+      "priority": 2
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     597,
+     2997,
+     796
+    ],
+    "total": 4390
+   }
+  },
+  {
+   "id": "R062",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 1200,
+      "category": "c"
+     },
+     "s1": {
+      "price": 250,
+      "category": "a"
+     },
+     "s2": {
+      "price": 500,
+      "category": "a"
+     },
+     "s3": {
+      "price": 99,
+      "category": "b"
+     },
+     "s4": {
+      "price": 199,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s4",
+      "qty": 3
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     },
+     {
+      "sku": "s0",
+      "qty": 2
+     },
+     {
+      "sku": "s4",
+      "qty": 3
+     },
+     {
+      "sku": "s1",
+      "qty": 2
+     },
+     {
+      "sku": "s2",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "m",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 1,
+      "priority": 2
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "m"
+    ],
+    "lines": [
+     597,
+     5999,
+     2400,
+     597,
+     500,
+     1000
+    ],
+    "total": 11093
+   }
+  },
+  {
+   "id": "R063",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 400,
+      "category": "a"
+     },
+     "s1": {
+      "price": 1200,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 4
+     }
+    ],
+    [
+     {
+      "id": "m",
+      "type": "bxgy",
+      "skus": [
+       "s1",
+       "s0"
+      ],
+      "buy": 1,
+      "get": 1,
+      "priority": 0
+     },
+     {
+      "id": "A",
+      "type": "threshold",
+      "min_subtotal": 1000,
+      "amount_off": 10000,
+      "priority": 0,
+      "group": "g2"
+     },
+     {
+      "id": "x1",
+      "type": "bxgy",
+      "skus": [
+       "s0",
+       "s1"
+      ],
+      "buy": 1,
+      "get": 2,
+      "priority": 0,
+      "group": "g1"
+     },
+     {
+      "id": "B",
+      "type": "threshold",
+      "min_subtotal": 2000,
+      "amount_off": 1,
+      "priority": 0
+     },
+     {
+      "id": "AB",
+      "type": "bxgy",
+      "skus": [
+       "s0"
+      ],
+      "buy": 2,
+      "get": 1,
+      "priority": 1
+     },
+     {
+      "id": "Q7",
+      "type": "percent",
+      "category": "a",
+      "percent": 10,
+      "min_qty": 3,
+      "priority": 2,
+      "group": "g2"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "A"
+    ],
+    "lines": [
+     0
+    ],
+    "total": 0
+   }
+  },
+  {
+   "id": "R064",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 99,
+      "category": "b"
+     },
+     "s1": {
+      "price": 1200,
+      "category": "b"
+     },
+     "s2": {
+      "price": 499,
+      "category": "b"
+     },
+     "s3": {
+      "price": 0,
+      "category": "b"
+     },
+     "s4": {
+      "price": 0,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 2
+     },
+     {
+      "sku": "s0",
+      "qty": 4
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     },
+     {
+      "sku": "s3",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "b0",
+      "type": "percent",
+      "category": "c",
+      "percent": 5,
+      "min_qty": 2,
+      "priority": 2
+     },
+     {
+      "id": "b",
+      "type": "bxgy",
+      "skus": [
+       "s0",
+       "s1",
+       "s2"
+      ],
+      "buy": 1,
+      "get": 1,
+      "priority": 2
+     },
+     {
+      "id": "x1",
+      "type": "percent",
+      "category": "c",
+      "percent": 25,
+      "min_qty": 1,
+      "priority": 2,
+      "exclusive": true
+     },
+     {
+      "id": "AB",
+      "type": "bundle",
+      "skus": [
+       "s3",
+       "s4"
+      ],
+      "price": 199,
+      "priority": 0,
+      "group": "g2"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "b"
+    ],
+    "lines": [
+     198,
+     297,
+     99,
+     0
+    ],
+    "total": 594
+   }
+  },
+  {
+   "id": "R065",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 1200,
+      "category": "a"
+     },
+     "s1": {
+      "price": 999,
+      "category": "c"
+     },
+     "s2": {
+      "price": 150,
+      "category": "b"
+     },
+     "s3": {
+      "price": 199,
+      "category": "c"
+     },
+     "s4": {
+      "price": 499,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s3",
+      "qty": 4
+     },
+     {
+      "sku": "s1",
+      "qty": 3
+     },
+     {
+      "sku": "s3",
+      "qty": 5
+     },
+     {
+      "sku": "s1",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "M",
+      "type": "bundle",
+      "skus": [
+       "s3",
+       "s4"
+      ],
+      "price": 1500,
+      "priority": 3
+     },
+     {
+      "id": "A1",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 333,
+      "priority": 3,
+      "group": "g1"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "A1"
+    ],
+    "lines": [
+     750,
+     2823,
+     940,
+     941
+    ],
+    "total": 5454
+   }
+  },
+  {
+   "id": "R066",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 1999,
+      "category": "a"
+     },
+     "s1": {
+      "price": 150,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 4
+     },
+     {
+      "sku": "s0",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "x1",
+      "type": "bxgy",
+      "skus": [
+       "s1"
+      ],
+      "buy": 3,
+      "get": 2,
+      "priority": 1,
+      "group": "g2"
+     },
+     {
+      "id": "A",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 10000,
+      "priority": 2
+     },
+     {
+      "id": "AB",
+      "type": "threshold",
+      "min_subtotal": 2000,
+      "amount_off": 10000,
+      "priority": 1
+     },
+     {
+      "id": "b",
+      "type": "bxgy",
+      "skus": [
+       "s0"
+      ],
+      "buy": 1,
+      "get": 2,
+      "priority": 2,
+      "group": "g1"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "AB",
+     "A"
+    ],
+    "lines": [
+     0,
+     0
+    ],
+    "total": 0
+   }
+  },
+  {
+   "id": "R067",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 400,
+      "category": "c"
+     },
+     "s1": {
+      "price": 250,
+      "category": "c"
+     },
+     "s2": {
+      "price": 1200,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s2",
+      "qty": 1
+     },
+     {
+      "sku": "s1",
+      "qty": 2
+     },
+     {
+      "sku": "s2",
+      "qty": 3
+     },
+     {
+      "sku": "s2",
+      "qty": 2
+     },
+     {
+      "sku": "s2",
+      "qty": 5
+     }
+    ],
+    [
+     {
+      "id": "a",
+      "type": "bxgy",
+      "skus": [
+       "s1",
+       "s0"
+      ],
+      "buy": 3,
+      "get": 2,
+      "priority": 1,
+      "group": "g2"
+     },
+     {
+      "id": "b",
+      "type": "bxgy",
+      "skus": [
+       "s0"
+      ],
+      "buy": 2,
+      "get": 1,
+      "priority": 1
+     },
+     {
+      "id": "A",
+      "type": "bundle",
+      "skus": [
+       "s2",
+       "s0",
+       "s1"
+      ],
+      "price": 1000,
+      "priority": 3
+     },
+     {
+      "id": "AB",
+      "type": "percent",
+      "category": "a",
+      "percent": 33,
+      "min_qty": 2,
+      "priority": 3
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "AB"
+    ],
+    "lines": [
+     804,
+     500,
+     2412,
+     1608,
+     4020
+    ],
+    "total": 9344
+   }
+  },
+  {
+   "id": "R068",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 1200,
+      "category": "a"
+     },
+     "s1": {
+      "price": 99,
+      "category": "b"
+     },
+     "s2": {
+      "price": 1999,
+      "category": "a"
+     },
+     "s3": {
+      "price": 0,
+      "category": "a"
+     },
+     "s4": {
+      "price": 199,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s4",
+      "qty": 3
+     }
+    ],
+    [
+     {
+      "id": "A1",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 100,
+      "priority": 3
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "A1"
+    ],
+    "lines": [
+     3515,
+     582
+    ],
+    "total": 4097
+   }
+  },
+  {
+   "id": "R069",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 999,
+      "category": "c"
+     },
+     "s1": {
+      "price": 1200,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 4
+     }
+    ],
+    [
+     {
+      "id": "m",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 333,
+      "priority": 1
+     },
+     {
+      "id": "AB",
+      "type": "percent",
+      "category": "a",
+      "percent": 33,
+      "min_qty": 2,
+      "priority": 3,
+      "exclusive": true
+     },
+     {
+      "id": "Z9",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 100,
+      "priority": 3,
+      "group": "g2"
+     },
+     {
+      "id": "M",
+      "type": "bxgy",
+      "skus": [
+       "s0"
+      ],
+      "buy": 3,
+      "get": 1,
+      "priority": 0
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "M",
+     "m",
+     "Z9"
+    ],
+    "lines": [
+     2564
+    ],
+    "total": 2564
+   }
+  },
+  {
+   "id": "R070",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 333,
+      "category": "a"
+     },
+     "s1": {
+      "price": 199,
+      "category": "c"
+     },
+     "s2": {
+      "price": 1999,
+      "category": "b"
+     },
+     "s3": {
+      "price": 99,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 4
+     },
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s3",
+      "qty": 1
+     },
+     {
+      "sku": "s3",
+      "qty": 2
+     },
+     {
+      "sku": "s3",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "b0",
+      "type": "bxgy",
+      "skus": [
+       "s2",
+       "s3"
+      ],
+      "buy": 2,
+      "get": 2,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "b0"
+    ],
+    "lines": [
+     1332,
+     999,
+     99,
+     99,
+     99
+    ],
+    "total": 2628
+   }
+  },
+  {
+   "id": "R071",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 199,
+      "category": "c"
+     },
+     "s1": {
+      "price": 333,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 2
+     },
+     {
+      "sku": "s1",
+      "qty": 1
+     },
+     {
+      "sku": "s1",
+      "qty": 2
+     },
+     {
+      "sku": "s1",
+      "qty": 2
+     },
+     {
+      "sku": "s1",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "A1",
+      "type": "bxgy",
+      "skus": [
+       "s1",
+       "s0"
+      ],
+      "buy": 2,
+      "get": 1,
+      "priority": 1,
+      "group": "g2"
+     },
+     {
+      "id": "B",
+      "type": "threshold",
+      "min_subtotal": 5000,
+      "amount_off": 1000,
+      "priority": 2
+     },
+     {
+      "id": "A",
+      "type": "bxgy",
+      "skus": [
+       "s1"
+      ],
+      "buy": 1,
+      "get": 2,
+      "priority": 1,
+      "group": "g2"
+     },
+     {
+      "id": "Q7",
+      "type": "bxgy",
+      "skus": [
+       "s0"
+      ],
+      "buy": 3,
+      "get": 2,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "A"
+    ],
+    "lines": [
+     398,
+     333,
+     333,
+     0,
+     333
+    ],
+    "total": 1397
+   }
+  },
+  {
+   "id": "R072",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 333,
+      "category": "a"
+     },
+     "s1": {
+      "price": 999,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 4
+     }
+    ],
+    []
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     1332
+    ],
+    "total": 1332
+   }
+  },
+  {
+   "id": "R073",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 1999,
+      "category": "b"
+     },
+     "s1": {
+      "price": 100,
+      "category": "b"
+     },
+     "s2": {
+      "price": 199,
+      "category": "a"
+     },
+     "s3": {
+      "price": 0,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s2",
+      "qty": 2
+     },
+     {
+      "sku": "s1",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "A1",
+      "type": "bxgy",
+      "skus": [
+       "s1"
+      ],
+      "buy": 2,
+      "get": 2,
+      "priority": 0
+     },
+     {
+      "id": "b",
+      "type": "percent",
+      "category": "c",
+      "percent": 5,
+      "min_qty": 2,
+      "priority": 0
+     },
+     {
+      "id": "a",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 10000,
+      "priority": 1
+     },
+     {
+      "id": "x1",
+      "type": "percent",
+      "category": "b",
+      "percent": 50,
+      "min_qty": 1,
+      "priority": 2
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "x1"
+    ],
+    "lines": [
+     398,
+     50
+    ],
+    "total": 448
+   }
+  },
+  {
+   "id": "R074",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 500,
+      "category": "c"
+     },
+     "s1": {
+      "price": 999,
+      "category": "a"
+     },
+     "s2": {
+      "price": 999,
+      "category": "c"
+     },
+     "s3": {
+      "price": 250,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 5
+     },
+     {
+      "sku": "s3",
+      "qty": 2
+     },
+     {
+      "sku": "s3",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "a",
+      "type": "bxgy",
+      "skus": [
+       "s3",
+       "s0"
+      ],
+      "buy": 3,
+      "get": 1,
+      "priority": 3,
+      "group": "g2",
+      "exclusive": true
+     },
+     {
+      "id": "Z9",
+      "type": "bxgy",
+      "skus": [
+       "s2"
+      ],
+      "buy": 2,
+      "get": 1,
+      "priority": 2
+     },
+     {
+      "id": "A1",
+      "type": "threshold",
+      "min_subtotal": 1000,
+      "amount_off": 333,
+      "priority": 3,
+      "group": "g2"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "a"
+    ],
+    "lines": [
+     2500,
+     250,
+     250
+    ],
+    "total": 3000
+   }
+  },
+  {
+   "id": "R075",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 199,
+      "category": "a"
+     },
+     "s1": {
+      "price": 499,
+      "category": "c"
+     },
+     "s2": {
+      "price": 250,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 4
+     },
+     {
+      "sku": "s1",
+      "qty": 1
+     },
+     {
+      "sku": "s2",
+      "qty": 3
+     },
+     {
+      "sku": "s1",
+      "qty": 3
+     }
+    ],
+    []
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     1996,
+     499,
+     750,
+     1497
+    ],
+    "total": 4742
+   }
+  },
+  {
+   "id": "R076",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 500,
+      "category": "a"
+     },
+     "s1": {
+      "price": 499,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 1
+     },
+     {
+      "sku": "s1",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "M",
+      "type": "percent",
+      "category": "c",
+      "percent": 15,
+      "min_qty": 1,
+      "priority": 0,
+      "group": "g2"
+     },
+     {
+      "id": "A",
+      "type": "percent",
+      "category": "b",
+      "percent": 100,
+      "min_qty": 3,
+      "priority": 3
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     499,
+     499
+    ],
+    "total": 998
+   }
+  },
+  {
+   "id": "R077",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 150,
+      "category": "c"
+     },
+     "s1": {
+      "price": 199,
+      "category": "b"
+     },
+     "s2": {
+      "price": 1999,
+      "category": "a"
+     },
+     "s3": {
+      "price": 499,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 5
+     },
+     {
+      "sku": "s1",
+      "qty": 3
+     },
+     {
+      "sku": "s3",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "m",
+      "type": "bxgy",
+      "skus": [
+       "s2",
+       "s0"
+      ],
+      "buy": 2,
+      "get": 1,
+      "priority": 0
+     },
+     {
+      "id": "A",
+      "type": "bundle",
+      "skus": [
+       "s2",
+       "s1"
+      ],
+      "price": 900,
+      "priority": 2,
+      "group": "g2"
+     },
+     {
+      "id": "A1",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 50,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "A1"
+    ],
+    "lines": [
+     970,
+     584,
+     487
+    ],
+    "total": 2041
+   }
+  },
+  {
+   "id": "R078",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 500,
+      "category": "a"
+     },
+     "s1": {
+      "price": 999,
+      "category": "c"
+     },
+     "s2": {
+      "price": 333,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s2",
+      "qty": 3
+     },
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s0",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "b0",
+      "type": "percent",
+      "category": "b",
+      "percent": 33,
+      "min_qty": 4,
+      "priority": 3
+     },
+     {
+      "id": "a",
+      "type": "percent",
+      "category": "c",
+      "percent": 5,
+      "min_qty": 4,
+      "priority": 3
+     },
+     {
+      "id": "A1",
+      "type": "bundle",
+      "skus": [
+       "s2",
+       "s0"
+      ],
+      "price": 900,
+      "priority": 2
+     },
+     {
+      "id": "B",
+      "type": "bundle",
+      "skus": [
+       "s0",
+       "s2"
+      ],
+      "price": 750,
+      "priority": 1,
+      "group": "g1"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "B"
+    ],
+    "lines": [
+     900,
+     1350,
+     1000
+    ],
+    "total": 3250
+   }
+  },
+  {
+   "id": "R079",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 1200,
+      "category": "a"
+     },
+     "s1": {
+      "price": 499,
+      "category": "b"
+     },
+     "s2": {
+      "price": 500,
+      "category": "b"
+     },
+     "s3": {
+      "price": 99,
+      "category": "b"
+     },
+     "s4": {
+      "price": 250,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 4
+     },
+     {
+      "sku": "s4",
+      "qty": 3
+     },
+     {
+      "sku": "s2",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "A1",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 10000,
+      "priority": 3
+     },
+     {
+      "id": "B",
+      "type": "percent",
+      "category": "c",
+      "percent": 25,
+      "min_qty": 3,
+      "priority": 0,
+      "group": "g1"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "A1"
+    ],
+    "lines": [
+     0,
+     0,
+     0
+    ],
+    "total": 0
+   }
+  },
+  {
+   "id": "R080",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 1200,
+      "category": "a"
+     },
+     "s1": {
+      "price": 1200,
+      "category": "b"
+     },
+     "s2": {
+      "price": 99,
+      "category": "b"
+     },
+     "s3": {
+      "price": 1200,
+      "category": "c"
+     },
+     "s4": {
+      "price": 400,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 5
+     },
+     {
+      "sku": "s2",
+      "qty": 2
+     },
+     {
+      "sku": "s3",
+      "qty": 1
+     },
+     {
+      "sku": "s2",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "AB",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 50,
+      "priority": 0
+     },
+     {
+      "id": "M",
+      "type": "percent",
+      "category": "b",
+      "percent": 33,
+      "min_qty": 2,
+      "priority": 1,
+      "group": "g1"
+     },
+     {
+      "id": "b",
+      "type": "bundle",
+      "skus": [
+       "s3",
+       "s0"
+      ],
+      "price": 1000,
+      "priority": 2
+     },
+     {
+      "id": "b0",
+      "type": "percent",
+      "category": "b",
+      "percent": 50,
+      "min_qty": 3,
+      "priority": 3,
+      "group": "g1"
+     },
+     {
+      "id": "B",
+      "type": "bxgy",
+      "skus": [
+       "s4",
+       "s1"
+      ],
+      "buy": 3,
+      "get": 1,
+      "priority": 2,
+      "exclusive": true
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "AB",
+     "b0"
+    ],
+    "lines": [
+     2980,
+     98,
+     1192,
+     50
+    ],
+    "total": 4320
+   }
+  },
+  {
+   "id": "R081",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 100,
+      "category": "c"
+     },
+     "s1": {
+      "price": 250,
+      "category": "a"
+     },
+     "s2": {
+      "price": 999,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 2
+     },
+     {
+      "sku": "s1",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "Z9",
+      "type": "bxgy",
+      "skus": [
+       "s0",
+       "s1"
+      ],
+      "buy": 2,
+      "get": 2,
+      "priority": 3
+     },
+     {
+      "id": "a",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 1,
+      "priority": 1
+     },
+     {
+      "id": "b",
+      "type": "bxgy",
+      "skus": [
+       "s2",
+       "s0"
+      ],
+      "buy": 2,
+      "get": 2,
+      "priority": 2,
+      "group": "g2"
+     },
+     {
+      "id": "x1",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 50,
+      "priority": 2
+     },
+     {
+      "id": "Q7",
+      "type": "threshold",
+      "min_subtotal": 0,
+      "amount_off": 1,
+      "priority": 1,
+      "group": "g2"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "Q7",
+     "a",
+     "x1"
+    ],
+    "lines": [
+     465,
+     233
+    ],
+    "total": 698
+   }
+  },
+  {
+   "id": "R082",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 0,
+      "category": "c"
+     },
+     "s1": {
+      "price": 1999,
+      "category": "b"
+     },
+     "s2": {
+      "price": 150,
+      "category": "a"
+     },
+     "s3": {
+      "price": 500,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s2",
+      "qty": 2
+     },
+     {
+      "sku": "s0",
+      "qty": 4
+     }
+    ],
+    [
+     {
+      "id": "b0",
+      "type": "threshold",
+      "min_subtotal": 5000,
+      "amount_off": 1000,
+      "priority": 2
+     },
+     {
+      "id": "x1",
+      "type": "bxgy",
+      "skus": [
+       "s0",
+       "s1",
+       "s2"
+      ],
+      "buy": 1,
+      "get": 1,
+      "priority": 0
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     300,
+     0
+    ],
+    "total": 300
+   }
+  },
+  {
+   "id": "R083",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 999,
+      "category": "a"
+     },
+     "s1": {
+      "price": 100,
+      "category": "a"
+     },
+     "s2": {
+      "price": 199,
+      "category": "a"
+     },
+     "s3": {
+      "price": 400,
+      "category": "a"
+     },
+     "s4": {
+      "price": 150,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s4",
+      "qty": 5
+     },
+     {
+      "sku": "s1",
+      "qty": 3
+     }
+    ],
+    [
+     {
+      "id": "b0",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 100,
+      "priority": 0
+     },
+     {
+      "id": "A1",
+      "type": "bxgy",
+      "skus": [
+       "s0",
+       "s3",
+       "s1"
+      ],
+      "buy": 2,
+      "get": 2,
+      "priority": 0
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "b0"
+    ],
+    "lines": [
+     680,
+     270
+    ],
+    "total": 950
+   }
+  },
+  {
+   "id": "R084",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 499,
+      "category": "a"
+     },
+     "s1": {
+      "price": 999,
+      "category": "c"
+     },
+     "s2": {
+      "price": 500,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s1",
+      "qty": 1
+     },
+     {
+      "sku": "s1",
+      "qty": 1
+     }
+    ],
+    [
+     {
+      "id": "Q7",
+      "type": "bxgy",
+      "skus": [
+       "s1",
+       "s0"
+      ],
+      "buy": 2,
+      "get": 1,
+      "priority": 1
+     },
+     {
+      "id": "x1",
+      "type": "percent",
+      "category": "c",
+      "percent": 33,
+      "min_qty": 2,
+      "priority": 0,
+      "group": "g2"
+     },
+     {
+      "id": "B",
+      "type": "threshold",
+      "min_subtotal": 2000,
+      "amount_off": 1,
+      "priority": 2
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "x1",
+     "Q7",
+     "B"
+    ],
+    "lines": [
+     998,
+     669,
+     670
+    ],
+    "total": 2337
+   }
+  },
+  {
+   "id": "R085",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 1200,
+      "category": "b"
+     },
+     "s1": {
+      "price": 333,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 3
+     },
+     {
+      "sku": "s1",
+      "qty": 4
+     }
+    ],
+    [
+     {
+      "id": "b",
+      "type": "bxgy",
+      "skus": [
+       "s0"
+      ],
+      "buy": 2,
+      "get": 2,
+      "priority": 1,
+      "group": "g2"
+     },
+     {
+      "id": "Q7",
+      "type": "bxgy",
+      "skus": [
+       "s1"
+      ],
+      "buy": 3,
+      "get": 2,
+      "priority": 1,
+      "group": "g1"
+     },
+     {
+      "id": "A",
+      "type": "percent",
+      "category": "c",
+      "percent": 25,
+      "min_qty": 1,
+      "priority": 0
+     },
+     {
+      "id": "B",
+      "type": "bxgy",
+      "skus": [
+       "s1",
+       "s0"
+      ],
+      "buy": 1,
+      "get": 2,
+      "priority": 1
+     },
+     {
+      "id": "b0",
+      "type": "percent",
+      "category": "b",
+      "percent": 50,
+      "min_qty": 1,
+      "priority": 1,
+      "group": "g1"
+     },
+     {
+      "id": "M",
+      "type": "threshold",
+      "min_subtotal": 2000,
+      "amount_off": 10000,
+      "priority": 3
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "M"
+    ],
+    "lines": [
+     0,
+     0
+    ],
+    "total": 0
+   }
+  },
+  {
+   "id": "R086",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 199,
+      "category": "b"
+     },
+     "s1": {
+      "price": 999,
+      "category": "b"
+     },
+     "s2": {
+      "price": 100,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 5
+     },
+     {
+      "sku": "s1",
+      "qty": 2
+     },
+     {
+      "sku": "s2",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "A1",
+      "type": "bundle",
+      "skus": [
+       "s2",
+       "s0"
+      ],
+      "price": 1000,
+      "priority": 2,
+      "group": "g1"
+     },
+     {
+      "id": "x1",
+      "type": "bxgy",
+      "skus": [
+       "s1",
+       "s2"
+      ],
+      "buy": 3,
+      "get": 1,
+      "priority": 1
+     },
+     {
+      "id": "m",
+      "type": "percent",
+      "category": "b",
+      "percent": 33,
+      "min_qty": 4,
+      "priority": 1,
+      "group": "g1"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "m",
+     "x1"
+    ],
+    "lines": [
+     670,
+     1340,
+     100
+    ],
+    "total": 2110
+   }
+  },
+  {
+   "id": "R087",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 100,
+      "category": "a"
+     },
+     "s1": {
+      "price": 499,
+      "category": "a"
+     },
+     "s2": {
+      "price": 150,
+      "category": "a"
+     },
+     "s3": {
+      "price": 0,
+      "category": "a"
+     },
+     "s4": {
+      "price": 100,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s0",
+      "qty": 2
+     },
+     {
+      "sku": "s4",
+      "qty": 2
+     },
+     {
+      "sku": "s3",
+      "qty": 1
+     },
+     {
+      "sku": "s1",
+      "qty": 5
+     }
+    ],
+    []
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     300,
+     200,
+     200,
+     0,
+     2495
+    ],
+    "total": 3195
+   }
+  },
+  {
+   "id": "R088",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 499,
+      "category": "c"
+     },
+     "s1": {
+      "price": 333,
+      "category": "a"
+     },
+     "s2": {
+      "price": 400,
+      "category": "a"
+     },
+     "s3": {
+      "price": 1999,
+      "category": "b"
+     },
+     "s4": {
+      "price": 500,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s3",
+      "qty": 5
+     },
+     {
+      "sku": "s2",
+      "qty": 3
+     },
+     {
+      "sku": "s4",
+      "qty": 2
+     },
+     {
+      "sku": "s3",
+      "qty": 1
+     },
+     {
+      "sku": "s3",
+      "qty": 5
+     }
+    ],
+    [
+     {
+      "id": "A1",
+      "type": "percent",
+      "category": "c",
+      "percent": 33,
+      "min_qty": 1,
+      "priority": 0
+     },
+     {
+      "id": "M",
+      "type": "bxgy",
+      "skus": [
+       "s1",
+       "s2"
+      ],
+      "buy": 2,
+      "get": 1,
+      "priority": 0
+     },
+     {
+      "id": "x1",
+      "type": "threshold",
+      "min_subtotal": 1000,
+      "amount_off": 1,
+      "priority": 3,
+      "exclusive": true
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "M"
+    ],
+    "lines": [
+     9995,
+     800,
+     1000,
+     1999,
+     9995
+    ],
+    "total": 23789
+   }
+  },
+  {
+   "id": "R089",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 333,
+      "category": "b"
+     },
+     "s1": {
+      "price": 1999,
+      "category": "a"
+     },
+     "s2": {
+      "price": 100,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 3
+     },
+     {
+      "sku": "s1",
+      "qty": 5
+     },
+     {
+      "sku": "s2",
+      "qty": 4
+     },
+     {
+      "sku": "s1",
+      "qty": 1
+     },
+     {
+      "sku": "s2",
+      "qty": 4
+     },
+     {
+      "sku": "s2",
+      "qty": 4
+     }
+    ],
+    [
+     {
+      "id": "x1",
+      "type": "bxgy",
+      "skus": [
+       "s1",
+       "s2"
+      ],
+      "buy": 3,
+      "get": 2,
+      "priority": 2
+     },
+     {
+      "id": "a",
+      "type": "threshold",
+      "min_subtotal": 5000,
+      "amount_off": 333,
+      "priority": 1,
+      "group": "g1"
+     },
+     {
+      "id": "b0",
+      "type": "threshold",
+      "min_subtotal": 1000,
+      "amount_off": 333,
+      "priority": 2,
+      "group": "g2"
+     },
+     {
+      "id": "AB",
+      "type": "bxgy",
+      "skus": [
+       "s0",
+       "s2"
+      ],
+      "buy": 1,
+      "get": 2,
+      "priority": 0
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "AB",
+     "a",
+     "b0",
+     "x1"
+    ],
+    "lines": [
+     951,
+     5694,
+     188,
+     1898,
+     0,
+     0
+    ],
+    "total": 8731
+   }
+  },
+  {
+   "id": "R090",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 333,
+      "category": "b"
+     },
+     "s1": {
+      "price": 150,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 4
+     },
+     {
+      "sku": "s1",
+      "qty": 4
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     }
+    ],
+    []
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     600,
+     600,
+     1665
+    ],
+    "total": 2865
+   }
+  },
+  {
+   "id": "R091",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 333,
+      "category": "a"
+     },
+     "s1": {
+      "price": 1200,
+      "category": "b"
+     },
+     "s2": {
+      "price": 0,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 1
+     }
+    ],
+    []
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     1200
+    ],
+    "total": 1200
+   }
+  },
+  {
+   "id": "R092",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 999,
+      "category": "c"
+     },
+     "s1": {
+      "price": 500,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 3
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     },
+     {
+      "sku": "s0",
+      "qty": 1
+     },
+     {
+      "sku": "s1",
+      "qty": 4
+     }
+    ],
+    [
+     {
+      "id": "A",
+      "type": "percent",
+      "category": "c",
+      "percent": 5,
+      "min_qty": 2,
+      "priority": 1
+     },
+     {
+      "id": "Q7",
+      "type": "threshold",
+      "min_subtotal": 1000,
+      "amount_off": 1,
+      "priority": 2
+     },
+     {
+      "id": "m",
+      "type": "bxgy",
+      "skus": [
+       "s0"
+      ],
+      "buy": 3,
+      "get": 1,
+      "priority": 2
+     },
+     {
+      "id": "b",
+      "type": "bxgy",
+      "skus": [
+       "s1"
+      ],
+      "buy": 3,
+      "get": 2,
+      "priority": 2
+     },
+     {
+      "id": "a",
+      "type": "bxgy",
+      "skus": [
+       "s1"
+      ],
+      "buy": 3,
+      "get": 2,
+      "priority": 2
+     },
+     {
+      "id": "A1",
+      "type": "percent",
+      "category": "b",
+      "percent": 100,
+      "min_qty": 2,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "A",
+     "A1",
+     "Q7",
+     "m"
+    ],
+    "lines": [
+     0,
+     3799,
+     950,
+     0
+    ],
+    "total": 4749
+   }
+  },
+  {
+   "id": "R093",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 100,
+      "category": "a"
+     },
+     "s1": {
+      "price": 0,
+      "category": "c"
+     },
+     "s2": {
+      "price": 0,
+      "category": "a"
+     },
+     "s3": {
+      "price": 0,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s2",
+      "qty": 4
+     },
+     {
+      "sku": "s3",
+      "qty": 2
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     },
+     {
+      "sku": "s3",
+      "qty": 4
+     },
+     {
+      "sku": "s2",
+      "qty": 3
+     },
+     {
+      "sku": "s3",
+      "qty": 2
+     }
+    ],
+    [
+     {
+      "id": "b",
+      "type": "percent",
+      "category": "a",
+      "percent": 10,
+      "min_qty": 2,
+      "priority": 3
+     },
+     {
+      "id": "M",
+      "type": "bxgy",
+      "skus": [
+       "s2",
+       "s3"
+      ],
+      "buy": 3,
+      "get": 1,
+      "priority": 3
+     },
+     {
+      "id": "m",
+      "type": "threshold",
+      "min_subtotal": 2000,
+      "amount_off": 1,
+      "priority": 0
+     },
+     {
+      "id": "a",
+      "type": "bundle",
+      "skus": [
+       "s2",
+       "s3"
+      ],
+      "price": 1000,
+      "priority": 2,
+      "exclusive": true
+     },
+     {
+      "id": "A",
+      "type": "percent",
+      "category": "b",
+      "percent": 10,
+      "min_qty": 1,
+      "priority": 3
+     },
+     {
+      "id": "AB",
+      "type": "bxgy",
+      "skus": [
+       "s3",
+       "s1"
+      ],
+      "buy": 2,
+      "get": 1,
+      "priority": 2
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "b"
+    ],
+    "lines": [
+     0,
+     0,
+     450,
+     0,
+     0,
+     0
+    ],
+    "total": 450
+   }
+  },
+  {
+   "id": "R094",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 1200,
+      "category": "a"
+     },
+     "s1": {
+      "price": 0,
+      "category": "a"
+     },
+     "s2": {
+      "price": 199,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 2
+     },
+     {
+      "sku": "s2",
+      "qty": 4
+     },
+     {
+      "sku": "s0",
+      "qty": 2
+     },
+     {
+      "sku": "s0",
+      "qty": 2
+     },
+     {
+      "sku": "s1",
+      "qty": 4
+     }
+    ],
+    [
+     {
+      "id": "M",
+      "type": "bundle",
+      "skus": [
+       "s2",
+       "s0",
+       "s1"
+      ],
+      "price": 1500,
+      "priority": 0
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     2400,
+     796,
+     2400,
+     2400,
+     0
+    ],
+    "total": 7996
+   }
+  },
+  {
+   "id": "R095",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 250,
+      "category": "b"
+     },
+     "s1": {
+      "price": 99,
+      "category": "c"
+     },
+     "s2": {
+      "price": 333,
+      "category": "c"
+     },
+     "s3": {
+      "price": 0,
+      "category": "b"
+     },
+     "s4": {
+      "price": 100,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s2",
+      "qty": 4
+     },
+     {
+      "sku": "s1",
+      "qty": 5
+     },
+     {
+      "sku": "s3",
+      "qty": 5
+     }
+    ],
+    [
+     {
+      "id": "b",
+      "type": "bundle",
+      "skus": [
+       "s1",
+       "s4"
+      ],
+      "price": 1500,
+      "priority": 0,
+      "group": "g2"
+     },
+     {
+      "id": "b0",
+      "type": "bundle",
+      "skus": [
+       "s0",
+       "s3"
+      ],
+      "price": 1000,
+      "priority": 1,
+      "group": "g1"
+     },
+     {
+      "id": "Z9",
+      "type": "percent",
+      "category": "c",
+      "percent": 10,
+      "min_qty": 1,
+      "priority": 2
+     },
+     {
+      "id": "m",
+      "type": "threshold",
+      "min_subtotal": 5000,
+      "amount_off": 10000,
+      "priority": 1
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "Z9"
+    ],
+    "lines": [
+     1200,
+     450,
+     0
+    ],
+    "total": 1650
+   }
+  },
+  {
+   "id": "R096",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 500,
+      "category": "b"
+     },
+     "s1": {
+      "price": 333,
+      "category": "a"
+     },
+     "s2": {
+      "price": 0,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 4
+     },
+     {
+      "sku": "s0",
+      "qty": 4
+     },
+     {
+      "sku": "s2",
+      "qty": 4
+     },
+     {
+      "sku": "s2",
+      "qty": 3
+     },
+     {
+      "sku": "s0",
+      "qty": 5
+     }
+    ],
+    [
+     {
+      "id": "A1",
+      "type": "threshold",
+      "min_subtotal": 1000,
+      "amount_off": 1000,
+      "priority": 0,
+      "exclusive": true
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "A1"
+    ],
+    "lines": [
+     1104,
+     1656,
+     0,
+     0,
+     2072
+    ],
+    "total": 4832
+   }
+  },
+  {
+   "id": "R097",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 150,
+      "category": "a"
+     },
+     "s1": {
+      "price": 499,
+      "category": "c"
+     },
+     "s2": {
+      "price": 499,
+      "category": "a"
+     },
+     "s3": {
+      "price": 333,
+      "category": "a"
+     },
+     "s4": {
+      "price": 100,
+      "category": "a"
+     }
+    },
+    [
+     {
+      "sku": "s0",
+      "qty": 4
+     },
+     {
+      "sku": "s4",
+      "qty": 5
+     },
+     {
+      "sku": "s0",
+      "qty": 2
+     },
+     {
+      "sku": "s1",
+      "qty": 3
+     }
+    ],
+    [
+     {
+      "id": "A1",
+      "type": "bundle",
+      "skus": [
+       "s4",
+       "s3"
+      ],
+      "price": 900,
+      "priority": 3
+     },
+     {
+      "id": "b0",
+      "type": "bxgy",
+      "skus": [
+       "s2",
+       "s1"
+      ],
+      "buy": 1,
+      "get": 2,
+      "priority": 1
+     },
+     {
+      "id": "Z9",
+      "type": "threshold",
+      "min_subtotal": 500,
+      "amount_off": 100,
+      "priority": 2,
+      "group": "g1"
+     },
+     {
+      "id": "B",
+      "type": "percent",
+      "category": "b",
+      "percent": 100,
+      "min_qty": 4,
+      "priority": 2
+     },
+     {
+      "id": "A",
+      "type": "percent",
+      "category": "b",
+      "percent": 33,
+      "min_qty": 2,
+      "priority": 0
+     },
+     {
+      "id": "AB",
+      "type": "percent",
+      "category": "b",
+      "percent": 33,
+      "min_qty": 4,
+      "priority": 2,
+      "group": "g2"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "b0",
+     "Z9"
+    ],
+    "lines": [
+     568,
+     475,
+     284,
+     472
+    ],
+    "total": 1799
+   }
+  },
+  {
+   "id": "R098",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 99,
+      "category": "c"
+     },
+     "s1": {
+      "price": 500,
+      "category": "a"
+     },
+     "s2": {
+      "price": 1200,
+      "category": "b"
+     },
+     "s3": {
+      "price": 99,
+      "category": "a"
+     },
+     "s4": {
+      "price": 250,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s4",
+      "qty": 5
+     },
+     {
+      "sku": "s0",
+      "qty": 4
+     },
+     {
+      "sku": "s0",
+      "qty": 3
+     }
+    ],
+    []
+   ],
+   "expected": {
+    "applied": [],
+    "lines": [
+     1250,
+     396,
+     297
+    ],
+    "total": 1943
+   }
+  },
+  {
+   "id": "R099",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 500,
+      "category": "b"
+     },
+     "s1": {
+      "price": 250,
+      "category": "b"
+     },
+     "s2": {
+      "price": 333,
+      "category": "b"
+     },
+     "s3": {
+      "price": 333,
+      "category": "c"
+     },
+     "s4": {
+      "price": 1200,
+      "category": "b"
+     }
+    },
+    [
+     {
+      "sku": "s1",
+      "qty": 5
+     },
+     {
+      "sku": "s3",
+      "qty": 3
+     }
+    ],
+    [
+     {
+      "id": "a",
+      "type": "percent",
+      "category": "a",
+      "percent": 15,
+      "min_qty": 3,
+      "priority": 2
+     },
+     {
+      "id": "A",
+      "type": "percent",
+      "category": "a",
+      "percent": 100,
+      "min_qty": 3,
+      "priority": 1,
+      "exclusive": true
+     },
+     {
+      "id": "A1",
+      "type": "bundle",
+      "skus": [
+       "s3",
+       "s1"
+      ],
+      "price": 1500,
+      "priority": 3,
+      "group": "g1"
+     },
+     {
+      "id": "Z9",
+      "type": "bundle",
+      "skus": [
+       "s1",
+       "s2"
+      ],
+      "price": 1500,
+      "priority": 1
+     },
+     {
+      "id": "B",
+      "type": "percent",
+      "category": "c",
+      "percent": 5,
+      "min_qty": 1,
+      "priority": 3
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "B"
+    ],
+    "lines": [
+     1250,
+     951
+    ],
+    "total": 2201
+   }
+  },
+  {
+   "id": "R100",
+   "title": "random cart",
+   "args": [
+    {
+     "s0": {
+      "price": 333,
+      "category": "b"
+     },
+     "s1": {
+      "price": 150,
+      "category": "c"
+     },
+     "s2": {
+      "price": 999,
+      "category": "c"
+     }
+    },
+    [
+     {
+      "sku": "s2",
+      "qty": 3
+     },
+     {
+      "sku": "s1",
+      "qty": 3
+     },
+     {
+      "sku": "s0",
+      "qty": 4
+     }
+    ],
+    [
+     {
+      "id": "A1",
+      "type": "bundle",
+      "skus": [
+       "s2",
+       "s1"
+      ],
+      "price": 0,
+      "priority": 0
+     },
+     {
+      "id": "Q7",
+      "type": "bundle",
+      "skus": [
+       "s0",
+       "s2"
+      ],
+      "price": 750,
+      "priority": 1,
+      "group": "g2"
+     }
+    ]
+   ],
+   "expected": {
+    "applied": [
+     "A1"
+    ],
+    "lines": [
+     0,
+     0,
+     1332
+    ],
+    "total": 1332
+   }
+  }
+ ],
+ "stress": [
+  {
+   "id": "S1",
+   "title": "10 promotions, ~200 units",
+   "seed": 778,
+   "expected_sha256": "13c44ffb6597c90eefd810a181c5c6b5e39549163c1adfd29eb2a19c40b0ab0b",
+   "expected_head": "{\"applied\":[\"A\",\"P8\",\"P9\",\"x1\",\"P6\",\"P7\"],\"lines\":[7667,0,0,6315,0,5682,0,0,1894,3164,0,0,7232,1988,2130,2414,0,0,0,11368],\"total\":49854}"
+  },
+  {
+   "id": "S2",
+   "title": "10 promotions, ~200 units",
+   "seed": 779,
+   "expected_sha256": "7df0fecbbf291745990a9927b65294dfa281cb47621718c75e6e44e325973b2d",
+   "expected_head": "{\"applied\":[\"A1\",\"AB\",\"P8\",\"x1\"],\"lines\":[300,5489,0,0,1500,200,0,7485,0,1050,0,0,750,0,2100,3992,100,0,0,1497],\"total\":24463}"
+  },
+  {
+   "id": "S3",
+   "title": "10 promotions, ~200 units",
+   "seed": 780,
+   "expected_sha256": "213803d4fce124fbb2add682c3c420fbebe2429faa3cf86e78712d02e0ebcdd3",
+   "expected_head": "{\"applied\":[\"Q7\",\"Z9\",\"P7\",\"a\",\"P8\",\"P9\"],\"lines\":[0,0,9633,5070,0,9644,889,0,508,6096,2540,0,8636,0,0,0,508,2032,2540,0],\"total\":48096}"
+  }
+ ]
+}

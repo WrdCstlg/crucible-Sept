@@ -1,0 +1,4505 @@
+{
+ "problem": "sheet",
+ "entry": "evaluate",
+ "public": [
+  {
+   "id": "P1",
+   "title": "precedence and errors",
+   "args": [
+    {
+     "A1": "5",
+     "A2": "=-A1^2",
+     "A3": "=2^3^2",
+     "A4": "=A1/0"
+    }
+   ],
+   "expected": {
+    "A1": 5,
+    "A2": 25,
+    "A3": 64,
+    "A4": {
+     "error": "#DIV/0!"
+    }
+   }
+  },
+  {
+   "id": "P2",
+   "title": "comparisons and coercions",
+   "args": [
+    {
+     "A1": "abc",
+     "A2": "=A1=\"ABC\"",
+     "A3": "=1<\"0\"",
+     "A4": "=\"3\"+TRUE",
+     "A5": "=A1+1"
+    }
+   ],
+   "expected": {
+    "A1": "abc",
+    "A2": true,
+    "A3": true,
+    "A4": 4,
+    "A5": {
+     "error": "#VALUE!"
+    }
+   }
+  },
+  {
+   "id": "P3",
+   "title": "aggregates and ROUND",
+   "args": [
+    {
+     "A1": "1",
+     "A2": "x",
+     "A3": "TRUE",
+     "A4": "=SUM(A1:A3)",
+     "A5": "=SUM(A1,\"2\",TRUE)",
+     "A6": "=AVERAGE(B1:B3)",
+     "A7": "=ROUND(2.675,2)"
+    }
+   ],
+   "expected": {
+    "A1": 1,
+    "A2": "x",
+    "A3": true,
+    "A4": 1,
+    "A5": 4,
+    "A6": {
+     "error": "#DIV/0!"
+    },
+    "A7": 2.68
+   }
+  },
+  {
+   "id": "P4",
+   "title": "static cycles",
+   "args": [
+    {
+     "A1": "=IF(TRUE,1,B1)",
+     "B1": "=A1+1",
+     "C1": "=IFERROR(B1,7)",
+     "D1": "=E1&\"!\""
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#CYCLE!"
+    },
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "C1": 7,
+    "D1": "!"
+   }
+  }
+ ],
+ "hidden": [
+  {
+   "id": "H01",
+   "title": "unary minus binds tighter than ^",
+   "args": [
+    {
+     "A1": "=-2^2",
+     "A2": "=2^-1",
+     "A3": "=-(2^2)",
+     "A4": "=2*-3^2"
+    }
+   ],
+   "expected": {
+    "A1": 4,
+    "A2": 0.5,
+    "A3": -4,
+    "A4": 18
+   }
+  },
+  {
+   "id": "H02",
+   "title": "left associativity",
+   "args": [
+    {
+     "A1": "=2^3^2",
+     "A2": "=10-4-3",
+     "A3": "=64/4/2",
+     "A4": "=1=1=TRUE",
+     "A5": "=1<2<3"
+    }
+   ],
+   "expected": {
+    "A1": 64,
+    "A2": 3,
+    "A3": 8,
+    "A4": true,
+    "A5": false
+   }
+  },
+  {
+   "id": "H03",
+   "title": "& sits between comparison and +",
+   "args": [
+    {
+     "A1": "=1+2&3",
+     "A2": "=1&2+3",
+     "A3": "=\"a\"&1=\"A1\""
+    }
+   ],
+   "expected": {
+    "A1": "33",
+    "A2": "15",
+    "A3": true
+   }
+  },
+  {
+   "id": "H04",
+   "title": "string to number uses the literal rule",
+   "args": [
+    {
+     "A1": "=\" 1\"+1",
+     "A2": "=\"1.5\"*2",
+     "A3": "=\"-0.5\"+0",
+     "A4": "=\"1e3\"+0",
+     "A5": "=\"+1\"+0"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#VALUE!"
+    },
+    "A2": 3,
+    "A3": -0.5,
+    "A4": {
+     "error": "#VALUE!"
+    },
+    "A5": {
+     "error": "#VALUE!"
+    }
+   }
+  },
+  {
+   "id": "H05",
+   "title": "raw literal parsing",
+   "args": [
+    {
+     "A1": "007",
+     "A2": "-3.25",
+     "A3": "1.",
+     "A4": ".5",
+     "A5": "true",
+     "A6": "TRUE",
+     "A7": "",
+     "A8": " 1",
+     "A9": "-0"
+    }
+   ],
+   "expected": {
+    "A1": 7,
+    "A2": -3.25,
+    "A3": "1.",
+    "A4": ".5",
+    "A5": "true",
+    "A6": true,
+    "A7": null,
+    "A8": " 1",
+    "A9": 0
+   }
+  },
+  {
+   "id": "H06",
+   "title": "empty formula values stay empty",
+   "args": [
+    {
+     "A1": "=B1",
+     "A2": "=A1&\"x\"",
+     "A3": "=B1=0",
+     "A4": "=B1=\"\"",
+     "A5": "=B1=FALSE",
+     "A6": "=B1=C1",
+     "A7": "=A1+1",
+     "A8": "=-B1"
+    }
+   ],
+   "expected": {
+    "A1": 0,
+    "A2": "x",
+    "A3": true,
+    "A4": true,
+    "A5": true,
+    "A6": true,
+    "A7": 1,
+    "A8": 0
+   }
+  },
+  {
+   "id": "H07",
+   "title": "cross-type ordering",
+   "args": [
+    {
+     "A1": "=\"a\"<1",
+     "A2": "=TRUE>\"z\"",
+     "A3": "=\"10\"<\"9\"",
+     "A4": "=0.1+0.2=0.3",
+     "A5": "=\"B\">\"a\"",
+     "A6": "=FALSE<TRUE",
+     "A7": "=1=\"1\""
+    }
+   ],
+   "expected": {
+    "A1": false,
+    "A2": true,
+    "A3": true,
+    "A4": true,
+    "A5": true,
+    "A6": true,
+    "A7": false
+   }
+  },
+  {
+   "id": "H08",
+   "title": "error order: operand errors before conversion",
+   "args": [
+    {
+     "A1": "=\"a\"+1/0",
+     "A2": "=1/0+\"a\"",
+     "A3": "=(1/0)&X1",
+     "A4": "=\"a\"+\"b\"",
+     "A5": "=AA1+1/0",
+     "A6": "=1/0=1/0"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#DIV/0!"
+    },
+    "A2": {
+     "error": "#DIV/0!"
+    },
+    "A3": {
+     "error": "#DIV/0!"
+    },
+    "A4": {
+     "error": "#VALUE!"
+    },
+    "A5": {
+     "error": "#REF!"
+    },
+    "A6": {
+     "error": "#DIV/0!"
+    }
+   }
+  },
+  {
+   "id": "H09",
+   "title": "power edge cases",
+   "args": [
+    {
+     "A1": "=0^0",
+     "A2": "=0^-1",
+     "A3": "=(-8)^(1/3)",
+     "A4": "=(-2)^3",
+     "A5": "=10^400",
+     "A6": "=2^0.5"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#NUM!"
+    },
+    "A2": {
+     "error": "#DIV/0!"
+    },
+    "A3": {
+     "error": "#NUM!"
+    },
+    "A4": -8,
+    "A5": {
+     "error": "#NUM!"
+    },
+    "A6": 1.414213562
+   }
+  },
+  {
+   "id": "H10",
+   "title": "overflow is #NUM!",
+   "args": [
+    {
+     "A1": "=10^300*10^10",
+     "A2": "=SUM(A3,A3)",
+     "A3": "=10^308*1.5"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#NUM!"
+    },
+    "A2": {
+     "error": "#NUM!"
+    },
+    "A3": 150000000000000001646859544416068312610738464515967769505216024354736378107367237305744993467742033348591874504581758773417385425614710132492460513797219069046907496754399540778546234549382838565007576699247501767640346439319417766442136793680061187184175955257676622657937704339811809909462328573145334677504
+   }
+  },
+  {
+   "id": "H11",
+   "title": "aggregate argument kinds",
+   "args": [
+    {
+     "A1": "1",
+     "A2": "x",
+     "A3": "TRUE",
+     "A4": "",
+     "A5": "=SUM(A1:A4,\"3\")",
+     "A6": "=SUM((A2))",
+     "A7": "=COUNT(A1:A4,\"3\",TRUE,\"x\",1/0)",
+     "A8": "=MAX(B1:B5)",
+     "A9": "=MIN(A1:A3,-2)",
+     "B9": "=AVERAGE(A1:A4,5)"
+    }
+   ],
+   "expected": {
+    "A1": 1,
+    "A2": "x",
+    "A3": true,
+    "A4": null,
+    "A5": 4,
+    "A6": {
+     "error": "#VALUE!"
+    },
+    "A7": 3,
+    "A8": 0,
+    "A9": -2,
+    "B9": 3
+   }
+  },
+  {
+   "id": "H12",
+   "title": "AND / OR",
+   "args": [
+    {
+     "A1": "=AND(TRUE,1,\"true\")",
+     "A2": "=OR(B1:B3)",
+     "A3": "=AND(C1:C2)",
+     "C1": "1",
+     "C2": "abc",
+     "A4": "=OR(FALSE,1/0,TRUE)",
+     "A5": "=AND(\"x\")",
+     "A6": "=NOT(\"FALSE\")",
+     "A7": "=OR(C1:C2,FALSE)"
+    }
+   ],
+   "expected": {
+    "A1": true,
+    "A2": {
+     "error": "#VALUE!"
+    },
+    "A3": true,
+    "A4": {
+     "error": "#DIV/0!"
+    },
+    "A5": {
+     "error": "#VALUE!"
+    },
+    "A6": true,
+    "A7": true,
+    "C1": 1,
+    "C2": "abc"
+   }
+  },
+  {
+   "id": "H13",
+   "title": "IF evaluates only the chosen branch",
+   "args": [
+    {
+     "A1": "=IF(1,\"y\",1/0)",
+     "A2": "=IF(0,1/0)",
+     "A3": "=IF(\"x\",1,2)",
+     "A4": "=IF(B1:B2,1,2)",
+     "A5": "=IF(TRUE,B9)",
+     "A6": "=IFERROR(1/0,\"caught\")",
+     "A7": "=IFERROR(B1:B2,5)",
+     "A8": "=IF(\"TRUE\",1,2)"
+    }
+   ],
+   "expected": {
+    "A1": "y",
+    "A2": false,
+    "A3": {
+     "error": "#VALUE!"
+    },
+    "A4": {
+     "error": "#VALUE!"
+    },
+    "A5": 0,
+    "A6": "caught",
+    "A7": 5,
+    "A8": 1
+   }
+  },
+  {
+   "id": "H14",
+   "title": "names, references and function names",
+   "args": [
+    {
+     "A1": "=foo",
+     "A2": "=FOO(1/0)",
+     "A3": "=AA1",
+     "A4": "=A0",
+     "A5": "=A01",
+     "A6": "=A1000",
+     "A7": "=b2",
+     "B2": "5",
+     "A8": "=sum(b2,1)",
+     "A9": "=SUM1(2)",
+     "B1": "=TRUE()"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#NAME?"
+    },
+    "A2": {
+     "error": "#NAME?"
+    },
+    "A3": {
+     "error": "#REF!"
+    },
+    "A4": {
+     "error": "#REF!"
+    },
+    "A5": {
+     "error": "#REF!"
+    },
+    "A6": {
+     "error": "#REF!"
+    },
+    "A7": 5,
+    "A8": 6,
+    "A9": {
+     "error": "#NAME?"
+    },
+    "B1": {
+     "error": "#NAME?"
+    },
+    "B2": 5
+   }
+  },
+  {
+   "id": "H15",
+   "title": "grammar errors",
+   "args": [
+    {
+     "A1": "=",
+     "A2": "=SUM(1,)",
+     "A3": "=1 2",
+     "A4": "=IF(1)",
+     "A5": "=NOT(1,2)",
+     "A6": "=(1",
+     "A7": "=\"abc",
+     "A8": "=1.",
+     "A9": "=.5",
+     "B1": "=A1 :B2",
+     "B2": "=SUM()",
+     "B3": "=1+\t2",
+     "B4": "=FOO()",
+     "B5": "=A1:B"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#PARSE!"
+    },
+    "A2": {
+     "error": "#PARSE!"
+    },
+    "A3": {
+     "error": "#PARSE!"
+    },
+    "A4": {
+     "error": "#PARSE!"
+    },
+    "A5": {
+     "error": "#PARSE!"
+    },
+    "A6": {
+     "error": "#PARSE!"
+    },
+    "A7": {
+     "error": "#PARSE!"
+    },
+    "A8": {
+     "error": "#PARSE!"
+    },
+    "A9": {
+     "error": "#PARSE!"
+    },
+    "B1": {
+     "error": "#PARSE!"
+    },
+    "B2": {
+     "error": "#PARSE!"
+    },
+    "B3": {
+     "error": "#PARSE!"
+    },
+    "B4": {
+     "error": "#NAME?"
+    },
+    "B5": {
+     "error": "#PARSE!"
+    }
+   }
+  },
+  {
+   "id": "H16",
+   "title": "static cycles in every form",
+   "args": [
+    {
+     "A1": "=A1",
+     "B1": "=IF(FALSE,B2,1)",
+     "B2": "=B1",
+     "C1": "=FOO(C2)",
+     "C2": "=C1",
+     "D1": "=IFERROR(B1,\"cyc\")",
+     "D2": "=B1+1",
+     "E1": "=SUM(E2:E3)",
+     "E3": "=E1",
+     "F1": "=1+",
+     "F2": "=F1"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#CYCLE!"
+    },
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "B2": {
+     "error": "#CYCLE!"
+    },
+    "C1": {
+     "error": "#CYCLE!"
+    },
+    "C2": {
+     "error": "#CYCLE!"
+    },
+    "D1": "cyc",
+    "D2": {
+     "error": "#CYCLE!"
+    },
+    "E1": {
+     "error": "#CYCLE!"
+    },
+    "E3": {
+     "error": "#CYCLE!"
+    },
+    "F1": {
+     "error": "#PARSE!"
+    },
+    "F2": {
+     "error": "#PARSE!"
+    }
+   }
+  },
+  {
+   "id": "H17",
+   "title": "range containing its own cell",
+   "args": [
+    {
+     "A1": "=SUM(A1:A3)",
+     "A2": "1"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#CYCLE!"
+    },
+    "A2": 1
+   }
+  },
+  {
+   "id": "H18",
+   "title": "text conversion of numbers",
+   "args": [
+    {
+     "A1": "=CONCAT(B1:C2,1/4,TRUE)",
+     "B1": "a",
+     "C1": "=1/3",
+     "B2": "",
+     "C2": "=2*0.5",
+     "A2": "=LEN(1/3)",
+     "A3": "=LEN(\"héllo\")",
+     "A4": "=0.1+0.2&\"\"",
+     "A5": "=1/3*3&\"\"",
+     "A6": "=\"say \"\"hi\"\"\""
+    }
+   ],
+   "expected": {
+    "A1": "a0.33333333310.25TRUE",
+    "A2": 11,
+    "A3": 5,
+    "A4": "0.3",
+    "A5": "1",
+    "A6": "say \"hi\"",
+    "B1": "a",
+    "B2": null,
+    "C1": 0.333333333,
+    "C2": 1
+   }
+  },
+  {
+   "id": "H19",
+   "title": "ROUND halves away from zero on the repr decimal",
+   "args": [
+    {
+     "A1": "=ROUND(2.5,0)",
+     "A2": "=ROUND(-2.5,0)",
+     "A3": "=ROUND(1234.5678,-2)",
+     "A4": "=ROUND(1.005,2)",
+     "A5": "=ROUND(2.675,2.9)",
+     "A6": "=ROUND(\"7.45\",1)",
+     "A7": "=ROUND(-0.4,0)",
+     "A8": "=ROUND(5,-1)"
+    }
+   ],
+   "expected": {
+    "A1": 3,
+    "A2": -3,
+    "A3": 1200,
+    "A4": 1.01,
+    "A5": 2.68,
+    "A6": 7.5,
+    "A7": 0,
+    "A8": 10
+   }
+  },
+  {
+   "id": "H20",
+   "title": "SUM adds left to right",
+   "args": [
+    {
+     "A1": "=SUM(10000000000000000,1,-10000000000000000)",
+     "A2": "=SUM(0.1,0.2,0.3)=0.6"
+    }
+   ],
+   "expected": {
+    "A1": 0,
+    "A2": true
+   }
+  },
+  {
+   "id": "H21",
+   "title": "ranges are row-major, corners in any order",
+   "args": [
+    {
+     "A1": "=CONCAT(C2:B1)",
+     "B1": "1",
+     "C1": "2",
+     "B2": "3",
+     "C2": "4"
+    }
+   ],
+   "expected": {
+    "A1": "1234",
+    "B1": 1,
+    "B2": 3,
+    "C1": 2,
+    "C2": 4
+   }
+  },
+  {
+   "id": "H22",
+   "title": "invalid and misused ranges",
+   "args": [
+    {
+     "A1": "=SUM(A2:AA3)",
+     "A2": "1",
+     "A3": "=COUNT(B1:B0,1)",
+     "A4": "=B1:B2",
+     "A5": "=+\"abc\"",
+     "A6": "=+B1:B2"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#REF!"
+    },
+    "A2": 1,
+    "A3": 1,
+    "A4": {
+     "error": "#VALUE!"
+    },
+    "A5": "abc",
+    "A6": {
+     "error": "#VALUE!"
+    }
+   }
+  },
+  {
+   "id": "H23",
+   "title": "case-insensitive names, spaces before (",
+   "args": [
+    {
+     "A1": "=sum (a2:a3)",
+     "A2": "2",
+     "A3": "3",
+     "A4": "=true",
+     "A5": "=tRuE+1"
+    }
+   ],
+   "expected": {
+    "A1": 5,
+    "A2": 2,
+    "A3": 3,
+    "A4": true,
+    "A5": 2
+   }
+  },
+  {
+   "id": "H24",
+   "title": "IFERROR catches #PARSE!",
+   "args": [
+    {
+     "A1": "=1+",
+     "A2": "=IFERROR(A1,\"p\")",
+     "A3": "=ISBLANK(A9)"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#PARSE!"
+    },
+    "A2": "p",
+    "A3": {
+     "error": "#NAME?"
+    }
+   }
+  },
+  {
+   "id": "H25",
+   "title": "empty string comparisons",
+   "args": [
+    {
+     "A1": "=\"\"=B5",
+     "A2": "=\"\"<0",
+     "A3": "=\"\"=FALSE"
+    }
+   ],
+   "expected": {
+    "A1": true,
+    "A2": false,
+    "A3": false
+   }
+  },
+  {
+   "id": "H26",
+   "title": "boolean conversion",
+   "args": [
+    {
+     "A1": "=NOT(0)",
+     "A2": "=NOT(\"0\")",
+     "A3": "=NOT(B1)",
+     "A4": "=NOT(\"False\")"
+    }
+   ],
+   "expected": {
+    "A1": true,
+    "A2": {
+     "error": "#VALUE!"
+    },
+    "A3": true,
+    "A4": true
+   }
+  },
+  {
+   "id": "H27",
+   "title": "single REF is a range argument, (+REF) is not",
+   "args": [
+    {
+     "A1": "TRUE",
+     "A2": "5",
+     "A3": "=MAX(A1:A2)",
+     "A4": "=MAX(A1)",
+     "A5": "=MAX(+A1)"
+    }
+   ],
+   "expected": {
+    "A1": true,
+    "A2": 5,
+    "A3": 5,
+    "A4": 0,
+    "A5": 1
+   }
+  },
+  {
+   "id": "H28",
+   "title": "spaces and nesting",
+   "args": [
+    {
+     "A1": "= ( 1 + 2 ) * 3 ",
+     "A2": "=((((((((((1))))))))))"
+    }
+   ],
+   "expected": {
+    "A1": 9,
+    "A2": 1
+   }
+  },
+  {
+   "id": "H29",
+   "title": "number formatting",
+   "args": [
+    {
+     "A1": "=1/0.1&\"\"",
+     "A2": "=2^60&\"\"",
+     "A3": "=0.000000001&\"\"",
+     "A4": "=0.0000000001&\"\"",
+     "A5": "=-0.5&\"\"",
+     "A6": "=1/3"
+    }
+   ],
+   "expected": {
+    "A1": "10",
+    "A2": "1152921504606846976",
+    "A3": "1e-09",
+    "A4": "0",
+    "A5": "-0.5",
+    "A6": 0.333333333
+   }
+  },
+  {
+   "id": "H30",
+   "title": "COUNT of direct arguments",
+   "args": [
+    {
+     "A1": "=COUNT(\"1\",\"-2.5\",\"1e2\",\"\",B1,FALSE)"
+    }
+   ],
+   "expected": {
+    "A1": 3
+   }
+  },
+  {
+   "id": "H31",
+   "title": "comparison operators",
+   "args": [
+    {
+     "A1": "=2<>2",
+     "A2": "=2<=2",
+     "A3": "=\"b\">=\"B\"",
+     "A4": "=3>2"
+    }
+   ],
+   "expected": {
+    "A1": false,
+    "A2": true,
+    "A3": true,
+    "A4": true
+   }
+  },
+  {
+   "id": "H32",
+   "title": "string-to-boolean ignores ASCII case only",
+   "args": [
+    {
+     "A1": "=AND(\"TrUe\")",
+     "A2": "=OR(\"yes\")"
+    }
+   ],
+   "expected": {
+    "A1": true,
+    "A2": {
+     "error": "#VALUE!"
+    }
+   }
+  },
+  {
+   "id": "H33",
+   "title": "AND / OR do not short-circuit",
+   "args": [
+    {
+     "A1": "=AND(FALSE,1/0)",
+     "A2": "=OR(TRUE,NOT(\"x\"))"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#DIV/0!"
+    },
+    "A2": {
+     "error": "#VALUE!"
+    }
+   }
+  },
+  {
+   "id": "H34",
+   "title": "more associativity, row-major and invalid-range checks",
+   "args": [
+    {
+     "A1": "=2^2^3",
+     "A2": "=CONCAT(A3:B4)",
+     "A3": "p",
+     "B3": "q",
+     "A4": "r",
+     "B4": "s",
+     "A5": "=SUM(B1:B0)"
+    }
+   ],
+   "expected": {
+    "A1": 64,
+    "A2": "pqrs",
+    "A3": "p",
+    "A4": "r",
+    "A5": {
+     "error": "#REF!"
+    },
+    "B3": "q",
+    "B4": "s"
+   }
+  },
+  {
+   "id": "R01",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=A2",
+     "B2": "=\"x y\"",
+     "B3": "=C5",
+     "B4": "=C3",
+     "B5": "=SUM(A1,A3:A3)>\"-2.5\"",
+     "C3": "=+B1",
+     "C4": "=FALSE",
+     "C5": "=\"\""
+    }
+   ],
+   "expected": {
+    "A1": 0,
+    "B2": "x y",
+    "B3": "",
+    "B4": 0,
+    "B5": false,
+    "C3": 0,
+    "C4": false,
+    "C5": ""
+   }
+  },
+  {
+   "id": "R02",
+   "title": "random sheet",
+   "args": [
+    {
+     "A2": "=MIN(A2,\"1\"/A3-A4,A2)",
+     "A3": "=\"\"",
+     "A4": "=\"TRUE\"",
+     "B2": "=B3^IFERROR((100),B2)",
+     "B3": "TRUE"
+    }
+   ],
+   "expected": {
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A3": "",
+    "A4": "TRUE",
+    "B2": {
+     "error": "#CYCLE!"
+    },
+    "B3": true
+   }
+  },
+  {
+   "id": "R03",
+   "title": "random sheet",
+   "args": [
+    {
+     "A2": "100",
+     "A3": "=-(A1<B5)",
+     "B1": "=\"1\"",
+     "B2": "1",
+     "B3": "=AA1",
+     "B5": "abc",
+     "C1": "=C1",
+     "C2": "abc",
+     "C3": "=(C1)"
+    }
+   ],
+   "expected": {
+    "A2": 100,
+    "A3": -1,
+    "B1": "1",
+    "B2": 1,
+    "B3": {
+     "error": "#REF!"
+    },
+    "B5": "abc",
+    "C1": {
+     "error": "#CYCLE!"
+    },
+    "C2": "abc",
+    "C3": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R04",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "-3",
+     "A2": "=C4",
+     "A4": "=-A3",
+     "B1": "=C1",
+     "B2": "100",
+     "B4": "=--B4",
+     "C3": "=1^MAX(B2:A3,B1:a4)",
+     "C4": "abc"
+    }
+   ],
+   "expected": {
+    "A1": -3,
+    "A2": "abc",
+    "A4": 0,
+    "B1": 0,
+    "B2": 100,
+    "B4": {
+     "error": "#CYCLE!"
+    },
+    "C3": {
+     "error": "#CYCLE!"
+    },
+    "C4": "abc"
+   }
+  },
+  {
+   "id": "R05",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=SUM(B2^\"1\"<\"\")",
+     "A2": "=A3",
+     "A3": "=A1",
+     "B1": "=100",
+     "B2": "1"
+    }
+   ],
+   "expected": {
+    "A1": 1,
+    "A2": 1,
+    "A3": 1,
+    "B1": 100,
+    "B2": 1
+   }
+  },
+  {
+   "id": "R06",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "0.5",
+     "A2": "=B3",
+     "A3": "=NOT(CONCAT(a1:B1,a2:A3,B1:B3))",
+     "B1": "=+FOO(B2,A2,A1)-OR(CONCAT(A2))",
+     "B2": "=B3"
+    }
+   ],
+   "expected": {
+    "A1": 0.5,
+    "A2": 0,
+    "A3": {
+     "error": "#CYCLE!"
+    },
+    "B1": {
+     "error": "#NAME?"
+    },
+    "B2": 0
+   }
+  },
+  {
+   "id": "R07",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "0",
+     "A2": "=\"\"-0.5<=(D3^\"1\")",
+     "A3": "=IFERROR(A6,D2-+3)",
+     "A4": "=C1",
+     "A5": "=B6",
+     "A6": "=D6",
+     "B1": "=C6",
+     "B3": "=\"B\"",
+     "B4": "=3>=\"B\"<>d6",
+     "B6": "=(a5)/LEN(A5)",
+     "C2": "0",
+     "C3": "=D2",
+     "C4": "=0.5",
+     "C5": "10",
+     "C6": "=IF(B4^+B3,\"1\")",
+     "D1": "=(B1&C1)*B1",
+     "D4": "=MAX(10,MIN(\"-2.5\",D3,B6:C5)<=A3^B2)",
+     "D5": "=+AVERAGE(IFERROR(A6,B4),C6,a3:D1)"
+    }
+   ],
+   "expected": {
+    "A1": 0,
+    "A2": {
+     "error": "#VALUE!"
+    },
+    "A3": 0,
+    "A4": 0,
+    "A5": {
+     "error": "#CYCLE!"
+    },
+    "A6": 0,
+    "B1": {
+     "error": "#VALUE!"
+    },
+    "B3": "B",
+    "B4": false,
+    "B6": {
+     "error": "#CYCLE!"
+    },
+    "C2": 0,
+    "C3": 0,
+    "C4": 0.5,
+    "C5": 10,
+    "C6": {
+     "error": "#VALUE!"
+    },
+    "D1": {
+     "error": "#VALUE!"
+    },
+    "D4": {
+     "error": "#CYCLE!"
+    },
+    "D5": {
+     "error": "#VALUE!"
+    }
+   }
+  },
+  {
+   "id": "R08",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=(B2)=10>A1+A2<A3-a5",
+     "A2": "2.25",
+     "A3": "=OR(B1-B3*A2,\"\"/true,(AND(007)))",
+     "A5": "=IFERROR((MIN(A1,\"B\")),FOO(A2<=B6))",
+     "A6": "=A2&OR(-B1)",
+     "B1": "=AA1",
+     "B3": "=A6",
+     "B5": "=A2"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#CYCLE!"
+    },
+    "A2": 2.25,
+    "A3": {
+     "error": "#REF!"
+    },
+    "A5": {
+     "error": "#CYCLE!"
+    },
+    "A6": {
+     "error": "#REF!"
+    },
+    "B1": {
+     "error": "#REF!"
+    },
+    "B3": {
+     "error": "#REF!"
+    },
+    "B5": 2.25
+   }
+  },
+  {
+   "id": "R09",
+   "title": "random sheet",
+   "args": [
+    {
+     "A2": "=A3=C4<=ROUND(3,3)+IF(-0.5,\"true\",B1)",
+     "A3": "abc",
+     "A4": "=0.5",
+     "B1": "=((2.25)&C4)",
+     "B2": "=SUM(MAX(2.25,10)-+0.5,A4:B1,\"\")",
+     "B3": "=C3&+B3>=\"1\" 2",
+     "B4": "=AND(-MIN(C2:B4),IFERROR(a3,C1&3),B2:c2)",
+     "C1": "=SUM((B4)^c3,(b3),-B1)",
+     "C2": "abc",
+     "C4": "=\"B\""
+    }
+   ],
+   "expected": {
+    "A2": {
+     "error": "#VALUE!"
+    },
+    "A3": "abc",
+    "A4": 0.5,
+    "B1": "2.25B",
+    "B2": {
+     "error": "#CYCLE!"
+    },
+    "B3": {
+     "error": "#PARSE!"
+    },
+    "B4": {
+     "error": "#CYCLE!"
+    },
+    "C1": {
+     "error": "#CYCLE!"
+    },
+    "C2": "abc",
+    "C4": "B"
+   }
+  },
+  {
+   "id": "R10",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=\"TRUE\"",
+     "A2": "=C3",
+     "A3": "=(AA1)",
+     "A4": "=IF(-C3,+B4)^C4>ROUND(AA1,A5)",
+     "A5": "=(007)",
+     "B1": "=C1<>C4-(A2)",
+     "B2": "=(FOO(10/1))",
+     "B3": "=+C3<=\"x y\"^B3<OR(A2)",
+     "B4": "2",
+     "B5": "=B1",
+     "C1": "0",
+     "C2": "=B1",
+     "C3": "TRUE",
+     "C4": "=a2",
+     "C5": "FALSE"
+    }
+   ],
+   "expected": {
+    "A1": "TRUE",
+    "A2": true,
+    "A3": {
+     "error": "#REF!"
+    },
+    "A4": {
+     "error": "#REF!"
+    },
+    "A5": 7,
+    "B1": false,
+    "B2": {
+     "error": "#NAME?"
+    },
+    "B3": {
+     "error": "#CYCLE!"
+    },
+    "B4": 2,
+    "B5": false,
+    "C1": 0,
+    "C2": false,
+    "C3": true,
+    "C4": true,
+    "C5": false
+   }
+  },
+  {
+   "id": "R11",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=A4",
+     "A2": "=COUNT(B1:B4,IF(B1/0.5,\"\",A3),A4)",
+     "A3": "=b3>A1<>B2&A1",
+     "A4": "=A1",
+     "B1": "=\"\"",
+     "B2": "=(AND(1))",
+     "B3": "=NOT(\"true\")"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#CYCLE!"
+    },
+    "A2": 0,
+    "A3": {
+     "error": "#CYCLE!"
+    },
+    "A4": {
+     "error": "#CYCLE!"
+    },
+    "B1": "",
+    "B2": true,
+    "B3": false
+   }
+  },
+  {
+   "id": "R12",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=a3",
+     "A2": "",
+     "A3": "=CONCAT(B2)",
+     "A4": "=\"B\"/A3*B3<>B3>=A4",
+     "B2": "100",
+     "B3": "=(\"true\")",
+     "B4": "TRUE"
+    }
+   ],
+   "expected": {
+    "A1": "100",
+    "A2": null,
+    "A3": "100",
+    "A4": {
+     "error": "#CYCLE!"
+    },
+    "B2": 100,
+    "B3": "true",
+    "B4": true
+   }
+  },
+  {
+   "id": "R13",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=B2",
+     "A2": "=2",
+     "A3": "=a3",
+     "A4": "=a2",
+     "B1": "=B1",
+     "B3": "=(A3)=0<\"x y\"=SUM(AA1)&CONCAT(A3:B4,A1,A1)",
+     "B4": "=+B1"
+    }
+   ],
+   "expected": {
+    "A1": 0,
+    "A2": 2,
+    "A3": {
+     "error": "#CYCLE!"
+    },
+    "A4": 2,
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "B3": {
+     "error": "#CYCLE!"
+    },
+    "B4": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R14",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=\"-2.5\"",
+     "A2": "=B2",
+     "A3": "=AVERAGE(A1:A3)",
+     "B1": "=A1",
+     "B2": "=2.25=foo&-0.5^(A2/D2)",
+     "B3": "=(A3)>\"x y\">\"B\">=2.25>D2",
+     "C1": "=B1",
+     "C2": "=0.5<=B3>D2-\"a\"",
+     "C3": "=OR(0.1)",
+     "D2": "=-\"a\"^-b1>OR(C1:C2,B1:D2,C2)"
+    }
+   ],
+   "expected": {
+    "A1": "-2.5",
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A3": {
+     "error": "#CYCLE!"
+    },
+    "B1": "-2.5",
+    "B2": {
+     "error": "#CYCLE!"
+    },
+    "B3": {
+     "error": "#CYCLE!"
+    },
+    "C1": "-2.5",
+    "C2": {
+     "error": "#CYCLE!"
+    },
+    "C3": true,
+    "D2": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R15",
+   "title": "random sheet",
+   "args": [
+    {
+     "A2": "=(AND(D3:a2))=COUNT(\"TRUE\"+\"\",b2,D2:D2)",
+     "A3": "=COUNT(\"B\")",
+     "B1": "10",
+     "B2": "=D1",
+     "B3": "=MIN(B1:D3,OR(A2:C2))",
+     "C1": "=B2",
+     "C3": "=D3",
+     "D1": "=\"x y\"",
+     "D2": "=(CONCAT(3))",
+     "D3": "1."
+    }
+   ],
+   "expected": {
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A3": 0,
+    "B1": 10,
+    "B2": "x y",
+    "B3": {
+     "error": "#CYCLE!"
+    },
+    "C1": "x y",
+    "C3": "1.",
+    "D1": "x y",
+    "D2": "3",
+    "D3": "1."
+   }
+  },
+  {
+   "id": "R16",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=A1",
+     "A2": "=LEN((0.1))+A2",
+     "A3": "=2.25",
+     "B1": "=D3",
+     "C1": "=D3",
+     "C2": "3",
+     "C3": "3",
+     "D1": "=c3",
+     "D2": "=A1",
+     "D3": "=\"\">(C2)<B1"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#CYCLE!"
+    },
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A3": 2.25,
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "C1": {
+     "error": "#CYCLE!"
+    },
+    "C2": 3,
+    "C3": 3,
+    "D1": 3,
+    "D2": {
+     "error": "#CYCLE!"
+    },
+    "D3": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R17",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=+C3+10*B3",
+     "A3": "2.25",
+     "B1": "=3",
+     "B2": "1.",
+     "B3": "=ROUND(0,-\"TRUE\")&SUM(C1^\"B\",C3:c2)",
+     "C1": "=C2",
+     "C2": "=\"a\"",
+     "C3": "0.5",
+     "D1": "=CONCAT(FOO(1,A3),COUNT(B2,3,B1))<>C2",
+     "D2": "=COUNT(1*c3,C1:C3)<b1",
+     "D3": "=COUNT((B3)/2.25)"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#VALUE!"
+    },
+    "A3": 2.25,
+    "B1": 3,
+    "B2": "1.",
+    "B3": {
+     "error": "#VALUE!"
+    },
+    "C1": "a",
+    "C2": "a",
+    "C3": 0.5,
+    "D1": {
+     "error": "#NAME?"
+    },
+    "D2": true,
+    "D3": 0
+   }
+  },
+  {
+   "id": "R18",
+   "title": "random sheet",
+   "args": [
+    {
+     "A2": "=+a1",
+     "A3": "=C2",
+     "B2": "0",
+     "C1": "=OR(A0,A1,c2)/C2+C1",
+     "C2": "=0=(\"TRUE\")*-100"
+    }
+   ],
+   "expected": {
+    "A2": 0,
+    "A3": {
+     "error": "#VALUE!"
+    },
+    "B2": 0,
+    "C1": {
+     "error": "#CYCLE!"
+    },
+    "C2": {
+     "error": "#VALUE!"
+    }
+   }
+  },
+  {
+   "id": "R19",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=\"a\"<=+foo=(A2)",
+     "A2": "",
+     "A4": "=NOT((\"TRUE\")&NOT(B4))",
+     "A5": "0",
+     "B1": "=A1",
+     "B3": "=A5>\"\"&(A0)",
+     "B4": "=OR(\"1\",B3+B4)+(B5/a2)",
+     "B5": "=NOT(A3)"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#NAME?"
+    },
+    "A2": null,
+    "A4": {
+     "error": "#CYCLE!"
+    },
+    "A5": 0,
+    "B1": {
+     "error": "#NAME?"
+    },
+    "B3": {
+     "error": "#REF!"
+    },
+    "B4": {
+     "error": "#CYCLE!"
+    },
+    "B5": true
+   }
+  },
+  {
+   "id": "R20",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=MIN(d1<>A3,OR(B1))^A2",
+     "A2": "=c2",
+     "B1": "=A1>=LEN(1)^IF(NOT(D1),\"a\"<>A2,-3)",
+     "B2": "abc",
+     "C1": "=MAX(C3:b3,NOT(\"x y\"<>b1),A1)",
+     "C2": "=D3",
+     "C3": "=10",
+     "D1": "1.",
+     "D2": "=(D2)",
+     "D3": "=IFERROR(\"1\",-OR(b3:C3,C2,b1:D2))"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#CYCLE!"
+    },
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "B2": "abc",
+    "C1": {
+     "error": "#CYCLE!"
+    },
+    "C2": {
+     "error": "#CYCLE!"
+    },
+    "C3": 10,
+    "D1": "1.",
+    "D2": {
+     "error": "#CYCLE!"
+    },
+    "D3": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R21",
+   "title": "random sheet",
+   "args": [
+    {
+     "A2": "TRUE",
+     "A3": "=007",
+     "A4": "=\"TRUE\"",
+     "A5": "abc",
+     "B1": "=+IFERROR(COUNT(C1:A2,B2:B5,A3),A1)",
+     "B2": "=A3",
+     "B3": "=MIN(B3:A5,+A2^c1)",
+     "B4": "1.",
+     "B5": "abc",
+     "C2": "=(MIN(\"1\")^TRUE<=C4) 2",
+     "C3": "=(\"-2.5\")",
+     "C4": "=B5",
+     "C5": "=ROUND(\"B\",(100))<A1"
+    }
+   ],
+   "expected": {
+    "A2": true,
+    "A3": 7,
+    "A4": "TRUE",
+    "A5": "abc",
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "B2": 7,
+    "B3": {
+     "error": "#CYCLE!"
+    },
+    "B4": "1.",
+    "B5": "abc",
+    "C2": {
+     "error": "#PARSE!"
+    },
+    "C3": "-2.5",
+    "C4": "abc",
+    "C5": {
+     "error": "#VALUE!"
+    }
+   }
+  },
+  {
+   "id": "R22",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=B1",
+     "A2": "=A1",
+     "A3": "=COUNT(B1-OR(B2,\"a\",\"true\"),B2:B3)",
+     "B1": "=+A1",
+     "B2": "=\"a\""
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#CYCLE!"
+    },
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A3": 0,
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "B2": "a"
+   }
+  },
+  {
+   "id": "R23",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=1",
+     "A3": "-3",
+     "A4": "=NOT(B3)",
+     "B1": "TRUE",
+     "B3": "=COUNT(B1:C4,0,C2:A1)",
+     "B4": "=100-0",
+     "C1": "=B1"
+    }
+   ],
+   "expected": {
+    "A1": 1,
+    "A3": -3,
+    "A4": {
+     "error": "#CYCLE!"
+    },
+    "B1": true,
+    "B3": {
+     "error": "#CYCLE!"
+    },
+    "B4": 100,
+    "C1": true
+   }
+  },
+  {
+   "id": "R24",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "abc",
+     "A3": "=0",
+     "B1": "0.1",
+     "B2": "=A2",
+     "C3": "=A1"
+    }
+   ],
+   "expected": {
+    "A1": "abc",
+    "A3": 0,
+    "B1": 0.1,
+    "B2": 0,
+    "C3": "abc"
+   }
+  },
+  {
+   "id": "R25",
+   "title": "random sheet",
+   "args": [
+    {
+     "A4": "=B1",
+     "B1": "=COUNT(\"x y\"+a4^\"\"/\"a\")",
+     "B2": "=AVERAGE(LEN(B2)<+10)",
+     "B3": "",
+     "B4": "=CONCAT(a1:C3)",
+     "C1": "=AA1",
+     "C2": "=IFERROR(c1,B3)",
+     "C3": "=007",
+     "D2": "=\"-2.5\"",
+     "D3": "0.1"
+    }
+   ],
+   "expected": {
+    "A4": {
+     "error": "#CYCLE!"
+    },
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "B2": {
+     "error": "#CYCLE!"
+    },
+    "B3": null,
+    "B4": {
+     "error": "#CYCLE!"
+    },
+    "C1": {
+     "error": "#REF!"
+    },
+    "C2": 0,
+    "C3": 7,
+    "D2": "-2.5",
+    "D3": 0.1
+   }
+  },
+  {
+   "id": "R26",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=(B2)<=((AA1))",
+     "A2": "100",
+     "A3": "TRUE",
+     "B2": "2",
+     "C2": "=\"-2.5\"",
+     "C3": "=+-C3+B2"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#REF!"
+    },
+    "A2": 100,
+    "A3": true,
+    "B2": 2,
+    "C2": "-2.5",
+    "C3": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R27",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=B2-IFERROR(AVERAGE(A3:B5,B2,B3),NOT(a5))",
+     "A2": "=SUM(0.1,(+0))",
+     "A3": "=A1>\"true\"<>0<\"B\"<>B3 2",
+     "A4": "=(NOT(+B5))",
+     "A5": "=-AND(A5:A5,3<=\"a\",2)",
+     "B2": "=A3/(OR(A3:a1,0.1))",
+     "B3": "=B5",
+     "B4": "=B4",
+     "B5": "0"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#CYCLE!"
+    },
+    "A2": 0.1,
+    "A3": {
+     "error": "#PARSE!"
+    },
+    "A4": true,
+    "A5": {
+     "error": "#CYCLE!"
+    },
+    "B2": {
+     "error": "#CYCLE!"
+    },
+    "B3": 0,
+    "B4": {
+     "error": "#CYCLE!"
+    },
+    "B5": 0
+   }
+  },
+  {
+   "id": "R28",
+   "title": "random sheet",
+   "args": [
+    {
+     "A2": "=A1",
+     "B3": "=A4^(ROUND(B2,a4))",
+     "B4": "=MIN(B2,b4,B2)<>OR(b2:B2,foo,B3:A2)<>(B3)<>\"x y\""
+    }
+   ],
+   "expected": {
+    "A2": 0,
+    "B3": {
+     "error": "#NUM!"
+    },
+    "B4": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R29",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=MAX(A1:b4,C1)",
+     "A2": "=-(A2)",
+     "B2": "=(NOT(0.1))",
+     "B3": "=1",
+     "B4": "=+B1=D4",
+     "C2": "=B3",
+     "C3": "=D3=2-D2-B1",
+     "C4": "=b1/C3+true>=D3",
+     "D1": "=B2",
+     "D2": "=AA1-D3-A4+(COUNT(B4,\"B\",C4:A4))",
+     "D3": "x",
+     "D4": "=\"-2.5\""
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#CYCLE!"
+    },
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "B2": false,
+    "B3": 1,
+    "B4": false,
+    "C2": 1,
+    "C3": {
+     "error": "#CYCLE!"
+    },
+    "C4": {
+     "error": "#CYCLE!"
+    },
+    "D1": false,
+    "D2": {
+     "error": "#CYCLE!"
+    },
+    "D3": "x",
+    "D4": "-2.5"
+   }
+  },
+  {
+   "id": "R30",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=((C1/D1))",
+     "A2": "=((-B1))",
+     "B2": "=foo",
+     "C1": "-3",
+     "C2": "0.5",
+     "C3": "=A1",
+     "D1": "-3",
+     "D2": "=(AVERAGE(0.1)),1",
+     "D3": "0"
+    }
+   ],
+   "expected": {
+    "A1": 1,
+    "A2": 0,
+    "B2": {
+     "error": "#NAME?"
+    },
+    "C1": -3,
+    "C2": 0.5,
+    "C3": 1,
+    "D1": -3,
+    "D2": {
+     "error": "#PARSE!"
+    },
+    "D3": 0
+   }
+  },
+  {
+   "id": "R31",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=A3&B2*0.1&10",
+     "A2": "=-AA1",
+     "A3": "1",
+     "A4": "=A1",
+     "B1": "=MAX(A4:D3)",
+     "B2": "3",
+     "B3": "=LEN((a4))",
+     "B4": "=+0.1&C2<>TRUE",
+     "C1": "=LEN(C4>=C1)/0.1)",
+     "C2": "=(AND(D4:D1))",
+     "C3": "FALSE",
+     "C4": "10",
+     "D3": "=CONCAT(MIN(b3,IF(2,C1),C1),B4)",
+     "D4": "=A4"
+    }
+   ],
+   "expected": {
+    "A1": "10.310",
+    "A2": {
+     "error": "#REF!"
+    },
+    "A3": 1,
+    "A4": "10.310",
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "B2": 3,
+    "B3": 6,
+    "B4": {
+     "error": "#CYCLE!"
+    },
+    "C1": {
+     "error": "#PARSE!"
+    },
+    "C2": {
+     "error": "#CYCLE!"
+    },
+    "C3": false,
+    "C4": 10,
+    "D3": {
+     "error": "#CYCLE!"
+    },
+    "D4": "10.310"
+   }
+  },
+  {
+   "id": "R32",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=true",
+     "A2": "=ROUND((CONCAT(A6,B5,A1:A4)),B1)",
+     "A3": "100",
+     "A4": "=NOT(A6/100=A2)",
+     "A5": "=-B6",
+     "A6": "=CONCAT(B3:A2)",
+     "B1": "=007",
+     "B3": "=-100",
+     "B5": "=MAX(A4:A1)",
+     "B6": "0.1"
+    }
+   ],
+   "expected": {
+    "A1": true,
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A3": 100,
+    "A4": {
+     "error": "#CYCLE!"
+    },
+    "A5": -0.1,
+    "A6": {
+     "error": "#CYCLE!"
+    },
+    "B1": 7,
+    "B3": -100,
+    "B5": {
+     "error": "#CYCLE!"
+    },
+    "B6": 0.1
+   }
+  },
+  {
+   "id": "R33",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=SUM(C4)",
+     "A3": "1",
+     "A4": "=-(C2)",
+     "B1": "=AND(C1:A3)",
+     "B2": "=B2)",
+     "B4": "=LEN((\"B\"))",
+     "C1": "=\"true\"",
+     "C3": "=A3+A4",
+     "C4": "007"
+    }
+   ],
+   "expected": {
+    "A1": 7,
+    "A3": 1,
+    "A4": 0,
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "B2": {
+     "error": "#PARSE!"
+    },
+    "B4": 1,
+    "C1": "true",
+    "C3": 1,
+    "C4": 7
+   }
+  },
+  {
+   "id": "R34",
+   "title": "random sheet",
+   "args": [
+    {
+     "A2": "=B3>=A2^\"\"",
+     "A3": "=ROUND(D2,D2-D1&B3)",
+     "B1": "=0.5<=C3<=A2&IFERROR(-100,(007))",
+     "B2": "-3",
+     "B3": "=SUM(B1,\"B\",\"-2.5\")+AND(D2)",
+     "C2": "=D1",
+     "D1": "=B1",
+     "D2": "=\"B\">=D1+1>A1"
+    }
+   ],
+   "expected": {
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A3": {
+     "error": "#CYCLE!"
+    },
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "B2": -3,
+    "B3": {
+     "error": "#CYCLE!"
+    },
+    "C2": {
+     "error": "#CYCLE!"
+    },
+    "D1": {
+     "error": "#CYCLE!"
+    },
+    "D2": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R35",
+   "title": "random sheet",
+   "args": [
+    {
+     "A2": "=\"TRUE\"",
+     "A3": "=(FALSE)",
+     "A4": "=CONCAT(C1:c4)",
+     "A5": "=FALSE",
+     "B1": "=C1+c1",
+     "B2": "=COUNT(B1:A2,100)<=+A2&(C1)",
+     "B3": "=-(FOO(\"\",\"a\"))",
+     "B4": "=B2",
+     "B5": "=C4",
+     "C2": "=COUNT(CONCAT(CONCAT(C3,a5:A2,B3),B4^A4,AVERAGE(\"true\",\"\",A1:C3)))",
+     "C3": "=B3",
+     "C4": "=C5<=\"x y\">=B3<foo<=AND(\"\",A3,a1:B2)>c4",
+     "C5": "=CONCAT(A2,C5,B5:C1)"
+    }
+   ],
+   "expected": {
+    "A2": "TRUE",
+    "A3": false,
+    "A4": {
+     "error": "#CYCLE!"
+    },
+    "A5": false,
+    "B1": 0,
+    "B2": {
+     "error": "#CYCLE!"
+    },
+    "B3": {
+     "error": "#NAME?"
+    },
+    "B4": {
+     "error": "#CYCLE!"
+    },
+    "B5": {
+     "error": "#CYCLE!"
+    },
+    "C2": {
+     "error": "#CYCLE!"
+    },
+    "C3": {
+     "error": "#NAME?"
+    },
+    "C4": {
+     "error": "#CYCLE!"
+    },
+    "C5": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R36",
+   "title": "random sheet",
+   "args": [
+    {
+     "A2": "=+MIN(C2:b3,C4:c2,2)",
+     "A3": "=+((B4))",
+     "A4": "=-\"-2.5\"",
+     "B1": "=\"true\"",
+     "B2": "=C2<>C4",
+     "B3": "=0<c3",
+     "C1": "10",
+     "C2": "1",
+     "C3": "=C1&C2",
+     "C4": "0.1"
+    }
+   ],
+   "expected": {
+    "A2": 0.1,
+    "A3": 0,
+    "A4": 2.5,
+    "B1": "true",
+    "B2": true,
+    "B3": true,
+    "C1": 10,
+    "C2": 1,
+    "C3": "101",
+    "C4": 0.1
+   }
+  },
+  {
+   "id": "R37",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=NOT(A1+(B1))",
+     "A2": "=A3<>\"a\"^CONCAT(A3,007,C3)<=B2",
+     "A3": "=007",
+     "B1": "=\"-2.5\"",
+     "B2": "=C4",
+     "B3": "=A2",
+     "B4": "=+A1",
+     "C1": "=B1-ROUND(\"TRUE\",0.1)/\"true\"<MIN(0.1,C2:c2)",
+     "C2": "=MIN(\"1\",B3:A1)--1",
+     "C3": "=FOO(-LEN(a1))",
+     "C4": "=007"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#CYCLE!"
+    },
+    "A2": {
+     "error": "#NAME?"
+    },
+    "A3": 7,
+    "B1": "-2.5",
+    "B2": 7,
+    "B3": {
+     "error": "#NAME?"
+    },
+    "B4": {
+     "error": "#CYCLE!"
+    },
+    "C1": {
+     "error": "#VALUE!"
+    },
+    "C2": {
+     "error": "#CYCLE!"
+    },
+    "C3": {
+     "error": "#NAME?"
+    },
+    "C4": 7
+   }
+  },
+  {
+   "id": "R38",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=\"x y\"",
+     "A2": "=SUM(b3:C3)",
+     "A3": "=\"a\"",
+     "B1": "=0.1 2",
+     "B2": "=+2/A0=0",
+     "B3": "=IF(A2+007,\"a\",C3)/\"\"",
+     "C2": "=B3/true*IF(A2,100,C3)",
+     "C3": "=COUNT(C2:A1,C3:B3)^+A3>A2"
+    }
+   ],
+   "expected": {
+    "A1": "x y",
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A3": "a",
+    "B1": {
+     "error": "#PARSE!"
+    },
+    "B2": {
+     "error": "#REF!"
+    },
+    "B3": {
+     "error": "#CYCLE!"
+    },
+    "C2": {
+     "error": "#CYCLE!"
+    },
+    "C3": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R39",
+   "title": "random sheet",
+   "args": [
+    {
+     "A2": "=\"\">=IFERROR(\"x y\",\"true\"^A1)",
+     "A3": "=((LEN(\"true\")))",
+     "A4": "=(2)/A2",
+     "B1": "1.",
+     "B4": "FALSE",
+     "C1": "=-B3^10>C4",
+     "C2": "=(d1<=\"B\"-C1)",
+     "C3": "",
+     "C4": "=0",
+     "D1": "=MIN(D2:A1)+0.1",
+     "D2": "=C1",
+     "D3": "=C2",
+     "D4": "=\"\""
+    }
+   ],
+   "expected": {
+    "A2": false,
+    "A3": 4,
+    "A4": {
+     "error": "#DIV/0!"
+    },
+    "B1": "1.",
+    "B4": false,
+    "C1": false,
+    "C2": {
+     "error": "#CYCLE!"
+    },
+    "C3": null,
+    "C4": 0,
+    "D1": {
+     "error": "#CYCLE!"
+    },
+    "D2": false,
+    "D3": {
+     "error": "#CYCLE!"
+    },
+    "D4": ""
+   }
+  },
+  {
+   "id": "R40",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=\"a\"",
+     "A2": "=ROUND(B5,MIN(C4))-2.25",
+     "A3": "1.",
+     "A4": "=true",
+     "A5": "=2",
+     "A6": "=A1",
+     "B1": "=AA1",
+     "B2": "=A2",
+     "B3": "=\"B\"",
+     "B4": "0.5",
+     "B6": "1.",
+     "C1": "",
+     "C3": "=NOT(MAX(B2))",
+     "C4": "0.1",
+     "C5": "=+C4",
+     "C6": "=c1<>-(B2)"
+    }
+   ],
+   "expected": {
+    "A1": "a",
+    "A2": -2.25,
+    "A3": "1.",
+    "A4": true,
+    "A5": 2,
+    "A6": "a",
+    "B1": {
+     "error": "#REF!"
+    },
+    "B2": -2.25,
+    "B3": "B",
+    "B4": 0.5,
+    "B6": "1.",
+    "C1": null,
+    "C3": false,
+    "C4": 0.1,
+    "C5": 0.1,
+    "C6": true
+   }
+  },
+  {
+   "id": "R41",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=A3-LEN(\"true\")=OR(c5:B6,\"a\">0)",
+     "A2": "=IFERROR(-\"a\",(A2)>=\"1\"/\"true\")",
+     "A3": "=\"a\"",
+     "A4": "TRUE",
+     "A5": "",
+     "A6": "=A3&B2",
+     "B1": "=2.25>=2<>1&\"TRUE\"",
+     "B2": "=true+ROUND(0.1,2.25*D1)",
+     "B4": "TRUE",
+     "B6": "10",
+     "C1": "=AA1",
+     "C2": "-3",
+     "C3": "=C6",
+     "C5": "=0.5",
+     "C6": "=B2",
+     "D1": "=-(0.1+\"B\")",
+     "D2": "=-007&D3<=+C2+007",
+     "D4": "=A3",
+     "D5": "=(D4)/(-C6)",
+     "D6": "abc"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#VALUE!"
+    },
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A3": "a",
+    "A4": true,
+    "A5": null,
+    "A6": {
+     "error": "#VALUE!"
+    },
+    "B1": true,
+    "B2": {
+     "error": "#VALUE!"
+    },
+    "B4": true,
+    "B6": 10,
+    "C1": {
+     "error": "#REF!"
+    },
+    "C2": -3,
+    "C3": {
+     "error": "#VALUE!"
+    },
+    "C5": 0.5,
+    "C6": {
+     "error": "#VALUE!"
+    },
+    "D1": {
+     "error": "#VALUE!"
+    },
+    "D2": false,
+    "D4": "a",
+    "D5": {
+     "error": "#VALUE!"
+    },
+    "D6": "abc"
+   }
+  },
+  {
+   "id": "R42",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=IF(A5,0.5)",
+     "A3": "=B3",
+     "A5": "=(B5)",
+     "B1": "=A2 2",
+     "B2": "=-C4>C2/OR(B1:A1,C1:C3,C2)",
+     "B3": "=B3>=2",
+     "B4": "0.1",
+     "B5": "x",
+     "C1": "=+(\"-2.5\"<foo)",
+     "C2": "=TRUE/ROUND(ROUND(A2,3),A4<C1)",
+     "C3": "=A3",
+     "C4": "=A2"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#VALUE!"
+    },
+    "A3": {
+     "error": "#CYCLE!"
+    },
+    "A5": "x",
+    "B1": {
+     "error": "#PARSE!"
+    },
+    "B2": {
+     "error": "#NAME?"
+    },
+    "B3": {
+     "error": "#CYCLE!"
+    },
+    "B4": 0.1,
+    "B5": "x",
+    "C1": {
+     "error": "#NAME?"
+    },
+    "C2": {
+     "error": "#NAME?"
+    },
+    "C3": {
+     "error": "#CYCLE!"
+    },
+    "C4": 0
+   }
+  },
+  {
+   "id": "R43",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=AVERAGE(A3:B3,A3,A3:B1)",
+     "A2": "=0",
+     "A3": "=ROUND(2.25=C2-c3<=A3,\"-2.5\")",
+     "B1": "=SUM((A0),B1:B3,C1:B2)^\"true\"",
+     "B2": "=007",
+     "B3": "=(A0)",
+     "C1": "=A2",
+     "C2": "-3",
+     "C3": "=+C3>=B2"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#CYCLE!"
+    },
+    "A2": 0,
+    "A3": {
+     "error": "#CYCLE!"
+    },
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "B2": 7,
+    "B3": {
+     "error": "#REF!"
+    },
+    "C1": 0,
+    "C2": -3,
+    "C3": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R44",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=MAX((\"TRUE\"),A1:A2,A3)/LEN(AVERAGE(B3))",
+     "A2": "=(B4)^CONCAT(A3,B2:A1)",
+     "A3": "=1",
+     "A4": "0.5",
+     "B1": "1.",
+     "B2": "=B4",
+     "B3": "=A1<A2",
+     "B4": "=0"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#CYCLE!"
+    },
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A3": 1,
+    "A4": 0.5,
+    "B1": "1.",
+    "B2": 0,
+    "B3": {
+     "error": "#CYCLE!"
+    },
+    "B4": 0
+   }
+  },
+  {
+   "id": "R45",
+   "title": "random sheet",
+   "args": [
+    {
+     "A2": "0.5",
+     "A3": "=(FALSE)^(TRUE)+100",
+     "A4": "=LEN((2)<=\"a\")",
+     "B1": "=MAX(A3:A4)",
+     "B2": "=MAX(A1:A4,0.1,B3:B1)",
+     "B4": "=NOT(A2)&\"true\"<B1<B4+B3"
+    }
+   ],
+   "expected": {
+    "A2": 0.5,
+    "A3": 100,
+    "A4": 4,
+    "B1": 100,
+    "B2": {
+     "error": "#CYCLE!"
+    },
+    "B4": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R46",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "0.5",
+     "A2": "=IFERROR(0.1,C4)^\"B\"*100<A3",
+     "A3": "=(B4)",
+     "A4": "=0.1*B5&A1",
+     "A5": "=C5",
+     "B2": "",
+     "B3": "=D4<=3^C2=(007)",
+     "B5": "=0.1",
+     "C2": "",
+     "C3": "100",
+     "C4": "3",
+     "C5": "=A5+C1*FOO(A1,C1,1)",
+     "D1": "=C2",
+     "D2": "=C2",
+     "D4": "=C1",
+     "D5": "=ROUND(LEN(C1),A4)>MIN(0)"
+    }
+   ],
+   "expected": {
+    "A1": 0.5,
+    "A2": {
+     "error": "#VALUE!"
+    },
+    "A3": 0,
+    "A4": "0.010.5",
+    "A5": {
+     "error": "#CYCLE!"
+    },
+    "B2": null,
+    "B3": false,
+    "B5": 0.1,
+    "C2": null,
+    "C3": 100,
+    "C4": 3,
+    "C5": {
+     "error": "#CYCLE!"
+    },
+    "D1": 0,
+    "D2": 0,
+    "D4": 0,
+    "D5": {
+     "error": "#VALUE!"
+    }
+   }
+  },
+  {
+   "id": "R47",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=A3",
+     "A2": "=FOO(-LEN(a3),(\"a\"),D3<>2/D5<=A2)",
+     "A3": "=\"B\"",
+     "A4": "=(\"TRUE\")",
+     "A5": "=1",
+     "B1": "=100",
+     "B3": "=FOO(C4,D3,FOO(B1,\"x y\",\"TRUE\"))+(IFERROR(B4,\"a\"))+",
+     "B4": "=((B2)/AA1)",
+     "B5": "=A3^NOT(FOO(true,A2))",
+     "C1": "=D1&a3<TRUE/D2",
+     "C2": "=-\"-2.5\"*OR(B1,A1:D2)+",
+     "C3": "=D1",
+     "C4": "1",
+     "C5": "=B5/0=D4&+C4",
+     "D1": "0.5",
+     "D2": "=C4",
+     "D3": "=-B5-C4<>MAX(+\"x y\",-D1,\"B\")",
+     "D4": "=C4",
+     "D5": "=AA1"
+    }
+   ],
+   "expected": {
+    "A1": "B",
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A3": "B",
+    "A4": "TRUE",
+    "A5": 1,
+    "B1": 100,
+    "B3": {
+     "error": "#PARSE!"
+    },
+    "B4": {
+     "error": "#REF!"
+    },
+    "B5": {
+     "error": "#CYCLE!"
+    },
+    "C1": false,
+    "C2": {
+     "error": "#PARSE!"
+    },
+    "C3": 0.5,
+    "C4": 1,
+    "C5": {
+     "error": "#CYCLE!"
+    },
+    "D1": 0.5,
+    "D2": 1,
+    "D3": {
+     "error": "#CYCLE!"
+    },
+    "D4": 1,
+    "D5": {
+     "error": "#REF!"
+    }
+   }
+  },
+  {
+   "id": "R48",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=MIN(B3)",
+     "A2": "=3",
+     "B1": "=\"1\"",
+     "B3": "=+1&-0.1",
+     "C1": "2.25",
+     "D1": "2.25",
+     "D2": "=D3",
+     "D3": "=OR(\"B\"/\"true\"+2.25,OR(C2,B1:A3)+COUNT(d2))"
+    }
+   ],
+   "expected": {
+    "A1": 0,
+    "A2": 3,
+    "B1": "1",
+    "B3": "1-0.1",
+    "C1": 2.25,
+    "D1": 2.25,
+    "D2": {
+     "error": "#CYCLE!"
+    },
+    "D3": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R49",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=(\"TRUE\")",
+     "A2": "100",
+     "A3": "=MIN(\"-2.5\",a3:a1,2.25)<=+B3<=B2",
+     "B1": "10"
+    }
+   ],
+   "expected": {
+    "A1": "TRUE",
+    "A2": 100,
+    "A3": {
+     "error": "#CYCLE!"
+    },
+    "B1": 10
+   }
+  },
+  {
+   "id": "R50",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=(A5)",
+     "A3": "=B6",
+     "A4": "=(+A4)",
+     "A5": "=(B6)",
+     "A6": "=c3&\"-2.5\"=C4-A4&\"x y\"&(3)",
+     "B1": "=B3",
+     "B2": "=+A2",
+     "B5": "007",
+     "B6": "1",
+     "C2": "1",
+     "C3": "100",
+     "C4": "=FOO(+-B3,b2,(\"-2.5\"))",
+     "C5": "=\"\"=0.5",
+     "C6": "=100"
+    }
+   ],
+   "expected": {
+    "A1": 1,
+    "A3": 1,
+    "A4": {
+     "error": "#CYCLE!"
+    },
+    "A5": 1,
+    "A6": {
+     "error": "#NAME?"
+    },
+    "B1": 0,
+    "B2": 0,
+    "B5": 7,
+    "B6": 1,
+    "C2": 1,
+    "C3": 100,
+    "C4": {
+     "error": "#NAME?"
+    },
+    "C5": false,
+    "C6": 100
+   }
+  },
+  {
+   "id": "R51",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "-3",
+     "A2": "=D2<>AND(D2:D4,FALSE,\"true\")",
+     "A5": "0.5",
+     "A6": "=MIN(OR(B6:C1,-B4),C5+D6)",
+     "B1": "=C6",
+     "B4": "=A6",
+     "B5": "=C4",
+     "B6": "=(B2)-(C6)<B3&C3",
+     "C3": "=C4",
+     "C4": "=2.25",
+     "C5": "=d1",
+     "C6": "=+SUM(C5)",
+     "D1": "=\"\"-+NOT(B4)",
+     "D2": "=IFERROR((0.1),+2.25<=B6)",
+     "D3": "=A2",
+     "D4": "=C1+A5>A6",
+     "D5": "=\"true\"<>CONCAT(A4<=B6)",
+     "D6": "=NOT(D4<\"a\")/D6<0.1=OR(B6:A6)"
+    }
+   ],
+   "expected": {
+    "A1": -3,
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A5": 0.5,
+    "A6": {
+     "error": "#CYCLE!"
+    },
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "B4": {
+     "error": "#CYCLE!"
+    },
+    "B5": 2.25,
+    "B6": {
+     "error": "#CYCLE!"
+    },
+    "C3": 2.25,
+    "C4": 2.25,
+    "C5": {
+     "error": "#CYCLE!"
+    },
+    "C6": {
+     "error": "#CYCLE!"
+    },
+    "D1": {
+     "error": "#CYCLE!"
+    },
+    "D2": 0.1,
+    "D3": {
+     "error": "#CYCLE!"
+    },
+    "D4": {
+     "error": "#CYCLE!"
+    },
+    "D5": {
+     "error": "#CYCLE!"
+    },
+    "D6": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R52",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=10",
+     "A2": "=C1",
+     "B1": "=\"-2.5\"",
+     "B2": "=(\"\")",
+     "B3": "=FOO(COUNT((\"-2.5\"),B1:B2))",
+     "C2": "=C3+0.5&0<=B3<>IF((0.1),OR(C2:C3),C1>=2.25)"
+    }
+   ],
+   "expected": {
+    "A1": 10,
+    "A2": 0,
+    "B1": "-2.5",
+    "B2": "",
+    "B3": {
+     "error": "#NAME?"
+    },
+    "C2": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R53",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=A2",
+     "A2": "=--\"TRUE\"",
+     "A3": "=-B2>=C3>=B5-B3",
+     "A4": "=A6",
+     "A5": "007",
+     "A6": "=COUNT(B6:C5)",
+     "B1": "100",
+     "B2": "2.25",
+     "B4": "=COUNT(A5:A2))",
+     "B5": "x",
+     "B6": "=COUNT(MAX(A1,B2,B6))^A5",
+     "C1": "=C5>=-A4<=A5",
+     "C2": "=(C3)*MAX(C6:A4,A5:C6)",
+     "C3": "=ROUND((D5),OR(A6)+A4)",
+     "C4": "=D6",
+     "C5": "=(3/A2)",
+     "D2": "=C2",
+     "D3": "=d4>+A3*\"B\"",
+     "D4": "=0.1<=SUM(B2:A5)<=\"-2.5\"",
+     "D5": "=(CONCAT(0.1,D4:B6,A6))"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#VALUE!"
+    },
+    "A2": {
+     "error": "#VALUE!"
+    },
+    "A3": {
+     "error": "#CYCLE!"
+    },
+    "A4": 0,
+    "A5": 7,
+    "A6": 0,
+    "B1": 100,
+    "B2": 2.25,
+    "B4": {
+     "error": "#PARSE!"
+    },
+    "B5": "x",
+    "B6": {
+     "error": "#CYCLE!"
+    },
+    "C1": {
+     "error": "#VALUE!"
+    },
+    "C2": {
+     "error": "#CYCLE!"
+    },
+    "C3": {
+     "error": "#CYCLE!"
+    },
+    "C4": 0,
+    "C5": {
+     "error": "#VALUE!"
+    },
+    "D2": {
+     "error": "#CYCLE!"
+    },
+    "D3": {
+     "error": "#CYCLE!"
+    },
+    "D4": {
+     "error": "#CYCLE!"
+    },
+    "D5": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R54",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=\"true\"*B2<=(\"1\"<A1)",
+     "A2": "=B2",
+     "A4": "=(AVERAGE(MAX(A1)))",
+     "B1": "=IF(A3,(\"x y\"),NOT(A3))",
+     "B2": "=A2",
+     "B3": "=B1",
+     "B4": "=A2^B2"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#CYCLE!"
+    },
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A4": {
+     "error": "#CYCLE!"
+    },
+    "B1": true,
+    "B2": {
+     "error": "#CYCLE!"
+    },
+    "B3": true,
+    "B4": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R55",
+   "title": "random sheet",
+   "args": [
+    {
+     "A2": "=A3",
+     "A3": "=(FOO(B2))",
+     "B1": "=CONCAT(B3:B3,B1:B3)",
+     "B2": "=+B3",
+     "B3": "=A1"
+    }
+   ],
+   "expected": {
+    "A2": {
+     "error": "#NAME?"
+    },
+    "A3": {
+     "error": "#NAME?"
+    },
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "B2": 0,
+    "B3": 0
+   }
+  },
+  {
+   "id": "R56",
+   "title": "random sheet",
+   "args": [
+    {
+     "A2": "abc",
+     "B1": "=IF(\"1\",AA1,10)<>B1^b2>=(1<2.25)",
+     "B2": "=\"a\"",
+     "B3": "=(-\"x y\"<>C3)",
+     "C1": "10",
+     "C2": "=B3",
+     "D2": "=AA1"
+    }
+   ],
+   "expected": {
+    "A2": "abc",
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "B2": "a",
+    "B3": {
+     "error": "#VALUE!"
+    },
+    "C1": 10,
+    "C2": {
+     "error": "#VALUE!"
+    },
+    "D2": {
+     "error": "#REF!"
+    }
+   }
+  },
+  {
+   "id": "R57",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "2",
+     "A2": "=A3",
+     "B1": "=(A2)",
+     "B2": "=(A3*A3)>=\"TRUE\"",
+     "B3": "=(0.5>=0.5+\"x y\"^TRUE)"
+    }
+   ],
+   "expected": {
+    "A1": 2,
+    "A2": 0,
+    "B1": 0,
+    "B2": false,
+    "B3": {
+     "error": "#VALUE!"
+    }
+   }
+  },
+  {
+   "id": "R58",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=B4",
+     "A2": "=-C2<ROUND(2,\"\")",
+     "A3": "3",
+     "A4": "=AND(A2:C4)",
+     "B1": "0.1",
+     "B2": "2",
+     "B3": "=007",
+     "B4": "0.5",
+     "C3": "=c4",
+     "C4": "TRUE"
+    }
+   ],
+   "expected": {
+    "A1": 0.5,
+    "A2": {
+     "error": "#VALUE!"
+    },
+    "A3": 3,
+    "A4": {
+     "error": "#CYCLE!"
+    },
+    "B1": 0.1,
+    "B2": 2,
+    "B3": 7,
+    "B4": 0.5,
+    "C3": true,
+    "C4": true
+   }
+  },
+  {
+   "id": "R59",
+   "title": "random sheet",
+   "args": [
+    {
+     "A2": "=ROUND(\"true\",A4&A3<LEN(2))",
+     "A3": "=\"B\"",
+     "B1": "=+\"x y\" 2",
+     "B2": "=OR(B2:A2)",
+     "B3": "x",
+     "B4": "=FOO(TRUE,A4<A3)"
+    }
+   ],
+   "expected": {
+    "A2": {
+     "error": "#VALUE!"
+    },
+    "A3": "B",
+    "B1": {
+     "error": "#PARSE!"
+    },
+    "B2": {
+     "error": "#CYCLE!"
+    },
+    "B3": "x",
+    "B4": {
+     "error": "#NAME?"
+    }
+   }
+  },
+  {
+   "id": "R60",
+   "title": "random sheet",
+   "args": [
+    {
+     "A2": "=+((C1))",
+     "A3": "=A3",
+     "B1": "=D1*(A1)>=C2",
+     "B3": "=AND(D3,\"x y\")",
+     "C1": "2",
+     "D2": "=D3+AND(+D3,C3:D3,D3)",
+     "D3": "=MAX(OR(B3:C2,A3:A1,B2))"
+    }
+   ],
+   "expected": {
+    "A2": 2,
+    "A3": {
+     "error": "#CYCLE!"
+    },
+    "B1": true,
+    "B3": {
+     "error": "#CYCLE!"
+    },
+    "C1": 2,
+    "D2": {
+     "error": "#CYCLE!"
+    },
+    "D3": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R61",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=LEN(B4)",
+     "A2": "=SUM(\"a\",+C4<>c2/A3,(a3))",
+     "A3": "=ROUND(+\"-2.5\"^1,B2)",
+     "A4": "=AVERAGE(0.1,B4:A2,(007<=\"a\"))",
+     "B3": "0.1",
+     "B4": "=\"TRUE\"",
+     "C2": "=LEN(C2>100)",
+     "C3": "=B4>C2+\"TRUE\""
+    }
+   ],
+   "expected": {
+    "A1": 4,
+    "A2": {
+     "error": "#VALUE!"
+    },
+    "A3": -3,
+    "A4": {
+     "error": "#CYCLE!"
+    },
+    "B3": 0.1,
+    "B4": "TRUE",
+    "C2": {
+     "error": "#CYCLE!"
+    },
+    "C3": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R62",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=\"B\"*(0.1)&(A2)",
+     "A3": "=10",
+     "A4": "=\"\"",
+     "A5": "=(\"x y\"*B5)=B2+",
+     "B1": "=\"TRUE\"",
+     "B2": "=foo",
+     "B3": "TRUE",
+     "B4": "=A1",
+     "B5": "=OR(c4:A4,1,A2:B5)+",
+     "C1": "-3",
+     "C2": "=-B2",
+     "C3": "=+COUNT(B5:A1,C3:B4,C2:C4)^C4",
+     "C4": "=A4*\"TRUE\"<0",
+     "C5": "=\"\""
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#VALUE!"
+    },
+    "A3": 10,
+    "A4": "",
+    "A5": {
+     "error": "#PARSE!"
+    },
+    "B1": "TRUE",
+    "B2": {
+     "error": "#NAME?"
+    },
+    "B3": true,
+    "B4": {
+     "error": "#VALUE!"
+    },
+    "B5": {
+     "error": "#PARSE!"
+    },
+    "C1": -3,
+    "C2": {
+     "error": "#NAME?"
+    },
+    "C3": {
+     "error": "#CYCLE!"
+    },
+    "C4": {
+     "error": "#VALUE!"
+    },
+    "C5": ""
+   }
+  },
+  {
+   "id": "R63",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=C3,1",
+     "A2": "=(2.25-B6)-0.5",
+     "A3": "3",
+     "A5": "007",
+     "A6": "0.5",
+     "B1": "=d3",
+     "B2": "=\"-2.5\"",
+     "B3": "=A5",
+     "B4": "x",
+     "B6": "007",
+     "C3": "=C6/C3+B4*D6",
+     "C4": "=\"true\"<\"B\"/D2<(0.5)",
+     "C6": "=SUM((A6-D5))",
+     "D1": "=\"1\" 2",
+     "D2": "=(foo)",
+     "D3": "=+D2",
+     "D4": "2.25",
+     "D5": "=\"a\"",
+     "D6": "=a1"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#PARSE!"
+    },
+    "A2": -5.25,
+    "A3": 3,
+    "A5": 7,
+    "A6": 0.5,
+    "B1": {
+     "error": "#NAME?"
+    },
+    "B2": "-2.5",
+    "B3": 7,
+    "B4": "x",
+    "B6": 7,
+    "C3": {
+     "error": "#CYCLE!"
+    },
+    "C4": {
+     "error": "#NAME?"
+    },
+    "C6": {
+     "error": "#VALUE!"
+    },
+    "D1": {
+     "error": "#PARSE!"
+    },
+    "D2": {
+     "error": "#NAME?"
+    },
+    "D3": {
+     "error": "#NAME?"
+    },
+    "D4": 2.25,
+    "D5": "a",
+    "D6": {
+     "error": "#PARSE!"
+    }
+   }
+  },
+  {
+   "id": "R64",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=ROUND(B3,a5)",
+     "A2": "=10&B1",
+     "A3": "=AVERAGE(B1:B2)",
+     "A4": "=FOO(\"a\"&2.25,A2,B4)^MAX(a1)&-B2",
+     "A5": "=A5",
+     "B1": "=A3>CONCAT(A3:A3,B4)/MIN(\"-2.5\",foo,\"x y\")",
+     "B2": "=LEN(0.5)",
+     "B3": "=OR(\"B\">=B3,b5:B4,B3)",
+     "B4": "TRUE",
+     "B5": "=A2"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#CYCLE!"
+    },
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A3": {
+     "error": "#CYCLE!"
+    },
+    "A4": {
+     "error": "#NAME?"
+    },
+    "A5": {
+     "error": "#CYCLE!"
+    },
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "B2": 3,
+    "B3": {
+     "error": "#CYCLE!"
+    },
+    "B4": true,
+    "B5": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R65",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "TRUE",
+     "A2": "=SUM(B2,\"true\",A1:C2)",
+     "B1": "=B1 2",
+     "B2": "=COUNT(C3:C3)+\"x y\"",
+     "B3": "=b1*\"true\"",
+     "C1": "=B3",
+     "C2": "10",
+     "C3": "=007"
+    }
+   ],
+   "expected": {
+    "A1": true,
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "B1": {
+     "error": "#PARSE!"
+    },
+    "B2": {
+     "error": "#VALUE!"
+    },
+    "B3": {
+     "error": "#PARSE!"
+    },
+    "C1": {
+     "error": "#PARSE!"
+    },
+    "C2": 10,
+    "C3": 7
+   }
+  },
+  {
+   "id": "R66",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=-2.25&(D6)",
+     "A2": "007",
+     "A3": "x",
+     "A4": "=(1>=IF(AA1,D1))",
+     "A5": "=B1",
+     "A6": "0.1",
+     "B1": "=\"TRUE\"",
+     "B2": "-3",
+     "B3": "=B5",
+     "B4": "=2",
+     "B5": "100",
+     "C1": "=(0)/(1-TRUE)",
+     "C2": "=D3",
+     "C6": "=D3",
+     "D1": "=C3^c5",
+     "D3": "007",
+     "D4": "=D4",
+     "D5": "=-\"1\"+A6"
+    }
+   ],
+   "expected": {
+    "A1": "-2.25",
+    "A2": 7,
+    "A3": "x",
+    "A4": {
+     "error": "#REF!"
+    },
+    "A5": "TRUE",
+    "A6": 0.1,
+    "B1": "TRUE",
+    "B2": -3,
+    "B3": 100,
+    "B4": 2,
+    "B5": 100,
+    "C1": {
+     "error": "#DIV/0!"
+    },
+    "C2": 7,
+    "C6": 7,
+    "D1": {
+     "error": "#NUM!"
+    },
+    "D3": 7,
+    "D4": {
+     "error": "#CYCLE!"
+    },
+    "D5": -0.9
+   }
+  },
+  {
+   "id": "R67",
+   "title": "random sheet",
+   "args": [
+    {
+     "A2": "=(a2>\"true\"^MAX(B1,B3:a3,0.5))",
+     "A4": "=AND(+A3,A4:B4)/B2",
+     "B2": "=IFERROR(B3,NOT((B4)))",
+     "B4": "=A1"
+    }
+   ],
+   "expected": {
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A4": {
+     "error": "#CYCLE!"
+    },
+    "B2": 0,
+    "B4": 0
+   }
+  },
+  {
+   "id": "R68",
+   "title": "random sheet",
+   "args": [
+    {
+     "A2": "=+C2",
+     "A4": "=0.5",
+     "A5": "=MAX(C2:C1,C1:C3)",
+     "B1": "=C5",
+     "B2": "3",
+     "B3": "007",
+     "B4": "=AVERAGE(\"-2.5\"&\"1\"+A1)",
+     "B5": "=A3&C4/COUNT(0,\"B\",A2)<>b3",
+     "C1": "=IFERROR(+B2&C5,A1)",
+     "C2": "=NOT(SUM(\"B\",C5:C2,C4)=c4)",
+     "C3": "=C3>007",
+     "C4": "=MIN(0.1)",
+     "C5": "=a2"
+    }
+   ],
+   "expected": {
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A4": 0.5,
+    "A5": {
+     "error": "#CYCLE!"
+    },
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "B2": 3,
+    "B3": 7,
+    "B4": -2.51,
+    "B5": true,
+    "C1": 0,
+    "C2": {
+     "error": "#CYCLE!"
+    },
+    "C3": {
+     "error": "#CYCLE!"
+    },
+    "C4": 0.1,
+    "C5": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R69",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=ROUND(3,(\"true\"))",
+     "A2": "=LEN(MAX(D3))*B1*\"TRUE\"<b5",
+     "A3": "TRUE",
+     "A5": "=B4",
+     "B1": "=A3",
+     "B2": "=A0<>AA1",
+     "B3": "=(\"\")>NOT(\"B\">c5)",
+     "B4": "=NOT(\"B\")",
+     "C1": "=+\"x y\")",
+     "C2": "=FOO(AVERAGE(A5,A4,\"x y\"),D3)>=A5",
+     "C3": "2",
+     "C4": "=D2",
+     "C5": "1.",
+     "D2": "=A5",
+     "D4": "=CONCAT(D3:C5,OR(10,SUM(d4,D2),\"1\"))",
+     "D5": "=\"x y\""
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#VALUE!"
+    },
+    "A2": {
+     "error": "#VALUE!"
+    },
+    "A3": true,
+    "A5": {
+     "error": "#VALUE!"
+    },
+    "B1": true,
+    "B2": {
+     "error": "#REF!"
+    },
+    "B3": false,
+    "B4": {
+     "error": "#VALUE!"
+    },
+    "C1": {
+     "error": "#PARSE!"
+    },
+    "C2": {
+     "error": "#NAME?"
+    },
+    "C3": 2,
+    "C4": {
+     "error": "#VALUE!"
+    },
+    "C5": "1.",
+    "D2": {
+     "error": "#VALUE!"
+    },
+    "D4": {
+     "error": "#CYCLE!"
+    },
+    "D5": "x y"
+   }
+  },
+  {
+   "id": "R70",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=COUNT(B2:C4,A4:A1,C4:A4)",
+     "A2": "=\"x y\"",
+     "A4": "=2.25",
+     "B1": "=+C1<0=-A1",
+     "B2": "=A2",
+     "B3": "=0.5",
+     "C3": "=B2^MAX(B2,(\"\"))"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#CYCLE!"
+    },
+    "A2": "x y",
+    "A4": 2.25,
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "B2": "x y",
+    "B3": 0.5,
+    "C3": {
+     "error": "#VALUE!"
+    }
+   }
+  },
+  {
+   "id": "R71",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=10",
+     "A2": "=(\"B\")",
+     "A3": "=3>-ROUND(\"true\",10)",
+     "A4": "10",
+     "B2": "=D1",
+     "B3": "=3",
+     "B4": "=A4",
+     "C3": "=A3",
+     "C4": "=+(1>A2)",
+     "D1": "=(C2)",
+     "D2": "=\"TRUE\">=(MAX(D1:C4,\"1\"))",
+     "D3": "=(0.1)",
+     "D4": "=d1<>100"
+    }
+   ],
+   "expected": {
+    "A1": 10,
+    "A2": "B",
+    "A3": {
+     "error": "#VALUE!"
+    },
+    "A4": 10,
+    "B2": 0,
+    "B3": 3,
+    "B4": 10,
+    "C3": {
+     "error": "#VALUE!"
+    },
+    "C4": false,
+    "D1": 0,
+    "D2": {
+     "error": "#CYCLE!"
+    },
+    "D3": 0.1,
+    "D4": true
+   }
+  },
+  {
+   "id": "R72",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=+B5",
+     "A2": "=ROUND(+A5,\"TRUE\")",
+     "A4": "=A4",
+     "A5": "=OR(b5/\"1\"<>B4,\"B\")",
+     "B3": "=B3/\"a\"+A5+(\"a\")",
+     "B5": "=007"
+    }
+   ],
+   "expected": {
+    "A1": 7,
+    "A2": {
+     "error": "#VALUE!"
+    },
+    "A4": {
+     "error": "#CYCLE!"
+    },
+    "A5": {
+     "error": "#VALUE!"
+    },
+    "B3": {
+     "error": "#CYCLE!"
+    },
+    "B5": 7
+   }
+  },
+  {
+   "id": "R73",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=B5",
+     "A2": "=AND(A1)",
+     "A3": "=B5>3=B1<NOT(B2)",
+     "A4": "=(MIN(A4,0.1+A3,A1))",
+     "A5": "=B5>B3&0.1>B5",
+     "B1": "=A1",
+     "B2": "=AND(A3,A3:B5,007/B5+\"TRUE\")",
+     "B3": "=A3=((A4))",
+     "B4": "1",
+     "B5": "=A5&B2"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#CYCLE!"
+    },
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A3": {
+     "error": "#CYCLE!"
+    },
+    "A4": {
+     "error": "#CYCLE!"
+    },
+    "A5": {
+     "error": "#CYCLE!"
+    },
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "B2": {
+     "error": "#CYCLE!"
+    },
+    "B3": {
+     "error": "#CYCLE!"
+    },
+    "B4": 1,
+    "B5": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R74",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=C4",
+     "A3": "=C4",
+     "A4": "=0 2",
+     "B1": "=\"B\"",
+     "B3": "=LEN(\"a\")",
+     "C1": "=(A1)>A4",
+     "C2": "=LEN(TRUE/\"B\")"
+    }
+   ],
+   "expected": {
+    "A1": 0,
+    "A3": 0,
+    "A4": {
+     "error": "#PARSE!"
+    },
+    "B1": "B",
+    "B3": 1,
+    "C1": {
+     "error": "#PARSE!"
+    },
+    "C2": {
+     "error": "#VALUE!"
+    }
+   }
+  },
+  {
+   "id": "R75",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=\"-2.5\"",
+     "A3": "=D4",
+     "A5": "=C2",
+     "A6": "=A1<=A5^D2-COUNT(B1:D4,D5)",
+     "B1": "=SUM(B2:A3,B6:A1)",
+     "B2": "0.1",
+     "B3": "=ROUND(B2,2.25)",
+     "B4": "=A4",
+     "B5": "=+B4",
+     "B6": "=C6",
+     "C1": "=MIN(A4,NOT(CONCAT(C5:D1,0.5)),IFERROR(A6&\"B\",0))",
+     "C2": "=(-D1)",
+     "C3": "=((\"\"))",
+     "C4": "=D3<\"B\">=C3>\"a\"^a5",
+     "C6": "=2^CONCAT(D6:B1)/1",
+     "D1": "=\"x y\">\"x y\"+",
+     "D3": "=\"\"",
+     "D4": "TRUE",
+     "D5": "=-C1",
+     "D6": "x"
+    }
+   ],
+   "expected": {
+    "A1": "-2.5",
+    "A3": true,
+    "A5": {
+     "error": "#PARSE!"
+    },
+    "A6": {
+     "error": "#CYCLE!"
+    },
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "B2": 0.1,
+    "B3": 0.1,
+    "B4": 0,
+    "B5": 0,
+    "B6": {
+     "error": "#CYCLE!"
+    },
+    "C1": {
+     "error": "#CYCLE!"
+    },
+    "C2": {
+     "error": "#PARSE!"
+    },
+    "C3": "",
+    "C4": {
+     "error": "#PARSE!"
+    },
+    "C6": {
+     "error": "#CYCLE!"
+    },
+    "D1": {
+     "error": "#PARSE!"
+    },
+    "D3": "",
+    "D4": true,
+    "D5": {
+     "error": "#CYCLE!"
+    },
+    "D6": "x"
+   }
+  },
+  {
+   "id": "R76",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=IFERROR(100,2>B1^0.5)",
+     "A2": "=b5",
+     "A4": "=0",
+     "A5": "=B5",
+     "B1": "=A4",
+     "B5": "=A2"
+    }
+   ],
+   "expected": {
+    "A1": 100,
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A4": 0,
+    "A5": {
+     "error": "#CYCLE!"
+    },
+    "B1": 0,
+    "B5": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R77",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=C1=((A3))",
+     "A2": "=C3&++\"x y\"",
+     "A3": "=\"1\"",
+     "B1": "=\"B\"+D1",
+     "B2": "=LEN(D1<0)<>D2",
+     "B3": "=AND(FOO(C1/C1),A1,D2:B1)",
+     "C1": "=C3=FOO(IF(B2,\"TRUE\"),A3)",
+     "C2": "=A3=\"-2.5\"=NOT(B2)",
+     "D3": "=A3"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#NAME?"
+    },
+    "A2": "x y",
+    "A3": "1",
+    "B1": {
+     "error": "#VALUE!"
+    },
+    "B2": true,
+    "B3": {
+     "error": "#NAME?"
+    },
+    "C1": {
+     "error": "#NAME?"
+    },
+    "C2": true,
+    "D3": "1"
+   }
+  },
+  {
+   "id": "R78",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=A6+B2",
+     "A2": "=C6-MAX(C2:A2,\"a\",A3)^\"-2.5\"",
+     "A4": "0.1",
+     "A6": "=\"x y\"",
+     "B1": "=B4",
+     "B3": "=(FOO(C6,A2,0))+(C2=C6)",
+     "B4": "=+C3",
+     "C4": "=A4"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#VALUE!"
+    },
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A4": 0.1,
+    "A6": "x y",
+    "B1": 0,
+    "B3": {
+     "error": "#NAME?"
+    },
+    "B4": 0,
+    "C4": 0.1
+   }
+  },
+  {
+   "id": "R79",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "0",
+     "A2": "=C1>-C1",
+     "A3": "",
+     "B1": "=(C4)",
+     "B2": "=B2",
+     "B4": "=LEN(A1)*a1<>100>=+C2",
+     "C1": "TRUE",
+     "C2": "=(\"1\")",
+     "C3": "=(\"B\")",
+     "C4": "=AND(\"TRUE\")"
+    }
+   ],
+   "expected": {
+    "A1": 0,
+    "A2": true,
+    "A3": null,
+    "B1": true,
+    "B2": {
+     "error": "#CYCLE!"
+    },
+    "B4": true,
+    "C1": true,
+    "C2": "1",
+    "C3": "B",
+    "C4": true
+   }
+  },
+  {
+   "id": "R80",
+   "title": "random sheet",
+   "args": [
+    {
+     "A2": "=OR(A1-IFERROR(\"TRUE\",100))",
+     "A3": "=AA1",
+     "A4": "=MAX(100,\"B\",D3:C2)",
+     "B1": "=(C2>10<=3)",
+     "B2": "=A1",
+     "B3": "0.1",
+     "B4": "=+B3=C1>=C4-0",
+     "C1": "=COUNT(+B3)+0.1<ROUND(C3,D1)",
+     "C2": "=B3",
+     "C3": "=NOT(B2)",
+     "C4": "=C4",
+     "D2": "=100",
+     "D3": "2.25",
+     "D4": "=MIN(-C2)"
+    }
+   ],
+   "expected": {
+    "A2": {
+     "error": "#VALUE!"
+    },
+    "A3": {
+     "error": "#REF!"
+    },
+    "A4": {
+     "error": "#VALUE!"
+    },
+    "B1": false,
+    "B2": 0,
+    "B3": 0.1,
+    "B4": {
+     "error": "#CYCLE!"
+    },
+    "C1": false,
+    "C2": 0.1,
+    "C3": true,
+    "C4": {
+     "error": "#CYCLE!"
+    },
+    "D2": 100,
+    "D3": 2.25,
+    "D4": -0.1
+   }
+  },
+  {
+   "id": "R81",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=IF(\"B\",0)",
+     "A2": "=A0",
+     "A3": "=0",
+     "A4": "=B3",
+     "A5": "=10",
+     "B1": "=\"B\"<=1",
+     "B3": "=a6>=c2",
+     "B5": "=TRUE=(B3&3)",
+     "B6": "=(B6)",
+     "C1": "=\"1\"<>\"x y\"&OR(C1:C2,B2)",
+     "C2": "=(AA1)",
+     "C3": "=CONCAT(MIN(A6:A4,\"\"),-A6,SUM(10))<=+A2",
+     "C5": "=(0.1<>B1-AND(\"x y\",C6,\"TRUE\"))",
+     "C6": "=\"\""
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#VALUE!"
+    },
+    "A2": {
+     "error": "#REF!"
+    },
+    "A3": 0,
+    "A4": {
+     "error": "#REF!"
+    },
+    "A5": 10,
+    "B1": false,
+    "B3": {
+     "error": "#REF!"
+    },
+    "B5": {
+     "error": "#REF!"
+    },
+    "B6": {
+     "error": "#CYCLE!"
+    },
+    "C1": {
+     "error": "#CYCLE!"
+    },
+    "C2": {
+     "error": "#REF!"
+    },
+    "C3": {
+     "error": "#REF!"
+    },
+    "C5": {
+     "error": "#VALUE!"
+    },
+    "C6": ""
+   }
+  },
+  {
+   "id": "R82",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=+(\"-2.5\")",
+     "A2": "=C2",
+     "A3": "1.",
+     "A4": "=IF(A0,A4&-B1,+C3>=CONCAT(\"a\",0.1))",
+     "B2": "0",
+     "B3": "=A2+OR(-B1)",
+     "B4": "=B3",
+     "C1": "=10",
+     "C3": "=LEN(IF((B4),-C3,2.25&1))",
+     "C4": "0.5"
+    }
+   ],
+   "expected": {
+    "A1": "-2.5",
+    "A2": 0,
+    "A3": "1.",
+    "A4": {
+     "error": "#CYCLE!"
+    },
+    "B2": 0,
+    "B3": 0,
+    "B4": 0,
+    "C1": 10,
+    "C3": {
+     "error": "#CYCLE!"
+    },
+    "C4": 0.5
+   }
+  },
+  {
+   "id": "R83",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=C4<>B1<\"x y\"<=A1",
+     "A2": "=A2",
+     "A3": "=A1",
+     "A4": "=B4",
+     "B1": "=C1",
+     "B2": "=3",
+     "B3": "=-2=c1>=TRUE",
+     "B4": "=1",
+     "C2": "=((\"1\"<>C1))",
+     "C3": "=A4",
+     "C4": "=OR(A4,C4:B3)>=C4>=-(C2)"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#CYCLE!"
+    },
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A3": {
+     "error": "#CYCLE!"
+    },
+    "A4": 1,
+    "B1": 0,
+    "B2": 3,
+    "B3": false,
+    "B4": 1,
+    "C2": true,
+    "C3": 1,
+    "C4": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R84",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=AVERAGE((D4>=0),(d5)>=AND(B5:D2),\"-2.5\") 2",
+     "A2": "=2.25=b2",
+     "A3": "=SUM(C4:D2,\"TRUE\">=-AA1,A2:D5)",
+     "A4": "=COUNT(FALSE^\"true\"=+0.5,D4)",
+     "A5": "=D5",
+     "B1": "=+\"x y\"&\"1\"",
+     "B2": "0.1",
+     "B4": "=(+\"true\")",
+     "B5": "=+0.5>ROUND(2.25,B5)",
+     "C3": "=NOT(+(a4))",
+     "C4": "1",
+     "D1": "=A3>=C4",
+     "D2": "=0",
+     "D4": "=-+AND(007,007)",
+     "D5": "=10&\"1\""
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#PARSE!"
+    },
+    "A2": false,
+    "A3": {
+     "error": "#CYCLE!"
+    },
+    "A4": 1,
+    "A5": "101",
+    "B1": "x y1",
+    "B2": 0.1,
+    "B4": "true",
+    "B5": {
+     "error": "#CYCLE!"
+    },
+    "C3": false,
+    "C4": 1,
+    "D1": {
+     "error": "#CYCLE!"
+    },
+    "D2": 0,
+    "D4": -1,
+    "D5": "101"
+   }
+  },
+  {
+   "id": "R85",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=+A4",
+     "A2": "=OR(A6)",
+     "A3": "=C6",
+     "A4": "=B5",
+     "A5": "=B4",
+     "A6": "=MIN(B6:A5,B1:C5)",
+     "B1": "1.",
+     "B2": "=\"1\"/+\"x y\">-C2",
+     "B3": "=OR((MIN(C5:A4)))",
+     "B4": "=ROUND(\"-2.5\",C2)+B6*C2-+C3<\"x y\"",
+     "B5": "0",
+     "B6": "x",
+     "C1": "2",
+     "C3": "=B2",
+     "C5": "=\"-2.5\"",
+     "C6": "=MIN(B1:A2,\"a\"^a1)^A6<=\"\""
+    }
+   ],
+   "expected": {
+    "A1": 0,
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A3": {
+     "error": "#CYCLE!"
+    },
+    "A4": 0,
+    "A5": {
+     "error": "#VALUE!"
+    },
+    "A6": {
+     "error": "#CYCLE!"
+    },
+    "B1": "1.",
+    "B2": {
+     "error": "#VALUE!"
+    },
+    "B3": {
+     "error": "#VALUE!"
+    },
+    "B4": {
+     "error": "#VALUE!"
+    },
+    "B5": 0,
+    "B6": "x",
+    "C1": 2,
+    "C3": {
+     "error": "#VALUE!"
+    },
+    "C5": "-2.5",
+    "C6": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R86",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "1",
+     "A2": "=A2",
+     "B1": "=A1*(\"true\")",
+     "B2": "=NOT(-A2)",
+     "B3": "=(A3+a4>A4)"
+    }
+   ],
+   "expected": {
+    "A1": 1,
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "B1": {
+     "error": "#VALUE!"
+    },
+    "B2": {
+     "error": "#CYCLE!"
+    },
+    "B3": false
+   }
+  },
+  {
+   "id": "R87",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=A5/(B1<>0.5)",
+     "A3": "=A3>A4^\"x y\"+OR(B5:A5,B1:A4,A1)",
+     "A4": "=IFERROR(MAX(\"TRUE\",B4:B5),(b3^A2))",
+     "A6": "=AND(MIN(A4^B1,b5:A4,AND(A3:B1)),B1,(B5)>=(B4))",
+     "B1": "TRUE",
+     "B3": "=MIN(A5,NOT(A1),A4)=A3",
+     "B4": "=MAX(A1,B5:b2)+AND(A2,\"-2.5\",B2)^A6-\"TRUE\"",
+     "B6": "=CONCAT(A4)"
+    }
+   ],
+   "expected": {
+    "A1": 0,
+    "A3": {
+     "error": "#CYCLE!"
+    },
+    "A4": {
+     "error": "#CYCLE!"
+    },
+    "A6": {
+     "error": "#CYCLE!"
+    },
+    "B1": true,
+    "B3": {
+     "error": "#CYCLE!"
+    },
+    "B4": {
+     "error": "#CYCLE!"
+    },
+    "B6": {
+     "error": "#CYCLE!"
+    }
+   }
+  },
+  {
+   "id": "R88",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=NOT((\"x y\"))",
+     "A3": "=B1",
+     "B1": "=+C2",
+     "B2": "=0.1",
+     "B3": "=+b3",
+     "C1": "=A1",
+     "C2": "=-B3,1",
+     "C3": "=\"x y\""
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#VALUE!"
+    },
+    "A3": {
+     "error": "#PARSE!"
+    },
+    "B1": {
+     "error": "#PARSE!"
+    },
+    "B2": 0.1,
+    "B3": {
+     "error": "#CYCLE!"
+    },
+    "C1": {
+     "error": "#VALUE!"
+    },
+    "C2": {
+     "error": "#PARSE!"
+    },
+    "C3": "x y"
+   }
+  },
+  {
+   "id": "R89",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=0.5*CONCAT(c2:A3,A2:A3)",
+     "A2": "=ROUND((B3),C2&2)<>10<\"1\"<A0",
+     "A3": "=\"B\"+B3",
+     "B1": "=-B3&\"TRUE\"<>+A0",
+     "B2": "=IFERROR(007,007)",
+     "B3": "=OR(+A3,A1:B1,\"B\")<A2",
+     "C2": "=b1",
+     "C3": "x"
+    }
+   ],
+   "expected": {
+    "A1": {
+     "error": "#CYCLE!"
+    },
+    "A2": {
+     "error": "#CYCLE!"
+    },
+    "A3": {
+     "error": "#CYCLE!"
+    },
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "B2": 7,
+    "B3": {
+     "error": "#CYCLE!"
+    },
+    "C2": {
+     "error": "#CYCLE!"
+    },
+    "C3": "x"
+   }
+  },
+  {
+   "id": "R90",
+   "title": "random sheet",
+   "args": [
+    {
+     "A1": "=C3",
+     "A3": "abc",
+     "A4": "TRUE",
+     "A5": "=\"B\"<>(A0/A4)",
+     "B1": "=+MAX(MIN(3,D3),A3:A4,B1)",
+     "B2": "=(IF(D2,\"true\",A5))",
+     "B4": "=\"1\"--SUM(C2)",
+     "B5": "=NOT(FOO(\"a\",A2>=0.5,a4/\"TRUE\"))",
+     "C2": "TRUE",
+     "C3": "100",
+     "C4": "=FALSE",
+     "C5": "=A0",
+     "D1": "=SUM((0),D1)",
+     "D2": "=0.1",
+     "D3": "=C5",
+     "D4": "=-(\"-2.5\")/(C2)>=\"B\">foo",
+     "D5": "=AVERAGE(B1:D4,D3)"
+    }
+   ],
+   "expected": {
+    "A1": 100,
+    "A3": "abc",
+    "A4": true,
+    "A5": {
+     "error": "#REF!"
+    },
+    "B1": {
+     "error": "#CYCLE!"
+    },
+    "B2": "true",
+    "B4": 1,
+    "B5": {
+     "error": "#NAME?"
+    },
+    "C2": true,
+    "C3": 100,
+    "C4": false,
+    "C5": {
+     "error": "#REF!"
+    },
+    "D1": {
+     "error": "#CYCLE!"
+    },
+    "D2": 0.1,
+    "D3": {
+     "error": "#REF!"
+    },
+    "D4": {
+     "error": "#NAME?"
+    },
+    "D5": {
+     "error": "#CYCLE!"
+    }
+   }
+  }
+ ],
+ "stress": [
+  {
+   "id": "S1",
+   "title": "reference chain of 20000 cells",
+   "kind": "chain",
+   "n": 20000,
+   "expected_sha256": "5337baf5138122d6c4b90ced2d758414ae3f2f4ef6c593cef1ccd0d730920b85",
+   "expected_head": "{\"A1\":20000,\"A10\":19991,\"A100\":19901,\"A101\":19900,\"A102\":19899,\"A103\":19898,\"A104\":19897,\"A105\":19896,\"A106\":19895,\"A107\":19894,\"A108\":19893,\"A109\":19892,\"A11\":19990,\"A110\":19891,\"A111\":19890,\"A112\":1"
+  },
+  {
+   "id": "S2",
+   "title": "prefix sums, a 999-cell cycle ring and readers",
+   "kind": "sums",
+   "expected_sha256": "dfb8b8f4272c48a9a6bb401896f3539f5efb6c2493ca5d406a2179e367992501",
+   "expected_head": "{\"A1\":37,\"A10\":67,\"A100\":64,\"A101\":0,\"A102\":37,\"A103\":74,\"A104\":10,\"A105\":47,\"A106\":84,\"A107\":20,\"A108\":57,\"A109\":94,\"A11\":3,\"A110\":30,\"A111\":67,\"A112\":3,\"A113\":40,\"A114\":77,\"A115\":13,\"A116\":50,\"A117\""
+  },
+  {
+   "id": "S3",
+   "title": "random sheet of ~6000 cells",
+   "kind": "random",
+   "seed": 4242,
+   "expected_sha256": "8cbaf7979808583cbc2ff7af96a02327e4cd2539a55478bf6585fa6db9b0ab9f",
+   "expected_head": "{\"A1\":\"TRUE\",\"A10\":0.5,\"A100\":\"TRUE\",\"A101\":{\"error\":\"#CYCLE!\"},\"A102\":7,\"A103\":{\"error\":\"#CYCLE!\"},\"A104\":3.1,\"A105\":\"-2.5\",\"A106\":null,\"A107\":\"-2.5\",\"A108\":0,\"A109\":{\"error\":\"#CYCLE!\"},\"A11\":{\"error"
+  }
+ ]
+}

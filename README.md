@@ -88,6 +88,8 @@ flowchart LR
 
 ## Status
 
+Open items, including tasks for the author, are tracked in [`BACKLOG.md`](BACKLOG.md).
+
 | Done and verified | Remaining |
 |---|---|
 | Docker sandbox by default; unsafe subprocess only by explicit opt-in; scrubbed environment | **A problem hard enough to separate the arms** (this one hit a ceiling); needs a new confirmed spend cap |

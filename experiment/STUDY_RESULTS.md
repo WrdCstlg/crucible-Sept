@@ -71,6 +71,7 @@ could not be.**
    - H2: gaps under ~30% (B below A's 97%) could not be detected at 80% power.
 2. **Request timeout added after the run, for future runs only.** The two B timeouts were API calls with no client timeout. [`rig/providers.py`](rig/providers.py) now accepts `settings.request_timeout_s` or `CRUCIBLE_REQUEST_TIMEOUT_S` (off by default, so the recorded configuration replays unchanged), tested in [`tests/test_providers.py`](../tests/test_providers.py). This changes no result here.
 3. **Hand-case review.** §9 says the author reviews the 20 hand-derived cases before the live run. No written sign-off of that review is stored in the repository. No case was changed: the per-file hashes recorded in `config.json` at launch match `bizsla/FROZEN.json`, whose sha256 is the pre-registered `39c19fed…`.
+   - *Update 2026-10-06, after publication:* the author approved all 20 cases **without a case-by-case check**, after the live run ([`bizsla/HAND_CASE_SIGNOFF.md`](bizsla/HAND_CASE_SIGNOFF.md)). The approved file's hash matches the freeze. This records the approval but does not meet §9, which asks for a review before the run, so the deviation stands. No result changes.
 
 ## 5. Exploratory analyses (not pre-registered; do not treat as confirmatory)
 
