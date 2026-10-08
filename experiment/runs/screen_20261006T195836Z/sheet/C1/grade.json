@@ -1,0 +1,933 @@
+{
+  "problem": "sheet",
+  "sandbox": "docker",
+  "strict_pass": false,
+  "passed": 0,
+  "total": 127,
+  "public_pass": false,
+  "by_layer": {
+    "public": "0/4",
+    "hidden": "0/124",
+    "stress": "0/3"
+  },
+  "first_failure": "P1: import failed: AttributeError: module 'solution' has no attribute 'evaluate'",
+  "cases": [
+    {
+      "id": "P1",
+      "layer": "public",
+      "title": "precedence and errors",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "P2",
+      "layer": "public",
+      "title": "comparisons and coercions",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "P3",
+      "layer": "public",
+      "title": "aggregates and ROUND",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "P4",
+      "layer": "public",
+      "title": "static cycles",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H01",
+      "layer": "hidden",
+      "title": "unary minus binds tighter than ^",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H02",
+      "layer": "hidden",
+      "title": "left associativity",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H03",
+      "layer": "hidden",
+      "title": "& sits between comparison and +",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H04",
+      "layer": "hidden",
+      "title": "string to number uses the literal rule",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H05",
+      "layer": "hidden",
+      "title": "raw literal parsing",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H06",
+      "layer": "hidden",
+      "title": "empty formula values stay empty",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H07",
+      "layer": "hidden",
+      "title": "cross-type ordering",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H08",
+      "layer": "hidden",
+      "title": "error order: operand errors before conversion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H09",
+      "layer": "hidden",
+      "title": "power edge cases",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H10",
+      "layer": "hidden",
+      "title": "overflow is #NUM!",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H11",
+      "layer": "hidden",
+      "title": "aggregate argument kinds",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H12",
+      "layer": "hidden",
+      "title": "AND / OR",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H13",
+      "layer": "hidden",
+      "title": "IF evaluates only the chosen branch",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H14",
+      "layer": "hidden",
+      "title": "names, references and function names",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H15",
+      "layer": "hidden",
+      "title": "grammar errors",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H16",
+      "layer": "hidden",
+      "title": "static cycles in every form",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H17",
+      "layer": "hidden",
+      "title": "range containing its own cell",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H18",
+      "layer": "hidden",
+      "title": "text conversion of numbers",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H19",
+      "layer": "hidden",
+      "title": "ROUND halves away from zero on the repr decimal",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H20",
+      "layer": "hidden",
+      "title": "SUM adds left to right",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H21",
+      "layer": "hidden",
+      "title": "ranges are row-major, corners in any order",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H22",
+      "layer": "hidden",
+      "title": "invalid and misused ranges",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H23",
+      "layer": "hidden",
+      "title": "case-insensitive names, spaces before (",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H24",
+      "layer": "hidden",
+      "title": "IFERROR catches #PARSE!",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H25",
+      "layer": "hidden",
+      "title": "empty string comparisons",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H26",
+      "layer": "hidden",
+      "title": "boolean conversion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H27",
+      "layer": "hidden",
+      "title": "single REF is a range argument, (+REF) is not",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H28",
+      "layer": "hidden",
+      "title": "spaces and nesting",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H29",
+      "layer": "hidden",
+      "title": "number formatting",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H30",
+      "layer": "hidden",
+      "title": "COUNT of direct arguments",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H31",
+      "layer": "hidden",
+      "title": "comparison operators",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H32",
+      "layer": "hidden",
+      "title": "string-to-boolean ignores ASCII case only",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H33",
+      "layer": "hidden",
+      "title": "AND / OR do not short-circuit",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "H34",
+      "layer": "hidden",
+      "title": "more associativity, row-major and invalid-range checks",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R01",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R02",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R03",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R04",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R05",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R06",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R07",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R08",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R09",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R10",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R11",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R12",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R13",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R14",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R15",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R16",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R17",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R18",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R19",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R20",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R21",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R22",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R23",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R24",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R25",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R26",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R27",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R28",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R29",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R30",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R31",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R32",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R33",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R34",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R35",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R36",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R37",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R38",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R39",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R40",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R41",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R42",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R43",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R44",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R45",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R46",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R47",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R48",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R49",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R50",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R51",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R52",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R53",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R54",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R55",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R56",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R57",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R58",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R59",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R60",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R61",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R62",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R63",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R64",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R65",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R66",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R67",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R68",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R69",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R70",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R71",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R72",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R73",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R74",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R75",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R76",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R77",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R78",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R79",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R80",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R81",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R82",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R83",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R84",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R85",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R86",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R87",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R88",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R89",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "R90",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "id": "S1",
+      "layer": "stress",
+      "title": "reference chain of 20000 cells",
+      "pass": false,
+      "reason": "no result (process died or timed out)"
+    },
+    {
+      "id": "S2",
+      "layer": "stress",
+      "title": "prefix sums, a 999-cell cycle ring and readers",
+      "pass": false,
+      "reason": "no result (process died or timed out)"
+    },
+    {
+      "id": "S3",
+      "layer": "stress",
+      "title": "random sheet of ~6000 cells",
+      "pass": false,
+      "reason": "no result (process died or timed out)"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "role": "competitor",
+  "provider": "anthropic",
+  "model": "claude-opus-5-5",
+  "seconds": 629.9,
+  "agent_calls": 1,
+  "usage": {
+    "input_tokens": 3635,
+    "output_tokens": 64000,
+    "thinking_tokens": null
+  },
+  "cost_usd": 1.29454,
+  "stop_reason": "max_tokens",
+  "tool_calls": 0,
+  "arm": "C",
+  "runner": "study",
+  "spec": "SPEC.md",
+  "roles_provider": {
+    "evaluated": "google",
+    "competitor": "anthropic"
+  }
+}

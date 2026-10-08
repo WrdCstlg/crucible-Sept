@@ -1,0 +1,673 @@
+from datetime import date, timedelta
+
+
+def _is_leap_year(y: int) -> bool:
+    return (y % 4 == 0 and y % 100 != 0) or (y % 400 == 0)
+
+
+def _days_in_month(y: int, m: int) -> int:
+    if m in (1, 3, 5, 7, 8, 10, 12):
+        return 31
+    if m in (4, 6, 9, 11):
+        return 30
+    return 29 if _is_leap_year(y) else 28
+
+
+def _validate_datetime(s: str):
+    if not isinstance(s, str) or len(s) != 16:
+        return None
+    if s[4] != "-" or s[7] != "-" or s[10] != "T" or s[13] != ":":
+        return None
+    for idx in (0, 1, 2, 3, 5, 6, 8, 9, 11, 12, 14, 15):
+        if not ("0" <= s[idx] <= "9"):
+            return None
+    y = int(s[0:4])
+    m = int(s[5:7])
+    d = int(s[8:10])
+    h = int(s[11:13])
+    mn = int(s[14:16])
+    if not (1 <= y <= 9999):
+        return None
+    if not (1 <= m <= 12):
+        return None
+    if not (0 <= h <= 23):
+        return None
+    if not (0 <= mn <= 59):
+        return None
+    if not (1 <= d <= _days_in_month(y, m)):
+        return None
+    return (y, m, d, h, mn)
+
+
+def _parse_unsigned_int(s: str, min_v: int, max_v: int):
+    if not s or not s.isdigit():
+        return None
+    if s[0] == "0":
+        return None
+    val = int(s)
+    if not (min_v <= val <= max_v):
+        return None
+    return val
+
+
+def _parse_signed_int(s: str, min_abs: int, max_abs: int):
+    if not s:
+        return None
+    digits = s
+    sign = 1
+    if s[0] == "+":
+        digits = s[1:]
+    elif s[0] == "-":
+        digits = s[1:]
+        sign = -1
+    val = _parse_unsigned_int(digits, min_abs, max_abs)
+    if val is None:
+        return None
+    return sign * val
+
+
+WD_MAP = {"MO": 0, "TU": 1, "WE": 2, "TH": 3, "FR": 4, "SA": 5, "SU": 6}
+ALLOWED_RULE_NAMES = {
+    "FREQ",
+    "INTERVAL",
+    "COUNT",
+    "UNTIL",
+    "WKST",
+    "BYMONTH",
+    "BYMONTHDAY",
+    "BYDAY",
+    "BYSETPOS",
+}
+
+
+def _parse_rule(rule_str: str):
+    if not isinstance(rule_str, str) or not rule_str:
+        return None
+
+    parts = rule_str.split(";")
+    raw_dict = {}
+    for part in parts:
+        if part.count("=") != 1:
+            return None
+        name, val = part.split("=")
+        if name not in ALLOWED_RULE_NAMES or name in raw_dict:
+            return None
+        raw_dict[name] = val
+
+    if "FREQ" not in raw_dict:
+        return None
+    if "COUNT" in raw_dict and "UNTIL" in raw_dict:
+        return None
+
+    freq = raw_dict["FREQ"]
+    if freq not in ("DAILY", "WEEKLY", "MONTHLY", "YEARLY"):
+        return None
+
+    parsed = {"FREQ": freq}
+
+    if "INTERVAL" in raw_dict:
+        v = _parse_unsigned_int(raw_dict["INTERVAL"], 1, 100000)
+        if v is None:
+            return None
+        parsed["INTERVAL"] = v
+    else:
+        parsed["INTERVAL"] = 1
+
+    if "COUNT" in raw_dict:
+        v = _parse_unsigned_int(raw_dict["COUNT"], 1, 1000000)
+        if v is None:
+            return None
+        parsed["COUNT"] = v
+
+    if "UNTIL" in raw_dict:
+        u_dt = _validate_datetime(raw_dict["UNTIL"])
+        if u_dt is None:
+            return None
+        parsed["UNTIL"] = raw_dict["UNTIL"]
+
+    if "WKST" in raw_dict:
+        w = raw_dict["WKST"]
+        if w not in WD_MAP:
+            return None
+        parsed["WKST"] = w
+    else:
+        parsed["WKST"] = "MO"
+
+    if "BYMONTH" in raw_dict:
+        items = raw_dict["BYMONTH"].split(",")
+        bm = []
+        for item in items:
+            v = _parse_unsigned_int(item, 1, 12)
+            if v is None:
+                return None
+            bm.append(v)
+        parsed["BYMONTH"] = bm
+
+    if "BYMONTHDAY" in raw_dict:
+        if freq == "WEEKLY":
+            return None
+        items = raw_dict["BYMONTHDAY"].split(",")
+        bmd = []
+        for item in items:
+            v = _parse_signed_int(item, 1, 31)
+            if v is None:
+                return None
+            bmd.append(v)
+        parsed["BYMONTHDAY"] = bmd
+
+    if "BYDAY" in raw_dict:
+        items = raw_dict["BYDAY"].split(",")
+        bd = []
+        for item in items:
+            if len(item) < 2:
+                return None
+            code = item[-2:]
+            if code not in WD_MAP:
+                return None
+            prefix = item[:-2]
+            if prefix == "":
+                ord_v = None
+            else:
+                ord_v = _parse_signed_int(prefix, 1, 53)
+                if ord_v is None:
+                    return None
+            if ord_v is not None and freq in ("DAILY", "WEEKLY"):
+                return None
+            bd.append((ord_v, code))
+        parsed["BYDAY"] = bd
+
+    if "BYSETPOS" in raw_dict:
+        if not ("BYMONTH" in raw_dict or "BYMONTHDAY" in raw_dict or "BYDAY" in raw_dict):
+            return None
+        items = raw_dict["BYSETPOS"].split(",")
+        bsp = []
+        for item in items:
+            v = _parse_signed_int(item, 1, 366)
+            if v is None:
+                return None
+            bsp.append(v)
+        parsed["BYSETPOS"] = bsp
+
+    parsed["_raw_names"] = set(raw_dict.keys())
+    return parsed
+
+
+MIN_ORDINAL = date(1, 1, 1).toordinal()
+MAX_ORDINAL = date(9999, 12, 31).toordinal()
+
+
+def occurrences(event, range_start, range_end):
+    # Step 1: Validate datetimes
+    start_str = event.get("start")
+    start_tuple = _validate_datetime(start_str) if isinstance(start_str, str) else None
+    if start_tuple is None:
+        return {"ok": False, "error": "bad_datetime"}
+
+    if _validate_datetime(range_start) is None or _validate_datetime(range_end) is None:
+        return {"ok": False, "error": "bad_datetime"}
+
+    exdates_list = event.get("exdates", [])
+    if not isinstance(exdates_list, list):
+        return {"ok": False, "error": "bad_datetime"}
+    for d in exdates_list:
+        if _validate_datetime(d) is None:
+            return {"ok": False, "error": "bad_datetime"}
+
+    rdates_list = event.get("rdates", [])
+    if not isinstance(rdates_list, list):
+        return {"ok": False, "error": "bad_datetime"}
+    for d in rdates_list:
+        if _validate_datetime(d) is None:
+            return {"ok": False, "error": "bad_datetime"}
+
+    # Step 2: Validate rule
+    rule_str = event.get("rule")
+    rule = None
+    if rule_str is not None:
+        rule = _parse_rule(rule_str)
+        if rule is None:
+            return {"ok": False, "error": "bad_rule"}
+
+    # Check for empty range
+    if range_end <= range_start:
+        return {"ok": True, "occurrences": []}
+
+    exdates_set = set(exdates_list)
+    results = []
+
+    start_date = date(start_tuple[0], start_tuple[1], start_tuple[2])
+    start_time_suffix = start_str[10:]
+    range_start_date = date(int(range_start[0:4]), int(range_start[5:7]), int(range_start[8:10]))
+    range_end_date = date(int(range_end[0:4]), int(range_end[5:7]), int(range_end[8:10]))
+
+    # Step 3 & 4: Series generation
+    # The start is always the first entry of the series (entry 1).
+    count_limit = rule.get("COUNT") if rule else None
+    until_str = rule.get("UNTIL") if rule else None
+    has_count = count_limit is not None
+
+    series_count = 1
+    if range_start <= start_str < range_end and start_str not in exdates_set:
+        results.append(start_str)
+
+    if rule is not None and (until_str is None or until_str >= start_str) and (count_limit is None or count_limit > 1):
+        freq = rule["FREQ"]
+        interval = rule["INTERVAL"]
+        raw_names = rule["_raw_names"]
+
+        until_date = None
+        if until_str is not None:
+            until_date = date(int(until_str[0:4]), int(until_str[5:7]), int(until_str[8:10]))
+
+        if freq == "DAILY":
+            bymonth_set = set(rule["BYMONTH"]) if "BYMONTH" in rule else None
+            bmd_pos = set()
+            bmd_neg = set()
+            if "BYMONTHDAY" in rule:
+                for v in rule["BYMONTHDAY"]:
+                    if v > 0:
+                        bmd_pos.add(v)
+                    else:
+                        bmd_neg.add(v)
+            has_bmd = "BYMONTHDAY" in rule
+            byday_set = {WD_MAP[code] for _, code in rule["BYDAY"]} if "BYDAY" in rule else None
+            bysetpos_set = set(rule["BYSETPOS"]) if "BYSETPOS" in rule else None
+
+            start_ord = start_date.toordinal()
+            i_start = 0
+            if not has_count:
+                diff = range_start_date.toordinal() - start_ord
+                if diff > 0:
+                    i_start = max(0, diff // interval - 1)
+
+            i = i_start
+            while True:
+                cur_ord = start_ord + i * interval
+                if cur_ord > MAX_ORDINAL:
+                    break
+                cur_d = date.fromordinal(cur_ord)
+                if cur_d > range_end_date:
+                    break
+                if until_date and cur_d > until_date:
+                    break
+
+                # Candidate filter
+                ok = True
+                if bymonth_set and cur_d.month not in bymonth_set:
+                    ok = False
+                elif has_bmd:
+                    dim = _days_in_month(cur_d.year, cur_d.month)
+                    pos_v = cur_d.day
+                    neg_v = -(dim - pos_v + 1)
+                    if pos_v not in bmd_pos and neg_v not in bmd_neg:
+                        ok = False
+                if ok and byday_set and cur_d.weekday() not in byday_set:
+                    ok = False
+
+                if ok:
+                    # BYSETPOS on single candidate
+                    if bysetpos_set and (1 not in bysetpos_set and -1 not in bysetpos_set):
+                        ok = False
+
+                if ok:
+                    inst = f"{cur_d.isoformat()}{start_time_suffix}"
+                    if inst > start_str and (until_str is None or inst <= until_str):
+                        series_count += 1
+                        if range_start <= inst < range_end:
+                            if inst not in exdates_set:
+                                results.append(inst)
+                        elif inst >= range_end:
+                            break
+                        if has_count and series_count >= count_limit:
+                            break
+
+                i += 1
+
+        elif freq == "WEEKLY":
+            wkst = WD_MAP[rule["WKST"]]
+            bymonth_set = set(rule["BYMONTH"]) if "BYMONTH" in rule else None
+            if "BYDAY" in rule:
+                byday_codes = {WD_MAP[code] for _, code in rule["BYDAY"]}
+            else:
+                byday_codes = {start_date.weekday()}
+            bysetpos_list = rule.get("BYSETPOS")
+
+            start_ord = start_date.toordinal()
+            offset = (start_date.weekday() - wkst) % 7
+            week_0_start_ord = start_ord - offset
+
+            i_start = 0
+            if not has_count:
+                diff = range_start_date.toordinal() - (week_0_start_ord + 6)
+                if diff > 0:
+                    i_start = max(0, diff // (interval * 7) - 1)
+
+            i = i_start
+            stop_all = False
+            while not stop_all:
+                w_start_ord = week_0_start_ord + i * interval * 7
+                if w_start_ord > MAX_ORDINAL:
+                    break
+                w_end_ord = w_start_ord + 6
+                if w_end_ord < MIN_ORDINAL:
+                    i += 1
+                    continue
+
+                w_start_d = date.fromordinal(max(MIN_ORDINAL, w_start_ord))
+                if w_start_d > range_end_date:
+                    break
+                if until_date and w_start_d > until_date:
+                    break
+
+                candidates = []
+                for k in range(7):
+                    day_ord = w_start_ord + k
+                    if MIN_ORDINAL <= day_ord <= MAX_ORDINAL:
+                        wd = (wkst + k) % 7
+                        if wd in byday_codes:
+                            d = date.fromordinal(day_ord)
+                            if bymonth_set is None or d.month in bymonth_set:
+                                candidates.append(d)
+
+                if bysetpos_list is not None and candidates:
+                    l_cand = len(candidates)
+                    kept_set = set()
+                    for p in bysetpos_list:
+                        if 1 <= p <= l_cand:
+                            kept_set.add(candidates[p - 1])
+                        elif -l_cand <= p <= -1:
+                            kept_set.add(candidates[l_cand + p])
+                    kept = sorted(kept_set)
+                else:
+                    kept = candidates
+
+                for cand_d in kept:
+                    inst = f"{cand_d.isoformat()}{start_time_suffix}"
+                    if inst <= start_str:
+                        continue
+                    if until_str is not None and inst > until_str:
+                        stop_all = True
+                        break
+                    series_count += 1
+                    if range_start <= inst < range_end:
+                        if inst not in exdates_set:
+                            results.append(inst)
+                    elif inst >= range_end:
+                        stop_all = True
+                        break
+                    if has_count and series_count >= count_limit:
+                        stop_all = True
+                        break
+
+                i += 1
+
+        elif freq == "MONTHLY":
+            bymonth_set = set(rule["BYMONTH"]) if "BYMONTH" in rule else None
+            has_bmd = "BYMONTHDAY" in rule
+            has_bd = "BYDAY" in rule
+            if not has_bmd and not has_bd:
+                bmd_list = [start_date.day]
+                has_bmd = True
+            else:
+                bmd_list = rule.get("BYMONTHDAY", [])
+            bd_list = rule.get("BYDAY", [])
+            bysetpos_list = rule.get("BYSETPOS")
+
+            start_abs_m = (start_date.year - 1) * 12 + (start_date.month - 1)
+            i_start = 0
+            if not has_count:
+                range_start_abs_m = (range_start_date.year - 1) * 12 + (range_start_date.month - 1)
+                diff = range_start_abs_m - start_abs_m
+                if diff > 0:
+                    i_start = max(0, diff // interval - 1)
+
+            i = i_start
+            stop_all = False
+            while not stop_all:
+                cur_abs_m = start_abs_m + i * interval
+                cur_y = cur_abs_m // 12 + 1
+                cur_m = cur_abs_m % 12 + 1
+                if cur_y > 9999:
+                    break
+
+                first_of_m = date(cur_y, cur_m, 1)
+                if first_of_m > range_end_date:
+                    break
+                if until_date and first_of_m > until_date:
+                    break
+
+                if bymonth_set is None or cur_m in bymonth_set:
+                    dim = _days_in_month(cur_y, cur_m)
+                    bmd_days = None
+                    if has_bmd:
+                        bmd_days = set()
+                        for v in bmd_list:
+                            if 1 <= v <= dim:
+                                bmd_days.add(v)
+                            elif -dim <= v <= -1:
+                                bmd_days.add(dim + v + 1)
+
+                    bd_days = None
+                    if has_bd:
+                        bd_days = set()
+                        for ord_n, code in bd_list:
+                            target_wd = WD_MAP[code]
+                            matching = [d_num for d_num in range(1, dim + 1)
+                                        if date(cur_y, cur_m, d_num).weekday() == target_wd]
+                            if ord_n is None:
+                                bd_days.update(matching)
+                            else:
+                                l_m = len(matching)
+                                if 1 <= ord_n <= l_m:
+                                    bd_days.add(matching[ord_n - 1])
+                                elif -l_m <= ord_n <= -1:
+                                    bd_days.add(matching[l_m + ord_n])
+
+                    if bmd_days is not None and bd_days is not None:
+                        valid_day_nums = sorted(bmd_days & bd_days)
+                    elif bmd_days is not None:
+                        valid_day_nums = sorted(bmd_days)
+                    elif bd_days is not None:
+                        valid_day_nums = sorted(bd_days)
+                    else:
+                        valid_day_nums = list(range(1, dim + 1))
+
+                    candidates = [date(cur_y, cur_m, d_num) for d_num in valid_day_nums]
+
+                    if bysetpos_list is not None and candidates:
+                        l_cand = len(candidates)
+                        kept_set = set()
+                        for p in bysetpos_list:
+                            if 1 <= p <= l_cand:
+                                kept_set.add(candidates[p - 1])
+                            elif -l_cand <= p <= -1:
+                                kept_set.add(candidates[l_cand + p])
+                        kept = sorted(kept_set)
+                    else:
+                        kept = candidates
+
+                    for cand_d in kept:
+                        inst = f"{cand_d.isoformat()}{start_time_suffix}"
+                        if inst <= start_str:
+                            continue
+                        if until_str is not None and inst > until_str:
+                            stop_all = True
+                            break
+                        series_count += 1
+                        if range_start <= inst < range_end:
+                            if inst not in exdates_set:
+                                results.append(inst)
+                        elif inst >= range_end:
+                            stop_all = True
+                            break
+                        if has_count and series_count >= count_limit:
+                            stop_all = True
+                            break
+
+                i += 1
+
+        elif freq == "YEARLY":
+            has_bmd = "BYMONTHDAY" in rule
+            has_bd = "BYDAY" in rule
+            has_bm_raw = "BYMONTH" in raw_names
+
+            if not has_bmd and not has_bd:
+                bmd_list = [start_date.day]
+                has_bmd = True
+                if not has_bm_raw:
+                    bymonth_list = [start_date.month]
+                else:
+                    bymonth_list = rule["BYMONTH"]
+            else:
+                bmd_list = rule.get("BYMONTHDAY", [])
+                bymonth_list = rule.get("BYMONTH")
+
+            bd_list = rule.get("BYDAY", [])
+            bysetpos_list = rule.get("BYSETPOS")
+            scope_is_month = has_bm_raw or (not has_bd)
+
+            i_start = 0
+            if not has_count:
+                diff = range_start_date.year - start_date.year
+                if diff > 0:
+                    i_start = max(0, diff // interval - 1)
+
+            i = i_start
+            stop_all = False
+            while not stop_all:
+                cur_y = start_date.year + i * interval
+                if cur_y > 9999:
+                    break
+
+                jan1 = date(cur_y, 1, 1)
+                if jan1 > range_end_date:
+                    break
+                if until_date and jan1 > until_date:
+                    break
+
+                candidates = []
+
+                if scope_is_month:
+                    months_to_check = bymonth_list if bymonth_list is not None else list(range(1, 13))
+                    for cur_m in sorted(months_to_check):
+                        dim = _days_in_month(cur_y, cur_m)
+                        bmd_days = None
+                        if has_bmd:
+                            bmd_days = set()
+                            for v in bmd_list:
+                                if 1 <= v <= dim:
+                                    bmd_days.add(v)
+                                elif -dim <= v <= -1:
+                                    bmd_days.add(dim + v + 1)
+
+                        bd_days = None
+                        if has_bd:
+                            bd_days = set()
+                            for ord_n, code in bd_list:
+                                target_wd = WD_MAP[code]
+                                matching = [d_num for d_num in range(1, dim + 1)
+                                            if date(cur_y, cur_m, d_num).weekday() == target_wd]
+                                if ord_n is None:
+                                    bd_days.update(matching)
+                                else:
+                                    l_m = len(matching)
+                                    if 1 <= ord_n <= l_m:
+                                        bd_days.add(matching[ord_n - 1])
+                                    elif -l_m <= ord_n <= -1:
+                                        bd_days.add(matching[l_m + ord_n])
+
+                        if bmd_days is not None and bd_days is not None:
+                            valid_day_nums = sorted(bmd_days & bd_days)
+                        elif bmd_days is not None:
+                            valid_day_nums = sorted(bmd_days)
+                        elif bd_days is not None:
+                            valid_day_nums = sorted(bd_days)
+                        else:
+                            valid_day_nums = list(range(1, dim + 1))
+
+                        for d_num in valid_day_nums:
+                            candidates.append(date(cur_y, cur_m, d_num))
+                else:
+                    # Scope is year
+                    # BYDAY matches across the full year
+                    bd_dates = set()
+                    year_len = 366 if _is_leap_year(cur_y) else 365
+                    year_start_ord = date(cur_y, 1, 1).toordinal()
+
+                    by_wd_dates = {}
+                    for ord_n, code in bd_list:
+                        target_wd = WD_MAP[code]
+                        if target_wd not in by_wd_dates:
+                            matching = []
+                            for offset_d in range(year_len):
+                                d = date.fromordinal(year_start_ord + offset_d)
+                                if d.weekday() == target_wd:
+                                    matching.append(d)
+                            by_wd_dates[target_wd] = matching
+                        else:
+                            matching = by_wd_dates[target_wd]
+
+                        if ord_n is None:
+                            bd_dates.update(matching)
+                        else:
+                            l_m = len(matching)
+                            if 1 <= ord_n <= l_m:
+                                bd_dates.add(matching[ord_n - 1])
+                            elif -l_m <= ord_n <= -1:
+                                bd_dates.add(matching[l_m + ord_n])
+
+                    if has_bmd:
+                        for cur_m in range(1, 13):
+                            dim = _days_in_month(cur_y, cur_m)
+                            for v in bmd_list:
+                                if 1 <= v <= dim:
+                                    d = date(cur_y, cur_m, v)
+                                    if d in bd_dates:
+                                        candidates.append(d)
+                                elif -dim <= v <= -1:
+                                    d = date(cur_y, cur_m, dim + v + 1)
+                                    if d in bd_dates:
+                                        candidates.append(d)
+                        candidates = sorted(set(candidates))
+                    else:
+                        candidates = sorted(bd_dates)
+
+                if bysetpos_list is not None and candidates:
+                    l_cand = len(candidates)
+                    kept_set = set()
+                    for p in bysetpos_list:
+                        if 1 <= p <= l_cand:
+                            kept_set.add(candidates[p - 1])
+                        elif -l_cand <= p <= -1:
+                            kept_set.add(candidates[l_cand + p])
+                    kept = sorted(kept_set)
+                else:
+                    kept = candidates
+
+                for cand_d in kept:
+                    inst = f"{cand_d.isoformat()}{start_time_suffix}"
+                    if inst <= start_str:
+                        continue
+                    if until_str is not None and inst > until_str:
+                        stop_all = True
+                        break
+                    series_count += 1
+                    if range_start <= inst < range_end:
+                        if inst not in exdates_set:
+                            results.append(inst)
+                    elif inst >= range_end:
+                        stop_all = True
+                        break
+                    if has_count and series_count >= count_limit:
+                        stop_all = True
+                        break
+
+                i += 1
+
+    # Step 5: Add rdates
+    for r in rdates_list:
+        if r not in exdates_set and range_start <= r < range_end:
+            results.append(r)
+
+    # Step 6: Distinct, sorted
+    return {"ok": True, "occurrences": sorted(set(results))}

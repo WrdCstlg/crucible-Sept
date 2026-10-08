@@ -1,0 +1,496 @@
+```python
+from datetime import date
+
+_DIGITS = frozenset("0123456789")
+_DIM = (0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+_WD = {"MO": 0, "TU": 1, "WE": 2, "TH": 3, "FR": 4, "SA": 5, "SU": 6}
+_MAXORD = date(9999, 12, 31).toordinal()
+_NAMES = frozenset(("FREQ", "INTERVAL", "COUNT", "UNTIL", "WKST",
+                    "BYMONTH", "BYMONTHDAY", "BYDAY", "BYSETPOS"))
+_FREQS = frozenset(("DAILY", "WEEKLY", "MONTHLY", "YEARLY"))
+
+
+def _is_leap(y):
+    return y % 4 == 0 and (y % 100 != 0 or y % 400 == 0)
+
+
+def _days_in_month(y, m):
+    if m == 2 and _is_leap(y):
+        return 29
+    return _DIM[m]
+
+
+def _parse_dt(s):
+    if not isinstance(s, str) or len(s) != 16:
+        return None
+    if s[4] != "-" or s[7] != "-" or s[10] != "T" or s[13] != ":":
+        return None
+    for i in (0, 1, 2, 3, 5, 6, 8, 9, 11, 12, 14, 15):
+        if s[i] not in _DIGITS:
+            return None
+    y = int(s[0:4])
+    m = int(s[5:7])
+    d = int(s[8:10])
+    hh = int(s[11:13])
+    mm = int(s[14:16])
+    if y < 1 or m < 1 or m > 12:
+        return None
+    if d < 1 or d > _days_in_month(y, m):
+        return None
+    if hh > 23 or mm > 59:
+        return None
+    return (y, m, d, hh, mm)
+
+
+def _uint(s):
+    if not s or s[0] == "0":
+        return None
+    for c in s:
+        if c not in _DIGITS:
+            return None
+    return int(s)
+
+
+def _sint(s):
+    if s and s[0] in "+-":
+        v = _uint(s[1:])
+        if v is None:
+            return None
+        return -v if s[0] == "-" else v
+    return _uint(s)
+
+
+def _parse_rule(rule):
+    if not isinstance(rule, str):
+        return None
+    vals = {}
+    for part in rule.split(";"):
+        if part.count("=") != 1:
+            return None
+        name, val = part.split("=")
+        if name not in _NAMES or name in vals:
+            return None
+        vals[name] = val
+    if "FREQ" not in vals:
+        return None
+    if "COUNT" in vals and "UNTIL" in vals:
+        return None
+    freq = vals["FREQ"]
+    if freq not in _FREQS:
+        return None
+    interval = 1
+    if "INTERVAL" in vals:
+        interval = _uint(vals["INTERVAL"])
+        if interval is None or interval > 100000:
+            return None
+    count = None
+    if "COUNT" in vals:
+        count = _uint(vals["COUNT"])
+        if count is None or count > 1000000:
+            return None
+    until = None
+    if "UNTIL" in vals:
+        until = _parse_dt(vals["UNTIL"])
+        if until is None:
+            return None
+    wkst = 0
+    if "WKST" in vals:
+        w = vals["WKST"]
+        if w not in _WD:
+            return None
+        wkst = _WD[w]
+    bymonth = None
+    if "BYMONTH" in vals:
+        s = set()
+        for it in vals["BYMONTH"].split(","):
+            v = _uint(it)
+            if v is None or v > 12:
+                return None
+            s.add(v)
+        bymonth = frozenset(s)
+    bymonthday = None
+    if "BYMONTHDAY" in vals:
+        s = set()
+        for it in vals["BYMONTHDAY"].split(","):
+            v = _sint(it)
+            if v is None or abs(v) > 31:
+                return None
+            s.add(v)
+        bymonthday = frozenset(s)
+    byday = None
+    if "BYDAY" in vals:
+        s = set()
+        for it in vals["BYDAY"].split(","):
+            if len(it) < 2:
+                return None
+            code = it[-2:]
+            if code not in _WD:
+                return None
+            prefix = it[:-2]
+            if prefix == "":
+                n = None
+            else:
+                n = _sint(prefix)
+                if n is None or abs(n) > 53:
+                    return None
+            s.add((n, _WD[code]))
+        byday = frozenset(s)
+    bysetpos = None
+    if "BYSETPOS" in vals:
+        s = set()
+        for it in vals["BYSETPOS"].split(","):
+            v = _sint(it)
+            if v is None or abs(v) > 366:
+                return None
+            s.add(v)
+        bysetpos = frozenset(s)
+    if byday is not None and freq in ("DAILY", "WEEKLY"):
+        for n, _ in byday:
+            if n is not None:
+                return None
+    if bymonthday is not None and freq == "WEEKLY":
+        return None
+    if bysetpos is not None and bymonth is None and bymonthday is None and byday is None:
+        return None
+    return {
+        "freq": freq, "interval": interval, "count": count, "until": until,
+        "wkst": wkst, "bymonth": bymonth, "bymonthday": bymonthday,
+        "byday": byday, "bysetpos": bysetpos,
+    }
+
+
+def _apply_setpos(lst, setpos):
+    n = len(lst)
+    if n == 0:
+        return lst
+    idx = set()
+    for p in setpos:
+        i = p - 1 if p > 0 else n + p
+        if 0 <= i < n:
+            idx.add(i)
+    return [lst[i] for i in sorted(idx)]
+
+
+def _expand(R, st, start_s, rs, rs_s, re_, re_s):
+    sy, sm, sd = st[0], st[1], st[2]
+    stime = start_s[11:]
+    start_ord = date(sy, sm, sd).toordinal()
+    start_wd = (start_ord - 1) % 7
+
+    freq = R["freq"]
+    I = R["interval"]
+    count = R["count"]
+    until = R["until"]
+    wkst = R["wkst"]
+    bymonth = R["bymonth"]
+    bymonthday = R["bymonthday"]
+    byday = R["byday"]
+    setpos = R["bysetpos"]
+    year_scope = (freq == "YEARLY" and bymonth is None)
+
+    if freq == "WEEKLY":
+        if byday is None:
+            byday = frozenset(((None, start_wd),))
+    elif freq == "MONTHLY":
+        if bymonthday is None and byday is None:
+            bymonthday = frozenset((sd,))
+    elif freq == "YEARLY":
+        if bymonthday is None and byday is None:
+            bymonthday = frozenset((sd,))
+            if bymonth is None:
+                bymonth = frozenset((sm,))
+
+    if count is not None and count <= 1:
+        return []
+
+    lo_series = start_ord + 1
+    if until is not None:
+        u_ord = date(until[0], until[1], until[2]).toordinal()
+        until_time = "%02d:%02d" % (until[3], until[4])
+        hi_series = u_ord if stime <= until_time else u_ord - 1
+    else:
+        hi_series = _MAXORD
+    rs_ord = date(rs[0], rs[1], rs[2]).toordinal()
+    rs_time = rs_s[11:]
+    r_lo = rs_ord if stime >= rs_time else rs_ord + 1
+    re_ord = date(re_[0], re_[1], re_[2]).toordinal()
+    re_time = re_s[11:]
+    r_hi = re_ord if stime < re_time else re_ord - 1
+
+    first_needed = max(r_lo, lo_series)
+    stop_ord = min(r_hi, hi_series, _MAXORD)
+    if first_needed > stop_ord:
+        return []
+
+    if setpos is None:
+        def sp(lst):
+            return lst
+    else:
+        def sp(lst):
+            return _apply_setpos(lst, setpos)
+
+    bmd = tuple(bymonthday) if bymonthday is not None else None
+    bd = tuple(byday) if byday is not None else None
+
+    def passes(m, d, wd, dim, doy1, ylen):
+        if bymonth is not None and m not in bymonth:
+            return False
+        if bmd is not None:
+            for v in bmd:
+                if v > 0:
+                    if d == v:
+                        break
+                elif d == dim + 1 + v:
+                    break
+            else:
+                return False
+        if bd is not None:
+            for n, c in bd:
+                if c != wd:
+                    continue
+                if n is None:
+                    break
+                if year_scope:
+                    if n > 0:
+                        pos = (doy1 - 1) // 7 + 1
+                    else:
+                        pos = -((ylen - doy1) // 7 + 1)
+                else:
+                    if n > 0:
+                        pos = (d - 1) // 7 + 1
+                    else:
+                        pos = -((dim - d) // 7 + 1)
+                if pos == n:
+                    break
+            else:
+                return False
+        return True
+
+    empty = ()
+
+    if freq == "DAILY":
+        if setpos is not None and 1 not in setpos and -1 not in setpos:
+            return []
+        single = (0,)
+        need_date = bymonth is not None or bmd is not None
+        wds = frozenset(c for _, c in bd) if bd is not None else None
+        nofilter = (not need_date) and wds is None
+
+        def period(k):
+            o = start_ord + k
+            if o > _MAXORD:
+                return None
+            if nofilter:
+                return (o, o, o, single)
+            if wds is not None and ((o - 1) % 7) not in wds:
+                return (o, o, o, empty)
+            if need_date:
+                dt = date.fromordinal(o)
+                m = dt.month
+                if bymonth is not None and m not in bymonth:
+                    return (o, o, o, empty)
+                if bmd is not None:
+                    d = dt.day
+                    dim = _days_in_month(dt.year, m)
+                    ok = False
+                    for v in bmd:
+                        if v > 0:
+                            if d == v:
+                                ok = True
+                                break
+                        elif d == dim + 1 + v:
+                            ok = True
+                            break
+                    if not ok:
+                        return (o, o, o, empty)
+            return (o, o, o, single)
+
+        P = first_needed - start_ord
+
+    elif freq == "WEEKLY":
+        ws0 = start_ord - ((start_wd - wkst) % 7)
+        wds = frozenset(c for _, c in bd)
+        base_offs = [o for o in range(7) if (wkst + o) % 7 in wds]
+        sel_full = sp(base_offs)
+
+        def period(k):
+            ws = ws0 + 7 * k
+            if ws > _MAXORD:
+                return None
+            we = ws + 6
+            boundary = ws < 1 or we > _MAXORD
+            if bymonth is not None:
+                a = ws if ws >= 1 else 1
+                b = we if we <= _MAXORD else _MAXORD
+                ma = date.fromordinal(a).month
+                mb = date.fromordinal(b).month
+                if ma == mb:
+                    if ma not in bymonth:
+                        return (ws, we, ws, empty)
+                else:
+                    lst = [o for o in base_offs
+                           if 1 <= ws + o <= _MAXORD
+                           and date.fromordinal(ws + o).month in bymonth]
+                    return (ws, we, ws, sp(lst))
+            if not boundary:
+                return (ws, we, ws, sel_full)
+            return (ws, we, ws, sp([o for o in base_offs if 1 <= ws + o <= _MAXORD]))
+
+        P = (first_needed - ws0) // 7
+
+    elif freq == "MONTHLY":
+        mi0 = sy * 12 + sm - 1
+        mcache = {}
+
+        def period(k):
+            mi = mi0 + k
+            y = mi // 12
+            if y > 9999:
+                return None
+            m = mi % 12 + 1
+            first = date(y, m, 1).toordinal()
+            dim = _days_in_month(y, m)
+            wd1 = (first - 1) % 7
+            key = (m, dim, wd1)
+            offs = mcache.get(key)
+            if offs is None:
+                if bymonth is not None and m not in bymonth:
+                    offs = []
+                else:
+                    lst = [d for d in range(1, dim + 1)
+                           if passes(m, d, (wd1 + d - 1) % 7, dim, 0, 0)]
+                    offs = sp(lst)
+                mcache[key] = offs
+            return (first, first + dim - 1, first - 1, offs)
+
+        fd = date.fromordinal(first_needed)
+        P = (fd.year * 12 + fd.month - 1) - mi0
+
+    else:  # YEARLY
+        ycache = {}
+
+        def period(k):
+            y = sy + k
+            if y > 9999:
+                return None
+            jan1 = date(y, 1, 1).toordinal()
+            leap = _is_leap(y)
+            ylen = 366 if leap else 365
+            wd0 = (jan1 - 1) % 7
+            key = (leap, wd0)
+            offs = ycache.get(key)
+            if offs is None:
+                lst = []
+                doy = 0
+                for m in range(1, 13):
+                    dim = _days_in_month(y, m)
+                    if bymonth is None or m in bymonth:
+                        for d in range(1, dim + 1):
+                            if passes(m, d, (wd0 + doy + d - 1) % 7, dim, doy + d, ylen):
+                                lst.append(doy + d - 1)
+                    doy += dim
+                offs = sp(lst)
+                ycache[key] = offs
+            return (jan1, jan1 + ylen - 1, jan1, offs)
+
+        fd = date.fromordinal(first_needed)
+        P = fd.year - sy
+
+    if count is None:
+        if P < 0:
+            P = 0
+        k = (P // I) * I
+    else:
+        k = 0
+
+    out = []
+    cnt = 1
+    while True:
+        info = period(k)
+        if info is None:
+            break
+        pstart, pend, base, offs = info
+        if pstart > stop_ord:
+            break
+        if offs:
+            if count is not None:
+                if pstart >= lo_series and pend < r_lo:
+                    n = len(offs)
+                    if cnt + n >= count:
+                        break
+                    cnt += n
+                else:
+                    finished = False
+                    for off in offs:
+                        o = base + off
+                        if o < lo_series:
+                            continue
+                        if o > r_hi:
+                            finished = True
+                            break
+                        cnt += 1
+                        if o >= r_lo:
+                            out.append(o)
+                        if cnt >= count:
+                            finished = True
+                            break
+                    if finished:
+                        break
+            elif pend >= r_lo:
+                for off in offs:
+                    o = base + off
+                    if o < r_lo or o < lo_series:
+                        continue
+                    if o > stop_ord:
+                        break
+                    out.append(o)
+        k += I
+
+    res = []
+    for o in out:
+        dt = date.fromordinal(o)
+        res.append("%04d-%02d-%02dT%s" % (dt.year, dt.month, dt.day, stime))
+    return res
+
+
+def occurrences(event, range_start, range_end):
+    bad_dt = {"ok": False, "error": "bad_datetime"}
+    start_s = event["start"]
+    rule = event["rule"]
+    exdates = event["exdates"]
+    rdates = event["rdates"]
+
+    st = _parse_dt(start_s)
+    rs = _parse_dt(range_start)
+    re_ = _parse_dt(range_end)
+    if st is None or rs is None or re_ is None:
+        return bad_dt
+    for x in exdates:
+        if _parse_dt(x) is None:
+            return bad_dt
+    for x in rdates:
+        if _parse_dt(x) is None:
+            return bad_dt
+
+    R = None
+    if rule is not None:
+        R = _parse_rule(rule)
+        if R is None:
+            return {"ok": False, "error": "bad_rule"}
+
+    if range_end <= range_start:
+        return {"ok": True, "occurrences": []}
+
+    result = set()
+    if range_start <= start_s < range_end:
+        result.add(start_s)
+    if R is not None:
+        for s in _expand(R, st, start_s, rs, range_start, re_, range_end):
+            result.add(s)
+    for r in rdates:
+        if range_start <= r < range_end:
+            result.add(r)
+    for x in exdates:
+        result.discard(x)
+    return {"ok": True, "occurrences": sorted(result)}
+```

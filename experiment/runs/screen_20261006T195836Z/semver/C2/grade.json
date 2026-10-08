@@ -1,0 +1,1261 @@
+{
+  "problem": "semver",
+  "sandbox": "docker",
+  "strict_pass": true,
+  "passed": 173,
+  "total": 173,
+  "public_pass": true,
+  "by_layer": {
+    "public": "5/5",
+    "hidden": "173/173"
+  },
+  "first_failure": null,
+  "cases": [
+    {
+      "id": "P1",
+      "layer": "public",
+      "title": "caret on 0.x",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P2a",
+      "layer": "public",
+      "title": "prerelease excluded",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P2b",
+      "layer": "public",
+      "title": "prerelease opt-in",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P3",
+      "layer": "public",
+      "title": "backtracking",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P4",
+      "layer": "public",
+      "title": "space after operator is invalid",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H01",
+      "layer": "hidden",
+      "title": "caret 0.2.3",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H02",
+      "layer": "hidden",
+      "title": "caret 0.0.3",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H03",
+      "layer": "hidden",
+      "title": "caret 0.0 (all zero: bump last present)",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H04",
+      "layer": "hidden",
+      "title": "caret 0",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H05",
+      "layer": "hidden",
+      "title": "caret 1.2.3 excludes prereleases",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H06",
+      "layer": "hidden",
+      "title": "tilde full",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H07",
+      "layer": "hidden",
+      "title": "tilde major only",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H08",
+      "layer": "hidden",
+      "title": "greater-than partial means >=next",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H09",
+      "layer": "hidden",
+      "title": "<= partial means <next",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H10",
+      "layer": "hidden",
+      "title": "< partial means <low",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H11",
+      "layer": "hidden",
+      "title": "bare partial",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H12",
+      "layer": "hidden",
+      "title": "capital X wildcard",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H13",
+      "layer": "hidden",
+      "title": "component after wildcard is invalid",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H14",
+      "layer": "hidden",
+      "title": "one invalid set invalidates the whole range",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H15",
+      "layer": "hidden",
+      "title": "v prefix is invalid",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H16",
+      "layer": "hidden",
+      "title": "hyphen with partial upper bound",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H17",
+      "layer": "hidden",
+      "title": "hyphen with prerelease lower bound",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H18",
+      "layer": "hidden",
+      "title": "prerelease opt-in is per M.m.p",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H19",
+      "layer": "hidden",
+      "title": "< full version excludes its prereleases",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H20",
+      "layer": "hidden",
+      "title": "< prerelease admits a lower prerelease",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H21",
+      "layer": "hidden",
+      "title": "numeric identifiers sort below alphanumeric",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H22",
+      "layer": "hidden",
+      "title": "more identifiers is greater; numeric below alpha",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H23",
+      "layer": "hidden",
+      "title": "build ignored; tie broken by greater string",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H24",
+      "layer": "hidden",
+      "title": "invalid registry versions ignored",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H25",
+      "layer": "hidden",
+      "title": "tab is not whitespace",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H26",
+      "layer": "hidden",
+      "title": "empty range means *",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H27",
+      "layer": "hidden",
+      "title": ">* matches nothing but another set can",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H28",
+      "layer": "hidden",
+      "title": "<* matches nothing",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H29",
+      "layer": "hidden",
+      "title": "hyphen with wildcard lower bound",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H30",
+      "layer": "hidden",
+      "title": "operator on a hyphen endpoint is invalid",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H31",
+      "layer": "hidden",
+      "title": "stray dash token is invalid",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H32",
+      "layer": "hidden",
+      "title": "tilde with prerelease",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H33",
+      "layer": "hidden",
+      "title": "leading zero in a range prerelease is invalid",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H34",
+      "layer": "hidden",
+      "title": "build metadata in a range is invalid",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H35",
+      "layer": "hidden",
+      "title": "union of sets",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H36",
+      "layer": "hidden",
+      "title": "=partial",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H37",
+      "layer": "hidden",
+      "title": "exact prerelease",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H38",
+      "layer": "hidden",
+      "title": "caret with prerelease admits same M.m.p only",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H39",
+      "layer": "hidden",
+      "title": "> full version excludes other prereleases",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H40",
+      "layer": "hidden",
+      "title": "x alone excludes prereleases",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H41",
+      "layer": "hidden",
+      "title": "four components is invalid",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H42",
+      "layer": "hidden",
+      "title": "star wildcards",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H43",
+      "layer": "hidden",
+      "title": "caret 0.0.x",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H44",
+      "layer": "hidden",
+      "title": "caret 0.0.0",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H45",
+      "layer": "hidden",
+      "title": "ASCII order: uppercase sorts first",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H46",
+      "layer": "hidden",
+      "title": "<= prerelease",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H47",
+      "layer": "hidden",
+      "title": "single pipe is invalid",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H48",
+      "layer": "hidden",
+      "title": "== is invalid",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H49",
+      "layer": "hidden",
+      "title": "numeric prerelease ids compare numerically",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H50",
+      "layer": "hidden",
+      "title": "space after tilde is invalid",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H51",
+      "layer": "hidden",
+      "title": "tie on prerelease broken by greater string",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H60",
+      "layer": "hidden",
+      "title": "self-dependency forces backtrack",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H61",
+      "layer": "hidden",
+      "title": "smallest name is resolved first",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H62",
+      "layer": "hidden",
+      "title": "chronological backtracking two levels deep",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H63",
+      "layer": "hidden",
+      "title": "missing package has no candidates",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H64",
+      "layer": "hidden",
+      "title": "new requirement re-checks an already selected package",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H65",
+      "layer": "hidden",
+      "title": "empty root",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H66",
+      "layer": "hidden",
+      "title": "invalid dependency range blocks",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H67",
+      "layer": "hidden",
+      "title": "unrequired packages are not selected",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H68",
+      "layer": "hidden",
+      "title": "equal-precedence candidates tried by string order",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H69",
+      "layer": "hidden",
+      "title": "empty registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H70",
+      "layer": "hidden",
+      "title": "backtracking drops packages selected deeper",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H71",
+      "layer": "hidden",
+      "title": "smallest name first, not dependency order",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP01",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP02",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP03",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP04",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP05",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP06",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP07",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP08",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP09",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP10",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP11",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP12",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP13",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP14",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP15",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP16",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP17",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP18",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP19",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP20",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP21",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP22",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP23",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP24",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP25",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP26",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP27",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP28",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP29",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP30",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP31",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP32",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP33",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP34",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP35",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP36",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP37",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP38",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP39",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RP40",
+      "layer": "hidden",
+      "title": "random range probe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR01",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR02",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR03",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR04",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR05",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR06",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR07",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR08",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR09",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR10",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR11",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR12",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR13",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR14",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR15",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR16",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR17",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR18",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR19",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR20",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR21",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR22",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR23",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR24",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR25",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR26",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR27",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR28",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR29",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR30",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR31",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR32",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR33",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR34",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR35",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR36",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR37",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR38",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR39",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR40",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR41",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR42",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR43",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR44",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR45",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR46",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR47",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR48",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR49",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR50",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR51",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR52",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR53",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR54",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR55",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR56",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR57",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR58",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR59",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR60",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR61",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR62",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR63",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR64",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR65",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR66",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR67",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR68",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR69",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "RR70",
+      "layer": "hidden",
+      "title": "random registry",
+      "pass": true,
+      "reason": null
+    }
+  ]
+}

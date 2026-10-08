@@ -1,0 +1,176 @@
+class Unit:
+    __slots__ = ("order", "line_idx", "sku", "price", "category", "claimed")
+
+    def __init__(self, order, line_idx, sku, price, category):
+        self.order = order
+        self.line_idx = line_idx
+        self.sku = sku
+        self.price = price
+        self.category = category
+        self.claimed = False
+
+
+def allocate(target_units, amount):
+    total_weight = sum(u.price for u in target_units)
+    if total_weight == 0:
+        return {u.order: 0 for u in target_units}
+
+    shares = {}
+    remainders = []
+    total_floor = 0
+
+    for u in target_units:
+        share = (amount * u.price) // total_weight
+        rem = (amount * u.price) % total_weight
+        shares[u.order] = share
+        total_floor += share
+        remainders.append((-rem, u.order))
+
+    missing = amount - total_floor
+    remainders.sort()
+    for i in range(missing):
+        order = remainders[i][1]
+        shares[order] += 1
+
+    return shares
+
+
+def simulate(cart, catalog, selection):
+    units = []
+    order = 0
+    for line_idx, line in enumerate(cart):
+        sku = line["sku"]
+        qty = line["qty"]
+        cat_info = catalog[sku]
+        price = cat_info["price"]
+        category = cat_info["category"]
+        for _ in range(qty):
+            units.append(Unit(order, line_idx, sku, price, category))
+            order += 1
+
+    ordered_promos = sorted(selection, key=lambda p: (p["priority"], p["id"]))
+    applied_ids = [p["id"] for p in ordered_promos]
+
+    for promo in ordered_promos:
+        ptype = promo["type"]
+        if ptype == "percent":
+            cat = promo["category"]
+            min_qty = promo["min_qty"]
+            percent = promo["percent"]
+            eligible = [u for u in units if not u.claimed and u.category == cat]
+            if len(eligible) >= min_qty:
+                for u in eligible:
+                    u.price -= (u.price * percent) // 100
+
+        elif ptype == "bxgy":
+            skus_set = set(promo["skus"])
+            buy_x = promo["buy"]
+            get_y = promo["get"]
+            eligible = [u for u in units if not u.claimed and u.sku in skus_set]
+            g = len(eligible) // (buy_x + get_y)
+            if g > 0:
+                eligible.sort(key=lambda u: (-u.price, u.order))
+                k = g * (buy_x + get_y)
+                claimed_units = eligible[:k]
+                for u in claimed_units:
+                    u.claimed = True
+                num_free = g * get_y
+                for u in claimed_units[-num_free:]:
+                    u.price = 0
+
+        elif ptype == "bundle":
+            bundle_skus = promo["skus"]
+            bundle_price = promo["price"]
+            while True:
+                picked = []
+                stopped = False
+                for sku in bundle_skus:
+                    best = None
+                    for u in units:
+                        if not u.claimed and u.sku == sku:
+                            if best is None or (-u.price, u.order) < (-best.price, best.order):
+                                best = u
+                    if best is None:
+                        stopped = True
+                        break
+                    picked.append(best)
+
+                if stopped:
+                    break
+
+                curr_sum = sum(u.price for u in picked)
+                if curr_sum <= bundle_price:
+                    break
+
+                shares = allocate(picked, bundle_price)
+                for u in picked:
+                    u.claimed = True
+                    u.price = shares[u.order]
+
+        elif ptype == "threshold":
+            min_subtotal = promo["min_subtotal"]
+            amount_off = promo["amount_off"]
+            subtotal = sum(u.price for u in units)
+            if subtotal > 0 and subtotal >= min_subtotal:
+                discount = max(0, min(amount_off, subtotal))
+                if discount > 0:
+                    shares = allocate(units, discount)
+                    for u in units:
+                        u.price -= shares[u.order]
+
+    lines = [0] * len(cart)
+    for u in units:
+        lines[u.line_idx] += u.price
+    total = sum(lines)
+    return lines, applied_ids, total
+
+
+def get_valid_selections(promotions):
+    selections = [()]
+
+    for p in promotions:
+        if p.get("exclusive", False):
+            selections.append((p,))
+
+    non_excl = [p for p in promotions if not p.get("exclusive", False)]
+
+    def backtrack(idx, current, used_groups):
+        if idx == len(non_excl):
+            if current:
+                selections.append(tuple(current))
+            return
+
+        p = non_excl[idx]
+        grp = p.get("group")
+
+        backtrack(idx + 1, current, used_groups)
+
+        if grp is None or grp not in used_groups:
+            current.append(p)
+            if grp is not None:
+                used_groups.add(grp)
+            backtrack(idx + 1, current, used_groups)
+            current.pop()
+            if grp is not None:
+                used_groups.remove(grp)
+
+    backtrack(0, [], set())
+    return selections
+
+
+def price_cart(catalog, cart, promotions):
+    best_key = None
+    best_result = None
+
+    for selection in get_valid_selections(promotions):
+        lines, applied, total = simulate(cart, catalog, selection)
+        key = (total, len(selection), sorted(p["id"] for p in selection))
+        if best_key is None or key < best_key:
+            best_key = key
+            best_result = {
+                "lines": lines,
+                "applied": applied,
+                "total": total,
+            }
+
+    return best_result

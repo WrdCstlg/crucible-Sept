@@ -1,0 +1,511 @@
+from datetime import date
+from bisect import bisect_right
+
+_MAXORD = 3652059  # date(9999, 12, 31).toordinal()
+_DIGITS = frozenset("0123456789")
+_WD = {"MO": 0, "TU": 1, "WE": 2, "TH": 3, "FR": 4, "SA": 5, "SU": 6}
+_FREQS = frozenset(("DAILY", "WEEKLY", "MONTHLY", "YEARLY"))
+_NAMES = frozenset(("FREQ", "INTERVAL", "COUNT", "UNTIL", "WKST",
+                    "BYMONTH", "BYMONTHDAY", "BYDAY", "BYSETPOS"))
+_ML = (31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31)
+
+
+def _leap(y):
+    return y % 4 == 0 and (y % 100 != 0 or y % 400 == 0)
+
+
+def _mlen(y, m):
+    if m == 2 and _leap(y):
+        return 29
+    return _ML[m - 1]
+
+
+def _parse_dt(s):
+    if not isinstance(s, str) or len(s) != 16:
+        return None
+    if s[4] != "-" or s[7] != "-" or s[10] != "T" or s[13] != ":":
+        return None
+    for i in (0, 1, 2, 3, 5, 6, 8, 9, 11, 12, 14, 15):
+        if s[i] not in _DIGITS:
+            return None
+    y = int(s[0:4])
+    mo = int(s[5:7])
+    d = int(s[8:10])
+    h = int(s[11:13])
+    mi = int(s[14:16])
+    if y < 1 or mo < 1 or mo > 12 or d < 1 or d > _mlen(y, mo) or h > 23 or mi > 59:
+        return None
+    return date(y, mo, d).toordinal() * 1440 + h * 60 + mi
+
+
+def _fmt(key):
+    o, mins = divmod(key, 1440)
+    d = date.fromordinal(o)
+    h, mi = divmod(mins, 60)
+    return "%04d-%02d-%02dT%02d:%02d" % (d.year, d.month, d.day, h, mi)
+
+
+def _uint(s):
+    if not s or s[0] == "0":
+        return None
+    for c in s:
+        if c not in _DIGITS:
+            return None
+    return int(s)
+
+
+def _sint(s):
+    if s and (s[0] == "+" or s[0] == "-"):
+        v = _uint(s[1:])
+        if v is None:
+            return None
+        return -v if s[0] == "-" else v
+    return _uint(s)
+
+
+def _parse_list(value, item_fn):
+    out = []
+    for item in value.split(","):
+        v = item_fn(item)
+        if v is None:
+            return None
+        out.append(v)
+    return out
+
+
+def _bymonth_item(s):
+    v = _uint(s)
+    if v is None or v > 12:
+        return None
+    return v
+
+
+def _bymonthday_item(s):
+    v = _sint(s)
+    if v is None or abs(v) > 31:
+        return None
+    return v
+
+
+def _bysetpos_item(s):
+    v = _sint(s)
+    if v is None or abs(v) > 366:
+        return None
+    return v
+
+
+def _byday_item(s):
+    if len(s) < 2:
+        return None
+    code = s[-2:]
+    if code not in _WD:
+        return None
+    prefix = s[:-2]
+    if prefix == "":
+        return (None, _WD[code])
+    n = _sint(prefix)
+    if n is None or abs(n) > 53:
+        return None
+    return (n, _WD[code])
+
+
+def _parse_rule(rule):
+    if not isinstance(rule, str):
+        return None
+    seen = {}
+    for part in rule.split(";"):
+        if part.count("=") != 1:
+            return None
+        name, value = part.split("=")
+        if name not in _NAMES or name in seen:
+            return None
+        seen[name] = value
+    if "FREQ" not in seen:
+        return None
+    if "COUNT" in seen and "UNTIL" in seen:
+        return None
+    freq = seen["FREQ"]
+    if freq not in _FREQS:
+        return None
+    interval = 1
+    if "INTERVAL" in seen:
+        interval = _uint(seen["INTERVAL"])
+        if interval is None or interval > 100000:
+            return None
+    count = None
+    if "COUNT" in seen:
+        count = _uint(seen["COUNT"])
+        if count is None or count > 1000000:
+            return None
+    until = None
+    if "UNTIL" in seen:
+        until = _parse_dt(seen["UNTIL"])
+        if until is None:
+            return None
+    wkst = 0
+    if "WKST" in seen:
+        if seen["WKST"] not in _WD:
+            return None
+        wkst = _WD[seen["WKST"]]
+    bymonth = bymonthday = byday = bysetpos = None
+    if "BYMONTH" in seen:
+        bymonth = _parse_list(seen["BYMONTH"], _bymonth_item)
+        if bymonth is None:
+            return None
+    if "BYMONTHDAY" in seen:
+        bymonthday = _parse_list(seen["BYMONTHDAY"], _bymonthday_item)
+        if bymonthday is None:
+            return None
+    if "BYDAY" in seen:
+        byday = _parse_list(seen["BYDAY"], _byday_item)
+        if byday is None:
+            return None
+    if "BYSETPOS" in seen:
+        bysetpos = _parse_list(seen["BYSETPOS"], _bysetpos_item)
+        if bysetpos is None:
+            return None
+    if byday is not None and freq in ("DAILY", "WEEKLY"):
+        for n, _w in byday:
+            if n is not None:
+                return None
+    if bymonthday is not None and freq == "WEEKLY":
+        return None
+    if bysetpos is not None and bymonth is None and bymonthday is None and byday is None:
+        return None
+    return {
+        "freq": freq, "interval": interval, "count": count, "until": until,
+        "wkst": wkst, "bymonth": bymonth, "bymonthday": bymonthday,
+        "byday": byday, "bysetpos": bysetpos,
+    }
+
+
+def _expand(r, S, RS, RE):
+    """Return rule instances (keys) of the series lying in [RS, RE), start excluded."""
+    Sd, St = divmod(S, 1440)
+    sdate = date.fromordinal(Sd)
+    Sy, Sm, Sdom = sdate.year, sdate.month, sdate.day
+    Swd = (Sd - 1) % 7
+    freq = r["freq"]
+    I = r["interval"]
+    COUNT = r["count"]
+    U = r["until"]
+    wkst = r["wkst"]
+    bymonth = set(r["bymonth"]) if r["bymonth"] is not None else None
+    bymonthday = r["bymonthday"]
+    byday = r["byday"]
+    setpos = r["bysetpos"]
+
+    # Defaults
+    if freq == "WEEKLY" and byday is None:
+        byday = [(None, Swd)]
+    elif freq == "MONTHLY" and bymonthday is None and byday is None:
+        bymonthday = [Sdom]
+    elif freq == "YEARLY" and bymonthday is None and byday is None:
+        bymonthday = [Sdom]
+        if bymonth is None:
+            bymonth = {Sm}
+
+    md_pos = md_neg = None
+    if bymonthday is not None:
+        md_pos = frozenset(v for v in bymonthday if v > 0)
+        md_neg = frozenset(v for v in bymonthday if v < 0)
+    bd_all = frozenset()
+    bd_ord = {}
+    if byday is not None:
+        bd_all = frozenset(w for n, w in byday if n is None)
+        for n, w in byday:
+            if n is not None:
+                bd_ord.setdefault(w, set()).add(n)
+
+    def match_bd(wd, a, b):
+        if wd in bd_all:
+            return True
+        s = bd_ord.get(wd)
+        return s is not None and (a in s or -b in s)
+
+    if setpos is not None:
+        sp = sorted(set(setpos))
+
+        def apply_sp(c):
+            N = len(c)
+            idx = set()
+            for p in sp:
+                if p > 0:
+                    if p <= N:
+                        idx.add(p - 1)
+                elif -p <= N:
+                    idx.add(N + p)
+            return [c[i] for i in sorted(idx)]
+    else:
+        def apply_sp(c):
+            return c
+
+    EMPTY = ()
+
+    if freq == "DAILY":
+        if setpos is not None and 1 not in setpos and -1 not in setpos:
+            return []
+        need_date = bymonth is not None or md_pos is not None
+        use_bd = byday is not None
+        ZERO = (0,)
+
+        def period(k):
+            o = Sd + k
+            if o > _MAXORD:
+                return None
+            if use_bd and (o - 1) % 7 not in bd_all:
+                return (o, EMPTY)
+            if need_date:
+                d = date.fromordinal(o)
+                m = d.month
+                if bymonth is not None and m not in bymonth:
+                    return (o, EMPTY)
+                if md_pos is not None:
+                    dom = d.day
+                    if dom not in md_pos and (dom - _mlen(d.year, m) - 1) not in md_neg:
+                        return (o, EMPTY)
+            return (o, ZERO)
+
+        def pidx(o):
+            return o - Sd
+
+    elif freq == "WEEKLY":
+        W0 = Sd - ((Swd - wkst) % 7)
+        wcache = {}
+
+        def period(k):
+            W = W0 + 7 * k
+            if W > _MAXORD:
+                return None
+            if W < 1 or W + 6 > _MAXORD:
+                c = []
+                for j in range(7):
+                    o = W + j
+                    if o < 1 or o > _MAXORD:
+                        continue
+                    if (wkst + j) % 7 not in bd_all:
+                        continue
+                    if bymonth is not None and date.fromordinal(o).month not in bymonth:
+                        continue
+                    c.append(j)
+                return (W, tuple(apply_sp(c)))
+            if bymonth is None:
+                key = None
+            else:
+                d = date.fromordinal(W)
+                split = _mlen(d.year, d.month) - d.day + 1
+                key = (d.month, split if split < 7 else 7)
+            kept = wcache.get(key)
+            if kept is None:
+                c = []
+                for j in range(7):
+                    if (wkst + j) % 7 not in bd_all:
+                        continue
+                    if key is not None:
+                        m = key[0] if j < key[1] else key[0] % 12 + 1
+                        if m not in bymonth:
+                            continue
+                    c.append(j)
+                kept = tuple(apply_sp(c))
+                wcache[key] = kept
+            return (W, kept)
+
+        def pidx(o):
+            return (o - W0) // 7
+
+    elif freq == "MONTHLY":
+        base_mi = Sy * 12 + Sm - 1
+        mcache = {}
+
+        def period(k):
+            y, m0 = divmod(base_mi + k, 12)
+            if y > 9999:
+                return None
+            m = m0 + 1
+            first = date(y, m, 1).toordinal()
+            if bymonth is not None and m not in bymonth:
+                return (first, EMPTY)
+            L = _mlen(y, m)
+            w1 = (first - 1) % 7
+            key = (L, w1)
+            kept = mcache.get(key)
+            if kept is None:
+                c = []
+                for dom in range(1, L + 1):
+                    if md_pos is not None and dom not in md_pos and (dom - L - 1) not in md_neg:
+                        continue
+                    if byday is not None and not match_bd((w1 + dom - 1) % 7,
+                                                          (dom - 1) // 7 + 1,
+                                                          (L - dom) // 7 + 1):
+                        continue
+                    c.append(dom - 1)
+                kept = tuple(apply_sp(c))
+                mcache[key] = kept
+            return (first, kept)
+
+        def pidx(o):
+            d = date.fromordinal(o)
+            return d.year * 12 + d.month - 1 - base_mi
+
+    else:  # YEARLY
+        ycache = {}
+        year_scope = bymonth is None
+
+        def period(k):
+            y = Sy + k
+            if y > 9999:
+                return None
+            first = date(y, 1, 1).toordinal()
+            lp = _leap(y)
+            wj1 = (first - 1) % 7
+            key = (lp, wj1)
+            kept = ycache.get(key)
+            if kept is None:
+                ylen = 366 if lp else 365
+                c = []
+                off = 0
+                for m in range(1, 13):
+                    L = 29 if (m == 2 and lp) else _ML[m - 1]
+                    if bymonth is None or m in bymonth:
+                        for dom in range(1, L + 1):
+                            if md_pos is not None and dom not in md_pos and (dom - L - 1) not in md_neg:
+                                continue
+                            doy0 = off + dom - 1
+                            if byday is not None:
+                                wd = (wj1 + doy0) % 7
+                                if year_scope:
+                                    a = doy0 // 7 + 1
+                                    b = (ylen - 1 - doy0) // 7 + 1
+                                else:
+                                    a = (dom - 1) // 7 + 1
+                                    b = (L - dom) // 7 + 1
+                                if not match_bd(wd, a, b):
+                                    continue
+                            c.append(doy0)
+                    off += L
+                kept = tuple(apply_sp(c))
+                ycache[key] = kept
+            return (first, kept)
+
+        def pidx(o):
+            return date.fromordinal(o).year - Sy
+
+    out = []
+    if COUNT is not None:
+        n = 1
+        if n >= COUNT:
+            return out
+        RE_ord = RE // 1440
+        k = 0
+        while True:
+            res = period(k)
+            if res is None:
+                break
+            first, kept = res
+            if first > RE_ord:
+                break
+            if kept:
+                lo = 0
+                if first + kept[0] <= Sd:
+                    lo = bisect_right(kept, Sd - first)
+                cnt = len(kept) - lo
+                if cnt:
+                    if (first + kept[-1]) * 1440 + St < RS:
+                        n += cnt
+                        if n >= COUNT:
+                            break
+                    else:
+                        done = False
+                        for i in range(lo, len(kept)):
+                            key = (first + kept[i]) * 1440 + St
+                            if key >= RE:
+                                done = True
+                                break
+                            n += 1
+                            if key >= RS:
+                                out.append(key)
+                            if n >= COUNT:
+                                done = True
+                                break
+                        if done:
+                            break
+            k += I
+        return out
+
+    stop_key = RE
+    if U is not None and U + 1 < stop_key:
+        stop_key = U + 1
+    if max(RS, S + 1) >= stop_key:
+        return out
+    stop_ord = (stop_key - 1) // 1440
+    rs_ord = max(RS // 1440, Sd)
+    p = pidx(rs_ord)
+    if p < 0:
+        p = 0
+    k = (p // I) * I
+    while True:
+        res = period(k)
+        if res is None:
+            break
+        first, kept = res
+        if first > stop_ord:
+            break
+        done = False
+        for off in kept:
+            o = first + off
+            if o <= Sd:
+                continue
+            key = o * 1440 + St
+            if key >= stop_key:
+                done = True
+                break
+            if key >= RS:
+                out.append(key)
+        if done:
+            break
+        k += I
+    return out
+
+
+def occurrences(event, range_start, range_end):
+    if not isinstance(event, dict):
+        return {"ok": False, "error": "bad_datetime"}
+    S = _parse_dt(event.get("start"))
+    RS = _parse_dt(range_start)
+    RE = _parse_dt(range_end)
+    if S is None or RS is None or RE is None:
+        return {"ok": False, "error": "bad_datetime"}
+    ex = []
+    for x in (event.get("exdates") or []):
+        v = _parse_dt(x)
+        if v is None:
+            return {"ok": False, "error": "bad_datetime"}
+        ex.append(v)
+    rd = []
+    for x in (event.get("rdates") or []):
+        v = _parse_dt(x)
+        if v is None:
+            return {"ok": False, "error": "bad_datetime"}
+        rd.append(v)
+
+    rule = event.get("rule")
+    r = None
+    if rule is not None:
+        r = _parse_rule(rule)
+        if r is None:
+            return {"ok": False, "error": "bad_rule"}
+
+    if RE <= RS:
+        return {"ok": True, "occurrences": []}
+
+    entries = set()
+    if RS <= S < RE:
+        entries.add(S)
+    if r is not None:
+        entries.update(_expand(r, S, RS, RE))
+    for v in rd:
+        if RS <= v < RE:
+            entries.add(v)
+    for v in ex:
+        entries.discard(v)
+    return {"ok": True, "occurrences": [_fmt(k) for k in sorted(entries)]}

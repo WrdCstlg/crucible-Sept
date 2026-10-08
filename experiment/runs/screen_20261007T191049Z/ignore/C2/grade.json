@@ -1,0 +1,1206 @@
+{
+  "problem": "ignore",
+  "sandbox": "docker",
+  "strict_pass": false,
+  "passed": 0,
+  "total": 166,
+  "public_pass": false,
+  "by_layer": {
+    "public": "0/4",
+    "hidden": "0/163",
+    "stress": "0/3"
+  },
+  "first_failure": "P1: import failed: AttributeError: module 'solution' has no attribute 'ignored'",
+  "cases": [
+    {
+      "id": "P1",
+      "layer": "public",
+      "title": "comments, negation, last match wins, directory-only at any depth, invalid path",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "P2",
+      "layer": "public",
+      "title": "anchoring relative to the ignore file; deeper ignore file wins",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "P3",
+      "layer": "public",
+      "title": "an excluded directory cannot be re-included",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "P4",
+      "layer": "public",
+      "title": "escapes, trailing spaces, ?, a range, a path that is also a directory",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H01",
+      "layer": "hidden",
+      "title": "parent exclusion beats negations in the excluded directory's own ignore file",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H02",
+      "layer": "hidden",
+      "title": "trailing /** matches inside the directory but not the directory itself",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H03",
+      "layer": "hidden",
+      "title": "leading **/ and middle /**/ match zero or more directories",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H04",
+      "layer": "hidden",
+      "title": "a middle slash anchors; * does not cross /",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H05",
+      "layer": "hidden",
+      "title": "a trailing slash alone does not anchor; directory-only skips files",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H06",
+      "layer": "hidden",
+      "title": "the deepest ignore file with a match decides",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H07",
+      "layer": "hidden",
+      "title": "last matching line wins, including re-ignoring after a negation",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H08",
+      "layer": "hidden",
+      "title": "trailing spaces: escaped kept, plain removed; leading spaces and tabs kept",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H09",
+      "layer": "hidden",
+      "title": "comments, escaped # and !, double !",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H10",
+      "layer": "hidden",
+      "title": "bracket expressions: ^ negates, ] first is a member, reversed range, - at the end",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H11",
+      "layer": "hidden",
+      "title": "an unclosed [ or a dangling \\ makes the rule match nothing",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H12",
+      "layer": "hidden",
+      "title": "directory-only never matches a file; negated directory-only re-includes directories only",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H13",
+      "layer": "hidden",
+      "title": "rules of a subdirectory: unanchored at any depth below it, anchored to it",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H14",
+      "layer": "hidden",
+      "title": "* matches a leading dot; ? is exactly one character; case-sensitive",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H15",
+      "layer": "hidden",
+      "title": "invalid paths: empty, . and .. segments, slashes, paths that are directories, duplicates",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H16",
+      "layer": "hidden",
+      "title": "*** is a globstar; ** inside a segment is a plain *",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H17",
+      "layer": "hidden",
+      "title": "globstars around a middle segment; the last globstar needs one segment",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H18",
+      "layer": "hidden",
+      "title": "an ignore file applies only below its directory; keys that are not directories do nothing",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H19",
+      "layer": "hidden",
+      "title": "ignored_dirs lists only the topmost excluded directories",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H20",
+      "layer": "hidden",
+      "title": "re-including a directory, then excluding inside it (the /* !/foo idiom)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H21",
+      "layer": "hidden",
+      "title": "lines that become empty; empty pattern segments match nothing",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H22",
+      "layer": "hidden",
+      "title": "escapes outside and inside bracket expressions",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H23",
+      "layer": "hidden",
+      "title": "leading / and **/ in a subdirectory's ignore file are relative to that subdirectory",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H24",
+      "layer": "hidden",
+      "title": "deeper ignore file decides for directories too",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H25",
+      "layer": "hidden",
+      "title": "characters are code points; ranges compare code points",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H26",
+      "layer": "hidden",
+      "title": "unanchored ** is a plain *; all files ignored but no directory excluded",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H27",
+      "layer": "hidden",
+      "title": "case-sensitive directory names; duplicates reported once",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "H28",
+      "layer": "hidden",
+      "title": "trailing spaces before and after a trailing slash",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R001",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R002",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R003",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R004",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R005",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R006",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R007",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R008",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R009",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R010",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R011",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R012",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R013",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R014",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R015",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R016",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R017",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R018",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R019",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R020",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R021",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R022",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R023",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R024",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R025",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R026",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R027",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R028",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R029",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R030",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R031",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R032",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R033",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R034",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R035",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R036",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R037",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R038",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R039",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R040",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R041",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R042",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R043",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R044",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R045",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R046",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R047",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R048",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R049",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R050",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R051",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R052",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R053",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R054",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R055",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R056",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R057",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R058",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R059",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R060",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R061",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R062",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R063",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R064",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R065",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R066",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R067",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R068",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R069",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R070",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R071",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R072",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R073",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R074",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R075",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R076",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R077",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R078",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R079",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R080",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R081",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R082",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R083",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R084",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R085",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R086",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R087",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R088",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R089",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R090",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R091",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R092",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R093",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R094",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R095",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R096",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R097",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R098",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R099",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R100",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R101",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R102",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R103",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R104",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R105",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R106",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R107",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R108",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R109",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R110",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R111",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R112",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R113",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R114",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R115",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R116",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R117",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R118",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R119",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R120",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R121",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R122",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R123",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R124",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R125",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R126",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R127",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R128",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R129",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R130",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R131",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R132",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R133",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R134",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "R135",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'ignored'"
+    },
+    {
+      "id": "S1",
+      "layer": "stress",
+      "title": "60 000 files ~28 levels deep under ~1 600 ignore files",
+      "pass": false,
+      "reason": "no result (process died or timed out)"
+    },
+    {
+      "id": "S2",
+      "layer": "stress",
+      "title": "directory chains 2 900, 1 600 and 1 100 levels deep",
+      "pass": false,
+      "reason": "no result (process died or timed out)"
+    },
+    {
+      "id": "S3",
+      "layer": "stress",
+      "title": "many-star and many-globstar rules against long names and deep paths",
+      "pass": false,
+      "reason": "no result (process died or timed out)"
+    }
+  ]
+}

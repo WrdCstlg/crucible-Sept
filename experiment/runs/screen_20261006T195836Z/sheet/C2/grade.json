@@ -1,0 +1,933 @@
+{
+  "problem": "sheet",
+  "sandbox": "docker",
+  "strict_pass": true,
+  "passed": 127,
+  "total": 127,
+  "public_pass": true,
+  "by_layer": {
+    "public": "4/4",
+    "hidden": "124/124",
+    "stress": "3/3"
+  },
+  "first_failure": null,
+  "cases": [
+    {
+      "id": "P1",
+      "layer": "public",
+      "title": "precedence and errors",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P2",
+      "layer": "public",
+      "title": "comparisons and coercions",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P3",
+      "layer": "public",
+      "title": "aggregates and ROUND",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P4",
+      "layer": "public",
+      "title": "static cycles",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H01",
+      "layer": "hidden",
+      "title": "unary minus binds tighter than ^",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H02",
+      "layer": "hidden",
+      "title": "left associativity",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H03",
+      "layer": "hidden",
+      "title": "& sits between comparison and +",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H04",
+      "layer": "hidden",
+      "title": "string to number uses the literal rule",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H05",
+      "layer": "hidden",
+      "title": "raw literal parsing",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H06",
+      "layer": "hidden",
+      "title": "empty formula values stay empty",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H07",
+      "layer": "hidden",
+      "title": "cross-type ordering",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H08",
+      "layer": "hidden",
+      "title": "error order: operand errors before conversion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H09",
+      "layer": "hidden",
+      "title": "power edge cases",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H10",
+      "layer": "hidden",
+      "title": "overflow is #NUM!",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H11",
+      "layer": "hidden",
+      "title": "aggregate argument kinds",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H12",
+      "layer": "hidden",
+      "title": "AND / OR",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H13",
+      "layer": "hidden",
+      "title": "IF evaluates only the chosen branch",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H14",
+      "layer": "hidden",
+      "title": "names, references and function names",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H15",
+      "layer": "hidden",
+      "title": "grammar errors",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H16",
+      "layer": "hidden",
+      "title": "static cycles in every form",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H17",
+      "layer": "hidden",
+      "title": "range containing its own cell",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H18",
+      "layer": "hidden",
+      "title": "text conversion of numbers",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H19",
+      "layer": "hidden",
+      "title": "ROUND halves away from zero on the repr decimal",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H20",
+      "layer": "hidden",
+      "title": "SUM adds left to right",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H21",
+      "layer": "hidden",
+      "title": "ranges are row-major, corners in any order",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H22",
+      "layer": "hidden",
+      "title": "invalid and misused ranges",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H23",
+      "layer": "hidden",
+      "title": "case-insensitive names, spaces before (",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H24",
+      "layer": "hidden",
+      "title": "IFERROR catches #PARSE!",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H25",
+      "layer": "hidden",
+      "title": "empty string comparisons",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H26",
+      "layer": "hidden",
+      "title": "boolean conversion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H27",
+      "layer": "hidden",
+      "title": "single REF is a range argument, (+REF) is not",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H28",
+      "layer": "hidden",
+      "title": "spaces and nesting",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H29",
+      "layer": "hidden",
+      "title": "number formatting",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H30",
+      "layer": "hidden",
+      "title": "COUNT of direct arguments",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H31",
+      "layer": "hidden",
+      "title": "comparison operators",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H32",
+      "layer": "hidden",
+      "title": "string-to-boolean ignores ASCII case only",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H33",
+      "layer": "hidden",
+      "title": "AND / OR do not short-circuit",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H34",
+      "layer": "hidden",
+      "title": "more associativity, row-major and invalid-range checks",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R01",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R02",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R03",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R04",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R05",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R06",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R07",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R08",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R09",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R10",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R11",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R12",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R13",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R14",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R15",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R16",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R17",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R18",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R19",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R20",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R21",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R22",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R23",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R24",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R25",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R26",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R27",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R28",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R29",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R30",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R31",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R32",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R33",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R34",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R35",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R36",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R37",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R38",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R39",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R40",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R41",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R42",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R43",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R44",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R45",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R46",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R47",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R48",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R49",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R50",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R51",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R52",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R53",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R54",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R55",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R56",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R57",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R58",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R59",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R60",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R61",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R62",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R63",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R64",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R65",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R66",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R67",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R68",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R69",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R70",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R71",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R72",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R73",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R74",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R75",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R76",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R77",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R78",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R79",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R80",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R81",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R82",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R83",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R84",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R85",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R86",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R87",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R88",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R89",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R90",
+      "layer": "hidden",
+      "title": "random sheet",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S1",
+      "layer": "stress",
+      "title": "reference chain of 20000 cells",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S2",
+      "layer": "stress",
+      "title": "prefix sums, a 999-cell cycle ring and readers",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S3",
+      "layer": "stress",
+      "title": "random sheet of ~6000 cells",
+      "pass": true,
+      "reason": null
+    }
+  ]
+}

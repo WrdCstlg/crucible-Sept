@@ -1,0 +1,975 @@
+{
+  "problem": "policy",
+  "sandbox": "docker",
+  "strict_pass": true,
+  "passed": 133,
+  "total": 133,
+  "public_pass": true,
+  "by_layer": {
+    "public": "4/4",
+    "hidden": "130/130",
+    "stress": "3/3"
+  },
+  "first_failure": null,
+  "cases": [
+    {
+      "id": "P1",
+      "layer": "public",
+      "title": "inheritance with a cycle, case-insensitive actions, explicit and implicit deny",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P2",
+      "layer": "public",
+      "title": "references: principal, inherited tag, literal star",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P3",
+      "layer": "public",
+      "title": "conditions: Bool, numbers, several values, multi-valued key",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P4",
+      "layer": "public",
+      "title": "a permission boundary limits an inherited allow",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H01",
+      "layer": "hidden",
+      "title": "unknown principal is denied even by a wildcard allow (ids are case-sensitive)",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H02",
+      "layer": "hidden",
+      "title": "inherits naming a user or an unknown id is ignored",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H03",
+      "layer": "hidden",
+      "title": "cycles and self-loops in inheritance; a role can make requests",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H04",
+      "layer": "hidden",
+      "title": "tag resolution: own tag first, then smallest distance, then smallest id; empty value is present",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H05",
+      "layer": "hidden",
+      "title": "a missing tag matches nothing; in not_resources it therefore excludes nothing",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H06",
+      "layer": "hidden",
+      "title": "substituted text is literal: * and ? inside an id or tag value match only themselves",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H07",
+      "layer": "hidden",
+      "title": "escapes ${*} ${?} ${$}; a $ not followed by { and a bare { are ordinary",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H08",
+      "layer": "hidden",
+      "title": "invalid references make the statement malformed; actions have no references",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H09",
+      "layer": "hidden",
+      "title": "[ and ] are ordinary; * crosses / and :; ? is exactly one character",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H10",
+      "layer": "hidden",
+      "title": "action case folding is ASCII-only; resources and principal ids are case-sensitive",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H11",
+      "layer": "hidden",
+      "title": "malformed statements: effect case, bare strings, empty or doubled lists, unknown keys",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H12",
+      "layer": "hidden",
+      "title": "malformed statements: principals in a boundary statement, missing in an identity one, bad set",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H13",
+      "layer": "hidden",
+      "title": "a role's boundary applies to everyone who inherits it; a set with no statements contains nothing",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H14",
+      "layer": "hidden",
+      "title": "identity deny beats the boundary; boundary denies are listed only under outside_boundary",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H15",
+      "layer": "hidden",
+      "title": "every boundary set must contain the request; duplicate sids are listed once",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H16",
+      "layer": "hidden",
+      "title": "plain negated operator: true for a missing key, false for an empty list, any-value for lists",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H17",
+      "layer": "hidden",
+      "title": "ForAllValues is true for a missing key or an empty list; ForAnyValue is false for both",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H18",
+      "layer": "hidden",
+      "title": "IfExists is true for a missing key and changes nothing for a present one",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H19",
+      "layer": "hidden",
+      "title": "keys and operators combine with AND, values with OR; an empty operator dict imposes nothing",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H20",
+      "layer": "hidden",
+      "title": "numbers: strict ASCII grammar, exact comparison",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H21",
+      "layer": "hidden",
+      "title": "numbers compare exactly; NumericNotEquals on a non-number is false; a bad policy number",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H22",
+      "layer": "hidden",
+      "title": "Bool is exact; Null tests presence (true = absent); Null takes no prefix or suffix",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H23",
+      "layer": "hidden",
+      "title": "operator names: prefix plus suffix is valid; wrong case, doubled parts and bad values are not",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H24",
+      "layer": "hidden",
+      "title": "not_actions and not_resources",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H25",
+      "layer": "hidden",
+      "title": "principal patterns match any member of the identity set, wildcards included",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H26",
+      "layer": "hidden",
+      "title": "allowed lists every matching identity allow, without duplicates, in code-point order",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H27",
+      "layer": "hidden",
+      "title": "explicit_deny lists every matching identity deny, whatever the statement order",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H28",
+      "layer": "hidden",
+      "title": "boundary statements have no principals and resolve references for the request principal",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H29",
+      "layer": "hidden",
+      "title": "glob edge cases: empty pattern, doubled stars, overlapping literal segments",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H30",
+      "layer": "hidden",
+      "title": "StringLike / StringNotLike: no references, [ is ordinary, negated base on a missing key",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R001",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R002",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R003",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R004",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R005",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R006",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R007",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R008",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R009",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R010",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R011",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R012",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R013",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R014",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R015",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R016",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R017",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R018",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R019",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R020",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R021",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R022",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R023",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R024",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R025",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R026",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R027",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R028",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R029",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R030",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R031",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R032",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R033",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R034",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R035",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R036",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R037",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R038",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R039",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R040",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R041",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R042",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R043",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R044",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R045",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R046",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R047",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R048",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R049",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R050",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R051",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R052",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R053",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R054",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R055",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R056",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R057",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R058",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R059",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R060",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R061",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R062",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R063",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R064",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R065",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R066",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R067",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R068",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R069",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R070",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R071",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R072",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R073",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R074",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R075",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R076",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R077",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R078",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R079",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R080",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R081",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R082",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R083",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R084",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R085",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R086",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R087",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R088",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R089",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R090",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R091",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R092",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R093",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R094",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R095",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R096",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R097",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R098",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R099",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R100",
+      "layer": "hidden",
+      "title": "random policy universe",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S1",
+      "layer": "stress",
+      "title": "dozens of stars against long resources and context values",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S2",
+      "layer": "stress",
+      "title": "inheritance chain 50 000 roles deep, with a cycle",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S3",
+      "layer": "stress",
+      "title": "20 000 requests from 60 users over dense role clusters",
+      "pass": true,
+      "reason": null
+    }
+  ]
+}

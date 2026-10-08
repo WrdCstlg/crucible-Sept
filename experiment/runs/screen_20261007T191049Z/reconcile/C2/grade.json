@@ -1,0 +1,1290 @@
+{
+  "problem": "reconcile",
+  "sandbox": "docker",
+  "strict_pass": false,
+  "passed": 0,
+  "total": 178,
+  "public_pass": false,
+  "by_layer": {
+    "public": "0/4",
+    "hidden": "0/175",
+    "stress": "0/3"
+  },
+  "first_failure": "P1: import failed: AttributeError: module 'solution' has no attribute 'reconcile'",
+  "cases": [
+    {
+      "id": "P1",
+      "layer": "public",
+      "title": "key normalisation, ref match, amount matches across a leap day",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "P2",
+      "layer": "public",
+      "title": "multi_ledger and multi_bank",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "P3",
+      "layer": "public",
+      "title": "fee matches across a year end",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "P4",
+      "layer": "public",
+      "title": "invalid records; a ref match beats a closer amount match",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H01",
+      "layer": "hidden",
+      "title": "strict dates: format, leap years, year 0, non-ASCII digits",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H02",
+      "layer": "hidden",
+      "title": "amount and field types; extra keys ignored",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H03",
+      "layer": "hidden",
+      "title": "duplicate ids: every copy invalid, only records passing other checks count, lists separate",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H04",
+      "layer": "hidden",
+      "title": "tokens: joiners deleted before zeros are stripped, zeros per digit run, whole tokens",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H05",
+      "layer": "hidden",
+      "title": "non-ASCII characters separate; a two-token ref has no key",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H06",
+      "layer": "hidden",
+      "title": "pass 1 greedy key: entry date before entry id",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H07",
+      "layer": "hidden",
+      "title": "pass 2 takes the global smallest key, not each entry's nearest line",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H08",
+      "layer": "hidden",
+      "title": "day distance across month, year and leap-day boundaries; window is inclusive",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H09",
+      "layer": "hidden",
+      "title": "ids compare as strings: L10 before L9",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H10",
+      "layer": "hidden",
+      "title": "multi_ledger: fewest entries first; party compared exactly; empty party never groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H11",
+      "layer": "hidden",
+      "title": "multi_ledger: mixed signs allowed; \u0394 tie broken by sorted id list (string order)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H12",
+      "layer": "hidden",
+      "title": "multi_ledger: lines processed in (date, id) order, entries used up as it goes",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H13",
+      "layer": "hidden",
+      "title": "multi_ledger: a triple when no pair fits; each entry within the window of the line",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H14",
+      "layer": "hidden",
+      "title": "multi_bank: fewest lines, then \u0394; an entry whose ref has two tokens is skipped",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H15",
+      "layer": "hidden",
+      "title": "multi_bank: entries processed in (date, id) order; lines of mixed sign",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H16",
+      "layer": "hidden",
+      "title": "fee: sign-aware (a payment's bank line is more negative), fee = F allowed, same sign",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H17",
+      "layer": "hidden",
+      "title": "fee key: the smaller fee wins a \u0394 tie before ids are looked at",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H18",
+      "layer": "hidden",
+      "title": "pass order: multi_ledger before multi_bank and fee",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H19",
+      "layer": "hidden",
+      "title": "a line carrying two keys; pass 1 respects the window",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H20",
+      "layer": "hidden",
+      "title": "W = 0 means the same day; F = 0 means no fee matches",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H21",
+      "layer": "hidden",
+      "title": "multi_ledger: best group across parties; \u0394 tie broken by ids, not by party",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H22",
+      "layer": "hidden",
+      "title": "multi_bank: \u0394 tie broken by sorted line ids in string order; across a year end",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H23",
+      "layer": "hidden",
+      "title": "tokens: zero runs after joiner removal, padding, trailing joiners, empty runs",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H24",
+      "layer": "hidden",
+      "title": "pass 2 key: entry date before entry id; line id, not line date, breaks the last tie",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "H25",
+      "layer": "hidden",
+      "title": "all five passes in one statement",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R001",
+      "layer": "hidden",
+      "title": "generated statement (7 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R002",
+      "layer": "hidden",
+      "title": "generated statement (7 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R003",
+      "layer": "hidden",
+      "title": "generated statement (4 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R004",
+      "layer": "hidden",
+      "title": "generated statement (4 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R005",
+      "layer": "hidden",
+      "title": "generated statement (5 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R006",
+      "layer": "hidden",
+      "title": "generated statement (4 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R007",
+      "layer": "hidden",
+      "title": "generated statement (3 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R008",
+      "layer": "hidden",
+      "title": "generated statement (4 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R009",
+      "layer": "hidden",
+      "title": "generated statement (7 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R010",
+      "layer": "hidden",
+      "title": "generated statement (3 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R011",
+      "layer": "hidden",
+      "title": "generated statement (6 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R012",
+      "layer": "hidden",
+      "title": "generated statement (3 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R013",
+      "layer": "hidden",
+      "title": "generated statement (4 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R014",
+      "layer": "hidden",
+      "title": "generated statement (5 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R015",
+      "layer": "hidden",
+      "title": "generated statement (7 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R016",
+      "layer": "hidden",
+      "title": "generated statement (8 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R017",
+      "layer": "hidden",
+      "title": "generated statement (6 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R018",
+      "layer": "hidden",
+      "title": "generated statement (3 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R019",
+      "layer": "hidden",
+      "title": "generated statement (5 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R020",
+      "layer": "hidden",
+      "title": "generated statement (4 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R021",
+      "layer": "hidden",
+      "title": "generated statement (4 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R022",
+      "layer": "hidden",
+      "title": "generated statement (4 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R023",
+      "layer": "hidden",
+      "title": "generated statement (5 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R024",
+      "layer": "hidden",
+      "title": "generated statement (6 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R025",
+      "layer": "hidden",
+      "title": "generated statement (8 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R026",
+      "layer": "hidden",
+      "title": "generated statement (7 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R027",
+      "layer": "hidden",
+      "title": "generated statement (3 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R028",
+      "layer": "hidden",
+      "title": "generated statement (4 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R029",
+      "layer": "hidden",
+      "title": "generated statement (8 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R030",
+      "layer": "hidden",
+      "title": "generated statement (7 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R031",
+      "layer": "hidden",
+      "title": "generated statement (6 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R032",
+      "layer": "hidden",
+      "title": "generated statement (5 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R033",
+      "layer": "hidden",
+      "title": "generated statement (3 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R034",
+      "layer": "hidden",
+      "title": "generated statement (6 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R035",
+      "layer": "hidden",
+      "title": "generated statement (4 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R036",
+      "layer": "hidden",
+      "title": "generated statement (5 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R037",
+      "layer": "hidden",
+      "title": "generated statement (7 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R038",
+      "layer": "hidden",
+      "title": "generated statement (7 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R039",
+      "layer": "hidden",
+      "title": "generated statement (8 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R040",
+      "layer": "hidden",
+      "title": "generated statement (5 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R041",
+      "layer": "hidden",
+      "title": "generated statement (7 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R042",
+      "layer": "hidden",
+      "title": "generated statement (7 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R043",
+      "layer": "hidden",
+      "title": "generated statement (5 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R044",
+      "layer": "hidden",
+      "title": "generated statement (4 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R045",
+      "layer": "hidden",
+      "title": "generated statement (7 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R046",
+      "layer": "hidden",
+      "title": "generated statement (7 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R047",
+      "layer": "hidden",
+      "title": "generated statement (8 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R048",
+      "layer": "hidden",
+      "title": "generated statement (5 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R049",
+      "layer": "hidden",
+      "title": "generated statement (3 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R050",
+      "layer": "hidden",
+      "title": "generated statement (3 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R051",
+      "layer": "hidden",
+      "title": "generated statement (4 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R052",
+      "layer": "hidden",
+      "title": "generated statement (6 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R053",
+      "layer": "hidden",
+      "title": "generated statement (3 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R054",
+      "layer": "hidden",
+      "title": "generated statement (8 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R055",
+      "layer": "hidden",
+      "title": "generated statement (8 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R056",
+      "layer": "hidden",
+      "title": "generated statement (3 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R057",
+      "layer": "hidden",
+      "title": "generated statement (8 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R058",
+      "layer": "hidden",
+      "title": "generated statement (6 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R059",
+      "layer": "hidden",
+      "title": "generated statement (5 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R060",
+      "layer": "hidden",
+      "title": "generated statement (8 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R061",
+      "layer": "hidden",
+      "title": "generated statement (7 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R062",
+      "layer": "hidden",
+      "title": "generated statement (3 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R063",
+      "layer": "hidden",
+      "title": "generated statement (8 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R064",
+      "layer": "hidden",
+      "title": "generated statement (5 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R065",
+      "layer": "hidden",
+      "title": "generated statement (4 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R066",
+      "layer": "hidden",
+      "title": "generated statement (5 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R067",
+      "layer": "hidden",
+      "title": "generated statement (6 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R068",
+      "layer": "hidden",
+      "title": "generated statement (7 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R069",
+      "layer": "hidden",
+      "title": "generated statement (5 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R070",
+      "layer": "hidden",
+      "title": "generated statement (3 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R071",
+      "layer": "hidden",
+      "title": "generated statement (3 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R072",
+      "layer": "hidden",
+      "title": "generated statement (5 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R073",
+      "layer": "hidden",
+      "title": "generated statement (5 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R074",
+      "layer": "hidden",
+      "title": "generated statement (3 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R075",
+      "layer": "hidden",
+      "title": "generated statement (4 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R076",
+      "layer": "hidden",
+      "title": "generated statement (7 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R077",
+      "layer": "hidden",
+      "title": "generated statement (6 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R078",
+      "layer": "hidden",
+      "title": "generated statement (6 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R079",
+      "layer": "hidden",
+      "title": "generated statement (3 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R080",
+      "layer": "hidden",
+      "title": "generated statement (4 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R081",
+      "layer": "hidden",
+      "title": "generated statement (7 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R082",
+      "layer": "hidden",
+      "title": "generated statement (4 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R083",
+      "layer": "hidden",
+      "title": "generated statement (3 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R084",
+      "layer": "hidden",
+      "title": "generated statement (5 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R085",
+      "layer": "hidden",
+      "title": "generated statement (8 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R086",
+      "layer": "hidden",
+      "title": "generated statement (8 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R087",
+      "layer": "hidden",
+      "title": "generated statement (4 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R088",
+      "layer": "hidden",
+      "title": "generated statement (5 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R089",
+      "layer": "hidden",
+      "title": "generated statement (4 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R090",
+      "layer": "hidden",
+      "title": "generated statement (5 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R091",
+      "layer": "hidden",
+      "title": "generated statement (24 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R092",
+      "layer": "hidden",
+      "title": "generated statement (22 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R093",
+      "layer": "hidden",
+      "title": "generated statement (20 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R094",
+      "layer": "hidden",
+      "title": "generated statement (14 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R095",
+      "layer": "hidden",
+      "title": "generated statement (22 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R096",
+      "layer": "hidden",
+      "title": "generated statement (24 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R097",
+      "layer": "hidden",
+      "title": "generated statement (21 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R098",
+      "layer": "hidden",
+      "title": "generated statement (20 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R099",
+      "layer": "hidden",
+      "title": "generated statement (19 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R100",
+      "layer": "hidden",
+      "title": "generated statement (19 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R101",
+      "layer": "hidden",
+      "title": "generated statement (15 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R102",
+      "layer": "hidden",
+      "title": "generated statement (14 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R103",
+      "layer": "hidden",
+      "title": "generated statement (20 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R104",
+      "layer": "hidden",
+      "title": "generated statement (21 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R105",
+      "layer": "hidden",
+      "title": "generated statement (18 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R106",
+      "layer": "hidden",
+      "title": "generated statement (14 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R107",
+      "layer": "hidden",
+      "title": "generated statement (16 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R108",
+      "layer": "hidden",
+      "title": "generated statement (22 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R109",
+      "layer": "hidden",
+      "title": "generated statement (21 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R110",
+      "layer": "hidden",
+      "title": "generated statement (16 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R111",
+      "layer": "hidden",
+      "title": "generated statement (19 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R112",
+      "layer": "hidden",
+      "title": "generated statement (22 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R113",
+      "layer": "hidden",
+      "title": "generated statement (23 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R114",
+      "layer": "hidden",
+      "title": "generated statement (18 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R115",
+      "layer": "hidden",
+      "title": "generated statement (16 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R116",
+      "layer": "hidden",
+      "title": "generated statement (20 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R117",
+      "layer": "hidden",
+      "title": "generated statement (22 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R118",
+      "layer": "hidden",
+      "title": "generated statement (18 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R119",
+      "layer": "hidden",
+      "title": "generated statement (23 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R120",
+      "layer": "hidden",
+      "title": "generated statement (17 events)",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R121",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R122",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R123",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R124",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R125",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R126",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R127",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R128",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R129",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R130",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R131",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R132",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R133",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R134",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R135",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R136",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R137",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R138",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R139",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R140",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R141",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R142",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R143",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R144",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R145",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R146",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R147",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R148",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R149",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "R150",
+      "layer": "hidden",
+      "title": "competing groups",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'reconcile'"
+    },
+    {
+      "id": "S1",
+      "layer": "stress",
+      "title": "20 000 a side, every pass",
+      "pass": false,
+      "reason": "no result (process died or timed out)"
+    },
+    {
+      "id": "S2",
+      "layer": "stress",
+      "title": "20 000 entries, most records left for passes 3-5",
+      "pass": false,
+      "reason": "no result (process died or timed out)"
+    },
+    {
+      "id": "S3",
+      "layer": "stress",
+      "title": "crowded amounts and shared keys",
+      "pass": false,
+      "reason": "no result (process died or timed out)"
+    }
+  ]
+}

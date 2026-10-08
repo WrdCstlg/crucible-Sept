@@ -1,4 +1,4 @@
-"""The five candidate problems (experiment/problems/) and their screening harness (screen.py).
+"""The candidate problems (experiment/problems/) and their screening harness (screen.py).
 
 These are SCREENING artifacts with a single oracle each (reference.py), so the tests attack the oracle from the
 sides that do not depend on it:
@@ -25,7 +25,8 @@ import pytest
 
 ROOT = Path(__file__).resolve().parent.parent
 PROB = ROOT / "experiment" / "problems"
-PROBLEMS = ["orderbook", "semver", "sheet", "promo", "payroll"]
+PROBLEMS = ["orderbook", "semver", "sheet", "promo", "payroll",
+            "policy", "washsale", "roster", "reconcile", "recur", "schema", "ignore", "merge3"]
 if str(PROB) not in sys.path:
     sys.path.insert(0, str(PROB))
 
@@ -95,7 +96,9 @@ def test_spec_names_the_entry_point_and_never_mentions_the_grader(p):
 @pytest.mark.parametrize("p", PROBLEMS)
 def test_problem_code_is_stdlib_only(p):
     allowed = set(sys.stdlib_module_names)
-    for f in ("reference.py", "cases.py"):
+    for f in ("reference.py", "cases.py", "oracle2.py"):
+        if f == "oracle2.py" and not (PROB / p / f).exists():     # only problems past screening have one
+            continue
         tree = ast.parse((PROB / p / f).read_text(encoding="utf-8"))
         for node in ast.walk(tree):
             names = [a.name for a in node.names] if isinstance(node, ast.Import) else \
@@ -261,7 +264,7 @@ def test_screen_refuses_unsafe_sandbox_for_live_output():
 def test_screen_plan_only_prices_every_run_and_calls_nothing(tmp_path):
     r = _screen("--plan-only", "--cap-usd", "10", "--out-root", str(tmp_path))
     assert r.returncode == 0, r.stderr
-    assert "5 problems x (4 A + 2 C) = 30 runs" in r.stdout
+    assert "8 problems x (4 A + 2 C) = 48 runs" in r.stdout      # default: the unscreened problems only
     assert not any(tmp_path.iterdir()), "plan-only must not create run folders"
 
 

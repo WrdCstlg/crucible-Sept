@@ -4,6 +4,8 @@
     python experiment/problems/screen.py --cap-usd 10 --env-file "../Project Crucible/.env"
     python experiment/problems/screen.py --mock --unsafe-subprocess-sandbox       zero-cost plumbing check (never evidence)
 
+By default only the problems not yet screened (UNSCREENED) are run; pass --problems to choose others.
+
 Per problem: --a-runs single calls to the evaluated (cheap) role and --c-runs single calls to the competitor (strong)
 role, through the same experiment/study/arm_study.py the study used (same system prompt; the only user text is the
 problem's SPEC.md). No Crucible arm: screening asks how hard the problem is, not whether Crucible helps.
@@ -34,7 +36,9 @@ HERE = Path(__file__).resolve().parent
 EXP = HERE.parent
 ROOT = EXP.parent
 STUDY = EXP / "study"
-PROBLEMS = ["orderbook", "semver", "sheet", "promo", "payroll"]
+SCREENED = ["orderbook", "semver", "sheet", "promo", "payroll"]        # runs/screen_20261006T195836Z
+UNSCREENED = ["policy", "washsale", "roster", "reconcile", "recur", "schema", "ignore", "merge3"]
+PROBLEMS = SCREENED + UNSCREENED
 CONCURRENCY = {"A": 3, "C": 3}
 KEEP_RULE = {"a_max_pass_rate": 0.25, "c_min_passes": 1}
 
@@ -183,7 +187,8 @@ def grade_all(results, run_dir, sandbox) -> list:
 
 def main(argv=None):
     ap = argparse.ArgumentParser()
-    ap.add_argument("--problems", nargs="+", default=PROBLEMS, choices=PROBLEMS)
+    ap.add_argument("--problems", nargs="+", default=UNSCREENED, choices=PROBLEMS,
+                    help="default: the problems not yet screened")
     ap.add_argument("--a-runs", type=int, default=4)
     ap.add_argument("--c-runs", type=int, default=2)
     ap.add_argument("--cap-usd", type=float)

@@ -1,0 +1,770 @@
+import heapq
+import re
+
+IDENT_RE = re.compile(r"^[A-Za-z0-9_]+$")
+
+
+def _parse_pos_int(s):
+    if s.isascii() and s.isdigit():
+        val = int(s)
+        if val >= 1:
+            return val
+    return None
+
+
+class Order:
+    __slots__ = (
+        "id",
+        "owner",
+        "side",
+        "price",
+        "visible",
+        "hidden",
+        "display",
+        "flag",
+        "prev",
+        "next",
+        "level",
+    )
+
+    def __init__(self, id, owner, side, price, visible, hidden, display, flag):
+        self.id = id
+        self.owner = owner
+        self.side = side
+        self.price = price
+        self.visible = visible
+        self.hidden = hidden
+        self.display = display
+        self.flag = flag
+        self.prev = None
+        self.next = None
+        self.level = None
+
+
+class Level:
+    __slots__ = ("price", "head", "tail", "count")
+
+    def __init__(self, price):
+        self.price = price
+        self.head = None
+        self.tail = None
+        self.count = 0
+
+    def append(self, order):
+        order.level = self
+        order.prev = self.tail
+        order.next = None
+        if self.tail is not None:
+            self.tail.next = order
+        else:
+            self.head = order
+        self.tail = order
+        self.count += 1
+
+    def remove(self, order):
+        if order.prev is not None:
+            order.prev.next = order.next
+        else:
+            self.head = order.next
+        if order.next is not None:
+            order.next.prev = order.prev
+        else:
+            self.tail = order.prev
+        order.prev = None
+        order.next = None
+        order.level = None
+        self.count -= 1
+
+    def move_to_back(self, order):
+        if self.tail is order:
+            return
+        if order.prev is not None:
+            order.prev.next = order.next
+        else:
+            self.head = order.next
+        if order.next is not None:
+            order.next.prev = order.prev
+        order.prev = self.tail
+        order.next = None
+        if self.tail is not None:
+            self.tail.next = order
+        self.tail = order
+
+
+class Stop:
+    __slots__ = ("id", "owner", "side", "trigger", "qty", "line_num", "prev", "next")
+
+    def __init__(self, id, owner, side, trigger, qty, line_num):
+        self.id = id
+        self.owner = owner
+        self.side = side
+        self.trigger = trigger
+        self.qty = qty
+        self.line_num = line_num
+        self.prev = None
+        self.next = None
+
+
+class StopList:
+    __slots__ = ("head", "tail", "count")
+
+    def __init__(self):
+        self.head = None
+        self.tail = None
+        self.count = 0
+
+    def append(self, stop):
+        stop.prev = self.tail
+        stop.next = None
+        if self.tail is not None:
+            self.tail.next = stop
+        else:
+            self.head = stop
+        self.tail = stop
+        self.count += 1
+
+    def remove(self, stop):
+        if stop.prev is not None:
+            stop.prev.next = stop.next
+        else:
+            self.head = stop.next
+        if stop.next is not None:
+            stop.next.prev = stop.prev
+        else:
+            self.tail = stop.prev
+        stop.prev = None
+        stop.next = None
+        self.count -= 1
+
+
+def run_book(commands):
+    trades = []
+    rejects = []
+    stp_cancelled = []
+    last_price = None
+
+    active_bids = {}
+    bid_heap = []
+    total_bid_volume = 0
+
+    active_asks = {}
+    ask_heap = []
+    total_ask_volume = 0
+
+    orders_by_id = {}
+    stops_by_id = {}
+    stop_list = StopList()
+    buy_stop_heap = []
+    sell_stop_heap = []
+
+    consumed_ids = set()
+
+    def get_best_ask():
+        while ask_heap:
+            p = ask_heap[0]
+            level = active_asks.get(p)
+            if level is not None and level.count > 0:
+                return level.head
+            heapq.heappop(ask_heap)
+        return None
+
+    def get_best_bid():
+        while bid_heap:
+            p = -bid_heap[0]
+            level = active_bids.get(p)
+            if level is not None and level.count > 0:
+                return level.head
+            heapq.heappop(bid_heap)
+        return None
+
+    def add_ask_order(order):
+        nonlocal total_ask_volume
+        p = order.price
+        level = active_asks.get(p)
+        if level is None:
+            level = Level(p)
+            active_asks[p] = level
+            heapq.heappush(ask_heap, p)
+        level.append(order)
+        orders_by_id[order.id] = order
+        total_ask_volume += order.visible + order.hidden
+
+    def remove_ask_order(order):
+        nonlocal total_ask_volume
+        total_ask_volume -= order.visible + order.hidden
+        level = order.level
+        level.remove(order)
+        if level.count == 0:
+            del active_asks[order.price]
+        if order.id in orders_by_id:
+            del orders_by_id[order.id]
+
+    def add_bid_order(order):
+        nonlocal total_bid_volume
+        p = order.price
+        level = active_bids.get(p)
+        if level is None:
+            level = Level(p)
+            active_bids[p] = level
+            heapq.heappush(bid_heap, -p)
+        level.append(order)
+        orders_by_id[order.id] = order
+        total_bid_volume += order.visible + order.hidden
+
+    def remove_bid_order(order):
+        nonlocal total_bid_volume
+        total_bid_volume -= order.visible + order.hidden
+        level = order.level
+        level.remove(order)
+        if level.count == 0:
+            del active_bids[order.price]
+        if order.id in orders_by_id:
+            del orders_by_id[order.id]
+
+    def check_fok_possible(side, limit, qty, owner):
+        if side == "B":
+            if total_ask_volume < qty:
+                return False
+            visited = set()
+            stack = [0]
+            vol = 0
+            n = len(ask_heap)
+            while stack:
+                idx = stack.pop()
+                p = ask_heap[idx]
+                if p <= limit:
+                    if p not in visited:
+                        visited.add(p)
+                        level = active_asks.get(p)
+                        if level is not None:
+                            curr = level.head
+                            while curr is not None:
+                                if curr.owner != owner:
+                                    vol += curr.visible + curr.hidden
+                                    if vol >= qty:
+                                        return True
+                                curr = curr.next
+                    left = 2 * idx + 1
+                    if left < n:
+                        stack.append(left)
+                    right = left + 1
+                    if right < n:
+                        stack.append(right)
+            return vol >= qty
+        else:
+            if total_bid_volume < qty:
+                return False
+            neg_limit = -limit
+            visited = set()
+            stack = [0]
+            vol = 0
+            n = len(bid_heap)
+            while stack:
+                idx = stack.pop()
+                neg_p = bid_heap[idx]
+                if neg_p <= neg_limit:
+                    p = -neg_p
+                    if p not in visited:
+                        visited.add(p)
+                        level = active_bids.get(p)
+                        if level is not None:
+                            curr = level.head
+                            while curr is not None:
+                                if curr.owner != owner:
+                                    vol += curr.visible + curr.hidden
+                                    if vol >= qty:
+                                        return True
+                                curr = curr.next
+                    left = 2 * idx + 1
+                    if left < n:
+                        stack.append(left)
+                    right = left + 1
+                    if right < n:
+                        stack.append(right)
+            return vol >= qty
+
+    def execute_market(owner, id, side, qty, line_num):
+        nonlocal last_price, total_ask_volume, total_bid_volume
+        remaining = qty
+        traded_any = False
+
+        while remaining > 0:
+            if side == "B":
+                best = get_best_ask()
+                if best is None:
+                    break
+            else:
+                best = get_best_bid()
+                if best is None:
+                    break
+
+            if best.owner == owner:
+                stp_cancelled.append(best.id)
+                if side == "B":
+                    remove_ask_order(best)
+                else:
+                    remove_bid_order(best)
+                continue
+
+            trade_qty = min(remaining, best.visible)
+            remaining -= trade_qty
+            best.visible -= trade_qty
+            if side == "B":
+                total_ask_volume -= trade_qty
+            else:
+                total_bid_volume -= trade_qty
+
+            seq = len(trades) + 1
+            p = best.price
+            last_price = p
+            traded_any = True
+            buy_id = id if side == "B" else best.id
+            sell_id = best.id if side == "B" else id
+            trades.append(
+                {
+                    "seq": seq,
+                    "price": p,
+                    "qty": trade_qty,
+                    "buy": buy_id,
+                    "sell": sell_id,
+                    "aggressor": side,
+                }
+            )
+
+            if best.visible == 0:
+                if best.hidden > 0:
+                    refill = min(best.display, best.hidden)
+                    best.visible += refill
+                    best.hidden -= refill
+                    best.level.move_to_back(best)
+                else:
+                    if side == "B":
+                        remove_ask_order(best)
+                    else:
+                        remove_bid_order(best)
+
+        if not traded_any:
+            rejects.append({"line": line_num, "reason": "no_liquidity"})
+
+    def process_limit(owner, id, side, price, qty, flag_info, line_num):
+        nonlocal last_price, total_ask_volume, total_bid_volume
+
+        flag_type = flag_info[0] if isinstance(flag_info, tuple) else flag_info
+
+        if flag_type == "POST":
+            if side == "B":
+                best_ask = get_best_ask()
+                if best_ask is not None and best_ask.price <= price:
+                    rejects.append({"line": line_num, "reason": "post_would_cross"})
+                    return
+            else:
+                best_bid = get_best_bid()
+                if best_bid is not None and best_bid.price >= price:
+                    rejects.append({"line": line_num, "reason": "post_would_cross"})
+                    return
+            new_order = Order(
+                id=id,
+                owner=owner,
+                side=side,
+                price=price,
+                visible=qty,
+                hidden=0,
+                display=None,
+                flag="POST",
+            )
+            if side == "B":
+                add_bid_order(new_order)
+            else:
+                add_ask_order(new_order)
+            return
+
+        if flag_type == "FOK":
+            if not check_fok_possible(side, price, qty, owner):
+                rejects.append({"line": line_num, "reason": "fok_unfilled"})
+                return
+
+        remaining = qty
+        while remaining > 0:
+            if side == "B":
+                best = get_best_ask()
+                if best is None or best.price > price:
+                    break
+            else:
+                best = get_best_bid()
+                if best is None or best.price < price:
+                    break
+
+            if best.owner == owner:
+                stp_cancelled.append(best.id)
+                if side == "B":
+                    remove_ask_order(best)
+                else:
+                    remove_bid_order(best)
+                continue
+
+            trade_qty = min(remaining, best.visible)
+            remaining -= trade_qty
+            best.visible -= trade_qty
+            if side == "B":
+                total_ask_volume -= trade_qty
+            else:
+                total_bid_volume -= trade_qty
+
+            seq = len(trades) + 1
+            p = best.price
+            last_price = p
+            buy_id = id if side == "B" else best.id
+            sell_id = best.id if side == "B" else id
+            trades.append(
+                {
+                    "seq": seq,
+                    "price": p,
+                    "qty": trade_qty,
+                    "buy": buy_id,
+                    "sell": sell_id,
+                    "aggressor": side,
+                }
+            )
+
+            if best.visible == 0:
+                if best.hidden > 0:
+                    refill = min(best.display, best.hidden)
+                    best.visible += refill
+                    best.hidden -= refill
+                    best.level.move_to_back(best)
+                else:
+                    if side == "B":
+                        remove_ask_order(best)
+                    else:
+                        remove_bid_order(best)
+
+        if flag_type in ("IOC", "FOK"):
+            return
+
+        if remaining > 0:
+            if flag_type == "ICE":
+                disp = flag_info[1]
+                vis = min(disp, remaining)
+                hid = remaining - vis
+                new_order = Order(
+                    id=id,
+                    owner=owner,
+                    side=side,
+                    price=price,
+                    visible=vis,
+                    hidden=hid,
+                    display=disp,
+                    flag="ICE",
+                )
+            else:
+                new_order = Order(
+                    id=id,
+                    owner=owner,
+                    side=side,
+                    price=price,
+                    visible=remaining,
+                    hidden=0,
+                    display=None,
+                    flag=None,
+                )
+            if side == "B":
+                add_bid_order(new_order)
+            else:
+                add_ask_order(new_order)
+
+    def process_triggered_stops():
+        if last_price is None:
+            return
+
+        while stop_list.count > 0:
+            while buy_stop_heap and (buy_stop_heap[0][1] not in stops_by_id):
+                heapq.heappop(buy_stop_heap)
+            min_buy_trig = buy_stop_heap[0][0] if buy_stop_heap else float("inf")
+
+            while sell_stop_heap and (sell_stop_heap[0][1] not in stops_by_id):
+                heapq.heappop(sell_stop_heap)
+            max_sell_trig = -sell_stop_heap[0][0] if sell_stop_heap else float("-inf")
+
+            if last_price < min_buy_trig and last_price > max_sell_trig:
+                break
+
+            curr = stop_list.head
+            triggered = None
+            while curr is not None:
+                if (curr.side == "B" and last_price >= curr.trigger) or (
+                    curr.side == "S" and last_price <= curr.trigger
+                ):
+                    triggered = curr
+                    break
+                curr = curr.next
+
+            if triggered is None:
+                break
+
+            stop_list.remove(triggered)
+            del stops_by_id[triggered.id]
+
+            execute_market(
+                owner=triggered.owner,
+                id=triggered.id,
+                side=triggered.side,
+                qty=triggered.qty,
+                line_num=triggered.line_num,
+            )
+
+    for i, line in enumerate(commands):
+        line = line.strip()
+        parts = [f.strip() for f in line.split(",")]
+        cmd = parts[0]
+
+        if cmd == "LIMIT":
+            if len(parts) not in (6, 7):
+                rejects.append({"line": i, "reason": "malformed"})
+                continue
+            owner = parts[1]
+            oid = parts[2]
+            side = parts[3]
+            price_str = parts[4]
+            qty_str = parts[5]
+
+            if (
+                not IDENT_RE.match(owner)
+                or not IDENT_RE.match(oid)
+                or side not in ("B", "S")
+            ):
+                rejects.append({"line": i, "reason": "malformed"})
+                continue
+            price = _parse_pos_int(price_str)
+            qty = _parse_pos_int(qty_str)
+            if price is None or qty is None:
+                rejects.append({"line": i, "reason": "malformed"})
+                continue
+
+            if len(parts) == 6:
+                flag_info = None
+            else:
+                flag_str = parts[6]
+                if flag_str in ("IOC", "FOK", "POST"):
+                    flag_info = flag_str
+                elif flag_str.startswith("ICE="):
+                    disp_str = flag_str[4:]
+                    disp = _parse_pos_int(disp_str)
+                    if disp is None or disp >= qty:
+                        rejects.append({"line": i, "reason": "malformed"})
+                        continue
+                    flag_info = ("ICE", disp)
+                else:
+                    rejects.append({"line": i, "reason": "malformed"})
+                    continue
+
+            if oid in consumed_ids:
+                rejects.append({"line": i, "reason": "duplicate_id"})
+                continue
+            consumed_ids.add(oid)
+
+            process_limit(owner, oid, side, price, qty, flag_info, line_num=i)
+            process_triggered_stops()
+
+        elif cmd == "MARKET":
+            if len(parts) != 5:
+                rejects.append({"line": i, "reason": "malformed"})
+                continue
+            owner = parts[1]
+            oid = parts[2]
+            side = parts[3]
+            qty_str = parts[4]
+
+            if (
+                not IDENT_RE.match(owner)
+                or not IDENT_RE.match(oid)
+                or side not in ("B", "S")
+            ):
+                rejects.append({"line": i, "reason": "malformed"})
+                continue
+            qty = _parse_pos_int(qty_str)
+            if qty is None:
+                rejects.append({"line": i, "reason": "malformed"})
+                continue
+
+            if oid in consumed_ids:
+                rejects.append({"line": i, "reason": "duplicate_id"})
+                continue
+            consumed_ids.add(oid)
+
+            execute_market(owner, oid, side, qty, line_num=i)
+            process_triggered_stops()
+
+        elif cmd == "STOP":
+            if len(parts) != 6:
+                rejects.append({"line": i, "reason": "malformed"})
+                continue
+            owner = parts[1]
+            oid = parts[2]
+            side = parts[3]
+            trigger_str = parts[4]
+            qty_str = parts[5]
+
+            if (
+                not IDENT_RE.match(owner)
+                or not IDENT_RE.match(oid)
+                or side not in ("B", "S")
+            ):
+                rejects.append({"line": i, "reason": "malformed"})
+                continue
+            trigger = _parse_pos_int(trigger_str)
+            qty = _parse_pos_int(qty_str)
+            if trigger is None or qty is None:
+                rejects.append({"line": i, "reason": "malformed"})
+                continue
+
+            if oid in consumed_ids:
+                rejects.append({"line": i, "reason": "duplicate_id"})
+                continue
+            consumed_ids.add(oid)
+
+            st = Stop(oid, owner, side, trigger, qty, line_num=i)
+            stop_list.append(st)
+            stops_by_id[oid] = st
+            if side == "B":
+                heapq.heappush(buy_stop_heap, (trigger, oid))
+            else:
+                heapq.heappush(sell_stop_heap, (-trigger, oid))
+
+            process_triggered_stops()
+
+        elif cmd == "CANCEL":
+            if len(parts) != 2:
+                rejects.append({"line": i, "reason": "malformed"})
+                continue
+            oid = parts[1]
+            if not IDENT_RE.match(oid):
+                rejects.append({"line": i, "reason": "malformed"})
+                continue
+
+            if oid in orders_by_id:
+                o = orders_by_id[oid]
+                if o.side == "B":
+                    remove_bid_order(o)
+                else:
+                    remove_ask_order(o)
+            elif oid in stops_by_id:
+                st = stops_by_id[oid]
+                stop_list.remove(st)
+                del stops_by_id[oid]
+            else:
+                rejects.append({"line": i, "reason": "unknown_id"})
+
+        elif cmd == "AMEND":
+            if len(parts) != 4:
+                rejects.append({"line": i, "reason": "malformed"})
+                continue
+            oid = parts[1]
+            price_str = parts[2]
+            qty_str = parts[3]
+
+            if not IDENT_RE.match(oid):
+                rejects.append({"line": i, "reason": "malformed"})
+                continue
+            new_price = _parse_pos_int(price_str)
+            new_qty = _parse_pos_int(qty_str)
+            if new_price is None or new_qty is None:
+                rejects.append({"line": i, "reason": "malformed"})
+                continue
+
+            if oid not in orders_by_id:
+                rejects.append({"line": i, "reason": "unknown_id"})
+                continue
+
+            order = orders_by_id[oid]
+            curr_total = order.visible + order.hidden
+
+            if new_price == order.price and new_qty == curr_total:
+                pass
+            elif new_price == order.price and new_qty < curr_total:
+                reduction = curr_total - new_qty
+                if order.side == "B":
+                    total_bid_volume -= reduction
+                else:
+                    total_ask_volume -= reduction
+                from_hidden = min(reduction, order.hidden)
+                order.hidden -= from_hidden
+                from_vis = reduction - from_hidden
+                order.visible -= from_vis
+            else:
+                if order.flag == "POST":
+                    if order.side == "B":
+                        best_ask = get_best_ask()
+                        if best_ask is not None and best_ask.price <= new_price:
+                            rejects.append(
+                                {"line": i, "reason": "post_would_cross"}
+                            )
+                            continue
+                    else:
+                        best_bid = get_best_bid()
+                        if best_bid is not None and best_bid.price >= new_price:
+                            rejects.append(
+                                {"line": i, "reason": "post_would_cross"}
+                            )
+                            continue
+
+                flag = order.flag
+                disp = order.display
+                owner = order.owner
+                side = order.side
+                if side == "B":
+                    remove_bid_order(order)
+                else:
+                    remove_ask_order(order)
+
+                if flag == "POST":
+                    flag_info = "POST"
+                elif flag == "ICE":
+                    flag_info = ("ICE", disp)
+                else:
+                    flag_info = None
+
+                process_limit(
+                    owner, oid, side, new_price, new_qty, flag_info, line_num=i
+                )
+                process_triggered_stops()
+
+        else:
+            rejects.append({"line": i, "reason": "malformed"})
+
+    bids_out = []
+    for p in sorted(active_bids.keys(), reverse=True):
+        lvl = active_bids[p]
+        if lvl.count > 0:
+            ords = []
+            curr = lvl.head
+            while curr is not None:
+                ords.append([curr.id, curr.visible, curr.hidden])
+                curr = curr.next
+            bids_out.append([p, ords])
+
+    asks_out = []
+    for p in sorted(active_asks.keys()):
+        lvl = active_asks[p]
+        if lvl.count > 0:
+            ords = []
+            curr = lvl.head
+            while curr is not None:
+                ords.append([curr.id, curr.visible, curr.hidden])
+                curr = curr.next
+            asks_out.append([p, ords])
+
+    stops_out = []
+    curr_st = stop_list.head
+    while curr_st is not None:
+        stops_out.append([curr_st.id, curr_st.side, curr_st.trigger, curr_st.qty])
+        curr_st = curr_st.next
+
+    return {
+        "trades": trades,
+        "rejects": rejects,
+        "stp_cancelled": stp_cancelled,
+        "bids": bids_out,
+        "asks": asks_out,
+        "stops": stops_out,
+        "last_price": last_price,
+    }

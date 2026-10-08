@@ -1,0 +1,487 @@
+from bisect import bisect_left, bisect_right, insort
+from datetime import date as _date
+
+_DIGITS = frozenset("0123456789")
+_STAFF_KEYS = ("id", "skills", "max_minutes_week", "unavailable", "senior")
+_SHIFT_KEYS = ("id", "start", "end", "skill", "need", "needs_senior")
+
+
+def _parse_date(s):
+    if not isinstance(s, str) or len(s) != 10:
+        return None
+    if s[4] != "-" or s[7] != "-":
+        return None
+    for c in s[0:4] + s[5:7] + s[8:10]:
+        if c not in _DIGITS:
+            return None
+    try:
+        return _date(int(s[0:4]), int(s[5:7]), int(s[8:10])).toordinal()
+    except ValueError:
+        return None
+
+
+def _parse_ts(s):
+    if not isinstance(s, str) or len(s) != 16:
+        return None
+    d = _parse_date(s[:10])
+    if d is None:
+        return None
+    if s[10] != " " or s[13] != ":":
+        return None
+    for c in s[11:13] + s[14:16]:
+        if c not in _DIGITS:
+            return None
+    h = int(s[11:13])
+    m = int(s[14:16])
+    if h > 23 or m > 59:
+        return None
+    return d * 1440 + h * 60 + m
+
+
+def _is_int(x):
+    return isinstance(x, int) and not isinstance(x, bool)
+
+
+def _check_staff(rec):
+    if not isinstance(rec, dict):
+        return None
+    for k in _STAFF_KEYS:
+        if k not in rec:
+            return None
+    sid = rec["id"]
+    if not isinstance(sid, str) or not sid:
+        return None
+    skills = rec["skills"]
+    if not isinstance(skills, list):
+        return None
+    for x in skills:
+        if not isinstance(x, str):
+            return None
+    mm = rec["max_minutes_week"]
+    if not _is_int(mm) or mm < 0:
+        return None
+    un = rec["unavailable"]
+    if not isinstance(un, list):
+        return None
+    unset = set()
+    for x in un:
+        d = _parse_date(x)
+        if d is None:
+            return None
+        unset.add(d)
+    sen = rec["senior"]
+    if not isinstance(sen, bool):
+        return None
+    return (sid, set(skills), mm, unset, sen)
+
+
+def _check_shift(rec):
+    if not isinstance(rec, dict):
+        return None
+    for k in _SHIFT_KEYS:
+        if k not in rec:
+            return None
+    sid = rec["id"]
+    if not isinstance(sid, str) or not sid:
+        return None
+    st = _parse_ts(rec["start"])
+    en = _parse_ts(rec["end"])
+    if st is None or en is None:
+        return None
+    if en <= st or en - st > 1440:
+        return None
+    sk = rec["skill"]
+    if not isinstance(sk, str):
+        return None
+    need = rec["need"]
+    if not _is_int(need) or need < 1:
+        return None
+    ns = rec["needs_senior"]
+    if not isinstance(ns, bool):
+        return None
+    return (sid, st, en, sk, need, ns)
+
+
+def make_roster(staff, shifts, rules):
+    # ---------------- validation ----------------
+    ign_staff = []
+    passed = []
+    for pos, rec in enumerate(staff):
+        v = _check_staff(rec)
+        if v is None:
+            ign_staff.append(pos)
+        else:
+            passed.append((pos, v))
+    counts = {}
+    for _, v in passed:
+        counts[v[0]] = counts.get(v[0], 0) + 1
+    vstaff = []
+    for pos, v in passed:
+        if counts[v[0]] > 1:
+            ign_staff.append(pos)
+        else:
+            vstaff.append(v)
+    ign_staff.sort()
+
+    ign_sh = []
+    passed = []
+    for pos, rec in enumerate(shifts):
+        v = _check_shift(rec)
+        if v is None:
+            ign_sh.append(pos)
+        else:
+            passed.append((pos, v))
+    counts = {}
+    for _, v in passed:
+        counts[v[0]] = counts.get(v[0], 0) + 1
+    vshifts = []
+    for pos, v in passed:
+        if counts[v[0]] > 1:
+            ign_sh.append(pos)
+        else:
+            vshifts.append(v)
+    ign_sh.sort()
+
+    vstaff.sort(key=lambda v: v[0])
+    N = len(vstaff)
+    ids = [v[0] for v in vstaff]
+    rank = {sid: r for r, sid in enumerate(ids)}
+    ignored = {"staff": ign_staff, "shifts": ign_sh}
+
+    def failed():
+        return {"ok": False, "assignments": {}, "minutes": {sid: 0 for sid in ids},
+                "ignored": ignored}
+
+    nsh = len(vshifts)
+    if nsh == 0:
+        return {"ok": True, "assignments": {}, "minutes": {sid: 0 for sid in ids},
+                "ignored": ignored}
+    if N == 0:
+        return failed()
+
+    skill_set = [v[1] for v in vstaff]
+    maxw = [v[2] for v in vstaff]
+    unav = [v[3] if v[3] else None for v in vstaff]
+    senior = [v[4] for v in vstaff]
+
+    used = set(v[3] for v in vshifts)
+    skill_staff = {sk: [] for sk in used}
+    pskills = []
+    for r in range(N):
+        mine = [sk for sk in skill_set[r] if sk in used]
+        for sk in mine:
+            skill_staff[sk].append(r)
+        pskills.append(mine)
+
+    max_sen = {}
+    sk_maxw = {}
+    sk_sen_maxw = {}
+    for sk, sl in skill_staff.items():
+        m = -1
+        for q in sl:
+            if senior[q]:
+                m = q
+        max_sen[sk] = m
+        sk_maxw[sk] = sorted(maxw[q] for q in sl)
+        sk_sen_maxw[sk] = sorted(maxw[q] for q in sl if senior[q])
+
+    rest = rules["min_rest_minutes"]
+    maxc = rules["max_consecutive_days"]
+    forb = [None] * N
+    for pair in rules["forbidden_pairs"]:
+        a = pair[0]
+        b = pair[1]
+        if a == b:
+            continue
+        ra = rank.get(a)
+        rb = rank.get(b)
+        if ra is None or rb is None:
+            continue
+        if forb[ra] is None:
+            forb[ra] = set()
+        if forb[rb] is None:
+            forb[rb] = set()
+        forb[ra].add(rb)
+        forb[rb].add(ra)
+
+    order = sorted(range(nsh), key=lambda x: (vshifts[x][1], vshifts[x][2], vshifts[x][0]))
+    sh_start = []
+    sh_end = []
+    sh_len = []
+    sh_d0 = []
+    sh_d1 = []
+    sh_week = []
+    sh_skill = []
+    sh_need = []
+    sh_ns = []
+    for x in order:
+        sid, st, en, sk, need, ns = vshifts[x]
+        d0 = st // 1440
+        d1 = (en - 1) // 1440
+        sh_start.append(st)
+        sh_end.append(en)
+        sh_len.append(en - st)
+        sh_d0.append(d0)
+        sh_d1.append(d1)
+        sh_week.append((d0 - 1) // 7)
+        sh_skill.append(sk)
+        sh_need.append(need)
+        sh_ns.append(ns)
+
+    # ---------------- static infeasibility checks (safe pruning) ----------------
+    unav_by_date = {}
+    for r in range(N):
+        u = unav[r]
+        if u:
+            for d in u:
+                unav_by_date.setdefault(d, []).append(r)
+    for si in range(nsh):
+        sk = sh_skill[si]
+        need = sh_need[si]
+        Ls = sh_len[si]
+        d0 = sh_d0[si]
+        d1 = sh_d1[si]
+        if maxc < 2 and d1 != d0:
+            return failed()
+        if need > len(skill_staff[sk]):
+            return failed()
+        if sh_ns[si] and max_sen[sk] < 0:
+            return failed()
+        lst = sk_maxw[sk]
+        cnt = len(lst) - bisect_left(lst, Ls)
+        if cnt < need:
+            return failed()
+        u0 = unav_by_date.get(d0, ())
+        u1 = unav_by_date.get(d1, ()) if d1 != d0 else ()
+        if cnt - len(u0) - len(u1) < need:
+            bad = set()
+            for uu in (u0, u1):
+                for q in uu:
+                    if sk in skill_set[q] and maxw[q] >= Ls:
+                        bad.add(q)
+            if cnt - len(bad) < need:
+                return failed()
+        if sh_ns[si]:
+            lst = sk_sen_maxw[sk]
+            scnt = len(lst) - bisect_left(lst, Ls)
+            if scnt < 1:
+                return failed()
+            if scnt - len(u0) - len(u1) < 1:
+                bad = set()
+                for uu in (u0, u1):
+                    for q in uu:
+                        if senior[q] and sk in skill_set[q] and maxw[q] >= Ls:
+                            bad.add(q)
+                if scnt - len(bad) < 1:
+                    return failed()
+
+    minlen_w = {}
+    for si in range(nsh):
+        dct = minlen_w.setdefault(sh_week[si], {})
+        sk = sh_skill[si]
+        if sk not in dct or sh_len[si] < dct[sk]:
+            dct[sk] = sh_len[si]
+
+    slot_sh = []
+    slot_k = []
+    slot_maxr = []
+    for si in range(nsh):
+        sl = skill_staff[sh_skill[si]]
+        n = sh_need[si]
+        base = len(sl) - n
+        for k in range(n):
+            slot_sh.append(si)
+            slot_k.append(k)
+            slot_maxr.append(sl[base + k])
+
+    # ---------------- search ----------------
+    nslots = len(slot_sh)
+    placed = [-1] * nslots
+    curkey = [0] * nslots
+    NEG = float("-inf")
+    lastEnd = [NEG] * N
+    lastM = [-10] * N
+    lastR = [0] * N
+    hist = [[] for _ in range(N)]
+    members = [set() for _ in range(nsh)]
+    scount = [0] * nsh
+    week_min = {}
+    cache = {}
+
+    i = 0
+    resume = False
+    ok = False
+    while True:
+        if i >= nslots:
+            ok = True
+            break
+        if i < 0:
+            break
+        si = slot_sh[i]
+        k = slot_k[i]
+        w = sh_week[si]
+        Ls = sh_len[si]
+        LsN = Ls * N
+        mlw = minlen_w[w]
+        if resume:
+            p = placed[i]
+            key = curkey[i]
+            newkey = key + LsN
+            W = key // N
+            wm = week_min[w]
+            if W:
+                wm[p] = W
+            else:
+                del wm[p]
+            wd = cache.get(w)
+            if wd is not None:
+                cap_old = maxw[p] - W
+                cap_new = cap_old - Ls
+                for sk2 in pskills[p]:
+                    L2 = wd.get(sk2)
+                    if L2 is not None:
+                        ml2 = mlw[sk2]
+                        if cap_new >= ml2:
+                            del L2[bisect_left(L2, newkey)]
+                        if cap_old >= ml2:
+                            insort(L2, key)
+            lastEnd[p], lastM[p], lastR[p] = hist[p].pop()
+            members[si].discard(p)
+            if senior[p]:
+                scount[si] -= 1
+            placed[i] = -1
+            cur = key
+            prev = placed[i - 1] if k else -1
+        elif k:
+            prev = placed[i - 1]
+            cur = prev
+        else:
+            prev = -1
+            cur = -1
+
+        wd = cache.get(w)
+        if wd is None:
+            if cache:
+                for ow in [x for x in cache if x < w - 2 or x > w + 2]:
+                    del cache[ow]
+            wd = {}
+            cache[w] = wd
+        sk = sh_skill[si]
+        L = wd.get(sk)
+        if L is None:
+            ml = mlw[sk]
+            sl = skill_staff[sk]
+            ww = week_min.get(w)
+            if ww:
+                L = []
+                for q in sl:
+                    Wq = ww.get(q, 0)
+                    if maxw[q] - Wq >= ml:
+                        L.append(Wq * N + q)
+                L.sort()
+            else:
+                L = [q for q in sl if maxw[q] >= ml]
+            wd[sk] = L
+
+        sstart = sh_start[si]
+        send = sh_end[si]
+        sd0 = sh_d0[si]
+        sd1 = sh_d1[si]
+        sd0m1 = sd0 - 1
+        span = sd1 - sd0
+        span1 = span + 1
+        needsen = sh_ns[si] and scount[si] == 0
+        lastseat = (k == sh_need[si] - 1)
+        maxsen = max_sen[sk]
+        maxr = slot_maxr[i]
+        mem = members[si]
+        nL = len(L)
+        j = bisect_right(L, cur)
+        while j < nL:
+            key = L[j]
+            W, p = divmod(key, N)
+            if p <= prev:
+                j = bisect_right(L, W * N + prev, j)
+                continue
+            if p > maxr:
+                j = bisect_left(L, (W + 1) * N, j)
+                continue
+            if W + Ls > maxw[p] or sstart - lastEnd[p] < rest:
+                j += 1
+                continue
+            un = unav[p]
+            if un is not None and (sd0 in un or sd1 in un):
+                j += 1
+                continue
+            M = lastM[p]
+            if M == sd0:
+                nr = lastR[p] + span
+            elif M == sd0m1:
+                nr = lastR[p] + span1
+            else:
+                nr = span1
+            if nr > maxc:
+                j += 1
+                continue
+            fp = forb[p]
+            if fp is not None and not fp.isdisjoint(mem):
+                j += 1
+                continue
+            if needsen and not senior[p] and (lastseat or p >= maxsen):
+                j += 1
+                continue
+            break
+        else:
+            i -= 1
+            resume = True
+            continue
+
+        # place p
+        newkey = key + LsN
+        wm = week_min.get(w)
+        if wm is None:
+            wm = {}
+            week_min[w] = wm
+        wm[p] = W + Ls
+        cap_old = maxw[p] - W
+        cap_new = cap_old - Ls
+        for sk2 in pskills[p]:
+            L2 = wd.get(sk2)
+            if L2 is not None:
+                ml2 = mlw[sk2]
+                if cap_old >= ml2:
+                    del L2[bisect_left(L2, key)]
+                if cap_new >= ml2:
+                    insort(L2, newkey)
+        hist[p].append((lastEnd[p], lastM[p], lastR[p]))
+        lastEnd[p] = send
+        lastM[p] = sd1
+        lastR[p] = nr
+        mem.add(p)
+        if senior[p]:
+            scount[si] += 1
+        placed[i] = p
+        curkey[i] = key
+        i += 1
+        resume = False
+
+    if not ok:
+        return failed()
+
+    per_shift = [[] for _ in range(nsh)]
+    mins = [0] * N
+    for i2 in range(nslots):
+        si = slot_sh[i2]
+        p = placed[i2]
+        per_shift[si].append(ids[p])
+        mins[p] += sh_len[si]
+    pos_in_sorted = [0] * nsh
+    for si, x in enumerate(order):
+        pos_in_sorted[x] = si
+    assignments = {}
+    for x in range(nsh):
+        assignments[vshifts[x][0]] = per_shift[pos_in_sorted[x]]
+    return {"ok": True,
+            "assignments": assignments,
+            "minutes": {ids[r]: mins[r] for r in range(N)},
+            "ignored": ignored}

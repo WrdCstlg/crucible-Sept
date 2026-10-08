@@ -1,0 +1,362 @@
+```python
+import re
+
+_NUM_RE = re.compile(r'(?:0|[1-9][0-9]*)')
+_IDENT_RE = re.compile(r'[0-9A-Za-z-]+')
+_DIGITS_RE = re.compile(r'[0-9]+')
+_WILD = ('x', 'X', '*')
+_OPS = ('>=', '<=', '>', '<', '=', '~', '^')
+
+
+def _is_num(s):
+    return _NUM_RE.fullmatch(s) is not None
+
+
+def _parse_pre(s):
+    out = []
+    for ident in s.split('.'):
+        if _IDENT_RE.fullmatch(ident) is None:
+            return None
+        if _DIGITS_RE.fullmatch(ident) is not None:
+            if not _is_num(ident):
+                return None
+            out.append((0, int(ident), ''))
+        else:
+            out.append((1, 0, ident))
+    return tuple(out)
+
+
+def _valid_build(s):
+    for ident in s.split('.'):
+        if _IDENT_RE.fullmatch(ident) is None:
+            return False
+    return True
+
+
+def _make_key(nums, pre):
+    if pre is None:
+        return (nums[0], nums[1], nums[2], 1, ())
+    return (nums[0], nums[1], nums[2], 0, pre)
+
+
+def _parse_version(s):
+    """Return (key, has_pre, mmp) or None if invalid."""
+    if not isinstance(s, str):
+        return None
+    if '+' in s:
+        core_pre, build = s.split('+', 1)
+        if not _valid_build(build):
+            return None
+    else:
+        core_pre = s
+    pre = None
+    if '-' in core_pre:
+        core, pre_s = core_pre.split('-', 1)
+        pre = _parse_pre(pre_s)
+        if pre is None:
+            return None
+    else:
+        core = core_pre
+    parts = core.split('.')
+    if len(parts) != 3:
+        return None
+    nums = []
+    for p in parts:
+        if not _is_num(p):
+            return None
+        nums.append(int(p))
+    return (_make_key(nums, pre), pre is not None, tuple(nums))
+
+
+def _parse_partial(s):
+    """Return (nums list, pre tuple or None) or None if invalid."""
+    if '+' in s:
+        return None
+    pre = None
+    if '-' in s:
+        core, pre_s = s.split('-', 1)
+        pre = _parse_pre(pre_s)
+        if pre is None:
+            return None
+    else:
+        core = s
+    parts = core.split('.')
+    if len(parts) < 1 or len(parts) > 3:
+        return None
+    nums = []
+    seen_wild = False
+    for p in parts:
+        if p in _WILD:
+            seen_wild = True
+        elif _is_num(p):
+            if seen_wild:
+                return None
+            nums.append(int(p))
+        else:
+            return None
+    if pre is not None and len(nums) != 3:
+        return None
+    return (nums, pre)
+
+
+def _comp(op, nums, pre):
+    nums3 = list(nums) + [0] * (3 - len(nums))
+    return (op, _make_key(nums3, pre), pre is not None, tuple(nums3))
+
+
+def _low(nums):
+    return list(nums) + [0] * (3 - len(nums))
+
+
+def _next(nums):
+    k = len(nums)
+    res = list(nums)
+    res[k - 1] += 1
+    return res + [0] * (3 - k)
+
+
+def _caret_upper(nums):
+    idx = None
+    for i, n in enumerate(nums):
+        if n != 0:
+            idx = i
+            break
+    if idx is None:
+        idx = len(nums) - 1
+    res = list(nums[:idx]) + [nums[idx] + 1]
+    return res + [0] * (3 - len(res))
+
+
+def _item(op, partial):
+    """Return list of comparators, or None meaning 'no version'."""
+    nums, pre = partial
+    k = len(nums)
+    if op in ('', '='):
+        if k == 0:
+            return []
+        if k < 3:
+            return [_comp('>=', _low(nums), None), _comp('<', _next(nums), None)]
+        return [_comp('=', nums, pre)]
+    if op == '>=':
+        if k == 0:
+            return []
+        if k < 3:
+            return [_comp('>=', _low(nums), None)]
+        return [_comp('>=', nums, pre)]
+    if op == '>':
+        if k == 0:
+            return None
+        if k < 3:
+            return [_comp('>=', _next(nums), None)]
+        return [_comp('>', nums, pre)]
+    if op == '<':
+        if k == 0:
+            return None
+        if k < 3:
+            return [_comp('<', _low(nums), None)]
+        return [_comp('<', nums, pre)]
+    if op == '<=':
+        if k == 0:
+            return []
+        if k < 3:
+            return [_comp('<', _next(nums), None)]
+        return [_comp('<=', nums, pre)]
+    if op == '~':
+        if k == 0:
+            return []
+        if k < 3:
+            return [_comp('>=', _low(nums), None), _comp('<', _next(nums), None)]
+        return [_comp('>=', nums, pre), _comp('<', [nums[0], nums[1] + 1, 0], None)]
+    if op == '^':
+        if k == 0:
+            return []
+        u = _caret_upper(nums)
+        if k < 3:
+            return [_comp('>=', _low(nums), None), _comp('<', u, None)]
+        return [_comp('>=', nums, pre), _comp('<', u, None)]
+    return None
+
+
+def _split_op(tok):
+    for op in _OPS:
+        if tok.startswith(op):
+            return op, tok[len(op):]
+    return '', tok
+
+
+def _parse_range(r):
+    """Return list of sets (None = never-satisfied set, else list of comparators),
+    or None if the whole range is invalid."""
+    if not isinstance(r, str):
+        return None
+    sets = []
+    for part in r.split('||'):
+        tokens = [t for t in part.split(' ') if t]
+        comps = []
+        never = False
+        if len(tokens) == 3 and tokens[1] == '-':
+            a = _parse_partial(tokens[0])
+            b = _parse_partial(tokens[2])
+            if a is None or b is None:
+                return None
+            anums, apre = a
+            if len(anums) >= 1:
+                comps.append(_comp('>=', _low(anums), apre if len(anums) == 3 else None))
+            bnums, bpre = b
+            if len(bnums) == 3:
+                comps.append(_comp('<=', bnums, bpre))
+            elif len(bnums) >= 1:
+                comps.append(_comp('<', _next(bnums), None))
+        else:
+            for tok in tokens:
+                op, rest = _split_op(tok)
+                p = _parse_partial(rest)
+                if p is None:
+                    return None
+                res = _item(op, p)
+                if res is None:
+                    never = True
+                else:
+                    comps.extend(res)
+        sets.append(None if never else comps)
+    return sets
+
+
+def _cmp_ok(op, vk, ck):
+    if op == '>=':
+        return vk >= ck
+    if op == '>':
+        return vk > ck
+    if op == '<':
+        return vk < ck
+    if op == '<=':
+        return vk <= ck
+    if op == '=':
+        return vk == ck
+    return False
+
+
+def _satisfies(info, sets):
+    if sets is None or info is None:
+        return False
+    key, has_pre, mmp = info
+    for s in sets:
+        if s is None:
+            continue
+        ok = True
+        for c in s:
+            if not _cmp_ok(c[0], key, c[1]):
+                ok = False
+                break
+        if not ok:
+            continue
+        if not has_pre:
+            return True
+        for c in s:
+            if c[2] and c[3] == mmp:
+                return True
+    return False
+
+
+def resolve(registry, root):
+    vcache = {}
+    rcache = {}
+    scache = {}
+
+    def pv(s):
+        if s in vcache:
+            return vcache[s]
+        res = _parse_version(s)
+        vcache[s] = res
+        return res
+
+    def pr(s):
+        if s in rcache:
+            return rcache[s]
+        res = _parse_range(s)
+        rcache[s] = res
+        return res
+
+    def sat(vstr, rstr):
+        k = (vstr, rstr)
+        if k in scache:
+            return scache[k]
+        res = _satisfies(pv(vstr), pr(rstr))
+        scache[k] = res
+        return res
+
+    if not isinstance(registry, dict):
+        registry = {}
+
+    reqs = {}
+    for name, r in root.items():
+        reqs.setdefault(name, []).append(r)
+    selected = {}
+
+    def next_unresolved():
+        best = None
+        for name, lst in reqs.items():
+            if lst and name not in selected and (best is None or name < best):
+                best = name
+        return best
+
+    def candidates(p):
+        vers = registry.get(p)
+        if not isinstance(vers, dict):
+            return []
+        rs = reqs.get(p, [])
+        out = []
+        for v in vers:
+            info = pv(v)
+            if info is None:
+                continue
+            good = True
+            for r in rs:
+                if not sat(v, r):
+                    good = False
+                    break
+            if good:
+                out.append((info[0], v))
+        out.sort(reverse=True)
+        return [v for _, v in out]
+
+    first = next_unresolved()
+    if first is None:
+        return {"ok": True, "packages": {}}
+
+    frames = [[first, candidates(first), 0, None]]
+    while frames:
+        f = frames[-1]
+        p = f[0]
+        if f[3] is not None:
+            for d in f[3]:
+                reqs[d].pop()
+            del selected[p]
+            f[3] = None
+        if f[2] >= len(f[1]):
+            frames.pop()
+            continue
+        v = f[1][f[2]]
+        f[2] += 1
+        deps = registry[p][v]
+        if not isinstance(deps, dict):
+            deps = {}
+        selected[p] = v
+        dep_items = list(deps.items())
+        for d, r in dep_items:
+            reqs.setdefault(d, []).append(r)
+        f[3] = [d for d, _ in dep_items]
+        ok = True
+        for d, r in dep_items:
+            if d in selected and not sat(selected[d], r):
+                ok = False
+                break
+        if not ok:
+            continue
+        nxt = next_unresolved()
+        if nxt is None:
+            return {"ok": True, "packages": dict(sorted(selected.items()))}
+        frames.append([nxt, candidates(nxt), 0, None])
+
+    return {"ok": False, "packages": {}}
+```

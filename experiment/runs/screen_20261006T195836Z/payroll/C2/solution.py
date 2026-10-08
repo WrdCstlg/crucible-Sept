@@ -1,0 +1,153 @@
+import math
+from datetime import date
+from fractions import Fraction
+
+_DIGITS = "0123456789"
+
+
+def _parse(s):
+    """Parse 'YYYY-MM-DD HH:MM' into absolute minutes (date ordinal * 1440 + minutes), or None."""
+    if not isinstance(s, str) or len(s) != 16:
+        return None
+    for i, c in enumerate(s):
+        if i in (4, 7):
+            if c != "-":
+                return None
+        elif i == 10:
+            if c != " ":
+                return None
+        elif i == 13:
+            if c != ":":
+                return None
+        else:
+            if c not in _DIGITS:
+                return None
+    y = int(s[0:4])
+    mo = int(s[5:7])
+    d = int(s[8:10])
+    h = int(s[11:13])
+    mi = int(s[14:16])
+    if h > 23 or mi > 59:
+        return None
+    try:
+        o = date(y, mo, d).toordinal()
+    except (ValueError, OverflowError):
+        return None
+    return o * 1440 + h * 60 + mi
+
+
+def _round(t):
+    q = t % 15
+    if q <= 7:
+        return t - q
+    return t + (15 - q)
+
+
+def _half_up(fr):
+    return int(math.floor(fr + Fraction(1, 2)))
+
+
+def compute_pay(punches, rate):
+    ignored = []
+    candidates = []  # (rin, rout, idx)
+
+    for idx, punch in enumerate(punches):
+        try:
+            s_in, s_out = punch
+        except (TypeError, ValueError):
+            ignored.append(idx)
+            continue
+        t_in = _parse(s_in)
+        t_out = _parse(s_out)
+        if t_in is None or t_out is None or t_out <= t_in:
+            ignored.append(idx)
+            continue
+        r_in = _round(t_in)
+        r_out = _round(t_out)
+        if r_out <= r_in:
+            ignored.append(idx)
+            continue
+        candidates.append((r_in, r_out, idx))
+
+    candidates.sort()
+    shifts = []
+    last_out = None
+    for r_in, r_out, idx in candidates:
+        if last_out is None or r_in >= last_out:
+            shifts.append((r_in, r_out, idx))
+            last_out = r_out
+        else:
+            ignored.append(idx)
+
+    # Days: ordinal -> worked minutes, meal flag
+    day_worked = {}
+    day_meal = {}
+    for r_in, r_out, idx in shifts:
+        day = r_in // 1440
+        length = r_out - r_in
+        day_worked[day] = day_worked.get(day, 0) + length
+        if length > 300:
+            day_meal[day] = True
+        else:
+            day_meal.setdefault(day, False)
+
+    # Group days into weeks (ordinal 1 is a Monday)
+    weeks = {}
+    for day in day_worked:
+        ws = day - (day - 1) % 7
+        weeks.setdefault(ws, []).append(day)
+
+    result_weeks = []
+    for ws in sorted(weeks):
+        days_in_week = set(weeks[ws])
+        seventh = all(
+            day_worked.get(ws + k, 0) > 0 for k in range(7)
+        )
+        R = O = D = 0
+        N = 0
+        running_reg = 0
+        for k in range(7):
+            day = ws + k
+            if day not in days_in_week:
+                continue
+            w = day_worked[day]
+            if seventh and k == 6:
+                reg = 0
+                ot = min(w, 480)
+                dt = max(w - 480, 0)
+            else:
+                reg = min(w, 480)
+                ot = min(max(w - 480, 0), 240)
+                dt = max(w - 720, 0)
+            # weekly overtime
+            allowed = max(2400 - running_reg, 0)
+            if reg > allowed:
+                ot += reg - allowed
+                reg = allowed
+            running_reg += reg
+            R += reg
+            O += ot
+            D += dt
+            if day_meal.get(day, False):
+                N += 1
+
+        regular_pay = _half_up(Fraction(R * rate, 60))
+        overtime_pay = _half_up(Fraction(O * rate * 3, 120))
+        double_pay = _half_up(Fraction(D * rate * 2, 60))
+        meal_pay = N * rate
+        total_pay = regular_pay + overtime_pay + double_pay + meal_pay
+
+        result_weeks.append({
+            "week_start": date.fromordinal(ws).isoformat(),
+            "regular_minutes": R,
+            "overtime_minutes": O,
+            "double_minutes": D,
+            "meal_penalties": N,
+            "regular_pay": regular_pay,
+            "overtime_pay": overtime_pay,
+            "double_pay": double_pay,
+            "meal_pay": meal_pay,
+            "total_pay": total_pay,
+        })
+
+    return {"weeks": result_weeks, "ignored": sorted(ignored)}

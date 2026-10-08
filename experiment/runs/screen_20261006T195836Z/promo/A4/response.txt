@@ -1,0 +1,167 @@
+```python
+import itertools
+
+
+class Unit:
+    __slots__ = ("order", "line_idx", "sku", "price", "category", "claimed")
+
+    def __init__(self, order, line_idx, sku, price, category):
+        self.order = order
+        self.line_idx = line_idx
+        self.sku = sku
+        self.price = price
+        self.category = category
+        self.claimed = False
+
+
+def allocate(amount, target_units):
+    """Allocate an amount A >= 0 over target_units with weights w (current prices)."""
+    weights_sum = sum(u.price for u in target_units)
+    if weights_sum == 0:
+        return {u.order: 0 for u in target_units}
+
+    alloc = {}
+    remainders = []
+    base_sum = 0
+    for u in target_units:
+        w = u.price
+        base = (amount * w) // weights_sum
+        rem = (amount * w) % weights_sum
+        alloc[u.order] = base
+        base_sum += base
+        remainders.append((rem, u.order))
+
+    missing = amount - base_sum
+    remainders.sort(key=lambda item: (-item[0], item[1]))
+    for i in range(missing):
+        alloc[remainders[i][1]] += 1
+
+    return alloc
+
+
+def apply_promotion(promo, units):
+    ptype = promo["type"]
+
+    if ptype == "percent":
+        eligible = [
+            u
+            for u in units
+            if not u.claimed and u.category == promo["category"]
+        ]
+        if len(eligible) >= promo["min_qty"]:
+            pct = promo["percent"]
+            for u in eligible:
+                u.price -= (u.price * pct) // 100
+
+    elif ptype == "bxgy":
+        skus_set = set(promo["skus"])
+        eligible = [
+            u for u in units if not u.claimed and u.sku in skus_set
+        ]
+        x = promo["buy"]
+        y = promo["get"]
+        g = len(eligible) // (x + y)
+        if g > 0:
+            eligible.sort(key=lambda u: (-u.price, u.order))
+            num_claimed = g * (x + y)
+            claimed_units = eligible[:num_claimed]
+            for u in claimed_units:
+                u.claimed = True
+            num_free = g * y
+            for u in claimed_units[-num_free:]:
+                u.price = 0
+
+    elif ptype == "bundle":
+        skus = promo["skus"]
+        target_price = promo["price"]
+        while True:
+            picked = []
+            stop = False
+            for sku in skus:
+                unclaimed = [
+                    u for u in units if not u.claimed and u.sku == sku
+                ]
+                if not unclaimed:
+                    stop = True
+                    break
+                best_u = min(unclaimed, key=lambda u: (-u.price, u.order))
+                picked.append(best_u)
+
+            if stop:
+                break
+
+            sum_picked = sum(u.price for u in picked)
+            if sum_picked <= target_price:
+                break
+
+            for u in picked:
+                u.claimed = True
+
+            alloc_map = allocate(target_price, picked)
+            for u in picked:
+                u.price = alloc_map[u.order]
+
+    elif ptype == "threshold":
+        subtotal = sum(u.price for u in units)
+        if subtotal > 0 and subtotal >= promo["min_subtotal"]:
+            d = min(promo["amount_off"], subtotal)
+            alloc_map = allocate(d, units)
+            for u in units:
+                u.price -= alloc_map[u.order]
+
+
+def is_valid_selection(subset):
+    if not subset:
+        return True
+    if any(p.get("exclusive", False) for p in subset):
+        return len(subset) == 1
+    groups = [p["group"] for p in subset if p.get("group") is not None]
+    return len(groups) == len(set(groups))
+
+
+def price_cart(catalog, cart, promotions):
+    base_unit_data = []
+    order = 0
+    for line_idx, line in enumerate(cart):
+        sku = line["sku"]
+        qty = line["qty"]
+        cat_info = catalog[sku]
+        price = cat_info["price"]
+        category = cat_info["category"]
+        for _ in range(qty):
+            base_unit_data.append((order, line_idx, sku, price, category))
+            order += 1
+
+    best_key = None
+    best_result = None
+
+    for r in range(len(promotions) + 1):
+        for subset in itertools.combinations(promotions, r):
+            if not is_valid_selection(subset):
+                continue
+
+            units = [Unit(*data) for data in base_unit_data]
+            sorted_promos = sorted(
+                subset, key=lambda p: (p["priority"], p["id"])
+            )
+
+            for promo in sorted_promos:
+                apply_promotion(promo, units)
+
+            total = sum(u.price for u in units)
+            sorted_ids = sorted(p["id"] for p in subset)
+            key = (total, len(subset), sorted_ids)
+
+            if best_key is None or key < best_key:
+                best_key = key
+                line_totals = [0] * len(cart)
+                for u in units:
+                    line_totals[u.line_idx] += u.price
+                best_result = {
+                    "lines": line_totals,
+                    "applied": [p["id"] for p in sorted_promos],
+                    "total": total,
+                }
+
+    return best_result
+```

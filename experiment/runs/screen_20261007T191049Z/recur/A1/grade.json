@@ -1,0 +1,2109 @@
+{
+  "problem": "recur",
+  "sandbox": "docker",
+  "strict_pass": false,
+  "passed": 293,
+  "total": 295,
+  "public_pass": true,
+  "by_layer": {
+    "public": "4/4",
+    "hidden": "290/292",
+    "stress": "3/3"
+  },
+  "first_failure": "H23: OverflowError: date value out of range",
+  "cases": [
+    {
+      "id": "P1",
+      "layer": "public",
+      "title": "BYSETPOS picks the last weekday of each month",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P2",
+      "layer": "public",
+      "title": "WKST decides which days share a week; INTERVAL=2",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P3",
+      "layer": "public",
+      "title": "day 31 skipped in short months; UNTIL inclusive; exdate and rdate",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P4",
+      "layer": "public",
+      "title": "an ordinal is not allowed with WEEKLY",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H01",
+      "layer": "hidden",
+      "title": "the start is the first occurrence even when it does not match the rule",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H02",
+      "layer": "hidden",
+      "title": "COUNT is applied before EXDATE removal; an excluded start still counts",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H03",
+      "layer": "hidden",
+      "title": "RDATEs are added, deduplicated, not counted, and may precede the start",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H04",
+      "layer": "hidden",
+      "title": "UNTIL is inclusive",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H05",
+      "layer": "hidden",
+      "title": "UNTIL compares the time too: one minute early excludes that day",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H06",
+      "layer": "hidden",
+      "title": "a start later than UNTIL is still an occurrence",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H07",
+      "layer": "hidden",
+      "title": "MONTHLY from the 31st skips short months instead of clamping",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H08",
+      "layer": "hidden",
+      "title": "YEARLY from Feb 29: leap years only (1900 is not one, 2000 is)",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H09",
+      "layer": "hidden",
+      "title": "YEARLY ordinal BYDAY without BYMONTH counts within the year",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H10",
+      "layer": "hidden",
+      "title": "YEARLY ordinal BYDAY with BYMONTH counts within each month",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H11",
+      "layer": "hidden",
+      "title": "WKST=TH with INTERVAL=2 changes which days share a week",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H12",
+      "layer": "hidden",
+      "title": "BYSETPOS counts candidates that lie before the start",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H13",
+      "layer": "hidden",
+      "title": "BYSETPOS is applied before UNTIL",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H14",
+      "layer": "hidden",
+      "title": "DAILY periods hold one candidate: BYSETPOS=2 selects nothing",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H15",
+      "layer": "hidden",
+      "title": "negative BYMONTHDAY counts back from each month's end; -31 needs a 31-day month",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H16",
+      "layer": "hidden",
+      "title": "MONTHLY BYMONTHDAY and BYDAY intersect",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H17",
+      "layer": "hidden",
+      "title": "YEARLY with BYMONTHDAY but no BYMONTH covers every month",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H18",
+      "layer": "hidden",
+      "title": "YEARLY with BYMONTH only uses the start's day of month",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H19",
+      "layer": "hidden",
+      "title": "the range includes its start and excludes its end",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H20",
+      "layer": "hidden",
+      "title": "range_end before range_start gives an empty list",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H21",
+      "layer": "hidden",
+      "title": "the series ends with year 9999 even if COUNT is not reached",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H22",
+      "layer": "hidden",
+      "title": "the last week of the calendar has only its existing days",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H23",
+      "layer": "hidden",
+      "title": "the first week of the calendar has only its existing days",
+      "pass": false,
+      "reason": "OverflowError: date value out of range"
+    },
+    {
+      "id": "H24",
+      "layer": "hidden",
+      "title": "a range thousands of years after the start (YEARLY, INTERVAL=7, Feb 29)",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H25",
+      "layer": "hidden",
+      "title": "a range thousands of years after the start (MONTHLY, INTERVAL=5, day 31)",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H26",
+      "layer": "hidden",
+      "title": "an EXDATE removes an RDATE too and must match the time exactly",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H27",
+      "layer": "hidden",
+      "title": "MONTHLY BYDAY=5MO only in months with five Mondays",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H28",
+      "layer": "hidden",
+      "title": "WEEKLY BYMONTH filters each day of a week that straddles two months",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H29",
+      "layer": "hidden",
+      "title": "DAILY INTERVAL counts days from the start; BYMONTHDAY filters",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H30",
+      "layer": "hidden",
+      "title": "BYSETPOS: overlapping positions select once, positions past the end select nothing",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H31",
+      "layer": "hidden",
+      "title": "YEARLY 53MO and -53MO exist only in years with 53 Mondays",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H32",
+      "layer": "hidden",
+      "title": "YEARLY with a bare BYDAY and no BYMONTH means every such weekday of the year",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H33",
+      "layer": "hidden",
+      "title": "WKST changes what BYSETPOS counts even with INTERVAL=1",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H34",
+      "layer": "hidden",
+      "title": "COUNT=1 keeps only the start; RDATEs are still added",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H35",
+      "layer": "hidden",
+      "title": "explicit + signs; an ordinal BYDAY limits BYMONTHDAY in MONTHLY",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H36",
+      "layer": "hidden",
+      "title": "YEARLY ordinal BYDAY limiting BYMONTHDAY counts in the year without BYMONTH",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H37",
+      "layer": "hidden",
+      "title": "bad_datetime is checked before bad_rule",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H38",
+      "layer": "hidden",
+      "title": "datetime digits must be ASCII",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H39",
+      "layer": "hidden",
+      "title": "datetime separator T is case-sensitive",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H40",
+      "layer": "hidden",
+      "title": "year 0000 is not a datetime",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H41",
+      "layer": "hidden",
+      "title": "hour 24 is not a datetime",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H42",
+      "layer": "hidden",
+      "title": "BYSETPOS is fine with any BY part written (DAILY, BYMONTH)",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H43",
+      "layer": "hidden",
+      "title": "WEEKLY BYSETPOS with BYMONTH written and the default weekday",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H44",
+      "layer": "hidden",
+      "title": "DAILY BYMONTHDAY=+31: the non-matching start, then Mar 31",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H45",
+      "layer": "hidden",
+      "title": "INTERVAL=100000 is valid (only the start in range)",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H46",
+      "layer": "hidden",
+      "title": "no rule: the start outside the range, an RDATE inside it",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H47",
+      "layer": "hidden",
+      "title": "COUNT exhausted before a later range",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V01",
+      "layer": "hidden",
+      "title": "invalid rule: leading zero in INTERVAL",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V02",
+      "layer": "hidden",
+      "title": "invalid rule: a part repeated",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V03",
+      "layer": "hidden",
+      "title": "invalid rule: COUNT together with UNTIL",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V04",
+      "layer": "hidden",
+      "title": "invalid rule: ordinal 0",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V05",
+      "layer": "hidden",
+      "title": "invalid rule: BYSETPOS without another BY part",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V06",
+      "layer": "hidden",
+      "title": "invalid rule: BYMONTHDAY with WEEKLY",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V07",
+      "layer": "hidden",
+      "title": "invalid rule: ordinal with DAILY",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V08",
+      "layer": "hidden",
+      "title": "invalid rule: trailing semicolon",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V09",
+      "layer": "hidden",
+      "title": "invalid rule: UNTIL is not a real date",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V10",
+      "layer": "hidden",
+      "title": "invalid rule: unsupported part",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V11",
+      "layer": "hidden",
+      "title": "invalid rule: FREQ missing",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V12",
+      "layer": "hidden",
+      "title": "invalid rule: ordinal 54",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V13",
+      "layer": "hidden",
+      "title": "invalid rule: BYMONTHDAY -0",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V14",
+      "layer": "hidden",
+      "title": "invalid rule: empty list item",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V15",
+      "layer": "hidden",
+      "title": "invalid rule: lower-case keyword",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V16",
+      "layer": "hidden",
+      "title": "invalid rule: sign on an unsigned value",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V17",
+      "layer": "hidden",
+      "title": "invalid rule: empty rule",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V18",
+      "layer": "hidden",
+      "title": "invalid rule: trailing space",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V19",
+      "layer": "hidden",
+      "title": "invalid rule: INTERVAL above 100000",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V20",
+      "layer": "hidden",
+      "title": "invalid rule: BYMONTHDAY 32",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V21",
+      "layer": "hidden",
+      "title": "invalid rule: two '=' in a part",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V22",
+      "layer": "hidden",
+      "title": "invalid rule: unsupported FREQ",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V23",
+      "layer": "hidden",
+      "title": "invalid rule: sign without digits in BYDAY",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V24",
+      "layer": "hidden",
+      "title": "invalid rule: ordinal with WEEKLY even when written +1",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "V25",
+      "layer": "hidden",
+      "title": "invalid rule: COUNT with UNTIL, in any order",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R001",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R002",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R003",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R004",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R005",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R006",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R007",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R008",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R009",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R010",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R011",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R012",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R013",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R014",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R015",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R016",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R017",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R018",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R019",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R020",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R021",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R022",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R023",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R024",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R025",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R026",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R027",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R028",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R029",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R030",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R031",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R032",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R033",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R034",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R035",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R036",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R037",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R038",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R039",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R040",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R041",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R042",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R043",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R044",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R045",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R046",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R047",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R048",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R049",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R050",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R051",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R052",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R053",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R054",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R055",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R056",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R057",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R058",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R059",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R060",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R061",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R062",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R063",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R064",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R065",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R066",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R067",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": false,
+      "reason": "OverflowError: date value out of range"
+    },
+    {
+      "id": "R068",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R069",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R070",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R071",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R072",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R073",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R074",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R075",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R076",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R077",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R078",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R079",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R080",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R081",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R082",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R083",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R084",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R085",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R086",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R087",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R088",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R089",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R090",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R091",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R092",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R093",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R094",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R095",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R096",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R097",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R098",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R099",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R100",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R101",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R102",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R103",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R104",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R105",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R106",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R107",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R108",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R109",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R110",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R111",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R112",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R113",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R114",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R115",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R116",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R117",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R118",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R119",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R120",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R121",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R122",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R123",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R124",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R125",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R126",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R127",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R128",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R129",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R130",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R131",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R132",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R133",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R134",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R135",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R136",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R137",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R138",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R139",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R140",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R141",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R142",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R143",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R144",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R145",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R146",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R147",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R148",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R149",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R150",
+      "layer": "hidden",
+      "title": "random event",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R151",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R152",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R153",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R154",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R155",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R156",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R157",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R158",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R159",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R160",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R161",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R162",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R163",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R164",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R165",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R166",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R167",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R168",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R169",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R170",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R171",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R172",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R173",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R174",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R175",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R176",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R177",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R178",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R179",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R180",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R181",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R182",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R183",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R184",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R185",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R186",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R187",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R188",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R189",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R190",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R191",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R192",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R193",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R194",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R195",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R196",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R197",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R198",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R199",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R200",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R201",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R202",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R203",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R204",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R205",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R206",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R207",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R208",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R209",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R210",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R211",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R212",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R213",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R214",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R215",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R216",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R217",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R218",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R219",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R220",
+      "layer": "hidden",
+      "title": "random event around one trap",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S1",
+      "layer": "stress",
+      "title": "no COUNT: dense DAILY rule from 0001-01-01, range in the last century",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S2",
+      "layer": "stress",
+      "title": "COUNT 59000: YEARLY with 21 ordinal BYDAY entries and BYSETPOS from year 1",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S3",
+      "layer": "stress",
+      "title": "COUNT 40000: dense DAILY rule with BYSETPOS over five centuries",
+      "pass": true,
+      "reason": null
+    }
+  ]
+}

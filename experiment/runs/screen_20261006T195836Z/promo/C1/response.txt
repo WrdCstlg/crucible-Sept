@@ -1,0 +1,153 @@
+```python
+def price_cart(catalog, cart, promotions):
+    # Expand cart into units (in unit order).
+    unit_line = []
+    unit_sku = []
+    unit_cat = []
+    unit_base = []
+    for li, line in enumerate(cart):
+        sku = line["sku"]
+        info = catalog[sku]
+        for _ in range(line["qty"]):
+            unit_line.append(li)
+            unit_sku.append(sku)
+            unit_cat.append(info["category"])
+            unit_base.append(int(info["price"]))
+    n = len(unit_base)
+
+    def allocate(amount, idxs, prices):
+        """Allocate amount over units idxs (weights = current prices).
+        Returns shares aligned with idxs."""
+        W = 0
+        for i in idxs:
+            W += prices[i]
+        shares = []
+        rems = []
+        for i in idxs:
+            num = amount * prices[i]
+            shares.append(num // W)
+            rems.append(num % W)
+        R = amount - sum(shares)
+        if R > 0:
+            order = sorted(range(len(idxs)), key=lambda k: (-rems[k], idxs[k]))
+            for k in order[:R]:
+                shares[k] += 1
+        return shares
+
+    def apply_percent(p, prices, claimed):
+        cat = p["category"]
+        elig = [i for i in range(n) if not claimed[i] and unit_cat[i] == cat]
+        if len(elig) >= p["min_qty"]:
+            pct = p["percent"]
+            for i in elig:
+                prices[i] -= (prices[i] * pct) // 100
+
+    def apply_bxgy(p, prices, claimed):
+        skus = set(p["skus"])
+        elig = [i for i in range(n) if not claimed[i] and unit_sku[i] in skus]
+        X = p["buy"]
+        Y = p["get"]
+        g = len(elig) // (X + Y)
+        if g <= 0:
+            return
+        elig.sort(key=lambda i: (-prices[i], i))
+        take = g * (X + Y)
+        claimed_units = elig[:take]
+        for i in claimed_units:
+            claimed[i] = True
+        free = g * Y
+        for i in claimed_units[take - free:]:
+            prices[i] = 0
+
+    def apply_bundle(p, prices, claimed):
+        skus = list(p["skus"])
+        P = p["price"]
+        # Unclaimed units' prices don't change during this bundle application
+        # except those being claimed, so sort once per sku.
+        queues = {}
+        for s in skus:
+            lst = [i for i in range(n) if not claimed[i] and unit_sku[i] == s]
+            lst.sort(key=lambda i: (-prices[i], i))
+            queues[s] = lst
+        pos = {s: 0 for s in skus}
+        while True:
+            picked = []
+            ok = True
+            for s in skus:
+                q = queues[s]
+                if pos[s] >= len(q):
+                    ok = False
+                    break
+                picked.append(q[pos[s]])
+            if not ok:
+                break
+            total = 0
+            for i in picked:
+                total += prices[i]
+            if total <= P:
+                break
+            for s in skus:
+                pos[s] += 1
+            for i in picked:
+                claimed[i] = True
+            idxs = sorted(picked)
+            shares = allocate(P, idxs, prices)
+            for k, i in enumerate(idxs):
+                prices[i] = shares[k]
+
+    def apply_threshold(p, prices, claimed):
+        S = sum(prices)
+        if S > 0 and S >= p["min_subtotal"]:
+            D = min(p["amount_off"], S)
+            idxs = list(range(n))
+            shares = allocate(D, idxs, prices)
+            for k, i in enumerate(idxs):
+                prices[i] -= shares[k]
+
+    handlers = {
+        "percent": apply_percent,
+        "bxgy": apply_bxgy,
+        "bundle": apply_bundle,
+        "threshold": apply_threshold,
+    }
+
+    ordered = sorted(promotions, key=lambda p: (p["priority"], p["id"]))
+    m = len(ordered)
+
+    best_key = None
+    best_prices = None
+    best_applied = None
+
+    for mask in range(1 << m):
+        sel = [ordered[k] for k in range(m) if (mask >> k) & 1]
+        # Validate groups
+        groups = set()
+        valid = True
+        for p in sel:
+            g = p.get("group")
+            if g is not None:
+                if g in groups:
+                    valid = False
+                    break
+                groups.add(g)
+        if not valid:
+            continue
+        if len(sel) > 1 and any(bool(p.get("exclusive", False)) for p in sel):
+            continue
+        prices = list(unit_base)
+        claimed = [False] * n
+        for p in sel:
+            handlers[p["type"]](p, prices, claimed)
+        total = sum(prices)
+        key = (total, len(sel), sorted(p["id"] for p in sel))
+        if best_key is None or key < best_key:
+            best_key = key
+            best_prices = prices
+            best_applied = [p["id"] for p in sel]
+
+    lines = [0] * len(cart)
+    for i in range(n):
+        lines[unit_line[i]] += best_prices[i]
+
+    return {"lines": lines, "applied": best_applied, "total": sum(best_prices)}
+```

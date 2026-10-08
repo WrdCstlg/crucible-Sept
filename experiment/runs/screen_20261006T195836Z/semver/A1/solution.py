@@ -1,0 +1,473 @@
+import functools
+import re
+
+VERSION_REGEX = re.compile(
+    r'^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)'
+    r'(?:-([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?'
+    r'(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$'
+)
+
+
+class Version:
+    def __init__(self, major, minor, patch, prerelease=None, build=None, raw_str=""):
+        self.major = major
+        self.minor = minor
+        self.patch = patch
+        self.prerelease = prerelease  # None or tuple of str
+        self.build = build
+        self.raw_str = raw_str
+
+        if prerelease is None:
+            prerelease_key = (1, ())
+        else:
+            id_keys = []
+            for ident in prerelease:
+                if ident.isdigit():
+                    id_keys.append((0, int(ident)))
+                else:
+                    id_keys.append((1, ident))
+            prerelease_key = (0, tuple(id_keys))
+        self.prec_key = (major, minor, patch, prerelease_key)
+
+    def __eq__(self, other):
+        return self.prec_key == other.prec_key
+
+    def __ne__(self, other):
+        return self.prec_key != other.prec_key
+
+    def __lt__(self, other):
+        return self.prec_key < other.prec_key
+
+    def __le__(self, other):
+        return self.prec_key <= other.prec_key
+
+    def __gt__(self, other):
+        return self.prec_key > other.prec_key
+
+    def __ge__(self, other):
+        return self.prec_key >= other.prec_key
+
+    def __repr__(self):
+        return f"Version({self.raw_str})"
+
+
+def parse_version(v_str):
+    if not isinstance(v_str, str):
+        return None
+    m = VERSION_REGEX.match(v_str)
+    if not m:
+        return None
+    major_s, minor_s, patch_s, pre_s, build_s = m.groups()
+    major = int(major_s)
+    minor = int(minor_s)
+    patch = int(patch_s)
+
+    prerelease_tuple = None
+    if pre_s is not None:
+        idents = pre_s.split('.')
+        for ident in idents:
+            if not ident:
+                return None
+            if ident.isdigit() and len(ident) > 1 and ident.startswith('0'):
+                return None
+        prerelease_tuple = tuple(idents)
+
+    return Version(major, minor, patch, prerelease_tuple, build_s, raw_str=v_str)
+
+
+class PartialVersion:
+    def __init__(self, k, low, next_v, U, prerelease, M=0, m=0, p=0):
+        self.k = k
+        self.low = low
+        self.next_v = next_v
+        self.U = U
+        self.prerelease = prerelease
+        self.M = M
+        self.m = m
+        self.p = p
+
+
+def _is_numeric_component(s):
+    if not s:
+        return False
+    if not all('0' <= c <= '9' for c in s):
+        return False
+    if len(s) > 1 and s[0] == '0':
+        return False
+    return True
+
+
+def _is_wildcard(s):
+    return s in ('*', 'x', 'X')
+
+
+def parse_partial_version(s):
+    if '+' in s:
+        return None
+
+    if '-' in s:
+        main_part, prerelease_part = s.split('-', 1)
+    else:
+        main_part = s
+        prerelease_part = None
+
+    prerelease_tuple = None
+    if prerelease_part is not None:
+        if not prerelease_part:
+            return None
+        idents = prerelease_part.split('.')
+        for ident in idents:
+            if not ident:
+                return None
+            for c in ident:
+                if not (('0' <= c <= '9') or ('a' <= c <= 'z') or ('A' <= c <= 'Z') or c == '-'):
+                    return None
+            if all('0' <= c <= '9' for c in ident):
+                if len(ident) > 1 and ident[0] == '0':
+                    return None
+        prerelease_tuple = tuple(idents)
+
+    parts = main_part.split('.')
+    if len(parts) == 0 or len(parts) > 3:
+        return None
+
+    if len(parts) == 1:
+        if _is_wildcard(parts[0]):
+            if prerelease_tuple is not None:
+                return None
+            return PartialVersion(0, None, None, None, None)
+        elif _is_numeric_component(parts[0]):
+            if prerelease_tuple is not None:
+                return None
+            M = int(parts[0])
+            low = Version(M, 0, 0)
+            next_v = Version(M + 1, 0, 0)
+            U = Version(M + 1, 0, 0)
+            return PartialVersion(1, low, next_v, U, None, M=M)
+        else:
+            return None
+
+    elif len(parts) == 2:
+        if not _is_numeric_component(parts[0]):
+            return None
+        M = int(parts[0])
+        if _is_wildcard(parts[1]):
+            if prerelease_tuple is not None:
+                return None
+            low = Version(M, 0, 0)
+            next_v = Version(M + 1, 0, 0)
+            U = Version(M + 1, 0, 0)
+            return PartialVersion(1, low, next_v, U, None, M=M)
+        elif _is_numeric_component(parts[1]):
+            if prerelease_tuple is not None:
+                return None
+            m = int(parts[1])
+            low = Version(M, m, 0)
+            next_v = Version(M, m + 1, 0)
+            U = Version(M + 1, 0, 0) if M != 0 else Version(0, m + 1, 0)
+            return PartialVersion(2, low, next_v, U, None, M=M, m=m)
+        else:
+            return None
+
+    else:  # len(parts) == 3
+        if not _is_numeric_component(parts[0]):
+            return None
+        M = int(parts[0])
+        if _is_wildcard(parts[1]):
+            if not _is_wildcard(parts[2]):
+                return None
+            if prerelease_tuple is not None:
+                return None
+            low = Version(M, 0, 0)
+            next_v = Version(M + 1, 0, 0)
+            U = Version(M + 1, 0, 0)
+            return PartialVersion(1, low, next_v, U, None, M=M)
+        elif _is_numeric_component(parts[1]):
+            m = int(parts[1])
+            if _is_wildcard(parts[2]):
+                if prerelease_tuple is not None:
+                    return None
+                low = Version(M, m, 0)
+                next_v = Version(M, m + 1, 0)
+                U = Version(M + 1, 0, 0) if M != 0 else Version(0, m + 1, 0)
+                return PartialVersion(2, low, next_v, U, None, M=M, m=m)
+            elif _is_numeric_component(parts[2]):
+                p = int(parts[2])
+                low = Version(M, m, p, prerelease_tuple)
+                if M != 0:
+                    U = Version(M + 1, 0, 0)
+                elif m != 0:
+                    U = Version(0, m + 1, 0)
+                else:
+                    U = Version(0, 0, p + 1)
+                return PartialVersion(3, low, None, U, prerelease_tuple, M=M, m=m, p=p)
+            else:
+                return None
+        else:
+            return None
+
+
+def parse_item(token):
+    op = None
+    rest = None
+    for candidate_op in ('>=', '<=', '>', '<', '=', '~', '^'):
+        if token.startswith(candidate_op):
+            op = candidate_op
+            rest = token[len(candidate_op):]
+            break
+
+    if op is None:
+        op = ''
+        rest = token
+
+    pv = parse_partial_version(rest)
+    if pv is None:
+        return None
+
+    k = pv.k
+    if op in ('', '='):
+        if k == 0:
+            return [], False
+        elif k in (1, 2):
+            return [('>=', pv.low), ('<', pv.next_v)], False
+        else:
+            return [('=', pv.low)], False
+
+    elif op == '>=':
+        if k == 0:
+            return [], False
+        elif k in (1, 2):
+            return [('>=', pv.low)], False
+        else:
+            return [('>=', pv.low)], False
+
+    elif op == '>':
+        if k == 0:
+            return [], True
+        elif k in (1, 2):
+            return [('>=', pv.next_v)], False
+        else:
+            return [('>', pv.low)], False
+
+    elif op == '<':
+        if k == 0:
+            return [], True
+        elif k in (1, 2):
+            return [('<', pv.low)], False
+        else:
+            return [('<', pv.low)], False
+
+    elif op == '<=':
+        if k == 0:
+            return [], False
+        elif k in (1, 2):
+            return [('<', pv.next_v)], False
+        else:
+            return [('<=', pv.low)], False
+
+    elif op == '~':
+        if k == 0:
+            return [], False
+        elif k in (1, 2):
+            return [('>=', pv.low), ('<', pv.next_v)], False
+        else:
+            return [('>=', pv.low), ('<', Version(pv.M, pv.m + 1, 0))], False
+
+    elif op == '^':
+        if k == 0:
+            return [], False
+        elif k in (1, 2):
+            return [('>=', pv.low), ('<', pv.U)], False
+        else:
+            return [('>=', pv.low), ('<', pv.U)], False
+
+
+class ParsedRange:
+    def __init__(self, comparator_sets):
+        self.comparator_sets = comparator_sets  # list of (comparators, no_version)
+
+
+@functools.lru_cache(maxsize=4096)
+def parse_range(range_str):
+    if not isinstance(range_str, str):
+        return None
+
+    raw_sets = range_str.split('||')
+    parsed_sets = []
+
+    for set_str in raw_sets:
+        tokens = [t for t in set_str.split(' ') if t]
+
+        if len(tokens) == 0:
+            parsed_sets.append(([], False))
+            continue
+
+        if len(tokens) == 3 and tokens[1] == '-':
+            # Hyphen range
+            pv_A = parse_partial_version(tokens[0])
+            pv_B = parse_partial_version(tokens[2])
+            if pv_A is None or pv_B is None:
+                return None
+
+            comps = []
+            if pv_A.k >= 1:
+                comps.append(('>=', pv_A.low))
+
+            if pv_B.k in (1, 2):
+                comps.append(('<', pv_B.next_v))
+            elif pv_B.k == 3:
+                comps.append(('<=', pv_B.low))
+
+            parsed_sets.append((comps, False))
+        else:
+            comps = []
+            no_version = False
+            for token in tokens:
+                res = parse_item(token)
+                if res is None:
+                    return None
+                item_comps, item_no_version = res
+                if item_no_version:
+                    no_version = True
+                else:
+                    comps.extend(item_comps)
+
+            parsed_sets.append((comps, no_version))
+
+    return ParsedRange(parsed_sets)
+
+
+def eval_comparator(op, comp_v, cand_v):
+    if op == '=':
+        return cand_v == comp_v
+    elif op == '>=':
+        return cand_v >= comp_v
+    elif op == '<=':
+        return cand_v <= comp_v
+    elif op == '>':
+        return cand_v > comp_v
+    elif op == '<':
+        return cand_v < comp_v
+    return False
+
+
+def satisfies_comparator_set(cand_v, comparators, no_version):
+    if no_version:
+        return False
+
+    if cand_v.prerelease is None:
+        if not comparators:
+            return True
+        return all(eval_comparator(op, comp_v, cand_v) for op, comp_v in comparators)
+    else:
+        if not comparators:
+            return False
+        if not all(eval_comparator(op, comp_v, cand_v) for op, comp_v in comparators):
+            return False
+        cand_mmp = (cand_v.major, cand_v.minor, cand_v.patch)
+        return any(
+            comp_v.prerelease is not None and (comp_v.major, comp_v.minor, comp_v.patch) == cand_mmp
+            for op, comp_v in comparators
+        )
+
+
+def satisfies_range(cand_v, parsed_range):
+    if parsed_range is None:
+        return False
+    return any(
+        satisfies_comparator_set(cand_v, comps, no_ver)
+        for comps, no_ver in parsed_range.comparator_sets
+    )
+
+
+def _get_requirements(P, root, registry, selected):
+    reqs = []
+    if P in root:
+        reqs.append(root[P])
+    for sel_pkg, sel_ver in selected.items():
+        if sel_pkg in registry and sel_ver in registry[sel_pkg]:
+            deps = registry[sel_pkg][sel_ver]
+            if P in deps:
+                reqs.append(deps[P])
+    return reqs
+
+
+def resolve(registry, root):
+    if not root:
+        return {"ok": True, "packages": {}}
+
+    # Pre-parse valid registry versions
+    valid_registry = {}
+    for pkg_name, versions in registry.items():
+        pkg_valid = []
+        for v_str, deps in versions.items():
+            parsed_v = parse_version(v_str)
+            if parsed_v is not None:
+                pkg_valid.append((parsed_v, v_str))
+        valid_registry[pkg_name] = pkg_valid
+
+    selected = {}          # pkg_name -> raw_v_str
+    selected_parsed = {}   # pkg_name -> Version
+
+    def dfs():
+        # Find all unresolved packages
+        pkgs_with_reqs = set(root.keys())
+        for sel_pkg, sel_ver in selected.items():
+            if sel_pkg in registry and sel_ver in registry[sel_pkg]:
+                pkgs_with_reqs.update(registry[sel_pkg][sel_ver].keys())
+
+        unresolved = [p for p in pkgs_with_reqs if p not in selected]
+        if not unresolved:
+            return dict(selected)
+
+        # 2. P = unresolved package whose name is smallest in code-point order
+        P = min(unresolved)
+
+        if P not in valid_registry:
+            return None
+
+        req_ranges = _get_requirements(P, root, registry, selected)
+        parsed_reqs = []
+        for r_str in req_ranges:
+            pr = parse_range(r_str)
+            if pr is None:
+                return None
+            parsed_reqs.append(pr)
+
+        candidates = []
+        for v_obj, raw_str in valid_registry[P]:
+            if all(satisfies_range(v_obj, pr) for pr in parsed_reqs):
+                candidates.append((v_obj, raw_str))
+
+        candidates.sort(key=lambda item: (item[0].prec_key, item[1]), reverse=True)
+
+        for v_obj, raw_str in candidates:
+            selected[P] = raw_str
+            selected_parsed[P] = v_obj
+
+            check_passed = True
+            for sel_pkg, sel_v_obj in selected_parsed.items():
+                pkg_reqs = _get_requirements(sel_pkg, root, registry, selected)
+                for r_str in pkg_reqs:
+                    pr = parse_range(r_str)
+                    if pr is None or not satisfies_range(sel_v_obj, pr):
+                        check_passed = False
+                        break
+                if not check_passed:
+                    break
+
+            if check_passed:
+                result = dfs()
+                if result is not None:
+                    return result
+
+            del selected[P]
+            del selected_parsed[P]
+
+        return None
+
+    solution = dfs()
+    if solution is not None:
+        return {"ok": True, "packages": solution}
+    else:
+        return {"ok": False, "packages": {}}

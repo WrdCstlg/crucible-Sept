@@ -1,0 +1,1283 @@
+{
+  "problem": "schema",
+  "sandbox": "docker",
+  "strict_pass": false,
+  "passed": 0,
+  "total": 177,
+  "public_pass": false,
+  "by_layer": {
+    "public": "0/4",
+    "hidden": "0/174",
+    "stress": "0/3"
+  },
+  "first_failure": "P1: import failed: AttributeError: module 'solution' has no attribute 'validate'",
+  "cases": [
+    {
+      "id": "P1",
+      "layer": "public",
+      "title": "object keywords, false schema for extra keys, code-point order",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "P2",
+      "layer": "public",
+      "title": "recursion through $ref, schema_path inside the target, $ref sibling",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "P3",
+      "layer": "public",
+      "title": "combinators report one error; if picks then",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "P4",
+      "layer": "public",
+      "title": "schema problems: cycle, unresolvable $ref, malformed value",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H01",
+      "layer": "hidden",
+      "title": "type names: bool is not a number, whole floats are integers",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H02",
+      "layer": "hidden",
+      "title": "enum and const use JSON equality",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H03",
+      "layer": "hidden",
+      "title": "uniqueItems uses JSON equality",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H04",
+      "layer": "hidden",
+      "title": "multipleOf is exact on the decimal that repr prints",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H05",
+      "layer": "hidden",
+      "title": "bounds: inclusive vs exclusive, exact big numbers, bools skipped",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H06",
+      "layer": "hidden",
+      "title": "string keywords: code points, unanchored pattern",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H07",
+      "layer": "hidden",
+      "title": "patternProperties: unanchored, several apply; additionalProperties false",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H08",
+      "layer": "hidden",
+      "title": "additionalProperties looks only at its own dict",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H09",
+      "layer": "hidden",
+      "title": "prefixItems, items after the prefix, maxItems",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H10",
+      "layer": "hidden",
+      "title": "array shorter than prefixItems; items without prefix",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H11",
+      "layer": "hidden",
+      "title": "required: one error at the object; ignored for non-objects",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H12",
+      "layer": "hidden",
+      "title": "a type failure stops only the other keywords of its own dict",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H13",
+      "layer": "hidden",
+      "title": "anyOf/oneOf/not: one error, members' errors hidden",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H14",
+      "layer": "hidden",
+      "title": "if/then/else: if's errors hidden; then/else need if",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H15",
+      "layer": "hidden",
+      "title": "if chooses per instance; recursion to the root",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H16",
+      "layer": "hidden",
+      "title": "$ref siblings evaluated; errors located in the target; duplicates removed",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H17",
+      "layer": "hidden",
+      "title": "root false schema",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H18",
+      "layer": "hidden",
+      "title": "boolean subschemas",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H19",
+      "layer": "hidden",
+      "title": "pointer escaping in paths, schema paths and $ref",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H20",
+      "layer": "hidden",
+      "title": "malformed keyword values; unknown keys ignored",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H21",
+      "layer": "hidden",
+      "title": "$ref resolution is an exact match on subschema locations",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H22",
+      "layer": "hidden",
+      "title": "cycles: every $ref whose target leads back to it in place",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H23",
+      "layer": "hidden",
+      "title": "a $ref to the root, at the root, is a cycle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H24",
+      "layer": "hidden",
+      "title": "unused cycles count; malformed values hide their contents",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H25",
+      "layer": "hidden",
+      "title": "sort by path in code-point order, then by schema_path",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H26",
+      "layer": "hidden",
+      "title": "array indices sort as strings",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H27",
+      "layer": "hidden",
+      "title": "big whole floats are integers; exact equality with big ints",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "H28",
+      "layer": "hidden",
+      "title": "patternProperties: empty matches count; pattern keys are escaped",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R001",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R002",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R003",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R004",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R005",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R006",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R007",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R008",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R009",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R010",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R011",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R012",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R013",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R014",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R015",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R016",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R017",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R018",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R019",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R020",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R021",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R022",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R023",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R024",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R025",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R026",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R027",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R028",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R029",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R030",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R031",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R032",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R033",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R034",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R035",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R036",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R037",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R038",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R039",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R040",
+      "layer": "hidden",
+      "title": "random property bundle",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R041",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R042",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R043",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R044",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R045",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R046",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R047",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R048",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R049",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R050",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R051",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R052",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R053",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R054",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R055",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R056",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R057",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R058",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R059",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R060",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R061",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R062",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R063",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R064",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R065",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R066",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R067",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R068",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R069",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R070",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R071",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R072",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R073",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R074",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R075",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R076",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R077",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R078",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R079",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R080",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R081",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R082",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R083",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R084",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R085",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R086",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R087",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R088",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R089",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R090",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R091",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R092",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R093",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R094",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R095",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R096",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R097",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R098",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R099",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R100",
+      "layer": "hidden",
+      "title": "random schema and instance",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R101",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R102",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R103",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R104",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R105",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R106",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R107",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R108",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R109",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R110",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R111",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R112",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R113",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R114",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R115",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R116",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R117",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R118",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R119",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R120",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R121",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R122",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R123",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R124",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R125",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R126",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R127",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R128",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R129",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R130",
+      "layer": "hidden",
+      "title": "random $ref graph",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R131",
+      "layer": "hidden",
+      "title": "JSON equality traps",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R132",
+      "layer": "hidden",
+      "title": "JSON equality traps",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R133",
+      "layer": "hidden",
+      "title": "JSON equality traps",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R134",
+      "layer": "hidden",
+      "title": "JSON equality traps",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R135",
+      "layer": "hidden",
+      "title": "JSON equality traps",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R136",
+      "layer": "hidden",
+      "title": "JSON equality traps",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R137",
+      "layer": "hidden",
+      "title": "JSON equality traps",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R138",
+      "layer": "hidden",
+      "title": "JSON equality traps",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R139",
+      "layer": "hidden",
+      "title": "JSON equality traps",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R140",
+      "layer": "hidden",
+      "title": "JSON equality traps",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R141",
+      "layer": "hidden",
+      "title": "JSON equality traps",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R142",
+      "layer": "hidden",
+      "title": "JSON equality traps",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R143",
+      "layer": "hidden",
+      "title": "JSON equality traps",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R144",
+      "layer": "hidden",
+      "title": "JSON equality traps",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R145",
+      "layer": "hidden",
+      "title": "JSON equality traps",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "R146",
+      "layer": "hidden",
+      "title": "JSON equality traps",
+      "pass": false,
+      "reason": "import failed: AttributeError: module 'solution' has no attribute 'validate'"
+    },
+    {
+      "id": "S1",
+      "layer": "stress",
+      "title": "instance 20 000 containers deep through a recursive $ref",
+      "pass": false,
+      "reason": "no result (process died or timed out)"
+    },
+    {
+      "id": "S2",
+      "layer": "stress",
+      "title": "uniqueItems over 50 000 mixed elements",
+      "pass": false,
+      "reason": "no result (process died or timed out)"
+    },
+    {
+      "id": "S3",
+      "layer": "stress",
+      "title": "18 000 $defs in one long in-place chain, cycles near its end",
+      "pass": false,
+      "reason": "no result (process died or timed out)"
+    }
+  ]
+}

@@ -1,0 +1,884 @@
+{
+  "problem": "orderbook",
+  "sandbox": "docker",
+  "strict_pass": true,
+  "passed": 120,
+  "total": 120,
+  "public_pass": true,
+  "by_layer": {
+    "public": "4/4",
+    "hidden": "117/117",
+    "stress": "3/3"
+  },
+  "first_failure": null,
+  "cases": [
+    {
+      "id": "P1",
+      "layer": "public",
+      "title": "price-time priority",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P2",
+      "layer": "public",
+      "title": "iceberg refresh to back",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P3",
+      "layer": "public",
+      "title": "STP, duplicate, malformed",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P4",
+      "layer": "public",
+      "title": "stop cascade",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H01",
+      "layer": "hidden",
+      "title": "non-ASCII digits are malformed",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H02",
+      "layer": "hidden",
+      "title": "spaces and leading zeros",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H03",
+      "layer": "hidden",
+      "title": "zero quantity is malformed",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H04",
+      "layer": "hidden",
+      "title": "iceberg display must be below qty",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H05",
+      "layer": "hidden",
+      "title": "FOK counts hidden, excludes own orders",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H06",
+      "layer": "hidden",
+      "title": "FOK fills past a self-trade cancel",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H07",
+      "layer": "hidden",
+      "title": "POST rejects even against own order",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H08",
+      "layer": "hidden",
+      "title": "amend down keeps priority",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H09",
+      "layer": "hidden",
+      "title": "amend up loses priority",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H10",
+      "layer": "hidden",
+      "title": "market with no liquidity",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H11",
+      "layer": "hidden",
+      "title": "IDs stay consumed after cancel",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H12",
+      "layer": "hidden",
+      "title": "stop triggers on acceptance",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H13",
+      "layer": "hidden",
+      "title": "earliest-line stop first; empty-book stop rejected",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H14",
+      "layer": "hidden",
+      "title": "market that only self-trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H15",
+      "layer": "hidden",
+      "title": "post-only amend that would cross",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H16",
+      "layer": "hidden",
+      "title": "crossing amend trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H17",
+      "layer": "hidden",
+      "title": "incoming iceberg uses full quantity",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H18",
+      "layer": "hidden",
+      "title": "amend down takes hidden first",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H19",
+      "layer": "hidden",
+      "title": "cancel a stop",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H20",
+      "layer": "hidden",
+      "title": "amend cannot touch a stop",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H21",
+      "layer": "hidden",
+      "title": "trailing comma is malformed",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H22",
+      "layer": "hidden",
+      "title": "IOC with nothing to hit",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H23",
+      "layer": "hidden",
+      "title": "one aggressor refreshes an iceberg twice",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H24",
+      "layer": "hidden",
+      "title": "stop waits for a first trade",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H25",
+      "layer": "hidden",
+      "title": "best bid first for an incoming sell",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H26",
+      "layer": "hidden",
+      "title": "lowercase side and flag are malformed",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H27",
+      "layer": "hidden",
+      "title": "same price, same total: no change",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R01",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R02",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R03",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R04",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R05",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R06",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R07",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R08",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R09",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R10",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R11",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R12",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R13",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R14",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R15",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R16",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R17",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R18",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R19",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R20",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R21",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R22",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R23",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R24",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R25",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R26",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R27",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R28",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R29",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R30",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R31",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R32",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R33",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R34",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R35",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R36",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R37",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R38",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R39",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R40",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R41",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R42",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R43",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R44",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R45",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R46",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R47",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R48",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R49",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R50",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R51",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R52",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R53",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R54",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R55",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R56",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R57",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R58",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R59",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R60",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R61",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R62",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R63",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R64",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R65",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R66",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R67",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R68",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R69",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R70",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R71",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R72",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R73",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R74",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R75",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R76",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R77",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R78",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R79",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R80",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R81",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R82",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R83",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R84",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R85",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R86",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R87",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R88",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R89",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R90",
+      "layer": "hidden",
+      "title": "random mixed session",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S1",
+      "layer": "stress",
+      "title": "200k mixed commands",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S2",
+      "layer": "stress",
+      "title": "deep book swept by market orders",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S3",
+      "layer": "stress",
+      "title": "icebergs, amends and stops",
+      "pass": true,
+      "reason": null
+    }
+  ]
+}

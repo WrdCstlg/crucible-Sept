@@ -1,0 +1,160 @@
+from itertools import combinations
+
+
+def _allocate(amount, idxs, prices):
+    """Allocate `amount` over the units in `idxs` (weights: their current prices).
+
+    Returns a list of shares aligned with `idxs`.
+    """
+    if not idxs:
+        return []
+    total_w = sum(prices[i] for i in idxs)
+    if total_w <= 0:
+        return [0] * len(idxs)
+    shares = []
+    rems = []
+    for i in idxs:
+        prod = amount * prices[i]
+        shares.append(prod // total_w)
+        rems.append(prod % total_w)
+    missing = amount - sum(shares)
+    if missing > 0:
+        order = sorted(range(len(idxs)), key=lambda k: (-rems[k], idxs[k]))
+        for k in order[:missing]:
+            shares[k] += 1
+    return shares
+
+
+def _apply_percent(promo, prices, claimed, cats):
+    category = promo["category"]
+    percent = promo["percent"]
+    min_qty = promo["min_qty"]
+    eligible = [i for i in range(len(prices)) if not claimed[i] and cats[i] == category]
+    if len(eligible) >= min_qty:
+        for i in eligible:
+            prices[i] -= (prices[i] * percent) // 100
+
+
+def _apply_bxgy(promo, prices, claimed, skus):
+    sku_set = set(promo["skus"])
+    x = promo["buy"]
+    y = promo["get"]
+    eligible = [i for i in range(len(prices)) if not claimed[i] and skus[i] in sku_set]
+    g = len(eligible) // (x + y)
+    if g <= 0:
+        return
+    eligible.sort(key=lambda i: (-prices[i], i))
+    chosen = eligible[: g * (x + y)]
+    for i in chosen:
+        claimed[i] = True
+    free_count = g * y
+    for i in chosen[len(chosen) - free_count:]:
+        prices[i] = 0
+
+
+def _apply_bundle(promo, prices, claimed, sku_units):
+    bundle_skus = promo["skus"]
+    bundle_price = promo["price"]
+    while True:
+        picked = []
+        for s in bundle_skus:
+            best = None
+            for i in sku_units.get(s, ()):
+                if claimed[i]:
+                    continue
+                if best is None or prices[i] > prices[best]:
+                    best = i
+            if best is None:
+                return
+            picked.append(best)
+        current_sum = sum(prices[i] for i in picked)
+        if current_sum <= bundle_price:
+            return
+        shares = _allocate(bundle_price, picked, prices)
+        for k, i in enumerate(picked):
+            claimed[i] = True
+            prices[i] = shares[k]
+
+
+def _apply_threshold(promo, prices):
+    s = sum(prices)
+    if s > 0 and s >= promo["min_subtotal"]:
+        d = min(promo["amount_off"], s)
+        idxs = list(range(len(prices)))
+        shares = _allocate(d, idxs, prices)
+        for k, i in enumerate(idxs):
+            prices[i] -= shares[k]
+
+
+def price_cart(catalog, cart, promotions):
+    # Expand units
+    unit_skus = []
+    unit_cats = []
+    unit_line = []
+    base_prices = []
+    for li, line in enumerate(cart):
+        sku = line["sku"]
+        info = catalog[sku]
+        for _ in range(line["qty"]):
+            unit_skus.append(sku)
+            unit_cats.append(info["category"])
+            unit_line.append(li)
+            base_prices.append(info["price"])
+    n_units = len(base_prices)
+
+    sku_units = {}
+    for i, s in enumerate(unit_skus):
+        sku_units.setdefault(s, []).append(i)
+
+    def run(selection):
+        ordered = sorted(selection, key=lambda p: (p["priority"], p["id"]))
+        prices = list(base_prices)
+        claimed = [False] * n_units
+        for p in ordered:
+            t = p["type"]
+            if t == "percent":
+                _apply_percent(p, prices, claimed, unit_cats)
+            elif t == "bxgy":
+                _apply_bxgy(p, prices, claimed, unit_skus)
+            elif t == "bundle":
+                _apply_bundle(p, prices, claimed, sku_units)
+            elif t == "threshold":
+                _apply_threshold(p, prices)
+        return prices, [p["id"] for p in ordered]
+
+    def valid(selection):
+        if len(selection) > 1:
+            for p in selection:
+                if p.get("exclusive", False):
+                    return False
+        seen = set()
+        for p in selection:
+            g = p.get("group")
+            if g is None:
+                continue
+            if g in seen:
+                return False
+            seen.add(g)
+        return True
+
+    best_key = None
+    best_prices = None
+    best_applied = None
+    promos = list(promotions)
+    for r in range(len(promos) + 1):
+        for combo in combinations(promos, r):
+            if not valid(combo):
+                continue
+            prices, applied = run(combo)
+            total = sum(prices)
+            key = (total, len(combo), sorted(p["id"] for p in combo))
+            if best_key is None or key < best_key:
+                best_key = key
+                best_prices = prices
+                best_applied = applied
+
+    lines = [0] * len(cart)
+    for i in range(n_units):
+        lines[unit_line[i]] += best_prices[i]
+    total = sum(best_prices)
+    return {"lines": lines, "applied": best_applied, "total": total}

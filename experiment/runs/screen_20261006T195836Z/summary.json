@@ -1,0 +1,774 @@
+{
+  "config": {
+    "started_utc": "2026-10-06T19:58:36.309097+00:00",
+    "mock": false,
+    "problems": [
+      "orderbook",
+      "semver",
+      "sheet",
+      "promo",
+      "payroll"
+    ],
+    "runs_per_problem": {
+      "A": 4,
+      "C": 2
+    },
+    "cap_usd": 20.0,
+    "worst_case_per_run": {
+      "A": 0.2908,
+      "C": 1.36
+    },
+    "roles_file": "roles_study.json",
+    "roles_sha256": "c709344779d2c3df22cafe1840d6808ede39f7e804e72095b14575cd860d69d7",
+    "sandbox": {
+      "backend": "docker",
+      "image": "python:3.12-slim@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d",
+      "network": "none",
+      "rootfs": "read-only",
+      "code_mount": "read-only",
+      "tmpfs_mb": 64,
+      "user": "65534:65534",
+      "capabilities": "all dropped",
+      "no_new_privileges": true,
+      "memory_mb": 1024,
+      "cpus": 1.0,
+      "pids_limit": 128,
+      "env": "allowlist only"
+    },
+    "keep_rule": {
+      "a_max_pass_rate": 0.25,
+      "c_min_passes": 1
+    },
+    "screen_cases_sha256": {
+      "orderbook": "e24f06b810d9ca664fdb4f48d969a50e509b05286a55d3bffe8f323c1bb547ab",
+      "semver": "14078e8753808011153d83b46cdc3c2297e7e1b667744857f9716f47337cf0be",
+      "sheet": "9b66a908c5bf72f67358602bc001dced08f9ae8e49bec6341dde184365802a80",
+      "promo": "fb324d7ac7b8b1dc90ce31d93e53b0b9c68d1e2051ffb7fb11b47a3111f1b475",
+      "payroll": "bd412cbc302523cf0e9b16b4d4288950cde6a47bb1723fca32d536f049f6ae5b"
+    },
+    "spec_sha256": {
+      "orderbook": "ebb13e95b03f235b93c7b4b902bd0939d7828404333a76715d76048af04f436a",
+      "semver": "c6068f278eb16dcd3da198d82d06307dc7fd257f02cb9ab30afe98f0831a29d0",
+      "sheet": "cd56618e0db5e701045be139051ad3b7ab86347dc283e6364e2fedde5febdbad",
+      "promo": "318e7db30a4454855f9994e96ed6adc5938878825a0e198b1310a9a2dd3606e2",
+      "payroll": "e7255f4729bed15f2cd8e43b8d2250d63662d6d21cc7554d12da0caf5d51627c"
+    }
+  },
+  "spent_usd": 8.3832,
+  "budget_halted": null,
+  "not_run": [],
+  "problems": {
+    "orderbook": {
+      "arms": {
+        "A": {
+          "runs": 4,
+          "valid": 4,
+          "harness_errors": 0,
+          "strict_passes": 3,
+          "mean_case_fraction": 0.75,
+          "cost_usd": 0.4747
+        },
+        "C": {
+          "runs": 2,
+          "valid": 2,
+          "harness_errors": 0,
+          "strict_passes": 2,
+          "mean_case_fraction": 1.0,
+          "cost_usd": 1.2869
+        }
+      },
+      "keep_candidate": false,
+      "why": "cheap model passed 3/4 (> 25%)"
+    },
+    "semver": {
+      "arms": {
+        "A": {
+          "runs": 4,
+          "valid": 4,
+          "harness_errors": 0,
+          "strict_passes": 0,
+          "mean_case_fraction": 0.48,
+          "cost_usd": 0.3853
+        },
+        "C": {
+          "runs": 2,
+          "valid": 2,
+          "harness_errors": 0,
+          "strict_passes": 2,
+          "mean_case_fraction": 1.0,
+          "cost_usd": 0.6781
+        }
+      },
+      "keep_candidate": true,
+      "why": "cheap model usually fails and the strong model can solve it"
+    },
+    "sheet": {
+      "arms": {
+        "A": {
+          "runs": 4,
+          "valid": 4,
+          "harness_errors": 0,
+          "strict_passes": 0,
+          "mean_case_fraction": 0.492,
+          "cost_usd": 0.4331
+        },
+        "C": {
+          "runs": 2,
+          "valid": 2,
+          "harness_errors": 0,
+          "strict_passes": 1,
+          "mean_case_fraction": 0.5,
+          "cost_usd": 2.3559
+        }
+      },
+      "keep_candidate": true,
+      "why": "cheap model usually fails and the strong model can solve it"
+    },
+    "promo": {
+      "arms": {
+        "A": {
+          "runs": 4,
+          "valid": 4,
+          "harness_errors": 0,
+          "strict_passes": 4,
+          "mean_case_fraction": 1.0,
+          "cost_usd": 0.4831
+        },
+        "C": {
+          "runs": 2,
+          "valid": 2,
+          "harness_errors": 0,
+          "strict_passes": 2,
+          "mean_case_fraction": 1.0,
+          "cost_usd": 0.1817
+        }
+      },
+      "keep_candidate": false,
+      "why": "cheap model passed 4/4 (> 25%)"
+    },
+    "payroll": {
+      "arms": {
+        "A": {
+          "runs": 4,
+          "valid": 4,
+          "harness_errors": 0,
+          "strict_passes": 4,
+          "mean_case_fraction": 1.0,
+          "cost_usd": 0.4636
+        },
+        "C": {
+          "runs": 2,
+          "valid": 2,
+          "harness_errors": 0,
+          "strict_passes": 2,
+          "mean_case_fraction": 1.0,
+          "cost_usd": 0.1868
+        }
+      },
+      "keep_candidate": false,
+      "why": "cheap model passed 4/4 (> 25%)"
+    }
+  },
+  "runs": [
+    {
+      "problem": "orderbook",
+      "run": "A1",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.15506,
+      "seconds": 305.6,
+      "input_tokens": 2946,
+      "strict_pass": true,
+      "cases_passed": 120,
+      "cases_total": 120,
+      "by_layer": {
+        "public": "4/4",
+        "hidden": "117/117",
+        "stress": "3/3"
+      },
+      "first_failure": null
+    },
+    {
+      "problem": "orderbook",
+      "run": "A2",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.15513,
+      "seconds": 277.7,
+      "input_tokens": 2946,
+      "strict_pass": true,
+      "cases_passed": 120,
+      "cases_total": 120,
+      "by_layer": {
+        "public": "4/4",
+        "hidden": "117/117",
+        "stress": "3/3"
+      },
+      "first_failure": null
+    },
+    {
+      "problem": "orderbook",
+      "run": "A3",
+      "arm": "A",
+      "status": "timeout",
+      "error": "no meta",
+      "harness_error": false,
+      "spec_seen": null,
+      "cost_usd": null,
+      "seconds": 2700.1,
+      "input_tokens": null,
+      "strict_pass": false,
+      "cases_passed": 0,
+      "cases_total": null,
+      "by_layer": null,
+      "first_failure": null
+    },
+    {
+      "problem": "orderbook",
+      "run": "A4",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.16446,
+      "seconds": 326.2,
+      "input_tokens": 2946,
+      "strict_pass": true,
+      "cases_passed": 120,
+      "cases_total": 120,
+      "by_layer": {
+        "public": "4/4",
+        "hidden": "117/117",
+        "stress": "3/3"
+      },
+      "first_failure": null
+    },
+    {
+      "problem": "orderbook",
+      "run": "C1",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.61692,
+      "seconds": 261.0,
+      "input_tokens": 3956,
+      "strict_pass": true,
+      "cases_passed": 120,
+      "cases_total": 120,
+      "by_layer": {
+        "public": "4/4",
+        "hidden": "117/117",
+        "stress": "3/3"
+      },
+      "first_failure": null
+    },
+    {
+      "problem": "orderbook",
+      "run": "C2",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.66998,
+      "seconds": 279.8,
+      "input_tokens": 3956,
+      "strict_pass": true,
+      "cases_passed": 120,
+      "cases_total": 120,
+      "by_layer": {
+        "public": "4/4",
+        "hidden": "117/117",
+        "stress": "3/3"
+      },
+      "first_failure": null
+    },
+    {
+      "problem": "payroll",
+      "run": "A1",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.13317,
+      "seconds": 209.4,
+      "input_tokens": 2134,
+      "strict_pass": true,
+      "cases_passed": 118,
+      "cases_total": 118,
+      "by_layer": {
+        "public": "4/4",
+        "hidden": "118/118"
+      },
+      "first_failure": null
+    },
+    {
+      "problem": "payroll",
+      "run": "A2",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.11245,
+      "seconds": 197.8,
+      "input_tokens": 2134,
+      "strict_pass": true,
+      "cases_passed": 118,
+      "cases_total": 118,
+      "by_layer": {
+        "public": "4/4",
+        "hidden": "118/118"
+      },
+      "first_failure": null
+    },
+    {
+      "problem": "payroll",
+      "run": "A3",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.11439,
+      "seconds": 207.1,
+      "input_tokens": 2134,
+      "strict_pass": true,
+      "cases_passed": 118,
+      "cases_total": 118,
+      "by_layer": {
+        "public": "4/4",
+        "hidden": "118/118"
+      },
+      "first_failure": null
+    },
+    {
+      "problem": "payroll",
+      "run": "A4",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.10355,
+      "seconds": 207.6,
+      "input_tokens": 2134,
+      "strict_pass": true,
+      "cases_passed": 118,
+      "cases_total": 118,
+      "by_layer": {
+        "public": "4/4",
+        "hidden": "118/118"
+      },
+      "first_failure": null
+    },
+    {
+      "problem": "payroll",
+      "run": "C1",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.0898,
+      "seconds": 34.9,
+      "input_tokens": 2486,
+      "strict_pass": true,
+      "cases_passed": 118,
+      "cases_total": 118,
+      "by_layer": {
+        "public": "4/4",
+        "hidden": "118/118"
+      },
+      "first_failure": null
+    },
+    {
+      "problem": "payroll",
+      "run": "C2",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.09698,
+      "seconds": 37.2,
+      "input_tokens": 2486,
+      "strict_pass": true,
+      "cases_passed": 118,
+      "cases_total": 118,
+      "by_layer": {
+        "public": "4/4",
+        "hidden": "118/118"
+      },
+      "first_failure": null
+    },
+    {
+      "problem": "promo",
+      "run": "A1",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.12127,
+      "seconds": 234.4,
+      "input_tokens": 1911,
+      "strict_pass": true,
+      "cases_passed": 123,
+      "cases_total": 123,
+      "by_layer": {
+        "public": "4/4",
+        "hidden": "120/120",
+        "stress": "3/3"
+      },
+      "first_failure": null
+    },
+    {
+      "problem": "promo",
+      "run": "A2",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.12672,
+      "seconds": 221.0,
+      "input_tokens": 1911,
+      "strict_pass": true,
+      "cases_passed": 123,
+      "cases_total": 123,
+      "by_layer": {
+        "public": "4/4",
+        "hidden": "120/120",
+        "stress": "3/3"
+      },
+      "first_failure": null
+    },
+    {
+      "problem": "promo",
+      "run": "A3",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.11947,
+      "seconds": 228.1,
+      "input_tokens": 1911,
+      "strict_pass": true,
+      "cases_passed": 123,
+      "cases_total": 123,
+      "by_layer": {
+        "public": "4/4",
+        "hidden": "120/120",
+        "stress": "3/3"
+      },
+      "first_failure": null
+    },
+    {
+      "problem": "promo",
+      "run": "A4",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.11564,
+      "seconds": 229.2,
+      "input_tokens": 1911,
+      "strict_pass": true,
+      "cases_passed": 123,
+      "cases_total": 123,
+      "by_layer": {
+        "public": "4/4",
+        "hidden": "120/120",
+        "stress": "3/3"
+      },
+      "first_failure": null
+    },
+    {
+      "problem": "promo",
+      "run": "C1",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.09312,
+      "seconds": 36.1,
+      "input_tokens": 2484,
+      "strict_pass": true,
+      "cases_passed": 123,
+      "cases_total": 123,
+      "by_layer": {
+        "public": "4/4",
+        "hidden": "120/120",
+        "stress": "3/3"
+      },
+      "first_failure": null
+    },
+    {
+      "problem": "promo",
+      "run": "C2",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.08862,
+      "seconds": 34.7,
+      "input_tokens": 2484,
+      "strict_pass": true,
+      "cases_passed": 123,
+      "cases_total": 123,
+      "by_layer": {
+        "public": "4/4",
+        "hidden": "120/120",
+        "stress": "3/3"
+      },
+      "first_failure": null
+    },
+    {
+      "problem": "semver",
+      "run": "A1",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.18824,
+      "seconds": 358.3,
+      "input_tokens": 2413,
+      "strict_pass": false,
+      "cases_passed": 166,
+      "cases_total": 173,
+      "by_layer": {
+        "public": "5/5",
+        "hidden": "166/173"
+      },
+      "first_failure": "RP03: result.ok: expected true, got false"
+    },
+    {
+      "problem": "semver",
+      "run": "A2",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.19702,
+      "seconds": 339.4,
+      "input_tokens": 2413,
+      "strict_pass": false,
+      "cases_passed": 166,
+      "cases_total": 173,
+      "by_layer": {
+        "public": "5/5",
+        "hidden": "166/173"
+      },
+      "first_failure": "RP03: result.ok: expected true, got false"
+    },
+    {
+      "problem": "semver",
+      "run": "A3",
+      "arm": "A",
+      "status": "timeout",
+      "error": "no meta",
+      "harness_error": false,
+      "spec_seen": null,
+      "cost_usd": null,
+      "seconds": 2700.1,
+      "input_tokens": null,
+      "strict_pass": false,
+      "cases_passed": 0,
+      "cases_total": null,
+      "by_layer": null,
+      "first_failure": null
+    },
+    {
+      "problem": "semver",
+      "run": "A4",
+      "arm": "A",
+      "status": "timeout",
+      "error": "no meta",
+      "harness_error": false,
+      "spec_seen": null,
+      "cost_usd": null,
+      "seconds": 2700.1,
+      "input_tokens": null,
+      "strict_pass": false,
+      "cases_passed": 0,
+      "cases_total": null,
+      "by_layer": null,
+      "first_failure": null
+    },
+    {
+      "problem": "semver",
+      "run": "C1",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.35087,
+      "seconds": 147.3,
+      "input_tokens": 3243,
+      "strict_pass": true,
+      "cases_passed": 173,
+      "cases_total": 173,
+      "by_layer": {
+        "public": "5/5",
+        "hidden": "173/173"
+      },
+      "first_failure": null
+    },
+    {
+      "problem": "semver",
+      "run": "C2",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.32727,
+      "seconds": 137.1,
+      "input_tokens": 3243,
+      "strict_pass": true,
+      "cases_passed": 173,
+      "cases_total": 173,
+      "by_layer": {
+        "public": "5/5",
+        "hidden": "173/173"
+      },
+      "first_failure": null
+    },
+    {
+      "problem": "sheet",
+      "run": "A1",
+      "arm": "A",
+      "status": "timeout",
+      "error": "no meta",
+      "harness_error": false,
+      "spec_seen": null,
+      "cost_usd": null,
+      "seconds": 2700.1,
+      "input_tokens": null,
+      "strict_pass": false,
+      "cases_passed": 0,
+      "cases_total": null,
+      "by_layer": null,
+      "first_failure": null
+    },
+    {
+      "problem": "sheet",
+      "run": "A2",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.22578,
+      "seconds": 423.0,
+      "input_tokens": 3049,
+      "strict_pass": false,
+      "cases_passed": 125,
+      "cases_total": 127,
+      "by_layer": {
+        "public": "4/4",
+        "hidden": "123/124",
+        "stress": "2/3"
+      },
+      "first_failure": "H11: result.A6: expected dict {\"error\": \"#VALUE!\"}, got int 0"
+    },
+    {
+      "problem": "sheet",
+      "run": "A3",
+      "arm": "A",
+      "status": "timeout",
+      "error": "no meta",
+      "harness_error": false,
+      "spec_seen": null,
+      "cost_usd": null,
+      "seconds": 2700.1,
+      "input_tokens": null,
+      "strict_pass": false,
+      "cases_passed": 0,
+      "cases_total": null,
+      "by_layer": null,
+      "first_failure": null
+    },
+    {
+      "problem": "sheet",
+      "run": "A4",
+      "arm": "A",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 0.20734,
+      "seconds": 383.0,
+      "input_tokens": 3049,
+      "strict_pass": false,
+      "cases_passed": 125,
+      "cases_total": 127,
+      "by_layer": {
+        "public": "4/4",
+        "hidden": "123/124",
+        "stress": "2/3"
+      },
+      "first_failure": "H11: result.A6: expected dict {\"error\": \"#VALUE!\"}, got int 0"
+    },
+    {
+      "problem": "sheet",
+      "run": "C1",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 1.29764,
+      "seconds": 571.7,
+      "input_tokens": 4410,
+      "strict_pass": false,
+      "cases_passed": 0,
+      "cases_total": 127,
+      "by_layer": {
+        "public": "0/4",
+        "hidden": "0/124",
+        "stress": "0/3"
+      },
+      "first_failure": "P1: import failed: AttributeError: module 'solution' has no attribute 'evaluate'"
+    },
+    {
+      "problem": "sheet",
+      "run": "C2",
+      "arm": "C",
+      "status": "done",
+      "error": null,
+      "harness_error": false,
+      "spec_seen": "SPEC.md",
+      "cost_usd": 1.05828,
+      "seconds": 455.9,
+      "input_tokens": 4410,
+      "strict_pass": true,
+      "cases_passed": 127,
+      "cases_total": 127,
+      "by_layer": {
+        "public": "4/4",
+        "hidden": "124/124",
+        "stress": "3/3"
+      },
+      "first_failure": null
+    }
+  ]
+}

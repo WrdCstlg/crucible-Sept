@@ -1,0 +1,488 @@
+import collections
+import datetime
+
+_DIGITS = set("0123456789")
+
+
+def _parse_date(s):
+    if not isinstance(s, str) or len(s) != 10:
+        return None
+    if s[4] != "-" or s[7] != "-":
+        return None
+    for idx in (0, 1, 2, 3, 5, 6, 8, 9):
+        if s[idx] not in _DIGITS:
+            return None
+    y = int(s[:4])
+    m = int(s[5:7])
+    d = int(s[8:10])
+    if not (1 <= y <= 9999 and 1 <= m <= 12 and 1 <= d <= 31):
+        return None
+    try:
+        return datetime.date(y, m, d)
+    except ValueError:
+        return None
+
+
+def _parse_timestamp(s):
+    if not isinstance(s, str) or len(s) != 16:
+        return None
+    if s[10] != " " or s[13] != ":":
+        return None
+    for idx in (11, 12, 14, 15):
+        if s[idx] not in _DIGITS:
+            return None
+    d = _parse_date(s[:10])
+    if d is None:
+        return None
+    hh = int(s[11:13])
+    mm = int(s[14:16])
+    if not (0 <= hh <= 23 and 0 <= mm <= 59):
+        return None
+    return datetime.datetime(d.year, d.month, d.day, hh, mm)
+
+
+def _dt_to_minutes(dt):
+    return dt.toordinal() * 1440 + dt.hour * 60 + dt.minute
+
+
+class _Staff:
+    __slots__ = (
+        "idx",
+        "id",
+        "skills",
+        "max_minutes_week",
+        "unavailable",
+        "senior",
+    )
+
+    def __init__(self, idx, id_str, skills, max_minutes_week, unavailable, senior):
+        self.idx = idx
+        self.id = id_str
+        self.skills = skills
+        self.max_minutes_week = max_minutes_week
+        self.unavailable = unavailable
+        self.senior = senior
+
+
+class _Shift:
+    __slots__ = (
+        "idx",
+        "id",
+        "start_min",
+        "end_min",
+        "length",
+        "week",
+        "d1",
+        "has_d2",
+        "d2",
+        "skill",
+        "need",
+        "needs_senior",
+    )
+
+    def __init__(
+        self,
+        idx,
+        id_str,
+        start_min,
+        end_min,
+        length,
+        week,
+        d1,
+        has_d2,
+        d2,
+        skill,
+        need,
+        needs_senior,
+    ):
+        self.idx = idx
+        self.id = id_str
+        self.start_min = start_min
+        self.end_min = end_min
+        self.length = length
+        self.week = week
+        self.d1 = d1
+        self.has_d2 = has_d2
+        self.d2 = d2
+        self.skill = skill
+        self.need = need
+        self.needs_senior = needs_senior
+
+
+def make_roster(staff, shifts, rules):
+    # 1. Validation of staff records
+    ignored_staff = []
+    valid_staff_pass1 = []
+
+    for idx, rec in enumerate(staff):
+        if not isinstance(rec, dict):
+            ignored_staff.append(idx)
+            continue
+        if not all(
+            k in rec
+            for k in ("id", "skills", "max_minutes_week", "unavailable", "senior")
+        ):
+            ignored_staff.append(idx)
+            continue
+        s_id = rec["id"]
+        if not isinstance(s_id, str) or len(s_id) == 0:
+            ignored_staff.append(idx)
+            continue
+        skills = rec["skills"]
+        if not isinstance(skills, list) or any(
+            not isinstance(sk, str) for sk in skills
+        ):
+            ignored_staff.append(idx)
+            continue
+        mmw = rec["max_minutes_week"]
+        if not (isinstance(mmw, int) and not isinstance(mmw, bool) and mmw >= 0):
+            ignored_staff.append(idx)
+            continue
+        unavail = rec["unavailable"]
+        if not isinstance(unavail, list):
+            ignored_staff.append(idx)
+            continue
+        unavail_dates = set()
+        unavail_bad = False
+        for d_str in unavail:
+            parsed_d = _parse_date(d_str)
+            if parsed_d is None:
+                unavail_bad = True
+                break
+            unavail_dates.add(parsed_d.toordinal())
+        if unavail_bad:
+            ignored_staff.append(idx)
+            continue
+        senior = rec["senior"]
+        if not isinstance(senior, bool):
+            ignored_staff.append(idx)
+            continue
+
+        valid_staff_pass1.append(
+            (idx, s_id, set(skills), mmw, unavail_dates, senior)
+        )
+
+    staff_id_counts = collections.Counter(item[1] for item in valid_staff_pass1)
+    valid_staff_list = []
+    for item in valid_staff_pass1:
+        if staff_id_counts[item[1]] > 1:
+            ignored_staff.append(item[0])
+        else:
+            valid_staff_list.append(item)
+    ignored_staff.sort()
+
+    # 2. Validation of shift records
+    ignored_shifts = []
+    valid_shifts_pass1 = []
+
+    for idx, rec in enumerate(shifts):
+        if not isinstance(rec, dict):
+            ignored_shifts.append(idx)
+            continue
+        if not all(
+            k in rec
+            for k in ("id", "start", "end", "skill", "need", "needs_senior")
+        ):
+            ignored_shifts.append(idx)
+            continue
+        sh_id = rec["id"]
+        if not isinstance(sh_id, str) or len(sh_id) == 0:
+            ignored_shifts.append(idx)
+            continue
+        st_dt = _parse_timestamp(rec["start"])
+        en_dt = _parse_timestamp(rec["end"])
+        if st_dt is None or en_dt is None:
+            ignored_shifts.append(idx)
+            continue
+        st_min = _dt_to_minutes(st_dt)
+        en_min = _dt_to_minutes(en_dt)
+        sh_len = en_min - st_min
+        if sh_len <= 0 or sh_len > 1440:
+            ignored_shifts.append(idx)
+            continue
+        skill = rec["skill"]
+        if not isinstance(skill, str):
+            ignored_shifts.append(idx)
+            continue
+        need = rec["need"]
+        if not (isinstance(need, int) and not isinstance(need, bool) and need >= 1):
+            ignored_shifts.append(idx)
+            continue
+        needs_senior = rec["needs_senior"]
+        if not isinstance(needs_senior, bool):
+            ignored_shifts.append(idx)
+            continue
+
+        # Week and dates shift is on
+        st_date = st_dt.date()
+        week_ordinal = (
+            st_date - datetime.timedelta(days=st_date.weekday())
+        ).toordinal()
+
+        d1 = st_date.toordinal()
+        en_date = en_dt.date()
+        if en_dt.hour == 0 and en_dt.minute == 0:
+            has_d2 = False
+            d2 = None
+        elif en_date == st_date:
+            has_d2 = False
+            d2 = None
+        else:
+            has_d2 = True
+            d2 = en_date.toordinal()
+
+        valid_shifts_pass1.append(
+            (
+                idx,
+                sh_id,
+                st_min,
+                en_min,
+                sh_len,
+                week_ordinal,
+                d1,
+                has_d2,
+                d2,
+                skill,
+                need,
+                needs_senior,
+            )
+        )
+
+    shift_id_counts = collections.Counter(item[1] for item in valid_shifts_pass1)
+    valid_shifts_list = []
+    for item in valid_shifts_pass1:
+        if shift_id_counts[item[1]] > 1:
+            ignored_shifts.append(item[0])
+        else:
+            valid_shifts_list.append(item)
+    ignored_shifts.sort()
+
+    # Build staff objects
+    staff_objs = []
+    staff_by_id = {}
+    for idx_in_valid, item in enumerate(valid_staff_list):
+        s_obj = _Staff(
+            idx_in_valid, item[1], item[2], item[3], item[4], item[5]
+        )
+        staff_objs.append(s_obj)
+        staff_by_id[s_obj.id] = s_obj
+
+    # Build shift objects
+    shift_objs = []
+    for idx_in_valid, item in enumerate(valid_shifts_list):
+        sh_obj = _Shift(
+            idx_in_valid,
+            item[1],
+            item[2],
+            item[3],
+            item[4],
+            item[5],
+            item[6],
+            item[7],
+            item[8],
+            item[9],
+            item[10],
+            item[11],
+        )
+        shift_objs.append(sh_obj)
+
+    # Base output structure
+    output_ignored = {"staff": ignored_staff, "shifts": ignored_shifts}
+    base_minutes = {s.id: 0 for s in staff_objs}
+
+    if not shift_objs:
+        return {
+            "ok": True,
+            "assignments": {},
+            "minutes": base_minutes,
+            "ignored": output_ignored,
+        }
+
+    # Sort shifts by (start time, end time, id)
+    shift_objs.sort(key=lambda s: (s.start_min, s.end_min, s.id))
+    for idx, sh in enumerate(shift_objs):
+        sh.idx = idx
+
+    # Build slots
+    slots = []
+    for sh in shift_objs:
+        for seat in range(sh.need):
+            slots.append((sh, seat))
+
+    num_slots = len(slots)
+    num_staff = len(staff_objs)
+
+    # Rules
+    min_rest = rules["min_rest_minutes"]
+    max_consec = rules["max_consecutive_days"]
+    forbidden_with = collections.defaultdict(set)
+    for pair in rules["forbidden_pairs"]:
+        if (
+            len(pair) == 2
+            and pair[0] in staff_by_id
+            and pair[1] in staff_by_id
+            and pair[0] != pair[1]
+        ):
+            forbidden_with[pair[0]].add(pair[1])
+            forbidden_with[pair[1]].add(pair[0])
+
+    staff_with_skill = collections.defaultdict(list)
+    for s in staff_objs:
+        for sk in s.skills:
+            staff_with_skill[sk].append(s)
+    for sk in staff_with_skill:
+        staff_with_skill[sk].sort(key=lambda s: s.id)
+
+    # Search tracking state
+    num_shifts = len(shift_objs)
+    assignments = [[] for _ in range(num_shifts)]
+
+    p_weekly_minutes = [collections.defaultdict(int) for _ in range(num_staff)]
+    p_last_end = [-1] * num_staff
+    p_last_date = [None] * num_staff
+    p_consecutive = [0] * num_staff
+    p_total_minutes = [0] * num_staff
+
+    # Stack structures for DFS
+    slot_cands = [None] * num_slots
+    slot_cand_ptr = [0] * num_slots
+    undo_info = [None] * num_slots
+    cands_for_shift = [None] * num_shifts
+
+    slot_idx = 0
+    while slot_idx < num_slots:
+        sh, seat = slots[slot_idx]
+        sh_idx = sh.idx
+
+        if slot_cands[slot_idx] is None:
+            if seat == 0:
+                week = sh.week
+                cands = sorted(
+                    staff_with_skill[sh.skill],
+                    key=lambda p: (p_weekly_minutes[p.idx][week], p.id),
+                )
+                cands_for_shift[sh_idx] = cands
+                slot_cands[slot_idx] = cands
+            else:
+                prev_id = assignments[sh_idx][seat - 1].id
+                slot_cands[slot_idx] = [
+                    p for p in cands_for_shift[sh_idx] if p.id > prev_id
+                ]
+            slot_cand_ptr[slot_idx] = 0
+
+        cands = slot_cands[slot_idx]
+        ptr = slot_cand_ptr[slot_idx]
+        placed = False
+
+        sh_d1 = sh.d1
+        sh_has_d2 = sh.has_d2
+        sh_d2 = sh.d2
+        sh_start_min = sh.start_min
+        sh_end_min = sh.end_min
+        sh_len = sh.length
+        sh_week = sh.week
+        sh_needs_senior = sh.needs_senior
+        is_last_seat = seat == (sh.need - 1)
+        curr_assigned = assignments[sh_idx]
+
+        while ptr < len(cands):
+            p = cands[ptr]
+            ptr += 1
+            p_idx = p.idx
+
+            # 1. Availability
+            if sh_d1 in p.unavailable or (sh_has_d2 and sh_d2 in p.unavailable):
+                continue
+
+            # 2. Overlap & Rest
+            last_end = p_last_end[p_idx]
+            if last_end != -1 and (sh_start_min - last_end) < min_rest:
+                continue
+
+            # 3. Weekly cap
+            if (p_weekly_minutes[p_idx][sh_week] + sh_len) > p.max_minutes_week:
+                continue
+
+            # 4. Forbidden pairs
+            if any(p.id in forbidden_with[a.id] for a in curr_assigned):
+                continue
+
+            # 5. Consecutive days
+            run = p_consecutive[p_idx]
+            last_d = p_last_date[p_idx]
+            if last_d is None:
+                r1 = 1
+            elif sh_d1 == last_d:
+                r1 = run
+            elif sh_d1 == last_d + 1:
+                r1 = run + 1
+                if r1 > max_consec:
+                    continue
+            else:
+                r1 = 1
+
+            if sh_has_d2:
+                r2 = r1 + 1
+                if r2 > max_consec:
+                    continue
+                next_run = r2
+                next_date = sh_d2
+            else:
+                next_run = r1
+                next_date = sh_d1
+
+            # 6. Senior
+            if sh_needs_senior and is_last_seat:
+                if not p.senior and not any(a.senior for a in curr_assigned):
+                    continue
+
+            # Candidate is acceptable
+            undo_info[slot_idx] = (p, last_end, last_d, run)
+            curr_assigned.append(p)
+            p_last_end[p_idx] = sh_end_min
+            p_last_date[p_idx] = next_date
+            p_consecutive[p_idx] = next_run
+            p_weekly_minutes[p_idx][sh_week] += sh_len
+            p_total_minutes[p_idx] += sh_len
+
+            slot_cand_ptr[slot_idx] = ptr
+            placed = True
+            break
+
+        if placed:
+            slot_idx += 1
+        else:
+            # Backtrack
+            slot_cands[slot_idx] = None
+            slot_idx -= 1
+            if slot_idx < 0:
+                break
+            sh_prev, _ = slots[slot_idx]
+            p, old_end, old_date, old_run = undo_info[slot_idx]
+            p_idx = p.idx
+            assignments[sh_prev.idx].pop()
+            p_last_end[p_idx] = old_end
+            p_last_date[p_idx] = old_date
+            p_consecutive[p_idx] = old_run
+            p_weekly_minutes[p_idx][sh_prev.week] -= sh_prev.length
+            p_total_minutes[p_idx] -= sh_prev.length
+
+    if slot_idx < 0:
+        return {
+            "ok": False,
+            "assignments": {},
+            "minutes": base_minutes,
+            "ignored": output_ignored,
+        }
+
+    final_assignments = {
+        sh.id: [p.id for p in assignments[sh.idx]] for sh in shift_objs
+    }
+    final_minutes = {s.id: p_total_minutes[s.idx] for s in staff_objs}
+
+    return {
+        "ok": True,
+        "assignments": final_assignments,
+        "minutes": final_minutes,
+        "ignored": output_ignored,
+    }

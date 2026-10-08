@@ -1,0 +1,954 @@
+{
+  "problem": "washsale",
+  "sandbox": "docker",
+  "strict_pass": true,
+  "passed": 130,
+  "total": 130,
+  "public_pass": true,
+  "by_layer": {
+    "public": "4/4",
+    "hidden": "127/127",
+    "stress": "3/3"
+  },
+  "first_failure": null,
+  "cases": [
+    {
+      "id": "P1",
+      "layer": "public",
+      "title": "a repurchase after the loss replaces part of it",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P2",
+      "layer": "public",
+      "title": "earlier purchases of an identical symbol count; two loss rows",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P3",
+      "layer": "public",
+      "title": "a chain; carried days make the replacement long-term",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P4",
+      "layer": "public",
+      "title": "unsorted input; invalid trades and an oversized sale are rejected",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H01",
+      "layer": "hidden",
+      "title": "window: a purchase exactly 30 days after the sale counts, 31 days does not",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H02",
+      "layer": "hidden",
+      "title": "window: an earlier purchase exactly 30 days before the sale counts, 31 days does not",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H03",
+      "layer": "hidden",
+      "title": "the unsold remainder of a lot the loss sale draws from is never a replacement",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H04",
+      "layer": "hidden",
+      "title": "identical lists merge transitively; symbols are case-sensitive",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H05",
+      "layer": "hidden",
+      "title": "loss is per row: a gain row beside a loss row uses no replacement shares",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H06",
+      "layer": "hidden",
+      "title": "disallowed is L * r // n, rounded down",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H07",
+      "layer": "hidden",
+      "title": "D is spread over the chunks by the running floor rule",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H08",
+      "layer": "hidden",
+      "title": "proceeds are spread over rows by the running floor rule",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H09",
+      "layer": "hidden",
+      "title": "term: sold on the first anniversary is short, the day after is long",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H10",
+      "layer": "hidden",
+      "title": "February 29 acquisition: the anniversary is March 1",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H11",
+      "layer": "hidden",
+      "title": "more than one year is not more than 365 days",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H12",
+      "layer": "hidden",
+      "title": "a chain carries holding days until the replacement is long-term",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H13",
+      "layer": "hidden",
+      "title": "two loss sales compete; the earlier one in processing order takes the shares first",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H14",
+      "layer": "hidden",
+      "title": "same-day trades follow input index",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H15",
+      "layer": "hidden",
+      "title": "validation: bools, floats, non-ASCII digits, year range, missing keys",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H16",
+      "layer": "hidden",
+      "title": "the oversell check is per symbol, not per group",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H17",
+      "layer": "hidden",
+      "title": "within a lot, replacement pieces are sold before the fresh piece",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H18",
+      "layer": "hidden",
+      "title": "earliest purchase first; a still-held earlier purchase counts, a sold-out one does not",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H19",
+      "layer": "hidden",
+      "title": "a loss with D = 0 still uses up the replacement shares and carries days",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H20",
+      "layer": "hidden",
+      "title": "a partly sold earlier purchase offers only its remaining fresh shares",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H21",
+      "layer": "hidden",
+      "title": "every lot the sale draws from is excluded, not just the loss row's own lot",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H22",
+      "layer": "hidden",
+      "title": "the split rule leaves the remainder with the piece",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H23",
+      "layer": "hidden",
+      "title": "no trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H24",
+      "layer": "hidden",
+      "title": "a later purchase is adjusted before it is bought; its replacement piece is sold first",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H25",
+      "layer": "hidden",
+      "title": "a carried holding start can land on February 29",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H26",
+      "layer": "hidden",
+      "title": "replacement shares are never candidates again",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H27",
+      "layer": "hidden",
+      "title": "a row with gain 0 is not a loss row",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R001",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R002",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R003",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R004",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R005",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R006",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R007",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R008",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R009",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R010",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R011",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R012",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R013",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R014",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R015",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R016",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R017",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R018",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R019",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R020",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R021",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R022",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R023",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R024",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R025",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R026",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R027",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R028",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R029",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R030",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R031",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R032",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R033",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R034",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R035",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R036",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R037",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R038",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R039",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R040",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R041",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R042",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R043",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R044",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R045",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R046",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R047",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R048",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R049",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R050",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R051",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R052",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R053",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R054",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R055",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R056",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R057",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R058",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R059",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R060",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R061",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R062",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R063",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R064",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R065",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R066",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R067",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R068",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R069",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R070",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R071",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R072",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R073",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R074",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R075",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R076",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R077",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R078",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R079",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R080",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R081",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R082",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R083",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R084",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R085",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R086",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R087",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R088",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R089",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R090",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R091",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R092",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R093",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R094",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R095",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R096",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R097",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R098",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R099",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R100",
+      "layer": "hidden",
+      "title": "random trades",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S1",
+      "layer": "stress",
+      "title": "crowded windows: 196 000 trades in one identical group",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S2",
+      "layer": "stress",
+      "title": "a 99 999-link wash chain whose holding start drifts before year 1",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S3",
+      "layer": "stress",
+      "title": "200 000 shuffled trades, 600 symbols in many groups, some invalid",
+      "pass": true,
+      "reason": null
+    }
+  ]
+}

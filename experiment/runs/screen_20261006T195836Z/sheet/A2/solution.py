@@ -1,0 +1,1096 @@
+import decimal
+import math
+import re
+
+# ---------------------------------------------------------------------------
+# Constants, Sentinels, and Regexes
+# ---------------------------------------------------------------------------
+
+class CellError:
+    __slots__ = ("message",)
+
+    def __init__(self, message: str):
+        self.message = message
+
+    def __repr__(self):
+        return f"CellError({self.message})"
+
+    def __eq__(self, other):
+        return isinstance(other, CellError) and self.message == other.message
+
+
+class EmptyVal:
+    __slots__ = ()
+
+    def __repr__(self):
+        return "EMPTY"
+
+
+EMPTY = EmptyVal()
+
+NUMBER_LITERAL_RE = re.compile(r"^-?[0-9]+(\.[0-9]+)?$")
+RANGE_RE = re.compile(r"([A-Za-z]+[0-9]+):([A-Za-z]+[0-9]+)")
+WORD_RE = re.compile(r"[A-Za-z]+[0-9]*")
+NUMBER_RE = re.compile(r"[0-9]+(\.[0-9]+)?")
+
+KNOWN_FUNCTIONS = {
+    "SUM": lambda n: n >= 1,
+    "MIN": lambda n: n >= 1,
+    "MAX": lambda n: n >= 1,
+    "AVERAGE": lambda n: n >= 1,
+    "COUNT": lambda n: n >= 1,
+    "AND": lambda n: n >= 1,
+    "OR": lambda n: n >= 1,
+    "NOT": lambda n: n == 1,
+    "IF": lambda n: n in (2, 3),
+    "IFERROR": lambda n: n == 2,
+    "CONCAT": lambda n: n >= 1,
+    "LEN": lambda n: n == 1,
+    "ROUND": lambda n: n == 2,
+}
+
+ASCII_LOWER_TRANS = str.maketrans(
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZ", "abcdefghijklmnopqrstuvwxyz"
+)
+
+
+def ascii_lower(s: str) -> str:
+    return s.translate(ASCII_LOWER_TRANS)
+
+
+def parse_ref(s: str):
+    """
+    Checks if s is a valid REF token: exactly 1 ASCII letter and a row 1-999
+    without leading zeros. Returns normalized uppercase reference (e.g. 'A1'),
+    or None if invalid.
+    """
+    if len(s) >= 2 and s[0].isalpha() and not s[1].isalpha():
+        col = s[0].upper()
+        if "A" <= col <= "Z":
+            row_str = s[1:]
+            if row_str[0] != "0":
+                try:
+                    row = int(row_str)
+                    if 1 <= row <= 999:
+                        return f"{col}{row}"
+                except ValueError:
+                    return None
+    return None
+
+
+def expand_range(ref1: str, ref2: str):
+    """
+    Expands the rectangle between ref1 and ref2 in row-major order.
+    """
+    col1, row1 = ref1[0], int(ref1[1:])
+    col2, row2 = ref2[0], int(ref2[1:])
+    r_start, r_end = min(row1, row2), max(row1, row2)
+    c_start, c_end = min(ord(col1), ord(col2)), max(ord(col1), ord(col2))
+    cells = []
+    for r in range(r_start, r_end + 1):
+        for c in range(c_start, c_end + 1):
+            cells.append(f"{chr(c)}{r}")
+    return cells
+
+
+# ---------------------------------------------------------------------------
+# Coercions and Formatting
+# ---------------------------------------------------------------------------
+
+def fmt(x: float) -> str:
+    r = round(x, 9)
+    if r.is_integer():
+        return str(int(r))
+    return repr(r)
+
+
+def to_number(val):
+    if isinstance(val, CellError):
+        return val
+    if isinstance(val, (int, float)) and not isinstance(val, bool):
+        return float(val)
+    if isinstance(val, str):
+        if NUMBER_LITERAL_RE.match(val):
+            return float(val)
+        return CellError("#VALUE!")
+    if isinstance(val, bool):
+        return 1.0 if val else 0.0
+    if val is EMPTY:
+        return 0.0
+    return CellError("#VALUE!")
+
+
+def to_text(val):
+    if isinstance(val, CellError):
+        return val
+    if isinstance(val, (int, float)) and not isinstance(val, bool):
+        return fmt(float(val))
+    if isinstance(val, str):
+        return val
+    if isinstance(val, bool):
+        return "TRUE" if val else "FALSE"
+    if val is EMPTY:
+        return ""
+    return ""
+
+
+def to_boolean(val):
+    if isinstance(val, CellError):
+        return val
+    if isinstance(val, (int, float)) and not isinstance(val, bool):
+        return val != 0.0
+    if isinstance(val, str):
+        low = ascii_lower(val)
+        if low == "true":
+            return True
+        if low == "false":
+            return False
+        return CellError("#VALUE!")
+    if isinstance(val, bool):
+        return val
+    if val is EMPTY:
+        return False
+    return CellError("#VALUE!")
+
+
+# ---------------------------------------------------------------------------
+# AST Nodes
+# ---------------------------------------------------------------------------
+
+class ASTNode:
+    pass
+
+
+class LiteralNode(ASTNode):
+    __slots__ = ("val",)
+
+    def __init__(self, val):
+        self.val = val
+
+
+class RefNode(ASTNode):
+    __slots__ = ("ref",)
+
+    def __init__(self, ref: str):
+        self.ref = ref
+
+
+class InvalidRefNode(ASTNode):
+    __slots__ = ("token",)
+
+    def __init__(self, token: str):
+        self.token = token
+
+
+class RangeNode(ASTNode):
+    __slots__ = ("cells",)
+
+    def __init__(self, cells):
+        self.cells = cells
+
+
+class InvalidRangeNode(ASTNode):
+    __slots__ = ()
+
+
+class BareNameNode(ASTNode):
+    __slots__ = ("name",)
+
+    def __init__(self, name: str):
+        self.name = name
+
+
+class UnaryOpNode(ASTNode):
+    __slots__ = ("op", "expr")
+
+    def __init__(self, op: str, expr: ASTNode):
+        self.op = op
+        self.expr = expr
+
+
+class BinaryOpNode(ASTNode):
+    __slots__ = ("op", "left", "right")
+
+    def __init__(self, op: str, left: ASTNode, right: ASTNode):
+        self.op = op
+        self.left = left
+        self.right = right
+
+
+class FuncNode(ASTNode):
+    __slots__ = ("name", "args")
+
+    def __init__(self, name: str, args):
+        self.name = name
+        self.args = args
+
+
+class UnknownFuncNode(ASTNode):
+    __slots__ = ("name", "args")
+
+    def __init__(self, name: str, args):
+        self.name = name
+        self.args = args
+
+
+# ---------------------------------------------------------------------------
+# Lexer and Parser
+# ---------------------------------------------------------------------------
+
+class ParseError(Exception):
+    pass
+
+
+class Token:
+    __slots__ = ("type", "val")
+
+    def __init__(self, type_: str, val=None):
+        self.type = type_
+        self.val = val
+
+
+def tokenize(s: str):
+    tokens = []
+    pos = 0
+    n = len(s)
+
+    while pos < n:
+        if s[pos] == " ":
+            pos += 1
+            continue
+
+        ch = s[pos]
+
+        if ch == '"':
+            pos += 1
+            chars = []
+            closed = False
+            while pos < n:
+                if s[pos] == '"':
+                    if pos + 1 < n and s[pos + 1] == '"':
+                        chars.append('"')
+                        pos += 2
+                    else:
+                        pos += 1
+                        closed = True
+                        break
+                else:
+                    chars.append(s[pos])
+                    pos += 1
+            if not closed:
+                raise ParseError()
+            tokens.append(Token("STRING", "".join(chars)))
+            continue
+
+        if ch == ":":
+            raise ParseError()
+
+        if ch.isalpha():
+            m_range = RANGE_RE.match(s, pos)
+            if m_range:
+                tokens.append(Token("RANGE", (m_range.group(1), m_range.group(2))))
+                pos += len(m_range.group(0))
+                continue
+
+            m_word = WORD_RE.match(s, pos)
+            w = m_word.group(0)
+            next_pos = pos + len(w)
+
+            lookahead = next_pos
+            while lookahead < n and s[lookahead] == " ":
+                lookahead += 1
+
+            if lookahead < n and s[lookahead] == "(":
+                tokens.append(Token("FUNC", w.upper()))
+            else:
+                w_upper = w.upper()
+                if w_upper in ("TRUE", "FALSE"):
+                    tokens.append(Token("BOOLEAN", w_upper == "TRUE"))
+                elif any(c.isdigit() for c in w):
+                    norm = parse_ref(w)
+                    if norm:
+                        tokens.append(Token("REF", norm))
+                    else:
+                        tokens.append(Token("INVALID_REF", w))
+                else:
+                    tokens.append(Token("BARE_NAME", w_upper))
+            pos = next_pos
+            continue
+
+        if ch.isdigit():
+            m_num = NUMBER_RE.match(s, pos)
+            tokens.append(Token("NUMBER", float(m_num.group(0))))
+            pos += len(m_num.group(0))
+            continue
+
+        two = s[pos : pos + 2]
+        if two in ("<=", ">=", "<>"):
+            tokens.append(Token(two, two))
+            pos += 2
+            continue
+
+        if ch in "=+-*/^&(),<>":
+            tokens.append(Token(ch, ch))
+            pos += 1
+            continue
+
+        raise ParseError()
+
+    tokens.append(Token("EOF", None))
+    return tokens
+
+
+class Parser:
+    def __init__(self, tokens):
+        self.tokens = tokens
+        self.idx = 0
+
+    def peek(self):
+        return self.tokens[self.idx]
+
+    def consume(self, expected_type=None):
+        tok = self.tokens[self.idx]
+        if expected_type is not None and tok.type != expected_type:
+            raise ParseError()
+        self.idx += 1
+        return tok
+
+    def parse(self):
+        if self.peek().type == "EOF":
+            raise ParseError()
+        node = self.expr()
+        if self.peek().type != "EOF":
+            raise ParseError()
+        return node
+
+    def expr(self):
+        node = self.concat()
+        while self.peek().type in ("=", "<>", "<=", ">=", "<", ">"):
+            op = self.consume().type
+            right = self.concat()
+            node = BinaryOpNode(op, node, right)
+        return node
+
+    def concat(self):
+        node = self.additive()
+        while self.peek().type == "&":
+            self.consume()
+            right = self.additive()
+            node = BinaryOpNode("&", node, right)
+        return node
+
+    def additive(self):
+        node = self.term()
+        while self.peek().type in ("+", "-"):
+            op = self.consume().type
+            right = self.term()
+            node = BinaryOpNode(op, node, right)
+        return node
+
+    def term(self):
+        node = self.power()
+        while self.peek().type in ("*", "/"):
+            op = self.consume().type
+            right = self.power()
+            node = BinaryOpNode(op, node, right)
+        return node
+
+    def power(self):
+        node = self.unary()
+        while self.peek().type == "^":
+            self.consume()
+            right = self.unary()
+            node = BinaryOpNode("^", node, right)
+        return node
+
+    def unary(self):
+        if self.peek().type in ("+", "-"):
+            op = self.consume().type
+            right = self.unary()
+            return UnaryOpNode(op, right)
+        return self.primary()
+
+    def primary(self):
+        tok = self.peek()
+        t = tok.type
+        if t == "NUMBER":
+            self.consume()
+            return LiteralNode(tok.val)
+        if t == "STRING":
+            self.consume()
+            return LiteralNode(tok.val)
+        if t == "BOOLEAN":
+            self.consume()
+            return LiteralNode(tok.val)
+        if t == "REF":
+            self.consume()
+            return RefNode(tok.val)
+        if t == "INVALID_REF":
+            self.consume()
+            return InvalidRefNode(tok.val)
+        if t == "RANGE":
+            self.consume()
+            ref1, ref2 = tok.val
+            v1 = parse_ref(ref1)
+            v2 = parse_ref(ref2)
+            if v1 is None or v2 is None:
+                return InvalidRangeNode()
+            return RangeNode(expand_range(v1, v2))
+        if t == "BARE_NAME":
+            self.consume()
+            return BareNameNode(tok.val)
+        if t == "FUNC":
+            self.consume()
+            name = tok.val
+            self.consume("(")
+            args = []
+            if self.peek().type != ")":
+                args.append(self.expr())
+                while self.peek().type == ",":
+                    self.consume(",")
+                    args.append(self.expr())
+            self.consume(")")
+            if name in KNOWN_FUNCTIONS:
+                if not KNOWN_FUNCTIONS[name](len(args)):
+                    raise ParseError()
+                return FuncNode(name, args)
+            return UnknownFuncNode(name, args)
+        if t == "(":
+            self.consume("(")
+            node = self.expr()
+            self.consume(")")
+            return node
+        raise ParseError()
+
+
+def parse_formula(raw_formula: str):
+    tokens = tokenize(raw_formula)
+    parser = Parser(tokens)
+    return parser.parse()
+
+
+# ---------------------------------------------------------------------------
+# Graph & Cycles
+# ---------------------------------------------------------------------------
+
+def collect_edges(node: ASTNode, edges: set):
+    if isinstance(node, RefNode):
+        edges.add(node.ref)
+    elif isinstance(node, RangeNode):
+        for cell in node.cells:
+            edges.add(cell)
+    elif isinstance(node, UnaryOpNode):
+        collect_edges(node.expr, edges)
+    elif isinstance(node, BinaryOpNode):
+        collect_edges(node.left, edges)
+        collect_edges(node.right, edges)
+    elif isinstance(node, (FuncNode, UnknownFuncNode)):
+        for arg in node.args:
+            collect_edges(arg, edges)
+
+
+def find_cycle_cells(graph: dict, all_nodes: set) -> set:
+    index = 0
+    indices = {}
+    lowlink = {}
+    on_stack = set()
+    stack = []
+    cycle_cells = set()
+
+    for root in all_nodes:
+        if root in indices:
+            continue
+
+        call_stack = [(root, iter(graph.get(root, ())))]
+        indices[root] = lowlink[root] = index
+        index += 1
+        stack.append(root)
+        on_stack.add(root)
+
+        while call_stack:
+            u, it = call_stack[-1]
+            try:
+                v = next(it)
+                if v not in indices:
+                    indices[v] = lowlink[v] = index
+                    index += 1
+                    stack.append(v)
+                    on_stack.add(v)
+                    call_stack.append((v, iter(graph.get(v, ()))))
+                elif v in on_stack:
+                    lowlink[u] = min(lowlink[u], indices[v])
+            except StopIteration:
+                call_stack.pop()
+                if call_stack:
+                    parent, _ = call_stack[-1]
+                    lowlink[parent] = min(lowlink[parent], lowlink[u])
+                if lowlink[u] == indices[u]:
+                    scc = []
+                    while True:
+                        w = stack.pop()
+                        on_stack.remove(w)
+                        scc.append(w)
+                        if w == u:
+                            break
+                    if len(scc) > 1:
+                        cycle_cells.update(scc)
+                    elif len(scc) == 1:
+                        node = scc[0]
+                        if node in graph.get(node, ()):
+                            cycle_cells.add(node)
+
+    return cycle_cells
+
+
+# ---------------------------------------------------------------------------
+# Evaluator
+# ---------------------------------------------------------------------------
+
+def eval_comparison(op: str, left, right):
+    if left is EMPTY and right is EMPTY:
+        cmp = 0
+    else:
+        if left is EMPTY:
+            if isinstance(right, (int, float)) and not isinstance(right, bool):
+                left = 0.0
+            elif isinstance(right, str):
+                left = ""
+            elif isinstance(right, bool):
+                left = False
+        elif right is EMPTY:
+            if isinstance(left, (int, float)) and not isinstance(left, bool):
+                right = 0.0
+            elif isinstance(left, str):
+                right = ""
+            elif isinstance(left, bool):
+                right = False
+
+        def type_rank(v):
+            if isinstance(v, bool):
+                return 2
+            if isinstance(v, str):
+                return 1
+            if isinstance(v, (int, float)):
+                return 0
+            return -1
+
+        rank_l = type_rank(left)
+        rank_r = type_rank(right)
+
+        if rank_l != rank_r:
+            cmp = -1 if rank_l < rank_r else 1
+        else:
+            if rank_l == 0:
+                r_l = round(left, 9)
+                r_r = round(right, 9)
+                if r_l < r_r:
+                    cmp = -1
+                elif r_l > r_r:
+                    cmp = 1
+                else:
+                    cmp = 0
+            elif rank_l == 1:
+                s_l = ascii_lower(left)
+                s_r = ascii_lower(right)
+                if s_l < s_r:
+                    cmp = -1
+                elif s_l > s_r:
+                    cmp = 1
+                else:
+                    cmp = 0
+            else:
+                if left == right:
+                    cmp = 0
+                elif not left and right:
+                    cmp = -1
+                else:
+                    cmp = 1
+
+    if op == "=":
+        return cmp == 0
+    if op == "<>":
+        return cmp != 0
+    if op == "<":
+        return cmp < 0
+    if op == "<=":
+        return cmp <= 0
+    if op == ">":
+        return cmp > 0
+    if op == ">=":
+        return cmp >= 0
+    return False
+
+
+def eval_round(x: float, n: float):
+    n_int = int(n)
+    n_clamped = max(-15, min(15, n_int))
+    try:
+        with decimal.localcontext() as ctx:
+            ctx.prec = 400
+            d = decimal.Decimal(repr(x))
+            exp = decimal.Decimal((0, (1,), -n_clamped))
+            res_d = d.quantize(exp, rounding=decimal.ROUND_HALF_UP)
+            res = float(res_d)
+            if not math.isfinite(res):
+                return CellError("#NUM!")
+            return res
+    except (OverflowError, decimal.DecimalException):
+        return CellError("#NUM!")
+
+
+def eval_expr(node: ASTNode, cell_values: dict):
+    if isinstance(node, LiteralNode):
+        return node.val
+
+    if isinstance(node, RefNode):
+        return cell_values.get(node.ref, EMPTY)
+
+    if isinstance(node, InvalidRefNode):
+        return CellError("#REF!")
+
+    if isinstance(node, RangeNode):
+        return CellError("#VALUE!")
+
+    if isinstance(node, InvalidRangeNode):
+        return CellError("#REF!")
+
+    if isinstance(node, BareNameNode):
+        return CellError("#NAME?")
+
+    if isinstance(node, UnknownFuncNode):
+        return CellError("#NAME?")
+
+    if isinstance(node, UnaryOpNode):
+        val = eval_expr(node.expr, cell_values)
+        if isinstance(val, CellError):
+            return val
+        if node.op == "+":
+            return val
+        if node.op == "-":
+            num = to_number(val)
+            if isinstance(num, CellError):
+                return num
+            res = -num
+            if not math.isfinite(res):
+                return CellError("#NUM!")
+            return res
+
+    if isinstance(node, BinaryOpNode):
+        left_val = eval_expr(node.left, cell_values)
+        if isinstance(left_val, CellError):
+            return left_val
+        right_val = eval_expr(node.right, cell_values)
+        if isinstance(right_val, CellError):
+            return right_val
+
+        op = node.op
+        if op in ("+", "-", "*", "/"):
+            n1 = to_number(left_val)
+            if isinstance(n1, CellError):
+                return n1
+            n2 = to_number(right_val)
+            if isinstance(n2, CellError):
+                return n2
+            try:
+                if op == "+":
+                    res = n1 + n2
+                elif op == "-":
+                    res = n1 - n2
+                elif op == "*":
+                    res = n1 * n2
+                elif op == "/":
+                    if n2 == 0.0:
+                        return CellError("#DIV/0!")
+                    res = n1 / n2
+            except OverflowError:
+                return CellError("#NUM!")
+            if not math.isfinite(res):
+                return CellError("#NUM!")
+            return res
+
+        if op == "^":
+            n1 = to_number(left_val)
+            if isinstance(n1, CellError):
+                return n1
+            n2 = to_number(right_val)
+            if isinstance(n2, CellError):
+                return n2
+
+            if n1 == 0.0:
+                if n2 == 0.0:
+                    return CellError("#NUM!")
+                if n2 < 0.0:
+                    return CellError("#DIV/0!")
+                return 0.0
+            if n1 < 0.0:
+                if not n2.is_integer():
+                    return CellError("#NUM!")
+                try:
+                    res = n1 ** int(n2)
+                except OverflowError:
+                    return CellError("#NUM!")
+            else:
+                try:
+                    res = n1 ** n2
+                except OverflowError:
+                    return CellError("#NUM!")
+            if not math.isfinite(res):
+                return CellError("#NUM!")
+            return res
+
+        if op == "&":
+            t1 = to_text(left_val)
+            if isinstance(t1, CellError):
+                return t1
+            t2 = to_text(right_val)
+            if isinstance(t2, CellError):
+                return t2
+            return t1 + t2
+
+        if op in ("=", "<>", "<", "<=", ">", ">="):
+            return eval_comparison(op, left_val, right_val)
+
+    if isinstance(node, FuncNode):
+        name = node.name
+        args = node.args
+
+        if name == "IF":
+            cond_val = eval_expr(args[0], cell_values)
+            if isinstance(cond_val, CellError):
+                return cond_val
+            b = to_boolean(cond_val)
+            if isinstance(b, CellError):
+                return b
+            if b:
+                return eval_expr(args[1], cell_values)
+            if len(args) == 3:
+                return eval_expr(args[2], cell_values)
+            return False
+
+        if name == "IFERROR":
+            v1 = eval_expr(args[0], cell_values)
+            if isinstance(v1, CellError):
+                return eval_expr(args[1], cell_values)
+            return v1
+
+        if name == "NOT":
+            v = eval_expr(args[0], cell_values)
+            if isinstance(v, CellError):
+                return v
+            b = to_boolean(v)
+            if isinstance(b, CellError):
+                return b
+            return not b
+
+        if name == "LEN":
+            v = eval_expr(args[0], cell_values)
+            if isinstance(v, CellError):
+                return v
+            t = to_text(v)
+            if isinstance(t, CellError):
+                return t
+            return float(len(t))
+
+        if name == "ROUND":
+            v1 = eval_expr(args[0], cell_values)
+            if isinstance(v1, CellError):
+                return v1
+            x = to_number(v1)
+            if isinstance(x, CellError):
+                return x
+            v2 = eval_expr(args[1], cell_values)
+            if isinstance(v2, CellError):
+                return v2
+            n = to_number(v2)
+            if isinstance(n, CellError):
+                return n
+            return eval_round(x, n)
+
+        # Aggregate functions: SUM, MIN, MAX, AVERAGE, COUNT, AND, OR, CONCAT
+        return eval_aggregate(name, args, cell_values)
+
+    return CellError("#VALUE!")
+
+
+def eval_aggregate(name: str, args, cell_values: dict):
+    if name == "COUNT":
+        count = 0
+        for arg in args:
+            if isinstance(arg, RangeNode):
+                for cell in arg.cells:
+                    val = cell_values.get(cell, EMPTY)
+                    if isinstance(val, (int, float)) and not isinstance(val, bool):
+                        count += 1
+            elif isinstance(arg, RefNode):
+                val = cell_values.get(arg.ref, EMPTY)
+                if isinstance(val, (int, float)) and not isinstance(val, bool):
+                    count += 1
+            elif isinstance(arg, (InvalidRangeNode, InvalidRefNode)):
+                continue
+            else:
+                val = eval_expr(arg, cell_values)
+                if isinstance(val, CellError):
+                    continue
+                if isinstance(val, (int, float)) and not isinstance(val, bool):
+                    count += 1
+                elif isinstance(val, bool):
+                    count += 1
+                elif isinstance(val, str) and NUMBER_LITERAL_RE.match(val):
+                    count += 1
+        return float(count)
+
+    if name in ("SUM", "MIN", "MAX", "AVERAGE"):
+        nums = []
+        total = 0.0
+        for arg in args:
+            if isinstance(arg, RangeNode):
+                for cell in arg.cells:
+                    val = cell_values.get(cell, EMPTY)
+                    if isinstance(val, CellError):
+                        return val
+                    if isinstance(val, (int, float)) and not isinstance(val, bool):
+                        nums.append(val)
+                        if name in ("SUM", "AVERAGE"):
+                            try:
+                                total += val
+                            except OverflowError:
+                                return CellError("#NUM!")
+                            if not math.isfinite(total):
+                                return CellError("#NUM!")
+            elif isinstance(arg, RefNode):
+                val = cell_values.get(arg.ref, EMPTY)
+                if isinstance(val, CellError):
+                    return val
+                if isinstance(val, (int, float)) and not isinstance(val, bool):
+                    nums.append(val)
+                    if name in ("SUM", "AVERAGE"):
+                        try:
+                            total += val
+                        except OverflowError:
+                            return CellError("#NUM!")
+                        if not math.isfinite(total):
+                            return CellError("#NUM!")
+            elif isinstance(arg, (InvalidRangeNode, InvalidRefNode)):
+                return CellError("#REF!")
+            else:
+                val = eval_expr(arg, cell_values)
+                if isinstance(val, CellError):
+                    return val
+                num = to_number(val)
+                if isinstance(num, CellError):
+                    return num
+                nums.append(num)
+                if name in ("SUM", "AVERAGE"):
+                    try:
+                        total += num
+                    except OverflowError:
+                        return CellError("#NUM!")
+                    if not math.isfinite(total):
+                        return CellError("#NUM!")
+
+        if name == "SUM":
+            return total
+        if name == "MIN":
+            return min(nums) if nums else 0.0
+        if name == "MAX":
+            return max(nums) if nums else 0.0
+        if name == "AVERAGE":
+            if not nums:
+                return CellError("#DIV/0!")
+            try:
+                avg = total / len(nums)
+            except OverflowError:
+                return CellError("#NUM!")
+            if not math.isfinite(avg):
+                return CellError("#NUM!")
+            return avg
+
+    if name in ("AND", "OR"):
+        first_error = None
+        used_bools = []
+        for arg in args:
+            if isinstance(arg, RangeNode):
+                for cell in arg.cells:
+                    val = cell_values.get(cell, EMPTY)
+                    if isinstance(val, CellError):
+                        if first_error is None:
+                            first_error = val
+                    elif isinstance(val, bool):
+                        used_bools.append(val)
+                    elif isinstance(val, (int, float)):
+                        used_bools.append(val != 0.0)
+            elif isinstance(arg, RefNode):
+                val = cell_values.get(arg.ref, EMPTY)
+                if isinstance(val, CellError):
+                    if first_error is None:
+                        first_error = val
+                elif isinstance(val, bool):
+                    used_bools.append(val)
+                elif isinstance(val, (int, float)):
+                    used_bools.append(val != 0.0)
+            elif isinstance(arg, (InvalidRangeNode, InvalidRefNode)):
+                if first_error is None:
+                    first_error = CellError("#REF!")
+            else:
+                val = eval_expr(arg, cell_values)
+                if isinstance(val, CellError):
+                    if first_error is None:
+                        first_error = val
+                else:
+                    b = to_boolean(val)
+                    if isinstance(b, CellError):
+                        if first_error is None:
+                            first_error = b
+                    else:
+                        used_bools.append(b)
+
+        if first_error is not None:
+            return first_error
+        if not used_bools:
+            return CellError("#VALUE!")
+        if name == "AND":
+            return all(used_bools)
+        return any(used_bools)
+
+    if name == "CONCAT":
+        parts = []
+        for arg in args:
+            if isinstance(arg, RangeNode):
+                for cell in arg.cells:
+                    val = cell_values.get(cell, EMPTY)
+                    if isinstance(val, CellError):
+                        return val
+                    t = to_text(val)
+                    if isinstance(t, CellError):
+                        return t
+                    parts.append(t)
+            elif isinstance(arg, RefNode):
+                val = cell_values.get(arg.ref, EMPTY)
+                if isinstance(val, CellError):
+                    return val
+                t = to_text(val)
+                if isinstance(t, CellError):
+                    return t
+                parts.append(t)
+            elif isinstance(arg, (InvalidRangeNode, InvalidRefNode)):
+                return CellError("#REF!")
+            else:
+                val = eval_expr(arg, cell_values)
+                if isinstance(val, CellError):
+                    return val
+                t = to_text(val)
+                if isinstance(t, CellError):
+                    return t
+                parts.append(t)
+        return "".join(parts)
+
+    return CellError("#VALUE!")
+
+
+# ---------------------------------------------------------------------------
+# Main Public Function: evaluate
+# ---------------------------------------------------------------------------
+
+def evaluate(cells: dict) -> dict:
+    cell_values = {}
+    is_formula = {}
+    parsed_ast = {}
+    graph = {}
+    all_graph_nodes = set(cells.keys())
+
+    # Step 1: Parse literals and formulas
+    for cell, raw in cells.items():
+        if raw.startswith("="):
+            is_formula[cell] = True
+            raw_formula = raw[1:]
+            try:
+                ast_root = parse_formula(raw_formula)
+                parsed_ast[cell] = ast_root
+                edges = set()
+                collect_edges(ast_root, edges)
+                graph[cell] = edges
+                all_graph_nodes.update(edges)
+            except ParseError:
+                cell_values[cell] = CellError("#PARSE!")
+                graph[cell] = set()
+        else:
+            is_formula[cell] = False
+            graph[cell] = set()
+            if NUMBER_LITERAL_RE.match(raw):
+                cell_values[cell] = float(raw)
+            elif raw == "TRUE":
+                cell_values[cell] = True
+            elif raw == "FALSE":
+                cell_values[cell] = False
+            elif raw == "":
+                cell_values[cell] = EMPTY
+            else:
+                cell_values[cell] = raw
+
+    # Step 2: Cycle detection on the full reference graph
+    cycle_cells = find_cycle_cells(graph, all_graph_nodes)
+    for c in cycle_cells:
+        if c in cells and is_formula.get(c, False):
+            cell_values[c] = CellError("#CYCLE!")
+
+    # Step 3: Topological evaluation of remaining acyclic formulas
+    unresolved_deps = {}
+    dependents = {}
+    ready = []
+
+    for cell, ast_root in parsed_ast.items():
+        if cell in cell_values:
+            continue
+        unresolved = set()
+        for dep in graph.get(cell, ()):
+            if dep in parsed_ast and dep not in cell_values:
+                unresolved.add(dep)
+        unresolved_deps[cell] = unresolved
+        if not unresolved:
+            ready.append(cell)
+        else:
+            for dep in unresolved:
+                dependents.setdefault(dep, []).append(cell)
+
+    head = 0
+    while head < len(ready):
+        cell = ready[head]
+        head += 1
+
+        ast_root = parsed_ast[cell]
+        val = eval_expr(ast_root, cell_values)
+        cell_values[cell] = val
+
+        for dep_cell in dependents.get(cell, ()):
+            unresolved = unresolved_deps[dep_cell]
+            unresolved.discard(cell)
+            if not unresolved:
+                ready.append(dep_cell)
+
+    # Step 4: Output formatting
+    result = {}
+    for cell in cells:
+        val = cell_values.get(cell, EMPTY)
+
+        if isinstance(val, CellError):
+            result[cell] = {"error": val.message}
+        elif val is EMPTY:
+            if is_formula.get(cell, False):
+                result[cell] = 0
+            else:
+                result[cell] = None
+        elif isinstance(val, (int, float)) and not isinstance(val, bool):
+            r = round(float(val), 9)
+            if r.is_integer():
+                out_int = int(r)
+                result[cell] = 0 if out_int == 0 else out_int
+            else:
+                result[cell] = float(r)
+        elif isinstance(val, str):
+            result[cell] = str(val)
+        elif isinstance(val, bool):
+            result[cell] = bool(val)
+        else:
+            result[cell] = val
+
+    return result

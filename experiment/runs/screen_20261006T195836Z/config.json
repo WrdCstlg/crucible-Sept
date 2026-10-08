@@ -1,0 +1,55 @@
+{
+  "started_utc": "2026-10-06T19:58:36.309097+00:00",
+  "mock": false,
+  "problems": [
+    "orderbook",
+    "semver",
+    "sheet",
+    "promo",
+    "payroll"
+  ],
+  "runs_per_problem": {
+    "A": 4,
+    "C": 2
+  },
+  "cap_usd": 20.0,
+  "worst_case_per_run": {
+    "A": 0.2908,
+    "C": 1.36
+  },
+  "roles_file": "roles_study.json",
+  "roles_sha256": "c709344779d2c3df22cafe1840d6808ede39f7e804e72095b14575cd860d69d7",
+  "sandbox": {
+    "backend": "docker",
+    "image": "python:3.12-slim@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d",
+    "network": "none",
+    "rootfs": "read-only",
+    "code_mount": "read-only",
+    "tmpfs_mb": 64,
+    "user": "65534:65534",
+    "capabilities": "all dropped",
+    "no_new_privileges": true,
+    "memory_mb": 1024,
+    "cpus": 1.0,
+    "pids_limit": 128,
+    "env": "allowlist only"
+  },
+  "keep_rule": {
+    "a_max_pass_rate": 0.25,
+    "c_min_passes": 1
+  },
+  "screen_cases_sha256": {
+    "orderbook": "e24f06b810d9ca664fdb4f48d969a50e509b05286a55d3bffe8f323c1bb547ab",
+    "semver": "14078e8753808011153d83b46cdc3c2297e7e1b667744857f9716f47337cf0be",
+    "sheet": "9b66a908c5bf72f67358602bc001dced08f9ae8e49bec6341dde184365802a80",
+    "promo": "fb324d7ac7b8b1dc90ce31d93e53b0b9c68d1e2051ffb7fb11b47a3111f1b475",
+    "payroll": "bd412cbc302523cf0e9b16b4d4288950cde6a47bb1723fca32d536f049f6ae5b"
+  },
+  "spec_sha256": {
+    "orderbook": "ebb13e95b03f235b93c7b4b902bd0939d7828404333a76715d76048af04f436a",
+    "semver": "c6068f278eb16dcd3da198d82d06307dc7fd257f02cb9ab30afe98f0831a29d0",
+    "sheet": "cd56618e0db5e701045be139051ad3b7ab86347dc283e6364e2fedde5febdbad",
+    "promo": "318e7db30a4454855f9994e96ed6adc5938878825a0e198b1310a9a2dd3606e2",
+    "payroll": "e7255f4729bed15f2cd8e43b8d2250d63662d6d21cc7554d12da0caf5d51627c"
+  }
+}

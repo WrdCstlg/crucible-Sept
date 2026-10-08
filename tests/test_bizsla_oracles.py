@@ -63,6 +63,23 @@ def test_hand_cases_document_their_reasoning():
     assert len(HAND) >= 20 and all(c["why"].strip() for c in HAND)
 
 
+# Added 2026-10-07, after the study, at the author's request. Kept outside the frozen hand_cases.json (FROZEN.json
+# pins it, and its hash is pre-registered), so the published study is unchanged; these only guard the oracles.
+SUPPLEMENT = json.loads((BIZ / "hand_cases_supplement.json").read_text(encoding="utf-8"))
+
+
+@pytest.mark.parametrize("name", ORACLES)
+@pytest.mark.parametrize("case", SUPPLEMENT, ids=[c["id"] for c in SUPPLEMENT])
+def test_both_oracles_match_every_supplementary_hand_case(name, case):
+    assert ORACLES[name](list(case["lines"])) == case["expected"], case["why"]
+
+
+def test_supplementary_cases_are_documented_and_never_reuse_a_frozen_id():
+    assert SUPPLEMENT and all(c["why"].strip() for c in SUPPLEMENT)
+    ids = [c["id"] for c in SUPPLEMENT]
+    assert len(ids) == len(set(ids)) and not set(ids) & {c["id"] for c in HAND}
+
+
 def _fuzz_stream(rng):
     return gen.random_stream(rng, span=rng.choice([600, 3000, 12000, 25000]), n=rng.randint(1, 22),
                              ids=rng.sample(["A", "B", "C", "t1"], rng.randint(1, 3)), holidays=(0, 4),

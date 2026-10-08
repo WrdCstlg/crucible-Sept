@@ -1,0 +1,7452 @@
+{
+ "problem": "ignore",
+ "entry": "ignored",
+ "public": [
+  {
+   "id": "P1",
+   "title": "comments, negation, last match wins, directory-only at any depth, invalid path",
+   "args": [
+    [
+     "a.log",
+     "src/b.log",
+     "src/keep.log",
+     "build/out.txt",
+     "src/build",
+     "docs/build/x.md",
+     "a//b",
+     "README"
+    ],
+    {
+     "": [
+      "# logs",
+      "*.log",
+      "!keep.log",
+      "build/",
+      ""
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a.log",
+     "build/out.txt",
+     "docs/build/x.md",
+     "src/b.log"
+    ],
+    "ignored_dirs": [
+     "build",
+     "docs/build"
+    ],
+    "invalid": [
+     "a//b"
+    ]
+   }
+  },
+  {
+   "id": "P2",
+   "title": "anchoring relative to the ignore file; deeper ignore file wins",
+   "args": [
+    [
+     "out/a.txt",
+     "src/out/b.txt",
+     "src/gen/c.txt",
+     "src/lib/gen/d.txt",
+     "src/e.txt"
+    ],
+    {
+     "": [
+      "/out",
+      "*.txt"
+     ],
+     "src": [
+      "!*.txt",
+      "/gen/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "out/a.txt",
+     "src/gen/c.txt"
+    ],
+    "ignored_dirs": [
+     "out",
+     "src/gen"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "P3",
+   "title": "an excluded directory cannot be re-included",
+   "args": [
+    [
+     "logs/a.log",
+     "logs/keep/b.log",
+     "notes/c.txt"
+    ],
+    {
+     "": [
+      "logs/",
+      "!logs/keep/",
+      "!logs/keep/b.log"
+     ],
+     "logs/keep": [
+      "!*"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "logs/a.log",
+     "logs/keep/b.log"
+    ],
+    "ignored_dirs": [
+     "logs"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "P4",
+   "title": "escapes, trailing spaces, ?, a range, a path that is also a directory",
+   "args": [
+    [
+     "#notes",
+     "a ",
+     "a",
+     "x1",
+     "x/y",
+     "x",
+     "data/v2",
+     "data/vX"
+    ],
+    {
+     "": [
+      "\\#notes",
+      "a\\ ",
+      "data/v[0-9]",
+      "?1   "
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "#notes",
+     "a ",
+     "data/v2",
+     "x1"
+    ],
+    "ignored_dirs": [],
+    "invalid": [
+     "x"
+    ]
+   }
+  }
+ ],
+ "hidden": [
+  {
+   "id": "H01",
+   "title": "parent exclusion beats negations in the excluded directory's own ignore file",
+   "args": [
+    [
+     "build/a.o",
+     "build/keep.txt",
+     "src/a.o"
+    ],
+    {
+     "": [
+      "build/",
+      "*.o"
+     ],
+     "build": [
+      "!keep.txt",
+      "!*.o"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "build/a.o",
+     "build/keep.txt",
+     "src/a.o"
+    ],
+    "ignored_dirs": [
+     "build"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H02",
+   "title": "trailing /** matches inside the directory but not the directory itself",
+   "args": [
+    [
+     "out/a",
+     "out/sub/b",
+     "out/keep"
+    ],
+    {
+     "": [
+      "out/**",
+      "!out/keep",
+      "!out/sub/b"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "out/a",
+     "out/sub/b"
+    ],
+    "ignored_dirs": [
+     "out/sub"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H03",
+   "title": "leading **/ and middle /**/ match zero or more directories",
+   "args": [
+    [
+     "foo",
+     "a/foo",
+     "a/b/foo",
+     "x/y",
+     "x/m/n/y",
+     "xy"
+    ],
+    {
+     "": [
+      "**/foo",
+      "x/**/y"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/b/foo",
+     "a/foo",
+     "foo",
+     "x/m/n/y",
+     "x/y"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H04",
+   "title": "a middle slash anchors; * does not cross /",
+   "args": [
+    [
+     "doc/a.txt",
+     "src/doc/b.txt",
+     "doc/sub/c.txt"
+    ],
+    {
+     "": [
+      "doc/*.txt"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "doc/a.txt"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H05",
+   "title": "a trailing slash alone does not anchor; directory-only skips files",
+   "args": [
+    [
+     "tmp/a",
+     "src/tmp/b",
+     "lib/tmp"
+    ],
+    {
+     "": [
+      "tmp/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "src/tmp/b",
+     "tmp/a"
+    ],
+    "ignored_dirs": [
+     "src/tmp",
+     "tmp"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H06",
+   "title": "the deepest ignore file with a match decides",
+   "args": [
+    [
+     "a/x.log",
+     "a/b/y.log",
+     "c/z.log"
+    ],
+    {
+     "": [
+      "*.log",
+      "!*.log"
+     ],
+     "a": [
+      "*.log"
+     ],
+     "a/b": [
+      "!y.log"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/x.log"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H07",
+   "title": "last matching line wins, including re-ignoring after a negation",
+   "args": [
+    [
+     "a.txt",
+     "ab.txt",
+     "b.txt",
+     "abc.txt"
+    ],
+    {
+     "": [
+      "*.txt",
+      "!a*.txt",
+      "ab.txt"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "ab.txt",
+     "b.txt"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H08",
+   "title": "trailing spaces: escaped kept, plain removed; leading spaces and tabs kept",
+   "args": [
+    [
+     "a",
+     "a ",
+     "b",
+     " b",
+     "c\t",
+     "c",
+     "d\\"
+    ],
+    {
+     "": [
+      "a\\ ",
+      " b",
+      "c\t",
+      "d\\\\   "
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     " b",
+     "a ",
+     "c\t",
+     "d\\"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H09",
+   "title": "comments, escaped # and !, double !",
+   "args": [
+    [
+     "#a",
+     "#b",
+     " #c",
+     "!d",
+     "e",
+     "!f",
+     "f"
+    ],
+    {
+     "": [
+      "#a",
+      "\\#b",
+      " #c",
+      "\\!d",
+      "e",
+      "!e",
+      "*f",
+      "!!f"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     " #c",
+     "!d",
+     "#b",
+     "f"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H10",
+   "title": "bracket expressions: ^ negates, ] first is a member, reversed range, - at the end",
+   "args": [
+    [
+     "a1",
+     "b1",
+     "^1",
+     "]2",
+     "a2",
+     "a3",
+     "b3",
+     "c3",
+     "-4",
+     "a4",
+     "b4",
+     "]5",
+     "a5",
+     "b5"
+    ],
+    {
+     "": [
+      "[^a]1",
+      "[]]2",
+      "[c-a]3",
+      "[a-]4",
+      "[!]a]5"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "-4",
+     "]2",
+     "^1",
+     "a4",
+     "b1",
+     "b5"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H11",
+   "title": "an unclosed [ or a dangling \\ makes the rule match nothing",
+   "args": [
+    [
+     "a[b",
+     "ab",
+     "c",
+     "c\\",
+     "[",
+     "d[]",
+     "d]"
+    ],
+    {
+     "": [
+      "a[b",
+      "c\\",
+      "[",
+      "d[]",
+      "\\[",
+      "d\\[]"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "[",
+     "d[]"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H12",
+   "title": "directory-only never matches a file; negated directory-only re-includes directories only",
+   "args": [
+    [
+     "data",
+     "x/data/y",
+     "z/data"
+    ],
+    {
+     "": [
+      "data",
+      "!data/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "data",
+     "z/data"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H13",
+   "title": "rules of a subdirectory: unanchored at any depth below it, anchored to it",
+   "args": [
+    [
+     "a.tmp",
+     "src/a.tmp",
+     "src/x/b.tmp",
+     "src/gen/c",
+     "src/x/gen/d",
+     "gen/e"
+    ],
+    {
+     "src": [
+      "*.tmp",
+      "/gen"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "src/a.tmp",
+     "src/gen/c",
+     "src/x/b.tmp"
+    ],
+    "ignored_dirs": [
+     "src/gen"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H14",
+   "title": "* matches a leading dot; ? is exactly one character; case-sensitive",
+   "args": [
+    [
+     ".env",
+     "a.env",
+     "ab.md",
+     "b.md",
+     ".md",
+     "readme",
+     "README"
+    ],
+    {
+     "": [
+      "*.env",
+      "?.md",
+      "README"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     ".env",
+     "README",
+     "a.env",
+     "b.md"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H15",
+   "title": "invalid paths: empty, . and .. segments, slashes, paths that are directories, duplicates",
+   "args": [
+    [
+     "a/b",
+     "a",
+     "a/b",
+     "./x",
+     "x/.",
+     "y/../z",
+     "",
+     "/r",
+     "s/",
+     "t//u",
+     "v",
+     "v/w/q",
+     "v/w"
+    ],
+    {
+     "": [
+      "v/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "v/w/q"
+    ],
+    "ignored_dirs": [
+     "v"
+    ],
+    "invalid": [
+     "",
+     "./x",
+     "/r",
+     "a",
+     "s/",
+     "t//u",
+     "v",
+     "v/w",
+     "x/.",
+     "y/../z"
+    ]
+   }
+  },
+  {
+   "id": "H16",
+   "title": "*** is a globstar; ** inside a segment is a plain *",
+   "args": [
+    [
+     "x",
+     "d/e/x",
+     "p/qr",
+     "p/qzzr",
+     "p/q/r",
+     "p/qq/zr"
+    ],
+    {
+     "": [
+      "***/x",
+      "p/q**r"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "d/e/x",
+     "p/qr",
+     "p/qzzr",
+     "x"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H17",
+   "title": "globstars around a middle segment; the last globstar needs one segment",
+   "args": [
+    [
+     "a/b/c",
+     "a/b/keep",
+     "a/x/b/y/z",
+     "a/q/b2"
+    ],
+    {
+     "": [
+      "a/**/b/**",
+      "!a/b/keep"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/b/c",
+     "a/x/b/y/z"
+    ],
+    "ignored_dirs": [
+     "a/x/b/y"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H18",
+   "title": "an ignore file applies only below its directory; keys that are not directories do nothing",
+   "args": [
+    [
+     "f",
+     "x/a",
+     "x/y/b"
+    ],
+    {
+     "x": [
+      "*"
+     ],
+     "f": [
+      "*"
+     ],
+     "nowhere": [
+      "*"
+     ],
+     "": [
+      "!*"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "x/a",
+     "x/y/b"
+    ],
+    "ignored_dirs": [
+     "x/y"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H19",
+   "title": "ignored_dirs lists only the topmost excluded directories",
+   "args": [
+    [
+     "a/b/c/f",
+     "b/c/d/g",
+     "b/h"
+    ],
+    {
+     "": [
+      "a/",
+      "b/c/",
+      "b/c/d/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/b/c/f",
+     "b/c/d/g"
+    ],
+    "ignored_dirs": [
+     "a",
+     "b/c"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H20",
+   "title": "re-including a directory, then excluding inside it (the /* !/foo idiom)",
+   "args": [
+    [
+     "x",
+     "y/z",
+     "foo/a",
+     "foo/bar/b",
+     "foo/baz/c"
+    ],
+    {
+     "": [
+      "/*",
+      "!/foo",
+      "/foo/*",
+      "!/foo/bar"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "foo/a",
+     "foo/baz/c",
+     "x",
+     "y/z"
+    ],
+    "ignored_dirs": [
+     "foo/baz",
+     "y"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H21",
+   "title": "lines that become empty; empty pattern segments match nothing",
+   "args": [
+    [
+     "x",
+     "y"
+    ],
+    {
+     "": [
+      "*",
+      "!",
+      "/",
+      "!//x",
+      "!x//"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "x",
+     "y"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H22",
+   "title": "escapes outside and inside bracket expressions",
+   "args": [
+    [
+     "*",
+     "a",
+     "]x",
+     "\\x",
+     "a?",
+     "ab",
+     "!y",
+     "\\y"
+    ],
+    {
+     "": [
+      "\\*",
+      "[\\]]x",
+      "a\\?",
+      "[\\!]y"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "!y",
+     "*",
+     "]x",
+     "a?"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H23",
+   "title": "leading / and **/ in a subdirectory's ignore file are relative to that subdirectory",
+   "args": [
+    [
+     "lib/a.c",
+     "lib/sub/b.c",
+     "a.c",
+     "lib/x/c.h",
+     "lib/y/x/d.h",
+     "x/e.h"
+    ],
+    {
+     "lib": [
+      "/*.c",
+      "**/x/*.h"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "lib/a.c",
+     "lib/x/c.h",
+     "lib/y/x/d.h"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H24",
+   "title": "deeper ignore file decides for directories too",
+   "args": [
+    [
+     "a/keep/1",
+     "keep/2",
+     "kx/3",
+     "a/kx/4"
+    ],
+    {
+     "": [
+      "k*/",
+      "!keep/"
+     ],
+     "a": [
+      "keep/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/keep/1",
+     "a/kx/4",
+     "kx/3"
+    ],
+    "ignored_dirs": [
+     "a/keep",
+     "a/kx",
+     "kx"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H25",
+   "title": "characters are code points; ranges compare code points",
+   "args": [
+    [
+     "café",
+     "cafe",
+     "cafés",
+     "éx",
+     "Éx"
+    ],
+    {
+     "": [
+      "caf?",
+      "[à-ÿ]x"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "cafe",
+     "café",
+     "éx"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H26",
+   "title": "unanchored ** is a plain *; all files ignored but no directory excluded",
+   "args": [
+    [
+     "a/b",
+     "c",
+     "d/e/f"
+    ],
+    {
+     "": [
+      "**",
+      "!**/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/b",
+     "c",
+     "d/e/f"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H27",
+   "title": "case-sensitive directory names; duplicates reported once",
+   "args": [
+    [
+     "Build/x",
+     "build/y",
+     "build/y"
+    ],
+    {
+     "": [
+      "build/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "build/y"
+    ],
+    "ignored_dirs": [
+     "build"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "H28",
+   "title": "trailing spaces before and after a trailing slash",
+   "args": [
+    [
+     "dir/a",
+     "dir /b",
+     "x/dir"
+    ],
+    {
+     "": [
+      "dir/  ",
+      "dir\\ /"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "dir /b",
+     "dir/a"
+    ],
+    "ignored_dirs": [
+     "dir",
+     "dir "
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R001",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "lib/a",
+     "docs/x y/out/#x",
+     "keep/.env",
+     "build/foo ",
+     "src/README",
+     "b",
+     "logs/build/b.txt",
+     "out/src/a\\b",
+     "keep/.env"
+    ],
+    {
+     "nowhere": [
+      "!keep/*.txt",
+      ".*"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R002",
+   "title": "random tree and rules",
+   "args": [
+    [
+     ".cache/out/-",
+     "b/src/lib/#x",
+     "logs/out/a",
+     "a*",
+     "x y/out/readme",
+     "build/x y",
+     "b.txt",
+     "x y/out/readme"
+    ],
+    {
+     "b/src": [
+      "lib/**/",
+      "out/out",
+      "[!a]*",
+      ""
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "b/src/lib/#x"
+    ],
+    "ignored_dirs": [
+     "b/src/lib"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R003",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "logs/build/.cache/-",
+     "!x",
+     "sub/a\\b",
+     "src/docs/a.txt",
+     "src/x y/main.o",
+     "Build/docs/a/a.log",
+     "logs/docs/logs/a",
+     "a",
+     "a\\b",
+     "ba",
+     "out/sub/sub/build",
+     "a.log"
+    ],
+    {
+     "out": [
+      "main.o",
+      "sub/**",
+      "x y/*.txt",
+      "Build/**/a.txt",
+      "\\\\",
+      ""
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "out/sub/sub/build"
+    ],
+    "ignored_dirs": [
+     "out/sub/sub"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R004",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "a.log",
+     "keep/b/a.txt",
+     "lib/keep/-",
+     "sub/keep.txt",
+     "x y/a\\b",
+     "keep/a/src/ba",
+     "logs/b/.cache/build",
+     "."
+    ],
+    {
+     "": [
+      ".cache/**/-",
+      "*",
+      "[c-a]*",
+      "*.log",
+      "!/a"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a.log",
+     "keep/a/src/ba",
+     "keep/b/a.txt",
+     "lib/keep/-",
+     "logs/b/.cache/build",
+     "sub/keep.txt",
+     "x y/a\\b"
+    ],
+    "ignored_dirs": [
+     "keep",
+     "lib",
+     "logs",
+     "sub",
+     "x y"
+    ],
+    "invalid": [
+     "."
+    ]
+   }
+  },
+  {
+   "id": "R005",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "a/.cache/-",
+     "logs/x y/b",
+     "b/x y/x y",
+     "docs/ab",
+     "foo ",
+     "keep.txt",
+     "docs/src/build/ab",
+     "logs/Build/build/keep.txt"
+    ],
+    {
+     "": [
+      "!x y",
+      "foo \t",
+      "?.txt",
+      "build/**/build",
+      "a//a",
+      ".cache/*.txt",
+      "a*",
+      "[a",
+      "# comment"
+     ],
+     "b/x y": [
+      ".cache/***"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/.cache/-",
+     "docs/ab",
+     "docs/src/build/ab"
+    ],
+    "ignored_dirs": [
+     "a"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R006",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "x y/keep/[a]",
+     "sub/ba",
+     ".cache/x y/x y",
+     "a.txt",
+     "README",
+     "keep/b/[a]",
+     "Build/docs/out/.env",
+     "src/c",
+     "x y/build/x y",
+     "b/.cache/[a]",
+     "out/x y"
+    ],
+    {
+     "Build/docs/out": [
+      "a.txt\\ ",
+      ".cache/*.log",
+      "\\[a]",
+      "[!a]*",
+      "build/**/sub"
+     ],
+     "keep/b": [
+      "x y/***",
+      "sub/**/.cache",
+      "***/[a]"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "Build/docs/out/.env"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R007",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "logs/aa",
+     "a/b/a*",
+     "b/sub/ab",
+     "x y/a/build",
+     "Build/build",
+     "b/out/ba",
+     ".cache/sub/a/keep.txt",
+     "src/x y",
+     "readme",
+     "build/]",
+     ".cache/a/x y/ab",
+     "b/sub"
+    ],
+    {
+     "": [
+      "build/",
+      "[!a]*",
+      "*.txt",
+      "a*",
+      "sub",
+      "",
+      "# comment",
+      "*",
+      "Build/",
+      ""
+     ],
+     "b/out": [
+      "[!a]*",
+      "a*",
+      "[a-]"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     ".cache/a/x y/ab",
+     ".cache/sub/a/keep.txt",
+     "Build/build",
+     "a/b/a*",
+     "b/out/ba",
+     "b/sub/ab",
+     "build/]",
+     "logs/aa",
+     "readme",
+     "src/x y",
+     "x y/a/build"
+    ],
+    "ignored_dirs": [
+     ".cache",
+     "Build",
+     "a",
+     "b",
+     "build",
+     "logs",
+     "src",
+     "x y"
+    ],
+    "invalid": [
+     "b/sub"
+    ]
+   }
+  },
+  {
+   "id": "R008",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "main.o",
+     "a/b/x y/a.txt",
+     "sub/Build/]",
+     "sub/b/out/ab",
+     "logs/.cache/c",
+     "sub/-"
+    ],
+    {
+     "a/b": [
+      "logs\\ ",
+      "a*",
+      "[a-]",
+      "Build/**/"
+     ],
+     "logs": [
+      "?.txt",
+      "!LOGS",
+      "*.*"
+     ],
+     "a/b/c/d": [
+      "main.o/",
+      ".cache/",
+      "\\\\",
+      "!?"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/b/x y/a.txt",
+     "logs/.cache/c"
+    ],
+    "ignored_dirs": [
+     "logs/.cache"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R009",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "sub/main.o",
+     "src/sub/^",
+     "a.txt",
+     "sub/.cache/b.txt",
+     "src/-",
+     "README",
+     "build/b/README",
+     "foo ",
+     "logs/x y/a",
+     "b",
+     "out/docs/ab",
+     "x y/docs/a",
+     "b/build/main.o",
+     "sub"
+    ],
+    {
+     "a/b/c/d": [
+      "!*.txt"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": [
+     "b",
+     "sub"
+    ]
+   }
+  },
+  {
+   "id": "R010",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "foo ",
+     ".cache/x y/a*",
+     "src/README",
+     "a/b/a*",
+     "docs/build",
+     "src/.env",
+     "lib/[a]",
+     "readme",
+     ".cache/keep/readme"
+    ],
+    {
+     "a/b": [
+      "?",
+      "*/x y",
+      "[a-c]",
+      "*[!.]*",
+      "*/README",
+      "# comment"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/b/a*"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R011",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "build",
+     ".cache/logs/logs/c",
+     "logs/Build/src/main.o",
+     "keep/main.o",
+     "/a"
+    ],
+    {
+     "": [
+      "!*/"
+     ],
+     "keep": [
+      "!keep/*.txt",
+      "!/.cache",
+      "?"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": [
+     "/a"
+    ]
+   }
+  },
+  {
+   "id": "R012",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "b.txt",
+     "a",
+     "x y/]",
+     "keep/README"
+    ],
+    {
+     "": [
+      "[!a]*",
+      "*.log",
+      "!keep/*.txt",
+      "a/",
+      "*.*",
+      ".*",
+      "/*/]",
+      "[!a]*",
+      "x y/*"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "b.txt",
+     "keep/README",
+     "x y/]"
+    ],
+    "ignored_dirs": [
+     "keep",
+     "x y"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R013",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "out/a",
+     "docs/ab",
+     "a.log",
+     ".cache/!x",
+     "keep/[a]",
+     "a\\b",
+     "logs/logs/ab"
+    ],
+    {
+     "": [
+      "/[a]",
+      "docs/**/logs"
+     ],
+     "nowhere": [
+      "out/*/",
+      "# comment"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R014",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "x y/lib/foo ",
+     ".cache/ba",
+     "logs/x y/src/.env",
+     "lib/readme",
+     "x y/a",
+     "a.log",
+     ".",
+     "logs/x y/src",
+     "."
+    ],
+    {
+     "x y/lib": [
+      "*/",
+      "*a",
+      "/src"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": [
+     ".",
+     "logs/x y/src"
+    ]
+   }
+  },
+  {
+   "id": "R015",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "[a]",
+     "readme",
+     "keep/x y",
+     "ab",
+     "docs/readme",
+     "[a]",
+     "[a]",
+     "logs/]",
+     "keep/main.o",
+     "x y/docs/-",
+     "docs/build",
+     "a/"
+    ],
+    {
+     "keep": [
+      "[ab]*",
+      "x y/*.txt",
+      "[A-Z]*",
+      "\\!x",
+      ""
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": [
+     "a/"
+    ]
+   }
+  },
+  {
+   "id": "R016",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "a\\b",
+     "a/x y",
+     "main.o",
+     "b/a.txt",
+     "src/readme",
+     "lib/README",
+     "out/src/c",
+     "a.log",
+     "build/Build/ba",
+     "b/sub/b/c",
+     "Build/build/aa",
+     "#x"
+    ],
+    {
+     "": [
+      "\\[a]",
+      "/out/",
+      "!*.txt",
+      "*.*",
+      "# comment",
+      "!build/*.txt",
+      "!*/",
+      "#x",
+      ""
+     ],
+     "out": [
+      "\\[a]",
+      "src/**/lib",
+      "Build/**/#x",
+      "sub/?*"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a.log",
+     "b/a.txt",
+     "main.o"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R017",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "!x",
+     "keep/keep/ba",
+     ".cache/sub/.env",
+     "Build/build/build/-",
+     ".cache/README",
+     "x y/ba",
+     ".cache/sub/logs/]",
+     "sub/]",
+     "-",
+     "[a]",
+     "/"
+    ],
+    {
+     "": [
+      "[!a]*",
+      "*/keep",
+      ".env",
+      "Build/*.log"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "!x",
+     "-",
+     ".cache/README",
+     ".cache/sub/.env",
+     ".cache/sub/logs/]",
+     "Build/build/build/-",
+     "[a]",
+     "keep/keep/ba",
+     "sub/]",
+     "x y/ba"
+    ],
+    "ignored_dirs": [
+     ".cache",
+     "Build",
+     "keep",
+     "sub",
+     "x y"
+    ],
+    "invalid": [
+     "/"
+    ]
+   }
+  },
+  {
+   "id": "R018",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "build/a.log",
+     "x y",
+     "sub/^",
+     ".cache/docs/Build/a.txt",
+     "src//x"
+    ],
+    {
+     "": [
+      "/Build/**/*.txt"
+     ],
+     ".cache": [
+      "!/Build/src",
+      "/src/**/*.txt"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": [
+     "src//x"
+    ]
+   }
+  },
+  {
+   "id": "R019",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "build/]",
+     "a.txt",
+     "a.log",
+     "logs/docs/c",
+     "Build/src/readme"
+    ],
+    {
+     "Build/src": [
+      "?.txt",
+      "/src/",
+      "\\\\"
+     ],
+     "": [
+      "/docs/a.txt",
+      "\\build",
+      "\\#x",
+      "src/**/Build",
+      ""
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "build/]"
+    ],
+    "ignored_dirs": [
+     "build"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R020",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "#x",
+     "ab",
+     "a/Build/logs/aa",
+     "foo ",
+     "#x",
+     "lib/b/foo ",
+     "a/aa",
+     "a\\b",
+     "keep/Build/a*",
+     "Build/foo ",
+     "x y",
+     "a.txt",
+     "src/Build/a/ba"
+    ],
+    {
+     "": [
+      "lib/",
+      "a*",
+      "?.txt",
+      "?.txt",
+      "*",
+      "??"
+     ],
+     "src": [
+      "\\[a]",
+      "[]a]"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "#x",
+     "Build/foo ",
+     "a.txt",
+     "a/Build/logs/aa",
+     "a/aa",
+     "a\\b",
+     "ab",
+     "foo ",
+     "keep/Build/a*",
+     "lib/b/foo ",
+     "src/Build/a/ba",
+     "x y"
+    ],
+    "ignored_dirs": [
+     "Build",
+     "a",
+     "keep",
+     "lib",
+     "src"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R021",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "lib/a*",
+     "out/c",
+     "sub/sub/^",
+     "keep/b.txt",
+     "#x",
+     "x y/build/a*",
+     "]",
+     "build/.cache/ba",
+     "docs/lib/ba",
+     "sub/sub"
+    ],
+    {
+     "": [
+      "a*",
+      "#x\\ ",
+      ""
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "lib/a*",
+     "x y/build/a*"
+    ],
+    "ignored_dirs": [],
+    "invalid": [
+     "sub/sub"
+    ]
+   }
+  },
+  {
+   "id": "R022",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "ba",
+     "docs/docs/Build/b",
+     "b/build/README",
+     "build/build",
+     "a",
+     "sub/^",
+     ".cache/x y",
+     ".cache/x y/aa",
+     "logs/aa",
+     "out/sub/#x",
+     "/a"
+    ],
+    {
+     "": [
+      "**",
+      "docs/**/sub",
+      "/*/^"
+     ],
+     "out/sub": [
+      "!#X",
+      "!*/",
+      "BUILD",
+      "/logs/**/*.txt"
+     ],
+     "build": [
+      "*.*",
+      "build/readme",
+      "/*/x y",
+      "a[b",
+      "a[b",
+      "",
+      "# comment"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     ".cache/x y/aa",
+     "a",
+     "b/build/README",
+     "ba",
+     "build/build",
+     "docs/docs/Build/b",
+     "logs/aa",
+     "out/sub/#x",
+     "sub/^"
+    ],
+    "ignored_dirs": [
+     ".cache",
+     "b",
+     "build",
+     "docs",
+     "logs",
+     "out",
+     "sub"
+    ],
+    "invalid": [
+     ".cache/x y",
+     "/a"
+    ]
+   }
+  },
+  {
+   "id": "R023",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "lib/a/aa",
+     "Build/readme",
+     "a/b/a",
+     "x y",
+     "out/README",
+     "src/b",
+     "keep/x y",
+     "b/logs/!x",
+     "a/a*"
+    ],
+    {
+     "": [
+      "*[!.]*",
+      " src"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "Build/readme",
+     "a/a*",
+     "a/b/a",
+     "b/logs/!x",
+     "keep/x y",
+     "lib/a/aa",
+     "out/README",
+     "src/b",
+     "x y"
+    ],
+    "ignored_dirs": [
+     "Build",
+     "a",
+     "b",
+     "keep",
+     "lib",
+     "out",
+     "src"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R024",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "a.log",
+     ".cache/main.o",
+     "Build/a/Build/x y",
+     "src/logs/main.o",
+     "out/]"
+    ],
+    {
+     "src/logs": [
+      "[ab]*",
+      "[ab]*"
+     ],
+     "Build/a/Build": [
+      "[^a]*",
+      "\\\\",
+      "!.cache",
+      "main.o\t"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "Build/a/Build/x y"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R025",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "^",
+     "foo ",
+     "build/build/README",
+     "logs/b/-",
+     "c",
+     "out/b/]",
+     "keep/logs/foo "
+    ],
+    {
+     "": [
+      ".*",
+      ""
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R026",
+   "title": "random tree and rules",
+   "args": [
+    [
+     ".cache/logs/a/#x",
+     "build/keep.txt",
+     "sub/README",
+     "a/docs/keep/.env",
+     "x y/keep/^",
+     "build",
+     "/a",
+     "x y/keep/^"
+    ],
+    {
+     "": [
+      "*"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     ".cache/logs/a/#x",
+     "a/docs/keep/.env",
+     "build/keep.txt",
+     "sub/README",
+     "x y/keep/^"
+    ],
+    "ignored_dirs": [
+     ".cache",
+     "a",
+     "build",
+     "sub",
+     "x y"
+    ],
+    "invalid": [
+     "/a",
+     "build"
+    ]
+   }
+  },
+  {
+   "id": "R027",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "build/.cache/.cache/build",
+     "docs/keep/a",
+     "^",
+     ".cache/main.o",
+     "[a]",
+     "docs/README",
+     "a/logs/main.o",
+     "Build/^",
+     "ab",
+     "x y/a*",
+     "x y/sub/src/aa"
+    ],
+    {
+     "": [
+      "??",
+      "!*.txt",
+      "aa   ",
+      "",
+      "# comment"
+     ],
+     "Build": [
+      "!!x",
+      "!docs"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "ab",
+     "x y/a*",
+     "x y/sub/src/aa"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R028",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "ab",
+     "b/keep.txt",
+     "lib/build/c",
+     "docs/docs/a.txt",
+     "./a"
+    ],
+    {
+     "b": [
+      "!x",
+      "lib/A",
+      "[a",
+      "a[b",
+      "!keep.txt"
+     ],
+     "": [
+      "**/lib",
+      "*.*",
+      "./***",
+      "lib/***",
+      "# comment"
+     ],
+     "lib/build": [
+      "./",
+      "/**",
+      "**/build/.",
+      ""
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "docs/docs/a.txt",
+     "lib/build/c"
+    ],
+    "ignored_dirs": [
+     "lib"
+    ],
+    "invalid": [
+     "./a"
+    ]
+   }
+  },
+  {
+   "id": "R029",
+   "title": "random tree and rules",
+   "args": [
+    [
+     ".env",
+     "foo ",
+     "x y/sub/foo ",
+     "a",
+     "a/b/build",
+     "build/a/b/a*",
+     "sub/lib/x y/]",
+     "sub/.cache/aa",
+     "Build/logs/a.txt",
+     "x y/out/!x",
+     "aa",
+     "a/.."
+    ],
+    {
+     "": [
+      "**/x y/foo ",
+      "sub/**/.env",
+      "!build/*.txt"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": [
+     "a",
+     "a/.."
+    ]
+   }
+  },
+  {
+   "id": "R030",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "src/Build/a\\b",
+     "readme",
+     "-",
+     "a/a/a",
+     "a//b"
+    ],
+    {
+     "a": [
+      "[ab]*",
+      "!/*.txt"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/a/a"
+    ],
+    "ignored_dirs": [
+     "a/a"
+    ],
+    "invalid": [
+     "a//b"
+    ]
+   }
+  },
+  {
+   "id": "R031",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "lib/keep.txt",
+     "Build/build/b/a.log",
+     "Build/b/build/-",
+     "x y/a\\b",
+     "lib/.cache/readme",
+     "!x",
+     "x y",
+     "a*",
+     "b.txt",
+     "sub/lib/c",
+     "docs/src/Build/readme"
+    ],
+    {
+     "": [
+      "build/!X",
+      "build/*.txt",
+      "!**/",
+      "A\\B",
+      "**/sub/",
+      "x y/**/src",
+      "a*",
+      "\\c",
+      "**/x y/",
+      "**/src"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "Build/build/b/a.log",
+     "a*",
+     "docs/src/Build/readme",
+     "sub/lib/c",
+     "x y/a\\b"
+    ],
+    "ignored_dirs": [
+     "docs/src",
+     "sub",
+     "x y"
+    ],
+    "invalid": [
+     "x y"
+    ]
+   }
+  },
+  {
+   "id": "R032",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "x y/a/-",
+     "x y",
+     "docs/.env",
+     "docs/a.log",
+     "out/logs/out/^",
+     "a\\b",
+     "keep/a/keep/readme",
+     "lib/x y/!x",
+     "src/a*",
+     "keep/a",
+     ".env",
+     "lib/docs/logs/a.log",
+     "lib/out/-",
+     "./a"
+    ],
+    {
+     "a/b/c/d": [
+      "a\\b\t",
+      "logs\\ ",
+      "!logs/",
+      "[!a]*"
+     ],
+     "": [
+      "x y/*.txt",
+      "./***"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": [
+     "./a",
+     "keep/a",
+     "x y"
+    ]
+   }
+  },
+  {
+   "id": "R033",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "out/build",
+     "keep.txt",
+     ".cache/.cache/src/#x",
+     "keep/^",
+     "ba",
+     "a/docs/x y",
+     "out/out/!x",
+     "aa",
+     "keep/b"
+    ],
+    {
+     "": [
+      "!x",
+      "!*/",
+      "!*/",
+      "[!a]*",
+      "??",
+      "/^/",
+      "!BA"
+     ],
+     ".cache/.cache/src": [
+      "docs/**/a",
+      ""
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     ".cache/.cache/src/#x",
+     "a/docs/x y",
+     "aa",
+     "ba",
+     "keep.txt",
+     "keep/^",
+     "keep/b",
+     "out/build",
+     "out/out/!x"
+    ],
+    "ignored_dirs": [
+     ".cache",
+     "a/docs",
+     "keep",
+     "out"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R034",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "keep.txt",
+     "^",
+     "logs/.cache/keep/]",
+     "aa",
+     "build/b/.cache/a*",
+     "Build/!x",
+     "x y/lib/x y",
+     "foo ",
+     "out/ab",
+     "build/Build/src/a.txt",
+     "lib/sub/]",
+     "x y",
+     "a/./b"
+    ],
+    {
+     "": [
+      "[A-Z]*",
+      "# comment"
+     ],
+     "logs/.cache": [
+      "?",
+      "/!x/",
+      "logs\t",
+      ""
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "Build/!x",
+     "build/Build/src/a.txt",
+     "logs/.cache/keep/]"
+    ],
+    "ignored_dirs": [
+     "Build",
+     "build/Build"
+    ],
+    "invalid": [
+     "a/./b",
+     "x y"
+    ]
+   }
+  },
+  {
+   "id": "R035",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "build/src/-",
+     "c",
+     "docs/lib/build",
+     "#x",
+     ".cache/out/b/readme",
+     "Build/c",
+     "./a"
+    ],
+    {
+     "docs": [
+      "b/bUILD",
+      "!/out/src",
+      "b/**"
+     ],
+     "": [
+      "[ab]*",
+      "!OUT",
+      ""
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     ".cache/out/b/readme",
+     "build/src/-",
+     "docs/lib/build"
+    ],
+    "ignored_dirs": [
+     ".cache/out/b",
+     "build"
+    ],
+    "invalid": [
+     "./a"
+    ]
+   }
+  },
+  {
+   "id": "R036",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "build",
+     ".cache/lib/docs/a\\b",
+     "keep/-",
+     "sub/build/src/a.log",
+     "keep/sub/README",
+     "logs/ab",
+     "build/keep.txt",
+     "docs/^",
+     "out/out/^",
+     "sub/main.o",
+     "a/out/x y",
+     "b/docs/a\\b",
+     "/a"
+    ],
+    {
+     "": [
+      "[A-Z]*",
+      " .cache",
+      "\\!x",
+      "\\!x"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "keep/sub/README"
+    ],
+    "ignored_dirs": [],
+    "invalid": [
+     "/a",
+     "build"
+    ]
+   }
+  },
+  {
+   "id": "R037",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "a/x y/b.txt",
+     "logs/b",
+     "b/src/!x",
+     "x y/Build/sub/aa",
+     "a/src/a.log",
+     ".cache/a/!x",
+     "Build/lib/b/a.log",
+     "c",
+     "Build/keep/.env",
+     ".env",
+     "ab",
+     "src/src/build",
+     "a//b"
+    ],
+    {
+     "a/b/c/d": [
+      "??",
+      "[^a]*"
+     ],
+     "x y": [
+      "\\#x",
+      "**/**",
+      ""
+     ],
+     "": [
+      "/**",
+      "!x\t",
+      "#x"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     ".cache/a/!x",
+     ".env",
+     "Build/keep/.env",
+     "Build/lib/b/a.log",
+     "a/src/a.log",
+     "a/x y/b.txt",
+     "ab",
+     "b/src/!x",
+     "c",
+     "logs/b",
+     "src/src/build",
+     "x y/Build/sub/aa"
+    ],
+    "ignored_dirs": [
+     ".cache",
+     "Build",
+     "a",
+     "b",
+     "logs",
+     "src",
+     "x y"
+    ],
+    "invalid": [
+     "a//b"
+    ]
+   }
+  },
+  {
+   "id": "R038",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "main.o",
+     "out/README",
+     "src/logs/ba",
+     "!x",
+     "sub/lib/!x",
+     "keep/x y/b.txt",
+     "docs/logs/build/]",
+     "a/x y",
+     "b/sub/#x",
+     ".cache/a.txt",
+     "lib/^",
+     "b/#x",
+     "a/.."
+    ],
+    {
+     "nowhere": [
+      "logs//.cache"
+     ],
+     "": [
+      "lib/**/b.txt",
+      "out**"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "out/README"
+    ],
+    "ignored_dirs": [
+     "out"
+    ],
+    "invalid": [
+     "a/.."
+    ]
+   }
+  },
+  {
+   "id": "R039",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "logs/lib/x y",
+     "b",
+     "x y/ba",
+     "b",
+     "keep.txt",
+     "lib/readme",
+     "a\\b",
+     "src/build/x y/aa",
+     "sub/keep/a\\b",
+     "x y/]"
+    ],
+    {
+     "": [
+      "!*/",
+      "*.*"
+     ],
+     "logs": [
+      "[!]]",
+      "!/keep.txt"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "keep.txt"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R040",
+   "title": "random tree and rules",
+   "args": [
+    [
+     "a/main.o",
+     "#x",
+     "sub/README",
+     ".cache/keep.txt",
+     "lib/.env",
+     "a/logs/a.log",
+     "ab",
+     "a"
+    ],
+    {
+     "": [
+      "logs/***",
+      "*[!.]*",
+      ""
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "#x",
+     ".cache/keep.txt",
+     "a/logs/a.log",
+     "a/main.o",
+     "ab",
+     "lib/.env",
+     "sub/README"
+    ],
+    "ignored_dirs": [
+     ".cache",
+     "a",
+     "lib",
+     "sub"
+    ],
+    "invalid": [
+     "a"
+    ]
+   }
+  },
+  {
+   "id": "R041",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "build/x.log",
+     "build/a/keep.txt",
+     "y.txt",
+     "z.o",
+     "x/b/logs/build/build",
+     "b/x.log"
+    ],
+    {
+     "": [
+      "*/",
+      "/build/"
+     ],
+     "a/b/c/d": [
+      "!a",
+      "logs/logs/*"
+     ],
+     "b": [
+      "!x/**",
+      "build/**/build"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "b/x.log",
+     "build/a/keep.txt",
+     "build/x.log",
+     "x/b/logs/build/build"
+    ],
+    "ignored_dirs": [
+     "b",
+     "build",
+     "x"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R042",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "keep",
+     "build/a/a",
+     "x/build/build",
+     "logs/build",
+     "build/b",
+     "x/a",
+     "a/logs/logs/z.o",
+     "a/a/y.txt",
+     "z.o",
+     "a/b/a/b/z.o",
+     "x/b/logs/keep",
+     "a/build/x/a",
+     "logs/b/build/b/y.txt",
+     "a/y.txt"
+    ],
+    {
+     "": [
+      "logs/b/*",
+      "/*",
+      "x/a/"
+     ],
+     "a": [
+      "/*",
+      "!*.log",
+      "b/logs/",
+      "!logs/**"
+     ],
+     "a/logs/logs": [
+      "x/build/*"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/a/y.txt",
+     "a/b/a/b/z.o",
+     "a/build/x/a",
+     "a/logs/logs/z.o",
+     "a/y.txt",
+     "build/a/a",
+     "build/b",
+     "keep",
+     "logs/b/build/b/y.txt",
+     "logs/build",
+     "x/a",
+     "x/b/logs/keep",
+     "x/build/build",
+     "z.o"
+    ],
+    "ignored_dirs": [
+     "a",
+     "build",
+     "logs",
+     "x"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R043",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "logs/build/build",
+     "keep/b/x/keep/build",
+     "keep/b/keep/a",
+     "x/build/b/a/keep",
+     "logs/keep.txt",
+     "build/x/build/b",
+     "build/b/x/b",
+     "logs/keep/keep"
+    ],
+    {
+     "": [
+      "/keep/",
+      "# comment"
+     ],
+     "build/x": [
+      "*/",
+      "logs/",
+      "!*",
+      "!x",
+      "!b/x"
+     ],
+     "build/b": [
+      "/x",
+      "!build/**/a/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "build/b/x/b",
+     "keep/b/keep/a",
+     "keep/b/x/keep/build"
+    ],
+    "ignored_dirs": [
+     "build/b/x",
+     "keep"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R044",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "a/logs/build/keep",
+     "logs/b/keep",
+     "keep/a/b",
+     "keep/x.log",
+     "a/build/build/keep",
+     "build/keep/logs/y.txt",
+     "b/y.txt",
+     "logs/x/x/build/x.log",
+     "keep/b",
+     "a/keep.txt",
+     "z.o",
+     "a/z.o"
+    ],
+    {
+     "": [
+      "keep/x",
+      "!**/b",
+      "!b",
+      "b/build",
+      "!*",
+      "# comment",
+      "build/*",
+      "*/",
+      "!*.log",
+      "**/a/",
+      "keep",
+      ""
+     ],
+     "a/build": [
+      "!*.log"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/build/build/keep",
+     "a/keep.txt",
+     "a/logs/build/keep",
+     "a/z.o",
+     "b/y.txt",
+     "build/keep/logs/y.txt",
+     "keep/a/b",
+     "keep/b",
+     "keep/x.log",
+     "logs/b/keep",
+     "logs/x/x/build/x.log"
+    ],
+    "ignored_dirs": [
+     "a",
+     "b",
+     "build",
+     "keep",
+     "logs"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R045",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "build/build",
+     "x/b",
+     "keep/b/b",
+     "keep/b/x.log",
+     "a",
+     "x/build",
+     "build/x/logs/keep.txt",
+     "x/b/build/y.txt",
+     "a/a/logs/b/b",
+     "a/z.o",
+     "keep/keep/keep",
+     "b/keep/x/x/x.log",
+     "a/a/z.o",
+     "x/keep"
+    ],
+    {
+     "b/keep": [
+      "!a/",
+      "**/logs"
+     ],
+     "x/b/build": [
+      "/build/**/y.txt",
+      "x/",
+      "!a/logs",
+      "/a/**/b",
+      "/logs/",
+      "/*"
+     ],
+     "keep/b": [
+      "!a/**/y.txt",
+      "**/a/",
+      "/logs/"
+     ],
+     "": [
+      "!/keep/y.txt",
+      "keep/**/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "keep/b/b",
+     "keep/b/x.log",
+     "keep/keep/keep",
+     "x/b/build/y.txt"
+    ],
+    "ignored_dirs": [
+     "keep/b",
+     "keep/keep"
+    ],
+    "invalid": [
+     "a",
+     "x/b"
+    ]
+   }
+  },
+  {
+   "id": "R046",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "x.log",
+     "b/a/keep/logs/a",
+     "build/keep/z.o",
+     "y.txt",
+     "logs/build/keep/y.txt",
+     "b/b/b/b/keep"
+    ],
+    {
+     "": [
+      "/build/*.o",
+      "logs/",
+      "*/",
+      "*.log",
+      "*.log",
+      "/a/",
+      "a/**/",
+      "!*",
+      "b/build/*"
+     ],
+     "b/b/b": [
+      "!x.log"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R047",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "logs/b/a/b",
+     "a/build/a/x/keep.txt",
+     "b/b/logs/z.o",
+     "a/build/b",
+     "keep/build/y.txt"
+    ],
+    {
+     "zz": [
+      "a/keep"
+     ],
+     "": [
+      "!logs/logs",
+      "!keep/logs",
+      "*/",
+      "!/logs/keep",
+      "!keep/**",
+      "logs/keep/*",
+      "!**/logs"
+     ],
+     "logs/b": [
+      "keep",
+      "/x/**/z.o",
+      "!b/*.txt"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/build/a/x/keep.txt",
+     "a/build/b",
+     "b/b/logs/z.o",
+     "keep/build/y.txt",
+     "logs/b/a/b"
+    ],
+    "ignored_dirs": [
+     "a",
+     "b",
+     "keep",
+     "logs/b"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R048",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "keep/a/build/x.log",
+     "build/x/build/keep",
+     "keep/keep/keep/z.o",
+     "b/a/build/x.log",
+     "a/build/keep.txt",
+     "build/build/keep",
+     "keep/keep.txt",
+     "y.txt",
+     "build/x.log",
+     "a/b/keep/keep"
+    ],
+    {
+     "keep/a": [
+      "b/*",
+      "!*",
+      "*/",
+      "!build"
+     ],
+     "a/b": [
+      "x/",
+      "build",
+      "/a/*.o"
+     ],
+     "keep/keep/keep": [
+      "**/b",
+      "b/keep/*",
+      "!*.log",
+      "*"
+     ],
+     "a/build": [
+      "!*.log"
+     ],
+     "build/x/build": [
+      "/build/*.o"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "keep/keep/keep/z.o"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R049",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "a/keep/keep/b",
+     "b/logs/b/keep/x.log",
+     "keep/x/build/x/x.log",
+     "x/keep/build/b/y.txt",
+     "build/x/b/a",
+     "x/a/a/a/b",
+     "build/build/build/build/y.txt",
+     "x/b/z.o",
+     "keep/logs/x/z.o",
+     "logs/keep.txt",
+     "logs/keep.txt",
+     "logs/a/x/keep.txt",
+     "keep/logs/b"
+    ],
+    {
+     "": [
+      "a/**/b",
+      "/b/**/keep.txt",
+      "x/*.log",
+      "build",
+      "!x",
+      "!build/**/x/",
+      "keep"
+     ],
+     "a/b/c/d": [
+      "!b/**"
+     ],
+     "build/build": [
+      "!*/",
+      "!*/",
+      "!build/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/keep/keep/b",
+     "b/logs/b/keep/x.log",
+     "build/build/build/build/y.txt",
+     "build/x/b/a",
+     "keep/logs/b",
+     "keep/logs/x/z.o",
+     "keep/x/build/x/x.log",
+     "x/keep/build/b/y.txt"
+    ],
+    "ignored_dirs": [
+     "a/keep",
+     "b/logs/b/keep",
+     "build",
+     "keep",
+     "x/keep"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R050",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "build/logs/a/keep/y.txt",
+     "b/build/a/a/z.o",
+     "build/b/b/build",
+     "logs/build/a/build",
+     "logs/a/b/logs/z.o",
+     "b/logs/keep",
+     "a/y.txt",
+     "build/a/x.log",
+     "z.o",
+     "x/build/keep/keep.txt"
+    ],
+    {
+     "": [
+      "!a/b",
+      "a/**/z.o",
+      "!logs/**/build/",
+      "a/build",
+      "",
+      "!b",
+      "!a/*",
+      "b/*.log",
+      "!build/**/a/",
+      "# comment"
+     ],
+     "a/b/c/d": [
+      "*",
+      "!**/build"
+     ],
+     "x/build": [
+      "b/*",
+      "*/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "x/build/keep/keep.txt"
+    ],
+    "ignored_dirs": [
+     "x/build/keep"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R051",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "a/logs/keep.txt",
+     "x/build/a/x.log",
+     "b/build/a",
+     "build/x/build/a/x.log",
+     "build/logs/logs/build/keep.txt",
+     "keep/a/x/build"
+    ],
+    {
+     "build/x/build": [
+      "!build/**/x.log",
+      "!a",
+      "!a/x",
+      "**/build/",
+      "!*/",
+      "",
+      "# comment"
+     ],
+     "x/build/a": [
+      "**/build/",
+      "build/keep",
+      "keep.txt",
+      ""
+     ],
+     "a": [
+      "b/x",
+      "!x/logs",
+      "**/a",
+      "keep",
+      "!a"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R052",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "build/logs/z.o",
+     "b/y.txt",
+     "keep/x/x/keep/x.log",
+     "a",
+     "b/keep/keep"
+    ],
+    {
+     "": [
+      "!**/x",
+      "!keep/**/keep/",
+      "!keep/**",
+      "!*.log",
+      "!b",
+      "# comment",
+      "keep/**",
+      "/logs/",
+      "!b/**/b",
+      "# comment"
+     ],
+     "keep/x/x/keep": [
+      "!logs/**",
+      "!*/",
+      "b/*.log"
+     ],
+     "b": [
+      "!*",
+      "x"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "keep/x/x/keep/x.log"
+    ],
+    "ignored_dirs": [
+     "keep/x"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R053",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "x/b",
+     "logs/b/build/x.log",
+     "x/build/x/z.o",
+     "logs/a/a/y.txt",
+     "build/build/a/a",
+     "a/b/keep.txt",
+     "keep/a/x.log",
+     "logs/a/a/keep.txt"
+    ],
+    {
+     "nowhere": [
+      "build/**",
+      "!b"
+     ],
+     "x/build": [
+      "!logs/x",
+      "# comment",
+      "/b/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R054",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "a/a/keep.txt",
+     "x/a/x/keep",
+     "logs/keep/a/z.o",
+     "keep.txt",
+     "b/build",
+     "logs/a/x/keep",
+     "b/b/logs/x.log",
+     "logs/a/y.txt",
+     "x/build",
+     "logs/keep.txt",
+     "a/x.log",
+     "build/keep/build",
+     "x/keep",
+     "b/keep/x/b"
+    ],
+    {
+     "a/a": [
+      "!**/x",
+      "keep/b/",
+      "!*.log"
+     ],
+     "a/b/c/d": [
+      "!logs/",
+      "keep/**",
+      "*.log",
+      "keep/**/",
+      "a/keep/"
+     ],
+     "nowhere": [
+      "b/keep/",
+      "x.log",
+      "!*.log",
+      "/keep/*.o",
+      "!a",
+      ""
+     ],
+     "logs/keep": [
+      "/x/*.o"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R055",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "x/keep/build/build/build",
+     "a/keep/x/y.txt",
+     "build",
+     "a",
+     "keep",
+     "build/keep/b",
+     "keep/z.o",
+     "b/logs/b",
+     "a/y.txt"
+    ],
+    {
+     "": [
+      "!x"
+     ],
+     "x/keep/build": [
+      "!/a"
+     ],
+     "x": [
+      "!a/b"
+     ],
+     "build/keep": [
+      "!**/logs"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": [
+     "a",
+     "build",
+     "keep"
+    ]
+   }
+  },
+  {
+   "id": "R056",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "keep/b/keep.txt",
+     "build/b/x/keep",
+     "x/a",
+     "x/x/y.txt",
+     "a/a/keep.txt",
+     "b/a",
+     "logs/logs/a",
+     "a/logs/b",
+     "x/x/z.o",
+     "logs/x/x/keep.txt"
+    ],
+    {
+     "x/x": [
+      "x/**/y.txt",
+      "*.log",
+      "/x/*.o",
+      "!b/a",
+      "!b/*"
+     ],
+     "logs/x": [
+      "!b/b",
+      "!/b/y.txt",
+      "a/a/",
+      "!logs/logs",
+      "!keep/*",
+      ""
+     ],
+     "keep/b": [
+      "**/z.o",
+      "!build/*"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R057",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "keep/keep/build/b/y.txt",
+     "keep/a/keep.txt",
+     "logs/build/a",
+     "x/a/logs/x.log",
+     "build/a",
+     "a/keep.txt",
+     "b",
+     "logs/logs/keep",
+     "logs/x/x.log",
+     "x/keep/b/z.o"
+    ],
+    {
+     "keep": [
+      "x/keep/",
+      "!*",
+      "!keep",
+      "!*/",
+      "# comment"
+     ],
+     "": [
+      "!*/",
+      "!logs/*",
+      "!keep/logs",
+      "/keep/",
+      "*",
+      "!x/x.log",
+      "b/*.log",
+      "# comment"
+     ],
+     "keep/keep": [
+      "x/**/",
+      "!build/**"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/keep.txt",
+     "b",
+     "build/a",
+     "keep/a/keep.txt",
+     "keep/keep/build/b/y.txt",
+     "logs/build/a",
+     "logs/logs/keep",
+     "logs/x/x.log",
+     "x/a/logs/x.log",
+     "x/keep/b/z.o"
+    ],
+    "ignored_dirs": [
+     "a",
+     "build",
+     "keep",
+     "logs",
+     "x"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R058",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "logs/build/keep",
+     "a/build/b/a/y.txt",
+     "a/b",
+     "keep/a/x/keep.txt",
+     "logs/b/b",
+     "keep/b/keep",
+     "keep.txt"
+    ],
+    {
+     "a": [
+      "/*",
+      "logs/**/",
+      "*"
+     ],
+     "": [
+      "!b/**/x/"
+     ],
+     "a/build/b": [
+      "!**/y.txt",
+      "!x/b"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/b",
+     "a/build/b/a/y.txt"
+    ],
+    "ignored_dirs": [
+     "a/build"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R059",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "b/x/build",
+     "keep/b/x/build",
+     "z.o",
+     "x.log",
+     "logs/logs/logs/build",
+     "a/keep/build",
+     "logs/x/keep/keep/y.txt",
+     "logs/keep/a/build",
+     "a/logs/logs/build",
+     "build/b/a/logs/build",
+     "build/build",
+     "a/logs/a/keep",
+     "build/a",
+     "b/x/keep/z.o",
+     "b/logs/build/y.txt"
+    ],
+    {
+     "": [
+      "x/*.log",
+      "!a/",
+      "/b/",
+      "!b/**",
+      "!/logs/keep",
+      "!*/",
+      "/build/"
+     ],
+     "keep/b/x": [
+      "logs/*",
+      "x/build"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "build/a",
+     "build/b/a/logs/build",
+     "build/build"
+    ],
+    "ignored_dirs": [
+     "build"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R060",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "z.o",
+     "x/x/a",
+     "keep/b",
+     "build",
+     "logs/b/b/x/y.txt",
+     "a/build",
+     "logs/y.txt",
+     "build",
+     "b/b/b",
+     "a/a/logs/keep",
+     "b/b/build/build",
+     "b/logs/x/y.txt",
+     "b/x/logs/keep.txt",
+     "build/build/y.txt",
+     "keep.txt"
+    ],
+    {
+     "build/build": [
+      "!**/logs",
+      "!*.log",
+      "!*.log",
+      "!b/*",
+      "# comment"
+     ],
+     "b/x/logs": [
+      "build",
+      "!b/*.txt",
+      "x/logs/"
+     ],
+     "b/logs": [
+      "a",
+      "keep",
+      "b/x/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": [
+     "build"
+    ]
+   }
+  },
+  {
+   "id": "R061",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "b/x.log",
+     "logs/y.txt",
+     "keep/build/b",
+     "x/z.o",
+     "a/b/x/x.log",
+     "keep/build/keep.txt",
+     "a/b/logs/keep/keep.txt",
+     "y.txt",
+     "keep/build/keep/y.txt",
+     "a/x/a",
+     "build/logs/x.log"
+    ],
+    {
+     "": [
+      "*.log",
+      "x/build/",
+      "!build/z.o",
+      "!*",
+      "",
+      "*.log",
+      "!*/",
+      "!keep/**"
+     ],
+     "a": [
+      "*.log",
+      "/b/**/b"
+     ],
+     "b": [
+      "!**/a",
+      "x/*",
+      "*"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/b/x/x.log",
+     "b/x.log",
+     "build/logs/x.log"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R062",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "logs/a/a",
+     "x/x/keep",
+     "a/keep/x/a",
+     "build/x/a",
+     "x/b/x/a",
+     "logs/z.o",
+     "build/a",
+     "a/keep/build",
+     "x/x/keep.txt"
+    ],
+    {
+     "": [
+      "!**/x",
+      "!x/**/a",
+      "logs/**",
+      "!build/**/logs/",
+      "z.o",
+      "# comment"
+     ],
+     "x": [
+      "build/**/",
+      "a/**/z.o",
+      "*.log"
+     ],
+     "logs/a": [
+      "*/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "logs/a/a",
+     "logs/z.o"
+    ],
+    "ignored_dirs": [
+     "logs/a"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R063",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "b/b/z.o",
+     "a/build/x/z.o",
+     "build/build",
+     "keep/x/keep/y.txt",
+     "a/keep.txt",
+     "x/a/keep",
+     "b/x/a/x.log",
+     "build/keep/keep",
+     "logs/logs/y.txt"
+    ],
+    {
+     "": [
+      "x/**/",
+      "build/**",
+      "/logs/**/a",
+      "!**/z.o",
+      "build",
+      "a/**/x.log",
+      "a/a",
+      "!b/**",
+      "keep/keep/*",
+      "# comment"
+     ],
+     "x": [
+      "/keep/"
+     ],
+     "keep/x/keep": [
+      "logs/*.log"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/build/x/z.o",
+     "build/build",
+     "build/keep/keep",
+     "x/a/keep"
+    ],
+    "ignored_dirs": [
+     "a/build",
+     "build",
+     "x/a"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R064",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "keep/build/keep",
+     "x.log",
+     "b/b",
+     "keep/logs/x/y.txt",
+     "x/keep/logs/keep"
+    ],
+    {
+     "nowhere": [
+      "!x/",
+      "b"
+     ],
+     "": [
+      "keep/*.log",
+      "/logs",
+      "!*"
+     ],
+     "zz": [
+      "*",
+      "!**/keep",
+      "b/",
+      "/build/",
+      "**/b"
+     ],
+     "keep/logs/x": [
+      "*/"
+     ],
+     "keep/logs": [
+      "keep/a/",
+      "!a/*"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R065",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "build/keep/keep/b/build",
+     "build/y.txt",
+     "x/keep",
+     "a/build",
+     "keep/x/a/x.log",
+     "logs/z.o",
+     "build/b/b/b"
+    ],
+    {
+     "build/keep/keep/b": [
+      "build/**/",
+      ""
+     ],
+     "": [
+      "!**/build",
+      "**/b/",
+      "!**/b",
+      "/build/",
+      "!b/build"
+     ],
+     "keep/x/a": [
+      "/keep",
+      "a/**/b"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "build/b/b/b",
+     "build/keep/keep/b/build",
+     "build/y.txt"
+    ],
+    "ignored_dirs": [
+     "build"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R066",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "a/logs/y.txt",
+     "a/build",
+     "keep/a/b/logs/keep",
+     "x.log",
+     "build/z.o",
+     "x/logs/logs/z.o",
+     "logs/a/keep/x.log",
+     "logs/a/keep/y.txt",
+     "build/b/x/logs/a",
+     "a/logs/a/build",
+     "build/b/x.log",
+     "keep"
+    ],
+    {
+     "keep": [
+      "!logs/**",
+      ""
+     ],
+     "build/b/x": [
+      "/build/**/b",
+      "!b/",
+      "!/build/a",
+      "a/x/"
+     ],
+     "": [
+      "!keep/**/x"
+     ],
+     "logs": [
+      "*.log",
+      "a"
+     ],
+     "a/logs": [
+      "!keep.txt",
+      "b/**/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "logs/a/keep/x.log",
+     "logs/a/keep/y.txt"
+    ],
+    "ignored_dirs": [
+     "logs/a"
+    ],
+    "invalid": [
+     "keep"
+    ]
+   }
+  },
+  {
+   "id": "R067",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "x/b",
+     "build/x/keep",
+     "b/a",
+     "logs/b/x/b/z.o",
+     "build/a/build/keep",
+     "b/logs/keep/b",
+     "logs/b/keep.txt",
+     "keep/x/x/keep.txt",
+     "logs/x/x/b",
+     "logs/keep",
+     "build/x.log"
+    ],
+    {
+     "keep": [
+      "b/logs/*",
+      "!a/**/a/",
+      "keep/",
+      "!x/*.txt",
+      "*"
+     ],
+     "": [
+      "*.log",
+      "*.log",
+      "!*",
+      "logs/*",
+      "!/logs",
+      "",
+      "# comment",
+      "!/build",
+      "/x/*.o",
+      "b/**/b",
+      "x"
+     ],
+     "logs": [
+      "!*",
+      "keep/build/",
+      "!/logs"
+     ],
+     "logs/b/x": [
+      "a"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "b/logs/keep/b",
+     "build/x/keep",
+     "keep/x/x/keep.txt",
+     "x/b"
+    ],
+    "ignored_dirs": [
+     "build/x",
+     "keep/x",
+     "x"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R068",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "keep",
+     "a/b/x.log",
+     "x/x/keep/a",
+     "build/x/x/build",
+     "a/keep/keep/x.log",
+     "b/x/build/keep.txt",
+     "a/x/keep"
+    ],
+    {
+     "x/x/keep": [
+      "keep/*.log",
+      "keep/*.log",
+      "**/build",
+      "*.log",
+      "x/*.log"
+     ],
+     "": [
+      "/build/**/x",
+      "!*",
+      "!*.log",
+      "/a/*.o"
+     ],
+     "a/keep/keep": [
+      "!x",
+      "!build"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R069",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "keep.txt",
+     "keep.txt",
+     "build/x/b",
+     "a/keep",
+     "b/a/build/build/z.o",
+     "y.txt",
+     "keep/keep.txt"
+    ],
+    {
+     "build": [
+      "build/",
+      "# comment"
+     ],
+     "b/a/build/build": [
+      "/keep/",
+      "!b/*.txt",
+      "!/b"
+     ],
+     "a": [
+      "/b/",
+      "!*/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R070",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "logs/logs/z.o",
+     "a/z.o",
+     "build/b",
+     "a/keep.txt",
+     "keep/keep/y.txt",
+     "b/x.log"
+    ],
+    {
+     "a": [
+      "!a",
+      "!keep/"
+     ],
+     "": [
+      "!a",
+      "build/y.txt",
+      "logs/**",
+      "!logs",
+      "!keep/z.o"
+     ],
+     "build": [
+      "/keep",
+      "b/*.log"
+     ],
+     "b": [
+      "/x/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "logs/logs/z.o"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R071",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "b/a/logs/keep",
+     "logs/x/x/logs/keep",
+     "b/a/b",
+     "keep/logs/logs/z.o",
+     "b/z.o",
+     "b/build/build/keep/x.log"
+    ],
+    {
+     "keep/logs/logs": [
+      "!**/b",
+      "*/",
+      "*"
+     ],
+     "logs/x/x": [
+      "!**/keep",
+      "!build/",
+      "a/**",
+      "b/"
+     ],
+     "b/build": [
+      "/keep/**/build"
+     ],
+     "b/a/logs": [
+      "!/build/keep"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "keep/logs/logs/z.o"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R072",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "logs/x/keep.txt",
+     "logs/build",
+     "x/a/y.txt",
+     "b/build/x/x.log",
+     "logs/logs/logs/x.log",
+     "x/x.log",
+     "keep/b/a/x.log",
+     "build/b/x/z.o",
+     "b/x.log"
+    ],
+    {
+     "": [
+      "!logs/*.txt",
+      "!keep/**/logs",
+      "b",
+      "!/logs",
+      "/x/",
+      "!*/",
+      "*/"
+     ],
+     "keep/b": [
+      "a",
+      "*.log",
+      "logs/x/*"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "b/build/x/x.log",
+     "b/x.log",
+     "build/b/x/z.o",
+     "keep/b/a/x.log",
+     "logs/build",
+     "logs/logs/logs/x.log",
+     "logs/x/keep.txt",
+     "x/a/y.txt",
+     "x/x.log"
+    ],
+    "ignored_dirs": [
+     "b",
+     "build",
+     "keep",
+     "logs",
+     "x"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R073",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "x/a/b",
+     "keep/y.txt",
+     "keep",
+     "x/z.o",
+     "build",
+     "a/b/keep.txt",
+     "x/build/y.txt",
+     "logs/y.txt"
+    ],
+    {
+     "x/a": [
+      "a",
+      "/b",
+      "build/*.log",
+      "keep/*",
+      "# comment"
+     ],
+     "": [
+      "*.log"
+     ],
+     "logs": [
+      "*/",
+      "logs/*",
+      "!x"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "x/a/b"
+    ],
+    "ignored_dirs": [],
+    "invalid": [
+     "keep"
+    ]
+   }
+  },
+  {
+   "id": "R074",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "logs/logs/logs/a",
+     "logs/keep/z.o",
+     "keep/build/b",
+     "build/x/b/a",
+     "build/b/logs/build",
+     "keep",
+     "build/keep/z.o",
+     "build/z.o",
+     "build/a/build/a/keep"
+    ],
+    {
+     "logs/logs/logs": [
+      "/keep/**/z.o",
+      "/x/"
+     ],
+     "": [
+      "!x/*",
+      "!**/logs",
+      "!keep",
+      "",
+      "!/a",
+      "x/",
+      "/*"
+     ],
+     "build/keep": [
+      "!keep/",
+      "!**/z.o",
+      "!*/",
+      "b/**",
+      "/*"
+     ],
+     "build/b/logs": [
+      "logs/*"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "build/a/build/a/keep",
+     "build/b/logs/build",
+     "build/keep/z.o",
+     "build/x/b/a",
+     "build/z.o",
+     "keep/build/b",
+     "logs/keep/z.o",
+     "logs/logs/logs/a"
+    ],
+    "ignored_dirs": [
+     "build",
+     "keep",
+     "logs"
+    ],
+    "invalid": [
+     "keep"
+    ]
+   }
+  },
+  {
+   "id": "R075",
+   "title": "random precedence and exclusion",
+   "args": [
+    [
+     "build/build/z.o",
+     "x/b/z.o",
+     "logs/keep.txt",
+     "a/logs/b",
+     "a/logs/keep.txt",
+     "keep/keep/b/a"
+    ],
+    {
+     "": [
+      "!keep",
+      "*/",
+      "!keep/**",
+      "/b/**/keep",
+      "# comment",
+      "!*",
+      "!/b",
+      "/build/",
+      "!keep/**",
+      "*"
+     ],
+     "keep": [
+      "build/**/x.log",
+      "!x/*",
+      "!x/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/logs/b",
+     "a/logs/keep.txt",
+     "build/build/z.o",
+     "keep/keep/b/a",
+     "logs/keep.txt",
+     "x/b/z.o"
+    ],
+    "ignored_dirs": [
+     "a",
+     "build",
+     "keep",
+     "logs",
+     "x"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R076",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     "!x",
+     "#x",
+     ".x",
+     "?",
+     "[!]",
+     "[^]",
+     "[a]",
+     "[x-x]",
+     "\\",
+     "\\!x",
+     "\\[a]",
+     "a b",
+     "ax",
+     "d/[a]",
+     "d/]x",
+     "d/^",
+     "d/ab",
+     "d/é",
+     "e/*",
+     "e/[",
+     "e/b",
+     "y",
+     "zx",
+     "é"
+    ],
+    {
+     "": [
+      "[a",
+      "\\[a]",
+      "\\!x",
+      "[x-x]",
+      "!\\#x"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "!x",
+     "[a]",
+     "d/[a]"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R077",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     "*",
+     "-",
+     "Ab",
+     "[]",
+     "[^]",
+     "\\*",
+     "]",
+     "a",
+     "a b",
+     "a\\b",
+     "ab",
+     "bx",
+     "d/a b",
+     "d/a[b",
+     "e/]x",
+     "e/a-b",
+     "e/b",
+     "x",
+     "x\t",
+     "x ",
+     "x  "
+    ],
+    {
+     "": [
+      "!x ",
+      "a*b",
+      "\\*"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "*",
+     "a b",
+     "a\\b",
+     "ab",
+     "d/a b",
+     "d/a[b",
+     "e/a-b"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R078",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     " x ",
+     "!x",
+     ".x",
+     "[!]",
+     "[]]",
+     "[]]x",
+     "\\ x ",
+     "^x",
+     "a\\b",
+     "d/*",
+     "e/a",
+     "x  ",
+     "x.y",
+     "x[",
+     "x\\"
+    ],
+    {
+     "": [
+      "x\\  ",
+      "[a-c-e]",
+      "\\?",
+      "[]]",
+      "\\ x ",
+      "[\\]]x"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "e/a"
+    ],
+    "ignored_dirs": [
+     "e"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R079",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     "!",
+     "#x",
+     ".x",
+     "Ab",
+     "[!]",
+     "[]",
+     "[^]",
+     "[a]",
+     "\\",
+     "\\#x",
+     "a[b",
+     "ab",
+     "ax",
+     "b",
+     "d/c",
+     "d/x "
+    ],
+    {
+     "": [
+      "!\\#x",
+      "a[!b-]b"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a[b"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R080",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     " x ",
+     "!",
+     "!x",
+     "[^-]",
+     "\\ x ",
+     "\\[a]",
+     "\\\\",
+     "a b",
+     "a-b",
+     "aB",
+     "a[!b-]b",
+     "b",
+     "d/ x",
+     "d/^x",
+     "d/x\t",
+     "x.y",
+     "y",
+     "É"
+    ],
+    {
+     "": [
+      "\\[a]",
+      "\\ x ",
+      "\\\\",
+      "[^-]",
+      "a[!b-]b",
+      "[\\]]x"
+     ],
+     "d": [
+      "[!]",
+      " x"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "!",
+     "a b",
+     "b",
+     "d/ x",
+     "d/^x",
+     "d/x\t",
+     "y",
+     "É"
+    ],
+    "ignored_dirs": [
+     "d"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R081",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     " x",
+     "!x",
+     "#x",
+     "-",
+     "?",
+     "[]-a]",
+     "[^]",
+     "[^]]x",
+     "\\",
+     "^x",
+     "a[b",
+     "ax",
+     "b",
+     "d/\\",
+     "d/zx",
+     "e/a",
+     "e/ax",
+     "x ",
+     "x.y",
+     "x[",
+     "x\\ ",
+     "É"
+    ],
+    {
+     "": [
+      "[^]]x",
+      "x\\ ",
+      "\\?",
+      "[]-a]",
+      "[b-a]x",
+      " "
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     " x",
+     "!x",
+     "#x",
+     "?",
+     "^x",
+     "ax",
+     "d/zx",
+     "e/a",
+     "e/ax",
+     "x "
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R082",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     "#x",
+     "*",
+     ".x",
+     "?",
+     "[!]",
+     "[]",
+     "[a]",
+     "\\",
+     "]",
+     "^",
+     "^x",
+     "a",
+     "a*",
+     "bx",
+     "d/[a",
+     "e/*",
+     "e/^",
+     "x\t",
+     "x  ",
+     "x.y",
+     "zx",
+     "É"
+    ],
+    {
+     "": [
+      "!a*",
+      "[z-a]*",
+      "#x"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R083",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     "!",
+     "!x",
+     "#x",
+     "*",
+     "[[]a]",
+     "\\",
+     "a*b",
+     "a-b",
+     "b",
+     "bx",
+     "c",
+     "d/a b",
+     "d/b",
+     "d/x\t",
+     "e/[",
+     "e/a[b",
+     "x ",
+     "x[",
+     "y",
+     "zx",
+     "É",
+     "é"
+    ],
+    {
+     "": [
+      "!*",
+      "a*b",
+      "[[]a]",
+      "[x-x]",
+      "*",
+      "[[]a]",
+      "??"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "!",
+     "!x",
+     "#x",
+     "*",
+     "[[]a]",
+     "\\",
+     "a*b",
+     "a-b",
+     "b",
+     "bx",
+     "c",
+     "d/a b",
+     "d/b",
+     "d/x\t",
+     "e/[",
+     "e/a[b",
+     "x ",
+     "x[",
+     "y",
+     "zx",
+     "É",
+     "é"
+    ],
+    "ignored_dirs": [
+     "d",
+     "e"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R084",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     " x",
+     "!",
+     "#x",
+     "*",
+     "*\\",
+     "[a",
+     "\\\\",
+     "^x",
+     "a*",
+     "aB",
+     "ax",
+     "d/*",
+     "d/*.*",
+     "d/\\\\*",
+     "d/b",
+     "e/a",
+     "zx"
+    ],
+    {
+     "": [
+      "\\\\",
+      "*\\",
+      "!a*",
+      "[c-a]*",
+      "a\\",
+      "x "
+     ],
+     "d": [
+      "[]",
+      "*.*",
+      "\\\\*"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "d/*.*",
+     "d/\\\\*"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R085",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     ".x",
+     "?",
+     "[",
+     "[!]",
+     "[!a-b]",
+     "[a",
+     "\\ x ",
+     "]",
+     "^",
+     "a",
+     "a-b",
+     "aB",
+     "ax",
+     "b",
+     "bx",
+     "d/^x",
+     "d/y",
+     "e/!",
+     "e/[^]",
+     "e/a-b",
+     "x\t",
+     "é"
+    ],
+    {
+     "": [
+      "[!a-b]",
+      "\\?",
+      "\\ x "
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "?",
+     "[",
+     "]",
+     "^",
+     "d/^x",
+     "d/y",
+     "e/!",
+     "e/[^]",
+     "e/a-b",
+     "é"
+    ],
+    "ignored_dirs": [
+     "d",
+     "e"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R086",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     " x",
+     "!",
+     "?",
+     "\\",
+     "a b",
+     "a[b",
+     "a\\\\b",
+     "ab",
+     "d/!",
+     "d/-",
+     "e/*",
+     "e/a\\b",
+     "e/x.y",
+     "x\t",
+     "x\\",
+     "x\\\t"
+    ],
+    {
+     "": [
+      "a\\\\b",
+      "x\\\t"
+     ],
+     "d": [
+      "\\\\"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "e/a\\b",
+     "x\t"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R087",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     "!x",
+     "#x",
+     ".x",
+     "Ab",
+     "[^]",
+     "[a]",
+     "\\",
+     "\\#x",
+     "\\[a]",
+     "\\x",
+     "]x",
+     "^",
+     "a b",
+     "a\\b",
+     "ab",
+     "b",
+     "bx",
+     "d/x ",
+     "e/[^]",
+     "e/aB",
+     "e/é",
+     "x\t",
+     "x ",
+     "x  ",
+     "x.y",
+     "y",
+     "É"
+    ],
+    {
+     "": [
+      "\\[a]",
+      "a\\b",
+      "\\#x",
+      "\\x  ",
+      "\\[a]"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "#x",
+     "[a]",
+     "ab"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R088",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     " x ",
+     "!",
+     "!x",
+     "#x",
+     "*",
+     "-",
+     "[",
+     "[]",
+     "[^]",
+     "[a]",
+     "\\ x",
+     "]x",
+     "^",
+     "^x",
+     "aB",
+     "d/zx",
+     "d/é",
+     "e/*",
+     "e/[^]",
+     "e/^x",
+     "x[",
+     "y",
+     "É",
+     "é"
+    ],
+    {
+     "": [
+      "[!c-a]",
+      "\\ x ",
+      "\\#x"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "!",
+     "#x",
+     "*",
+     "-",
+     "[",
+     "^",
+     "d/zx",
+     "d/é",
+     "e/*",
+     "e/[^]",
+     "e/^x",
+     "y",
+     "É",
+     "é"
+    ],
+    "ignored_dirs": [
+     "d",
+     "e"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R089",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     " x ",
+     "!",
+     "-",
+     ".x",
+     "?",
+     "[",
+     "[]",
+     "\\ x ",
+     "^",
+     "a b",
+     "a[b",
+     "ab",
+     "bx",
+     "d/*",
+     "d/*[!x]",
+     "d/?x",
+     "d/[a",
+     "d/\\*",
+     "d/^",
+     "d/ab",
+     "e/]",
+     "e/a",
+     "e/zx",
+     "x ",
+     "x.y",
+     "y"
+    ],
+    {
+     "": [
+      "\\ x ",
+      "#x"
+     ],
+     "d": [
+      "*[!x]",
+      "\\*",
+      "a\\b",
+      "?x"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "d/*",
+     "d/*[!x]",
+     "d/?x",
+     "d/[a",
+     "d/\\*",
+     "d/^",
+     "d/ab"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R090",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     "#x",
+     "*",
+     "-",
+     "[",
+     "[!]",
+     "[]",
+     "[a",
+     "[a-a]",
+     "[a]",
+     "]x",
+     "^x",
+     "a\\b",
+     "ab",
+     "ax",
+     "b",
+     "d/[a",
+     "d/]x",
+     "d/x[",
+     "e/[",
+     "e/[^]",
+     "e/x[",
+     "x ",
+     "y"
+    ],
+    {
+     "": [
+      "[a-a]",
+      "*"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "#x",
+     "*",
+     "-",
+     "[",
+     "[!]",
+     "[]",
+     "[a",
+     "[a-a]",
+     "[a]",
+     "]x",
+     "^x",
+     "a\\b",
+     "ab",
+     "ax",
+     "b",
+     "d/[a",
+     "d/]x",
+     "d/x[",
+     "e/[",
+     "e/[^]",
+     "e/x[",
+     "x ",
+     "y"
+    ],
+    "ignored_dirs": [
+     "d",
+     "e"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R091",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     " x",
+     "#x",
+     "*",
+     "Ab",
+     "[",
+     "[a]",
+     "\\",
+     "]x",
+     "a",
+     "a-b",
+     "aB",
+     "a\\b",
+     "ab",
+     "bx",
+     "d/#x",
+     "d/[!]",
+     "d/c",
+     "e/ax",
+     "e/x ",
+     "É",
+     "é"
+    ],
+    {
+     "": [
+      "[]-]",
+      "a\\\\b",
+      "*",
+      "[É-é]"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     " x",
+     "#x",
+     "*",
+     "Ab",
+     "[",
+     "[a]",
+     "\\",
+     "]x",
+     "a",
+     "a-b",
+     "aB",
+     "a\\b",
+     "ab",
+     "bx",
+     "d/#x",
+     "d/[!]",
+     "d/c",
+     "e/ax",
+     "e/x ",
+     "É",
+     "é"
+    ],
+    "ignored_dirs": [
+     "d",
+     "e"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R092",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     " x",
+     "!",
+     "#x",
+     "*",
+     "?",
+     "[^]",
+     "[a",
+     "\\ x",
+     "\\?",
+     "]x",
+     "a-b",
+     "d/a b",
+     "d/x\t",
+     "e/Ab",
+     "e/x[",
+     "x  ",
+     "x[",
+     "É",
+     "é"
+    ],
+    {
+     "": [
+      "\\?",
+      "!\\ x"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "?"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R093",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     " x",
+     "-",
+     ".x",
+     "?",
+     "[",
+     "[]-a]",
+     "[^]",
+     "\\ x",
+     "a b",
+     "a[]-b]b",
+     "a[b",
+     "bx",
+     "d/ ",
+     "d/[!a-b]",
+     "d/[]x]",
+     "d/a",
+     "d/c",
+     "d/É",
+     "e/a[b",
+     "e/a\\b",
+     "x  ",
+     "x[",
+     "y",
+     "zx"
+    ],
+    {
+     "": [
+      "!\\ x",
+      "x[",
+      "a[]-b]b",
+      "[]-a]"
+     ],
+     "d": [
+      " ",
+      "[]x]",
+      "[!a-b]",
+      "#x"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "d/ ",
+     "d/a",
+     "d/c",
+     "d/É"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R094",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     " x",
+     "!x",
+     "#x",
+     "*",
+     "*.*",
+     "[!]",
+     "[a",
+     "[a-]",
+     "\\",
+     "\\*",
+     "]",
+     "a",
+     "a-b",
+     "a\\b",
+     "bx",
+     "d/[",
+     "e/[",
+     "e/[]",
+     "e/x.y",
+     "x ",
+     "x  ",
+     "x.y",
+     "x[",
+     "x\\\\",
+     "x\\\\ ",
+     "zx"
+    ],
+    {
+     "": [
+      "!*",
+      "\\*",
+      "\\",
+      ".*",
+      "*.*",
+      "x\\\\ ",
+      "[a-]"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "*",
+     "*.*",
+     "a",
+     "e/x.y",
+     "x.y"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R095",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     "!x",
+     "#x",
+     "*",
+     "-",
+     "[",
+     "[[]a]",
+     "[a",
+     "\\",
+     "]",
+     "d/.*",
+     "d/[!a-b]",
+     "d/[^-]",
+     "d/[^]",
+     "d/ab",
+     "e/a\\b",
+     "e/x[",
+     "x",
+     "x ",
+     "x  ",
+     "zx"
+    ],
+    {
+     "": [
+      "[]x]",
+      "[[]a]",
+      "!x ",
+      "[^]]x"
+     ],
+     "d": [
+      "[^-]",
+      "[!a-b]",
+      ".*"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "!x",
+     "#x",
+     "]",
+     "d/.*",
+     "zx"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R096",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     " x ",
+     "*",
+     "*\\",
+     "?",
+     "[!]",
+     "[!a-b]",
+     "[]",
+     "[]]",
+     "[a]",
+     "\\",
+     "\\ x",
+     "\\ x ",
+     "a",
+     "a\\b",
+     "ab",
+     "d/zx",
+     "d/É",
+     "e/[a]",
+     "e/a b",
+     "e/a\\b",
+     "x.y",
+     "y",
+     "É",
+     "é"
+    ],
+    {
+     "": [
+      "[!]",
+      "?",
+      "[!a-b]",
+      "\\ x ",
+      "*\\",
+      "a\\b",
+      "[]]"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "*",
+     "?",
+     "\\",
+     "a",
+     "ab",
+     "d/zx",
+     "d/É",
+     "e/[a]",
+     "e/a b",
+     "e/a\\b",
+     "y",
+     "É",
+     "é"
+    ],
+    "ignored_dirs": [
+     "d",
+     "e"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R097",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     " x",
+     "!",
+     "#x",
+     ".x",
+     "?x",
+     "[a",
+     "[a]",
+     "[c-a]*",
+     "[y-a]",
+     "a",
+     "a b",
+     "b",
+     "bx",
+     "d/[a]",
+     "d/a*b",
+     "d/a\\b",
+     "d/bx",
+     "d/é",
+     "e/x.y",
+     "x\t",
+     "x.y"
+    ],
+    {
+     "": [
+      "a[!b-]b",
+      "[y-a]",
+      "?x",
+      "[!c-a]",
+      "a\\",
+      "[c-a]*"
+     ],
+     "d": [
+      "!a*",
+      "[]]",
+      "a*b",
+      "\\[a]"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     " x",
+     "!",
+     "#x",
+     ".x",
+     "?x",
+     "a",
+     "a b",
+     "b",
+     "bx",
+     "d/[a]",
+     "d/a*b",
+     "d/a\\b",
+     "d/bx",
+     "d/é",
+     "e/x.y"
+    ],
+    "ignored_dirs": [
+     "d",
+     "e"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R098",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     "!",
+     "#x",
+     ".x",
+     "Ab",
+     "[",
+     "[a",
+     "[É-é]",
+     "aB",
+     "a[b",
+     "a\\b",
+     "bx",
+     "d/[^]",
+     "d/x ",
+     "e/!x",
+     "e/*",
+     "e/?",
+     "e/]x",
+     "e/b",
+     "e/c",
+     "x",
+     "x\t",
+     "x ",
+     "x.y",
+     "é"
+    ],
+    {
+     "": [
+      "x ",
+      "\\\\",
+      "[É-é]"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "x",
+     "é"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R099",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     "#x",
+     "*",
+     "?",
+     "Ab",
+     "[",
+     "[a]",
+     "]",
+     "a",
+     "a\\b",
+     "b",
+     "bx",
+     "c",
+     "d/*",
+     "d/a[!b-]b",
+     "e/-",
+     "e/[a]",
+     "e/\\",
+     "e/ax",
+     "x\t",
+     "x ",
+     "y",
+     "zx"
+    ],
+    {
+     "": [
+      "\\#x",
+      "\\\\*"
+     ],
+     "d": [
+      "a[!b-]b",
+      "!*"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "#x",
+     "e/\\"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R100",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     "Ab",
+     "[\\-]",
+     "[]]x",
+     "^x",
+     "a-b",
+     "a[b",
+     "ax",
+     "bx",
+     "e/\\",
+     "e/bx",
+     "e/é",
+     "x",
+     "x[",
+     "zx",
+     "é"
+    ],
+    {
+     "": [
+      "!x",
+      "[^]",
+      "[\\]]x",
+      "[\\-]"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R101",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     " ",
+     "!",
+     "*",
+     "*[!x]",
+     ".x",
+     "?",
+     "Ab",
+     "[]",
+     "[^]",
+     "[a",
+     "\\",
+     "\\ ",
+     "\\x  ",
+     "]",
+     "]x",
+     "^",
+     "a[b",
+     "bx",
+     "c",
+     "d/!x",
+     "d/a",
+     "e/#x",
+     "e/ax",
+     "e/c",
+     "e/x\t",
+     "x",
+     "x ",
+     "x  ",
+     "é"
+    ],
+    {
+     "": [
+      "[a-a]",
+      "*[!x]",
+      "x ",
+      "\\x  ",
+      " ",
+      "\\ "
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     " ",
+     "!",
+     "*",
+     "*[!x]",
+     "?",
+     "Ab",
+     "[]",
+     "[^]",
+     "[a",
+     "\\",
+     "\\ ",
+     "\\x  ",
+     "]",
+     "^",
+     "a[b",
+     "c",
+     "d/!x",
+     "d/a",
+     "e/#x",
+     "e/ax",
+     "e/c",
+     "e/x\t",
+     "x",
+     "x ",
+     "x  ",
+     "é"
+    ],
+    "ignored_dirs": [
+     "d",
+     "e"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R102",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     " ",
+     "#x",
+     ".x",
+     "?",
+     "[",
+     "[!]",
+     "\\ x",
+     "bx",
+     "d/[^]",
+     "d/\\",
+     "d/x  ",
+     "e/aB",
+     "x ",
+     "y"
+    ],
+    {
+     "": [
+      "[!]]x",
+      " ",
+      "\\ x"
+     ],
+     "d": [
+      "!\\#x",
+      "\\"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "#x",
+     ".x",
+     "bx"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R103",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     " x",
+     "!x",
+     "-",
+     "?",
+     "[",
+     "[^-]",
+     "[a",
+     "[a]",
+     "a\\b",
+     "ax",
+     "d/ x",
+     "e/[]",
+     "x\t",
+     "x  ",
+     "zx",
+     "É"
+    ],
+    {
+     "": [
+      "[^-]",
+      "?"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "-",
+     "?",
+     "[",
+     "d/ x",
+     "e/[]",
+     "É"
+    ],
+    "ignored_dirs": [
+     "d",
+     "e"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R104",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     "!x",
+     "#x",
+     "*",
+     "-",
+     "[!]",
+     "[[:alpha:]]",
+     "]x",
+     "a",
+     "a-b",
+     "b",
+     "d/x\t",
+     "d/É",
+     "e/[]",
+     "e/é",
+     "x  ",
+     "x[",
+     "zx",
+     "É"
+    ],
+    {
+     "": [
+      "!*",
+      "[^-]",
+      "[[:alpha:]]"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "*",
+     "a",
+     "b",
+     "d/x\t",
+     "d/É",
+     "e/[]",
+     "e/é",
+     "É"
+    ],
+    "ignored_dirs": [
+     "d",
+     "e"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R105",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     "!",
+     "!x",
+     "*",
+     "-",
+     ".x",
+     "[]-]",
+     "\\\\*",
+     "]",
+     "ab",
+     "b",
+     "d/#x",
+     "d/^x",
+     "d/a[!b-]b",
+     "d/x\t",
+     "x\t",
+     "x ",
+     "x\\\\",
+     "x\\\\ "
+    ],
+    {
+     "": [
+      "[]-]",
+      "\\\\*",
+      "[!a]*",
+      " ",
+      "\\\\*",
+      "x\\\\ ",
+      "[]-]"
+     ],
+     "d": [
+      "a[!b-]b"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "!",
+     "!x",
+     "*",
+     "-",
+     ".x",
+     "[]-]",
+     "\\\\*",
+     "]",
+     "b",
+     "d/#x",
+     "d/^x",
+     "d/a[!b-]b",
+     "d/x\t",
+     "x\t",
+     "x ",
+     "x\\\\",
+     "x\\\\ "
+    ],
+    "ignored_dirs": [
+     "d"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R106",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     " x",
+     "!",
+     "*",
+     "[a]",
+     "[x-x]",
+     "]",
+     "]x",
+     "ab",
+     "bx",
+     "d/é",
+     "e/#x",
+     "e/a b",
+     "e/a[b",
+     "x",
+     "x\t",
+     "x  ",
+     "x.y",
+     "x\\ \\",
+     "x\\ \\ ",
+     "y",
+     "zx",
+     "É",
+     "é"
+    ],
+    {
+     "": [
+      "x[",
+      "x\\ \\ ",
+      " x",
+      "[x-x]",
+      "x\t",
+      "!\\ x"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "x",
+     "x\t",
+     "x  "
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R107",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     " x",
+     "!",
+     "*[!x]",
+     "Ab",
+     "[!]",
+     "[]",
+     "[a-c-e]",
+     "\\",
+     "\\x  ",
+     "]",
+     "aB",
+     "a[b",
+     "ab",
+     "b",
+     "d/!x",
+     "d/[!]]x",
+     "d/a",
+     "d/a[b",
+     "e/[a]",
+     "x ",
+     "x  ",
+     "x.y",
+     "x\\ ",
+     "É"
+    ],
+    {
+     "": [
+      "*\\",
+      "*[!x]",
+      "!?",
+      "[a-c-e]",
+      "x\\ ",
+      "!?",
+      "\\x  "
+     ],
+     "d": [
+      "a\\",
+      "[!]]x"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "*[!x]",
+     "Ab",
+     "[!]",
+     "[]",
+     "[a-c-e]",
+     "\\x  ",
+     "aB",
+     "a[b",
+     "ab",
+     "d/!x",
+     "d/a[b",
+     "e/[a]",
+     "x ",
+     "x  ",
+     "x.y",
+     "x\\ "
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R108",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     " x",
+     "!x",
+     "*",
+     "?",
+     "Ab",
+     "[]",
+     "\\ x",
+     "\\ x ",
+     "a",
+     "a[b",
+     "a\\b",
+     "d/[^]",
+     "d/a b",
+     "e/\\",
+     "e/a-b",
+     "e/x\t",
+     "e/É",
+     "x  ",
+     "É"
+    ],
+    {
+     "": [
+      "\\ x ",
+      "[]x]",
+      "\\ x"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     " x"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R109",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     " x ",
+     "#x",
+     "*",
+     "Ab",
+     "[!]",
+     "[]-a]",
+     "[^]",
+     "[a]",
+     "]x",
+     "aB",
+     "a[b",
+     "ab",
+     "ax",
+     "d/x\t",
+     "e/!x",
+     "e/Ab",
+     "e/[a",
+     "x  ",
+     "x.y",
+     "x\\ \\ "
+    ],
+    {
+     "": [
+      "x\\ \\ ",
+      "[]-a]",
+      "[a-c-e]",
+      "\\ x "
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "e/!x",
+     "e/Ab",
+     "e/[a",
+     "x  "
+    ],
+    "ignored_dirs": [
+     "e"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R110",
+   "title": "random pattern syntax",
+   "args": [
+    [
+     "#x",
+     "*",
+     "?",
+     "??",
+     "[",
+     "[^]",
+     "\\#x",
+     "\\*",
+     "a",
+     "a-b",
+     "ax",
+     "bx",
+     "d/a b",
+     "d/x\t",
+     "e/ x",
+     "e/y",
+     "x\\ ",
+     "zx",
+     "é"
+    ],
+    {
+     "": [
+      "\\#x",
+      "??",
+      "\\*",
+      "x\\ "
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "#x",
+     "*",
+     "??",
+     "\\*",
+     "ax",
+     "bx",
+     "d/x\t",
+     "e/ x",
+     "zx"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R111",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "b/x.log",
+     "a/keep",
+     "b/x.log",
+     "b/y",
+     "c/a/x.log",
+     "c/c/a/y",
+     "c/c/b/a/y",
+     "b/y",
+     "a/x.log",
+     "b/keep",
+     "x.log/x.log",
+     "b/b/x.log",
+     "y",
+     "a/a/x.log",
+     "a/c/c/y"
+    ],
+    {
+     "": [
+      "**",
+      "c/**/a",
+      "**"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/a/x.log",
+     "a/c/c/y",
+     "a/keep",
+     "a/x.log",
+     "b/b/x.log",
+     "b/keep",
+     "b/x.log",
+     "b/y",
+     "c/a/x.log",
+     "c/c/a/y",
+     "c/c/b/a/y",
+     "x.log/x.log",
+     "y"
+    ],
+    "ignored_dirs": [
+     "a",
+     "b",
+     "c",
+     "x.log"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R112",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "c/c/a/x.log",
+     "c/y",
+     "c/x.log/x.log",
+     "c/y",
+     "c/xy",
+     "b/c/a/keep",
+     "a/a/b/a/y",
+     "c/c/a/a/keep",
+     "b/a/x.log",
+     "a/x.log",
+     "a/y",
+     "keep",
+     "b/x.log",
+     "x.log",
+     "c/c/a/c/c/a/x.log",
+     "c/c/a/c/y",
+     "c/c/a/c/x.log/x.log",
+     "c/c/a/c/y",
+     "c/c/a/c/xy",
+     "c/c/a/b/c/a/keep"
+    ],
+    {
+     "c/c/a": [
+      "!c/**",
+      "c/*.log",
+      "**/a/a",
+      "!a/**"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "c/c/a/c/x.log/x.log"
+    ],
+    "ignored_dirs": [
+     "c/c/a/c/x.log"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R113",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "keep/keep",
+     "b/keep",
+     "c/b/keep",
+     "b/c/keep/x.log",
+     "a/keep",
+     "a/a/keep/x.log",
+     "a/b/keep/x.log",
+     "c/y",
+     "c/c/c/y",
+     "c/y",
+     "c/x.log",
+     "c/y",
+     "b/y/keep",
+     "b/x.log",
+     "c/c/b/a/c/x.log",
+     "b/c/c/b",
+     "b/a/a",
+     "y",
+     "b/c/a",
+     "b/a/keep/keep",
+     "b/a/b/keep",
+     "b/a/c/b/keep",
+     "b/a/b/c/keep/x.log",
+     "b/a/a/keep",
+     "b/a/a/a/keep/x.log"
+    ],
+    {
+     "b/a": [
+      "!**/keep",
+      "a/**/keep",
+      "c/**/c",
+      "**y",
+      "**/b/c/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "b/a/a/a/keep/x.log",
+     "b/a/a/keep",
+     "b/a/b/c/keep/x.log"
+    ],
+    "ignored_dirs": [
+     "b/a/a/a/keep",
+     "b/a/b/c"
+    ],
+    "invalid": [
+     "b/a/a"
+    ]
+   }
+  },
+  {
+   "id": "R114",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "x.log",
+     "b/y",
+     "y",
+     "a/b/y",
+     "c/y",
+     "c/c/x.log",
+     "c/x.log/x.log",
+     "a/b/keep",
+     "a/a/b/x.log",
+     "a/b/x.log",
+     "c/b/x.log"
+    ],
+    {
+     "": [
+      "/**",
+      "c/**/x.log",
+      "**/a/b/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/a/b/x.log",
+     "a/b/keep",
+     "a/b/x.log",
+     "a/b/y",
+     "b/y",
+     "c/b/x.log",
+     "c/c/x.log",
+     "c/x.log/x.log",
+     "c/y",
+     "x.log",
+     "y"
+    ],
+    "ignored_dirs": [
+     "a",
+     "b",
+     "c"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R115",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "c/b/b/x.log",
+     "c/b/x.log",
+     "a/c/a/y",
+     "a/a/b/y",
+     "a/c/a/a/y",
+     "b/y",
+     "b/keep",
+     "x.log"
+    ],
+    {
+     "": [
+      "c/**/**/x.log",
+      "a/**/a/**"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/a/b/y",
+     "a/c/a/a/y",
+     "a/c/a/y",
+     "c/b/b/x.log",
+     "c/b/x.log"
+    ],
+    "ignored_dirs": [
+     "a/a/b",
+     "a/c/a/a"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R116",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "c/keep",
+     "c/x.log",
+     "c/x.log",
+     "c/keep",
+     "c/c/c/y",
+     "c/c/x.log",
+     "y/c/c/b/x.log",
+     "a/c/y",
+     "c/b",
+     "a/a/x.log",
+     "b/b",
+     "a/y"
+    ],
+    {
+     "": [
+      "c/**",
+      "c/**",
+      "*/c/**"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/c/y",
+     "c/b",
+     "c/c/c/y",
+     "c/c/x.log",
+     "c/keep",
+     "c/x.log",
+     "y/c/c/b/x.log"
+    ],
+    "ignored_dirs": [
+     "c/c",
+     "y/c/c"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R117",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "a/b/keep",
+     "a/c/b/a/keep",
+     "c/b/y",
+     "b/c/y",
+     "b/c/keep",
+     "b/c/y",
+     "y",
+     "b/y",
+     "b/b/x.log",
+     "c/a/b/keep",
+     "c/a/c/b/a/keep",
+     "c/c/b/y",
+     "c/b/c/y",
+     "c/b/c/keep",
+     "c/b/c/y"
+    ],
+    {
+     "c": [
+      "a/**/**/keep",
+      "b/***"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "c/a/b/keep",
+     "c/a/c/b/a/keep",
+     "c/b/c/keep",
+     "c/b/c/y",
+     "c/b/y"
+    ],
+    "ignored_dirs": [
+     "c/b/c"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R118",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "y",
+     "c/y/keep",
+     "c/keep",
+     "a/c/y",
+     "c/x.log",
+     "c/c/x.log",
+     "a/b/x.log",
+     "b/b/y",
+     "c/b/a/y",
+     "c/x.log",
+     "c/keep",
+     "a/x.log",
+     "c/a/keep/x.log",
+     "b/c/c/c/x.log",
+     "a/keep",
+     "keep"
+    ],
+    {
+     "": [
+      "/**/y",
+      "**/c/**",
+      "!**/b/",
+      "c/***",
+      "**/**/keep"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/c/y",
+     "a/keep",
+     "b/b/y",
+     "b/c/c/c/x.log",
+     "c/a/keep/x.log",
+     "c/b/a/y",
+     "c/c/x.log",
+     "c/keep",
+     "c/x.log",
+     "c/y/keep",
+     "keep",
+     "y"
+    ],
+    "ignored_dirs": [
+     "b/c/c",
+     "c/a",
+     "c/b",
+     "c/c",
+     "c/y"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R119",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "c/a/a/x.log",
+     "c/a/y",
+     "c/c/a/keep",
+     "c/c/x.log",
+     "c/c/c/keep",
+     "a/b/a/a",
+     "c/b/a",
+     "a/c/b/x.log",
+     "c/c/a/c/a/a/x.log",
+     "c/c/a/c/a/y",
+     "c/c/a/c/c/a/keep",
+     "c/c/a/c/c/x.log",
+     "c/c/a/c/c/c/keep",
+     "c/c/a/a/b/a/a"
+    ],
+    {
+     "c/c/a": [
+      "c/**",
+      "c/c/**"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "c/c/a/c/a/a/x.log",
+     "c/c/a/c/a/y",
+     "c/c/a/c/c/a/keep",
+     "c/c/a/c/c/c/keep",
+     "c/c/a/c/c/x.log"
+    ],
+    "ignored_dirs": [
+     "c/c/a/c/a",
+     "c/c/a/c/c"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R120",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "c/b/c/y",
+     "c/x.log",
+     "c/y/keep",
+     "c/c/keep",
+     "b/x.log/keep",
+     "x.log/x.log",
+     "c/a/x.log/keep",
+     "c/c/x.log",
+     "c/b/x.log",
+     "c/a/a/keep",
+     "a/a/keep"
+    ],
+    {
+     "": [
+      "c/*",
+      "c/**/",
+      "!x.log",
+      "c/*/x.log"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "c/a/a/keep",
+     "c/a/x.log/keep",
+     "c/b/c/y",
+     "c/b/x.log",
+     "c/c/keep",
+     "c/c/x.log",
+     "c/y/keep"
+    ],
+    "ignored_dirs": [
+     "c/a",
+     "c/b",
+     "c/c",
+     "c/y"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R121",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "c/x.log",
+     "c/b/y/y",
+     "c/c/y",
+     "c/b/x.log",
+     "c/a/x.log/keep",
+     "c/a/b/x.log",
+     "c/b/x.log",
+     "b/y",
+     "b/a/x.log",
+     "b/b/a/y",
+     "b/a/b/a/x.log",
+     "b/z.log",
+     "b/a/x.log",
+     "c/keep",
+     "b/y",
+     "a/keep",
+     "b/b/c/x.log",
+     "b/b/c/b/y/y",
+     "b/b/c/c/y",
+     "b/b/c/b/x.log",
+     "b/b/c/a/x.log/keep",
+     "b/b/c/a/b/x.log"
+    ],
+    {
+     "b/b": [
+      "c/*",
+      "c/**/x.log",
+      "**/b/a/",
+      "b/**/*.log"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "b/b/c/a/b/x.log",
+     "b/b/c/a/x.log/keep",
+     "b/b/c/b/x.log",
+     "b/b/c/b/y/y",
+     "b/b/c/c/y",
+     "b/b/c/x.log"
+    ],
+    "ignored_dirs": [
+     "b/b/c/a",
+     "b/b/c/b",
+     "b/b/c/c"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R122",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "b/a/y",
+     "y/y",
+     "b/y",
+     "a/c/a/x.log",
+     "a/y",
+     "a/keep",
+     "a/keep",
+     "b/a/a/a",
+     "b/a/a/a",
+     "a/c/a/a"
+    ],
+    {
+     "": [
+      "***/y",
+      "a/**/*.log"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/c/a/x.log",
+     "a/y",
+     "b/a/y",
+     "b/y",
+     "y/y"
+    ],
+    "ignored_dirs": [
+     "y"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R123",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "b/c/b/a/keep",
+     "b/a/a/a/y",
+     "b/b/y",
+     "b/b/a/y",
+     "b/b/a/y",
+     "b/b/c/c/x.log",
+     "a/a/c/x.log",
+     "a/a/y",
+     "a/y",
+     "a/a/b/y",
+     "b/keep",
+     "keep/keep",
+     "a/keep",
+     "a/c/keep",
+     "c/keep",
+     "b/a/b/y"
+    ],
+    {
+     "": [
+      "b/**/a",
+      "**/**/b",
+      "**/a/**",
+      "!keep",
+      "!a/c/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/a/b/y",
+     "a/a/c/x.log",
+     "a/a/y",
+     "a/y",
+     "b/a/a/a/y",
+     "b/a/b/y",
+     "b/b/a/y",
+     "b/b/c/c/x.log",
+     "b/b/y",
+     "b/c/b/a/keep",
+     "b/keep"
+    ],
+    "ignored_dirs": [
+     "a/a",
+     "b"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R124",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "b/c/b/x.log",
+     "b/keep",
+     "b/x.log",
+     "b/b/b/x.log",
+     "a/y",
+     "a/y",
+     "y",
+     "b/y",
+     "b/a/a/b"
+    ],
+    {
+     "": [
+      "b/**/x.log",
+      "!a/a/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "b/b/b/x.log",
+     "b/c/b/x.log",
+     "b/x.log"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R125",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "b/keep",
+     "b/a/keep",
+     "b/y",
+     "c/a/c/x.log",
+     "c/x.log",
+     "c/c/x.log",
+     "c/b/y",
+     "c/a/x.log",
+     "c/b/y",
+     "a/b/x.log",
+     "a/b/x.log",
+     "a/x.log/y",
+     "a/b/y",
+     "a/a/x.log",
+     "a/c/y",
+     "a/a/c/x.log",
+     "y",
+     "a/b/b/keep",
+     "a/b/b/a/keep",
+     "a/b/b/y",
+     "a/b/c/a/c/x.log",
+     "a/b/c/x.log",
+     "a/b/c/c/x.log"
+    ],
+    {
+     "a/b": [
+      "!b/a/",
+      "/**",
+      "c/*/*.log",
+      "!a/**/x.log",
+      "!a/*/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/b/b/a/keep",
+     "a/b/b/keep",
+     "a/b/b/y",
+     "a/b/c/a/c/x.log",
+     "a/b/c/c/x.log",
+     "a/b/c/x.log",
+     "a/b/x.log",
+     "a/b/y"
+    ],
+    "ignored_dirs": [
+     "a/b/b",
+     "a/b/c"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R126",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "b/b/a/y",
+     "b/a/x.log",
+     "b/a/y",
+     "b/b/a/y",
+     "c/b/a/x.log",
+     "b/b/x.log",
+     "c/xy",
+     "z.log/keep",
+     "a/x.log/x.log",
+     "b/b/y",
+     "b/a/b/x.log",
+     "a/a/x.log",
+     "b/a/a",
+     "x.log"
+    ],
+    {
+     "": [
+      "!b/a/",
+      "*/b/**",
+      "**b",
+      "!b/b/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "b/a/a",
+     "b/a/b/x.log",
+     "b/a/x.log",
+     "b/a/y",
+     "b/b/a/y",
+     "b/b/x.log",
+     "b/b/y",
+     "c/b/a/x.log"
+    ],
+    "ignored_dirs": [
+     "b",
+     "c/b"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R127",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "c/b/x.log",
+     "y/y",
+     "a/a/keep",
+     "a/y/x.log",
+     "a/a/keep",
+     "a/c/c/a/x.log",
+     "a/a/a/y",
+     "a/x.log",
+     "c/a/b/x.log",
+     "b",
+     "c/c/c/y",
+     "a/c/x.log"
+    ],
+    {
+     "": [
+      "*/b/**",
+      "a/*/x.log",
+      "a/**/a"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/a/a/y",
+     "a/a/keep",
+     "a/c/c/a/x.log",
+     "a/c/x.log",
+     "a/y/x.log",
+     "c/b/x.log"
+    ],
+    "ignored_dirs": [
+     "a/a",
+     "a/c/c/a"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R128",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "b/c/x.log",
+     "b/a/y",
+     "b/c/a/y",
+     "c/a/keep",
+     "c/y/y",
+     "c/b/keep",
+     "c/b/keep",
+     "b/c/a/x.log/x.log",
+     "b/c/c/x.log",
+     "keep/keep",
+     "a/x.log",
+     "b/x.log",
+     "c/keep",
+     "b/x.log",
+     "a/a/b/y"
+    ],
+    {
+     "": [
+      "!b/*/",
+      "!c/*/",
+      "b/*/x.log",
+      "!keep"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "b/c/x.log"
+    ],
+    "ignored_dirs": [],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R129",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "a/x.log",
+     "a/b/xy/x.log",
+     "a/y",
+     "c/x.log",
+     "c/a/y",
+     "b/c/x.log",
+     "b/a/keep",
+     "b/keep",
+     "b/y",
+     "c/x.log",
+     "c/c/x.log",
+     "keep/x.log",
+     "b/b/keep",
+     "a/c/c/y",
+     "b/a/y"
+    ],
+    {
+     "": [
+      "a/*.log",
+      "c/?",
+      "b/*",
+      "c/*",
+      "!keep"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/x.log",
+     "b/a/keep",
+     "b/a/y",
+     "b/b/keep",
+     "b/c/x.log",
+     "b/y",
+     "c/a/y",
+     "c/c/x.log",
+     "c/x.log"
+    ],
+    "ignored_dirs": [
+     "b/a",
+     "b/b",
+     "b/c",
+     "c/a",
+     "c/c"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R130",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "c/a/x.log",
+     "b/a/y",
+     "a/y/y",
+     "a/c/y",
+     "a/x.log/y",
+     "a/z.log",
+     "c/z.log",
+     "y/x.log",
+     "z.log",
+     "a/keep",
+     "keep",
+     "c/b/y",
+     "c/keep",
+     "a/keep",
+     "b/b/a/x.log",
+     "c/b/c/y",
+     "c/y",
+     "b/a/b/keep",
+     "b/b/c/a/x.log",
+     "b/b/b/a/y",
+     "b/b/a/y/y",
+     "b/b/a/c/y",
+     "b/b/a/x.log/y",
+     "b/b/a/z.log"
+    ],
+    {
+     "b/b": [
+      "!a",
+      "a/[xy]*",
+      "**a",
+      "!keep",
+      "/**"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "b/b/a/c/y",
+     "b/b/a/x.log/y",
+     "b/b/a/y/y",
+     "b/b/a/z.log",
+     "b/b/b/a/y",
+     "b/b/c/a/x.log"
+    ],
+    "ignored_dirs": [
+     "b/b/a",
+     "b/b/b",
+     "b/b/c"
+    ],
+    "invalid": [
+     "b/b/a/x.log"
+    ]
+   }
+  },
+  {
+   "id": "R131",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "keep/x.log",
+     "c/y/x.log",
+     "b/y",
+     "b/c/b/x.log",
+     "a/y",
+     "a/a",
+     "y",
+     "c/y/keep/x.log",
+     "c/y/c/y/x.log",
+     "c/y/b/y",
+     "c/y/b/c/b/x.log",
+     "c/y/a/y",
+     "c/y/a/a"
+    ],
+    {
+     "c/y": [
+      "!keep",
+      "c/?"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "c/y/c/y/x.log"
+    ],
+    "ignored_dirs": [
+     "c/y/c/y"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R132",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "c/y",
+     "c/a/y",
+     "x.log",
+     "c/keep",
+     "c/c/x.log",
+     "b/c/b/keep",
+     "keep",
+     "a/b/z.log",
+     "a/keep",
+     "b/z.log/y",
+     "y/y",
+     "c/x.log/x.log",
+     "b/a/b",
+     "b/y"
+    ],
+    {
+     "": [
+      "**",
+      "/**/keep",
+      "a/?",
+      "c**"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/b/z.log",
+     "a/keep",
+     "b/a/b",
+     "b/c/b/keep",
+     "b/y",
+     "b/z.log/y",
+     "c/a/y",
+     "c/c/x.log",
+     "c/keep",
+     "c/x.log/x.log",
+     "c/y",
+     "keep",
+     "x.log",
+     "y/y"
+    ],
+    "ignored_dirs": [
+     "a",
+     "b",
+     "c",
+     "y"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R133",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "c/b/x.log",
+     "c/b/b/x.log",
+     "a/a/xy",
+     "a/x.log",
+     "a/y",
+     "a/b/x.log/keep",
+     "y/x.log",
+     "z.log",
+     "y/y",
+     "b/c/b/keep",
+     "b/a/c/x.log",
+     "b/a/b/c/c/y",
+     "b/a/y",
+     "b/c/c/c/y",
+     "b/a/b/b/y",
+     "a/b/c/b/x.log",
+     "a/y",
+     "c/c/x.log",
+     "b/c/x.log",
+     "x.log",
+     "b/b/b/y"
+    ],
+    {
+     "": [
+      "!c/**/b",
+      "a/*.log",
+      "**a",
+      "b/**/c/**",
+      "**/**/y"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/a/xy",
+     "a/b/c/b/x.log",
+     "a/b/x.log/keep",
+     "a/x.log",
+     "a/y",
+     "b/a/b/b/y",
+     "b/a/b/c/c/y",
+     "b/a/c/x.log",
+     "b/a/y",
+     "b/b/b/y",
+     "b/c/b/keep",
+     "b/c/c/c/y",
+     "b/c/x.log",
+     "y/x.log",
+     "y/y"
+    ],
+    "ignored_dirs": [
+     "a",
+     "b/a",
+     "b/c/b",
+     "b/c/c",
+     "y"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R134",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "a/x.log",
+     "a/b/y",
+     "a/y",
+     "b/y",
+     "y/y",
+     "y/y",
+     "b/b/x.log",
+     "x.log/x.log",
+     "x.log/keep",
+     "a/x.log",
+     "a/b/y",
+     "a/keep",
+     "a/c/a/x.log",
+     "a/a/y",
+     "keep"
+    ],
+    {
+     "": [
+      "/**",
+      "***/y",
+      "***/x.log",
+      "**",
+      "a/**/"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/a/y",
+     "a/b/y",
+     "a/c/a/x.log",
+     "a/keep",
+     "a/x.log",
+     "a/y",
+     "b/b/x.log",
+     "b/y",
+     "keep",
+     "x.log/keep",
+     "x.log/x.log",
+     "y/y"
+    ],
+    "ignored_dirs": [
+     "a",
+     "b",
+     "x.log",
+     "y"
+    ],
+    "invalid": []
+   }
+  },
+  {
+   "id": "R135",
+   "title": "random globstar rules",
+   "args": [
+    [
+     "y/b/keep",
+     "c/b/a/c/x.log",
+     "b/a/c/x.log",
+     "c/b/c/c/b/x.log",
+     "a/a/b/keep",
+     "a/b/a/x.log",
+     "keep",
+     "c/keep"
+    ],
+    {
+     "": [
+      "*/b/**",
+      "**/c/**",
+      "a/*"
+     ]
+    }
+   ],
+   "expected": {
+    "ignored": [
+     "a/a/b/keep",
+     "a/b/a/x.log",
+     "b/a/c/x.log",
+     "c/b/a/c/x.log",
+     "c/b/c/c/b/x.log",
+     "c/keep",
+     "y/b/keep"
+    ],
+    "ignored_dirs": [
+     "a/a",
+     "a/b",
+     "c/b"
+    ],
+    "invalid": []
+   }
+  }
+ ],
+ "stress": [
+  {
+   "id": "S1",
+   "title": "60 000 files ~28 levels deep under ~1 600 ignore files",
+   "kind": "big_tree",
+   "seed": 1,
+   "dirs": 4000,
+   "files": 60000,
+   "rule_files": 2000,
+   "max_depth": 70,
+   "hot_dirs": 300,
+   "expected_sha256": "50bb38fd6eea2c2af3171fbe7beb51b4503ebdd9edcf871822109363fcd9ef64",
+   "expected_head": "{\"ignored\":[\"a28/local/notes59305.bak\",\"a28/r26/r4/coverage/Temp49754.cfg\",\"a28/r26/r4/coverage/data52666.out\",\"a28/r26/r4/coverage/main29956.swp\",\"a28/r26/r4/coverage/main37220.txt\",\"a28/r26/r4/cover"
+  },
+  {
+   "id": "S2",
+   "title": "directory chains 2 900, 1 600 and 1 100 levels deep",
+   "kind": "deep_chains",
+   "seed": 2,
+   "depths": [
+    2900,
+    1600,
+    1100
+   ],
+   "rule_every": 400,
+   "file_every": 4,
+   "expected_sha256": "038ee5254d008d46e6247020d3a55f09b901f1bbb207cdc1a9a87860f7fa1ebf",
+   "expected_head": "{\"ignored\":[\"c0/n/n/n/n/n/n/n/n/n/f6.tmp\",\"c0/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/f9.tmp\",\"c0/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/f9.tmp\",\"c0/n/n/n/"
+  },
+  {
+   "id": "S3",
+   "title": "many-star and many-globstar rules against long names and deep paths",
+   "kind": "pathological",
+   "seed": 3,
+   "long_names": 700,
+   "deep_paths": 300,
+   "plain": 5000,
+   "expected_sha256": "eea9ca47d4cfd38f8d7489536011f66297501d8448b92f2b90ffe87649316755",
+   "expected_head": "{\"ignored\":[\"a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/ab/a/a/a/a/a/a/a/a/b/a/aa/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/leaf220\",\"a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/a/b"
+  }
+ ]
+}

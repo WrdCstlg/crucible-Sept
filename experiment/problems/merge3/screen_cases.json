@@ -1,0 +1,2753 @@
+{
+ "problem": "merge3",
+ "entry": "merge",
+ "public": [
+  {
+   "id": "P1",
+   "title": "edits separated by a stable line; one-sided insertion",
+   "args": [
+    "def f():\n    return 1\n\ndef g():\n    return 2\n",
+    "def f():\n    return 10\n\ndef g():\n    return 2\n",
+    "def f():\n    return 1\n\ndef g():\n    log()\n    return 2\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "def f():\n    return 10\n\ndef g():\n    log()\n    return 2\n"
+   }
+  },
+  {
+   "id": "P2",
+   "title": "conflict block; same change on both sides once",
+   "args": [
+    "a\nb\nc\nd\ne\n",
+    "a\nB\nc\nD\ne\n",
+    "a\nX\nc\nD\ne\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "a\n<<<<<<< ours\nB\n||||||| base\nb\n=======\nX\n>>>>>>> theirs\nc\nD\ne\n"
+   }
+  },
+  {
+   "id": "P3",
+   "title": "adding the final newline changes the last line",
+   "args": [
+    "x = 1\ny = 2",
+    "x = 1\ny = 3",
+    "x = 1\ny = 2\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "x = 1\n<<<<<<< ours\ny = 3\n||||||| base\ny = 2\n=======\ny = 2\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "P4",
+   "title": "the diff decides what is stable (tie goes down)",
+   "args": [
+    "a\nb\n",
+    "b\na\n",
+    "a\nb\nc\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "b\n<<<<<<< ours\na\n||||||| base\n=======\nc\n>>>>>>> theirs\n"
+   }
+  }
+ ],
+ "hidden": [
+  {
+   "id": "H01",
+   "title": "adjacent edits to different lines conflict",
+   "args": [
+    "1\n2\n3\n4\n",
+    "1\nX\n3\n4\n",
+    "1\n2\nY\n4\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "1\n<<<<<<< ours\nX\n3\n||||||| base\n2\n3\n=======\n2\nY\n>>>>>>> theirs\n4\n"
+   }
+  },
+  {
+   "id": "H02",
+   "title": "edits with one stable line between them merge",
+   "args": [
+    "1\n2\n3\n4\n5\n",
+    "1\nX\n3\n4\n5\n",
+    "1\n2\n3\nY\n5\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "1\nX\n3\nY\n5\n"
+   }
+  },
+  {
+   "id": "H03",
+   "title": "identical change on both sides is written once",
+   "args": [
+    "a\nb\nc\n",
+    "a\nB\nc\n",
+    "a\nB\nc\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\nB\nc\n"
+   }
+  },
+  {
+   "id": "H04",
+   "title": "different insertions at the same place conflict; empty base part keeps its marker",
+   "args": [
+    "a\nb\n",
+    "a\nx\nb\n",
+    "a\ny\nb\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "a\n<<<<<<< ours\nx\n||||||| base\n=======\ny\n>>>>>>> theirs\nb\n"
+   }
+  },
+  {
+   "id": "H05",
+   "title": "identical insertion at the same place is written once",
+   "args": [
+    "a\n",
+    "a\nz\n",
+    "a\nz\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\nz\n"
+   }
+  },
+  {
+   "id": "H06",
+   "title": "CRLF and LF lines are different lines",
+   "args": [
+    "a\r\nb\r\n",
+    "a\r\nb\n",
+    "a\nb\r\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\na\r\nb\n||||||| base\na\r\nb\r\n=======\na\nb\r\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "H07",
+   "title": "a lone CR does not end a line",
+   "args": [
+    "p\rq\nr\n",
+    "p\rq\nR\n",
+    "P\rq\nr\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\np\rq\nR\n||||||| base\np\rq\nr\n=======\nP\rq\nr\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "H08",
+   "title": "U+2028 and U+0085 do not end a line",
+   "args": [
+    "a mc\n",
+    "A mc\n",
+    "a mC\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\nA mc\n||||||| base\na mc\n=======\na mC\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "H09",
+   "title": "one side adds the final newline, the other edits elsewhere",
+   "args": [
+    "x\nm\ny",
+    "x\nm\ny\n",
+    "X\nm\ny"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "X\nm\ny\n"
+   }
+  },
+  {
+   "id": "H10",
+   "title": "one side removes the final newline; result ends without one",
+   "args": [
+    "a\nb\nc\n",
+    "a\nb\nc",
+    "A\nb\nc\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "A\nb\nc"
+   }
+  },
+  {
+   "id": "H11",
+   "title": "conflict on newline-less last lines: every part terminated",
+   "args": [
+    "k\nv1",
+    "k\nv2",
+    "k\nv3"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "k\n<<<<<<< ours\nv2\n||||||| base\nv1\n=======\nv3\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "H12",
+   "title": "empty base, both sides create different text",
+   "args": [
+    "",
+    "x",
+    "y\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\nx\n||||||| base\n=======\ny\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "H13",
+   "title": "three empty texts",
+   "args": [
+    "",
+    "",
+    ""
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": ""
+   }
+  },
+  {
+   "id": "H14",
+   "title": "both sides delete everything",
+   "args": [
+    "a\nb\n",
+    "",
+    ""
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": ""
+   }
+  },
+  {
+   "id": "H15",
+   "title": "delete versus modify conflicts with an empty ours part",
+   "args": [
+    "a\nb\nc\n",
+    "a\nc\n",
+    "a\nB\nc\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "a\n<<<<<<< ours\n||||||| base\nb\n=======\nB\n>>>>>>> theirs\nc\n"
+   }
+  },
+  {
+   "id": "H16",
+   "title": "marker-like input lines are ordinary text in a clean merge",
+   "args": [
+    "<<<<<<< ours\nx\n",
+    "<<<<<<< ours\nx\ny\n",
+    "=======\n<<<<<<< ours\nx\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "=======\n<<<<<<< ours\nx\ny\n"
+   }
+  },
+  {
+   "id": "H17",
+   "title": "reversed lines: the diff keeps the last base line",
+   "args": [
+    "a\nb\nc\n",
+    "c\nb\na\n",
+    "a\nb\nc\nd\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "c\n<<<<<<< ours\nb\na\n||||||| base\n=======\nd\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "H18",
+   "title": "the greedy diff keeps the first of two equal lines",
+   "args": [
+    "x\nx\nq\n",
+    "x\nq\n",
+    "x\nx\nQ\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "x\n<<<<<<< ours\nq\n||||||| base\nx\nq\n=======\nx\nQ\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "H19",
+   "title": "two conflict blocks are counted separately",
+   "args": [
+    "1\n2\n3\n",
+    "A\n2\nC\n",
+    "a\n2\nc\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 2,
+    "text": "<<<<<<< ours\nA\n||||||| base\n1\n=======\na\n>>>>>>> theirs\n2\n<<<<<<< ours\nC\n||||||| base\n3\n=======\nc\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "H20",
+   "title": "an insertion just before a line the other side edits conflicts",
+   "args": [
+    "a\nb\nc\n",
+    "a\nN\nb\nc\n",
+    "a\nB\nc\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "a\n<<<<<<< ours\nN\nb\n||||||| base\nb\n=======\nB\n>>>>>>> theirs\nc\n"
+   }
+  },
+  {
+   "id": "H21",
+   "title": "unchanged ours: theirs taken whole, deletions included",
+   "args": [
+    "a\nb\nc\nd\n",
+    "a\nb\nc\nd\n",
+    "b\nd\ne\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "b\nd\ne\n"
+   }
+  },
+  {
+   "id": "H22",
+   "title": "lines common to both sides stay inside the block",
+   "args": [
+    "a\nb\nc\n",
+    "a\nX\nY\nc\n",
+    "a\nX\nZ\nc\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "a\n<<<<<<< ours\nX\nY\n||||||| base\nb\n=======\nX\nZ\n>>>>>>> theirs\nc\n"
+   }
+  },
+  {
+   "id": "H23",
+   "title": "a marker-like line inside a conflict does not add a conflict",
+   "args": [
+    "m\n",
+    "<<<<<<< ours\n",
+    "t\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\n<<<<<<< ours\n||||||| base\nm\n=======\nt\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "H24",
+   "title": "an empty text has no lines; a lone newline is one line",
+   "args": [
+    "\n",
+    "",
+    "\n\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\n||||||| base\n\n=======\n\n\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "H25",
+   "title": "only theirs adds a newline-less line to an empty base",
+   "args": [
+    "",
+    "",
+    "t"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "t"
+   }
+  },
+  {
+   "id": "H26",
+   "title": "swap: the tie keeps the second line, not the first",
+   "args": [
+    "a\nb\nc\n",
+    "b\na\nc\n",
+    "a\nB\nc\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\nb\na\n||||||| base\na\nb\n=======\na\nB\n>>>>>>> theirs\nc\n"
+   }
+  },
+  {
+   "id": "H27",
+   "title": "appending after a newline-less last line changes it",
+   "args": [
+    "a\nb",
+    "a\nb\nc\n",
+    "A\nb"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\na\nb\nc\n||||||| base\na\nb\n=======\nA\nb\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "H28",
+   "title": "one side appends a newline-less line; the result keeps it that way",
+   "args": [
+    "a\nb\nc\n",
+    "a\nB\nc\n",
+    "a\nb\nc\nd"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\nB\nc\nd"
+   }
+  },
+  {
+   "id": "R001",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "d\nb\nd\nc\na\nb\na\nc\n",
+    "d\nd\nd\na\nb\nc\na\nb\na\nc\n",
+    "d\nb\nd\nc\na\na\nb\nd\nc\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "d\nd\nd\na\nb\nc\na\na\nb\nd\nc\n"
+   }
+  },
+  {
+   "id": "R002",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "a\na\nc\n",
+    "a\na\na\na\nc\n",
+    "a\na\nc\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\na\na\na\nc\n"
+   }
+  },
+  {
+   "id": "R003",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "d\nb\n",
+    "d\n",
+    "d\nb\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "d\n"
+   }
+  },
+  {
+   "id": "R004",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "a\na\nb\nb\na\nb\n",
+    "a\na\nb\nb\nb\na\nb\na\nb\n",
+    "a\nb\na\nb\nb\na\nb\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\nb\na\nb\nb\nb\na\nb\na\nb\n"
+   }
+  },
+  {
+   "id": "R005",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "b\na\nb\n",
+    "b\nb\n",
+    "b\nb\na\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "b\nb\na\n"
+   }
+  },
+  {
+   "id": "R006",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "c\na\na\nb\na\nc\na\nc\n",
+    "c\na\na\nb\na\na\nc\na\nc\n",
+    "a\nc\na\nb\na\nc\na\nc\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\nc\na\nb\na\na\nc\na\nc\n"
+   }
+  },
+  {
+   "id": "R007",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "b\nb\nb\nb\na\nb\n",
+    "b\nb\na\nb\n",
+    "b\nb\nb\nb\nb\nb\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "b\nb\n<<<<<<< ours\na\n||||||| base\nb\nb\na\n=======\nb\nb\n>>>>>>> theirs\nb\nb\n"
+   }
+  },
+  {
+   "id": "R008",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "a\nc\na\nc\na\nb\nb\n",
+    "a\nc\na\nb\na\nb\nb\n",
+    "a\nc\na\nc\na\na\nb\nb\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\nc\na\nb\na\na\nb\nb\n"
+   }
+  },
+  {
+   "id": "R009",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "a\na\na\nb\nb\na\na\nb\n",
+    "a\na\nb\nb\na\na\nb\n",
+    "a\na\nb\na\na\na\na\nb\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\na\nb\na\na\na\na\nb\n"
+   }
+  },
+  {
+   "id": "R010",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "a\nd\nc\nb\nc\nc\n",
+    "d\nc\nb\nc\n",
+    "a\nd\nc\nb\na\nc\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "d\nc\nb\na\nc\n"
+   }
+  },
+  {
+   "id": "R011",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "c\na\n",
+    "b\nc\nb\n",
+    "a\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\nb\nc\nb\n||||||| base\nc\na\n=======\na\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R012",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "b\nb\nb\na\nb\nb\na\na\nb\n",
+    "b\nb\nb\nb\nb\na\nb\nb\na\na\nb\n",
+    "b\nb\nb\na\nb\nb\na\na\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "b\nb\nb\nb\nb\na\nb\nb\na\na\n"
+   }
+  },
+  {
+   "id": "R013",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "d\nd\n",
+    "b\nd\nd\nb\nd\n",
+    "d\na\nd\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "b\nd\na\nd\nb\nd\n"
+   }
+  },
+  {
+   "id": "R014",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "c\nd\nd\nd\nc\nd\nd\n",
+    "c\nd\nd\nd\nc\nd\nd\nb\nb\n",
+    "c\nd\nd\nd\nc\nd\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "c\nd\nd\nd\nc\nd\n<<<<<<< ours\nd\nb\nb\n||||||| base\nd\n=======\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R015",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "a\na\na\nb\na\nb\na\n",
+    "a\na\na\na\nb\na\na\nb\na\n",
+    "a\na\nb\na\nb\na\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "a\na\n<<<<<<< ours\na\na\n||||||| base\na\n=======\n>>>>>>> theirs\nb\na\na\nb\na\n"
+   }
+  },
+  {
+   "id": "R016",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "b\nb\n",
+    "b\nb\n",
+    "b\na\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "b\na\n"
+   }
+  },
+  {
+   "id": "R017",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "b\na\na\nb\nb\nb\na\n",
+    "a\nb\na\nb\nb\nb\na\n",
+    "b\na\nb\nb\na\nb\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\nb\na\nb\nb\na\nb\n"
+   }
+  },
+  {
+   "id": "R018",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "b\na\na\nc\na\nc\nc\n",
+    "b\na\nb\nb\na\nc\na\nc\nc\n",
+    "b\na\na\na\nc\na\na\nc\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "b\na\nb\nb\na\na\nc\na\na\nc\n"
+   }
+  },
+  {
+   "id": "R019",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "a\na\nb\na\n",
+    "a\na\nb\na\n",
+    "a\na\na\nb\na\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\na\na\nb\na\n"
+   }
+  },
+  {
+   "id": "R020",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "c\nc\nc\n",
+    "c\nc\na\nc\n",
+    "a\nc\na\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "a\nc\n<<<<<<< ours\nc\na\nc\n||||||| base\nc\nc\n=======\na\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R021",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "a\nb\nb\n",
+    "a\nb\nb\n",
+    "b\na\nb\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "b\na\nb\n"
+   }
+  },
+  {
+   "id": "R022",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "b\nb\nb\n",
+    "b\nb\nb\n",
+    "b\nb\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "b\nb\n"
+   }
+  },
+  {
+   "id": "R023",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "b\nc\nb\na\n",
+    "a\na\nb\nb\na\n",
+    "c\nb\nb\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\na\na\nb\n||||||| base\nb\nc\n=======\nc\n>>>>>>> theirs\nb\nb\n"
+   }
+  },
+  {
+   "id": "R024",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "a\na\nb\nb\n",
+    "a\na\nb\nb\n",
+    "a\na\na\na\nb\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\na\na\na\nb\n"
+   }
+  },
+  {
+   "id": "R025",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "a\na\na\nb\na\na\nb\n",
+    "a\na\na\nb\na\nb\nb\n",
+    "a\na\na\nb\na\na\nb\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\na\na\nb\na\nb\nb\n"
+   }
+  },
+  {
+   "id": "R026",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "a\nc\nd\na\n",
+    "a\nc\nd\nb\na\n",
+    "a\nc\nd\na\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\nc\nd\nb\na\n"
+   }
+  },
+  {
+   "id": "R027",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "b\na\na\nb\n",
+    "b\nb\nb\n",
+    "b\nb\na\na\nb\nb\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "b\n<<<<<<< ours\n||||||| base\na\na\n=======\nb\na\na\n>>>>>>> theirs\nb\nb\n"
+   }
+  },
+  {
+   "id": "R028",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "b\nb\nc\nb\nc\na\na\n",
+    "c\nb\nb\nb\nc\na\na\n",
+    "c\nb\nc\na\nb\nb\nc\na\na\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "c\nb\n<<<<<<< ours\nb\n||||||| base\nb\nc\n=======\nc\na\n>>>>>>> theirs\nb\nb\nc\na\na\n"
+   }
+  },
+  {
+   "id": "R029",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "b\nb\nb\nb\nb\nb\na\na\na\n",
+    "b\nb\nb\nb\nb\nb\na\na\na\n",
+    "b\nb\nb\nb\nb\na\nb\na\na\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "b\nb\nb\nb\nb\na\nb\na\na\n"
+   }
+  },
+  {
+   "id": "R030",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "b\nc\na\n",
+    "b\nb\na\n",
+    "b\nc\nb\nb\na\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "b\n<<<<<<< ours\nb\n||||||| base\nc\n=======\nc\nb\nb\n>>>>>>> theirs\na\n"
+   }
+  },
+  {
+   "id": "R031",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "a\nd\nb\nc\nb\nc\n",
+    "a\nb\nd\nb\nc\n",
+    "a\na\nb\nc\nb\nd\nb\na\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 2,
+    "text": "a\n<<<<<<< ours\nb\nd\n||||||| base\nd\n=======\na\n>>>>>>> theirs\nb\nc\n<<<<<<< ours\n||||||| base\nb\nc\n=======\nb\nd\nb\na\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R032",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "b\nd\nc\nb\nc\nc\nb\nc\n",
+    "b\nd\nc\nb\nc\nd\nc\n",
+    "b\nd\nc\nb\nc\nc\nb\nc\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "b\nd\nc\nb\nc\nd\nc\n"
+   }
+  },
+  {
+   "id": "R033",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "b\nc\na\n",
+    "b\nc\nc\nc\na\n",
+    "b\nc\na\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "b\nc\nc\nc\na\n"
+   }
+  },
+  {
+   "id": "R034",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "c\na\nb\n",
+    "a\nb\n",
+    "c\na\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\n"
+   }
+  },
+  {
+   "id": "R035",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "b\na\na\n",
+    "a\nb\na\na\n",
+    "b\na\na\nb\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\nb\na\na\nb\n"
+   }
+  },
+  {
+   "id": "R036",
+   "title": "tiny alphabet (diff ties)",
+   "args": [
+    "b\nd\nd\na\nc\nc\nb\nd\na\n",
+    "b\nd\nd\na\nc\nc\na\nd\nb\nd\na\n",
+    "b\nd\nd\na\nc\nc\nb\nd\na\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "b\nd\nd\na\nc\nc\na\nd\nb\nd\na\n"
+   }
+  },
+  {
+   "id": "R037",
+   "title": "moved lines in a tiny alphabet",
+   "args": [
+    "a\na\nb\nb\na\nb\nb\na\n",
+    "a\nb\nb\na\na\nb\nb\na\n",
+    "a\na\nb\nb\na\nb\nZ\nb\na\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\nb\nb\na\na\nb\nZ\nb\na\n"
+   }
+  },
+  {
+   "id": "R038",
+   "title": "moved lines in a tiny alphabet",
+   "args": [
+    "b\na\nb\nb\nb\nb\nb\na\n",
+    "b\na\nb\nb\nb\nZ\nZ\nb\nb\na\n",
+    "b\na\nb\nb\nb\nb\nb\na\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "b\na\nb\nb\nb\nZ\nZ\nb\nb\na\n"
+   }
+  },
+  {
+   "id": "R039",
+   "title": "moved lines in a tiny alphabet",
+   "args": [
+    "b\nc\nb\nc\na\n",
+    "Z\nc\nb\nc\nb\nc\na\n",
+    "b\nc\nc\nb\na\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "Z\nc\nb\nc\nc\nb\na\n"
+   }
+  },
+  {
+   "id": "R040",
+   "title": "moved lines in a tiny alphabet",
+   "args": [
+    "a\nc\nc\na\n",
+    "c\nZ\nc\na\n",
+    "a\na\nc\nc\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\n||||||| base\na\n=======\na\na\n>>>>>>> theirs\nc\nZ\nc\n"
+   }
+  },
+  {
+   "id": "R041",
+   "title": "moved lines in a tiny alphabet",
+   "args": [
+    "c\nb\na\na\na\nb\na\n",
+    "c\na\na\na\nb\nb\na\n",
+    "b\nc\na\na\nb\na\na\nc\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\nc\n||||||| base\nc\nb\n=======\nb\nc\n>>>>>>> theirs\na\na\nb\nb\na\na\nc\n"
+   }
+  },
+  {
+   "id": "R042",
+   "title": "moved lines in a tiny alphabet",
+   "args": [
+    "c\na\nc\na\nc\na\nc\nc\nb\na\n",
+    "c\na\na\nc\nc\na\nc\nc\nb\na\n",
+    "c\na\nc\nc\na\na\nc\nc\nb\na\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "c\na\n<<<<<<< ours\na\n||||||| base\nc\na\n=======\nc\n>>>>>>> theirs\nc\nc\na\na\nc\nc\nb\na\n"
+   }
+  },
+  {
+   "id": "R043",
+   "title": "moved lines in a tiny alphabet",
+   "args": [
+    "c\na\nb\nb\nb\na\nb\n",
+    "b\nc\na\nb\nb\na\nb\n",
+    "c\na\nc\nb\nb\na\nb\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "b\nc\na\nc\nb\nb\na\nb\n"
+   }
+  },
+  {
+   "id": "R044",
+   "title": "moved lines in a tiny alphabet",
+   "args": [
+    "a\na\na\nb\nb\nb\n",
+    "a\nb\na\nb\na\nb\n",
+    "a\na\na\nb\nb\nb\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\nb\na\nb\na\nb\n"
+   }
+  },
+  {
+   "id": "R045",
+   "title": "moved lines in a tiny alphabet",
+   "args": [
+    "b\na\na\nc\na\na\nb\nb\na\n",
+    "b\na\na\nc\na\na\na\nb\nb\na\n",
+    "a\na\nc\na\nb\na\nb\nb\na\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\na\nc\na\nb\na\na\nb\nb\na\n"
+   }
+  },
+  {
+   "id": "R046",
+   "title": "moved lines in a tiny alphabet",
+   "args": [
+    "b\nb\nb\nb\na\na\nb\na\nb\na\n",
+    "b\nb\nb\nb\na\na\nb\na\n",
+    "b\nb\nb\na\na\nb\nb\na\na\nb\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "b\nb\nb\na\na\nb\n<<<<<<< ours\na\n||||||| base\na\nb\na\n=======\nb\na\na\nb\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R047",
+   "title": "a line moved next to the other side's edit",
+   "args": [
+    "a\nb\nc\nd\nc\nc\nc\nc\n",
+    "a\nb\nc\nd\nZ\nc\nc\nc\n",
+    "a\nb\nd\nc\nc\nc\nc\nc\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "a\nb\nd\nZ\nc\nc\nc\n<<<<<<< ours\n||||||| base\nc\n=======\nc\nc\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R048",
+   "title": "a line moved next to the other side's edit",
+   "args": [
+    "a\nd\nd\nd\n",
+    "a\nd\nd\nd\n",
+    "Z\nd\nd\nd\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "Z\nd\nd\nd\n"
+   }
+  },
+  {
+   "id": "R049",
+   "title": "a line moved next to the other side's edit",
+   "args": [
+    "b\nb\na\na\nb\n",
+    "b\na\nb\na\nb\n",
+    "b\nb\nZ\na\nb\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "b\na\nb\nZ\na\nb\n"
+   }
+  },
+  {
+   "id": "R050",
+   "title": "a line moved next to the other side's edit",
+   "args": [
+    "a\na\na\na\n",
+    "a\na\na\na\n",
+    "a\nZ\na\na\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\nZ\na\na\n"
+   }
+  },
+  {
+   "id": "R051",
+   "title": "a line moved next to the other side's edit",
+   "args": [
+    "b\na\na\na\nb\n",
+    "a\na\nb\na\nb\n",
+    "b\na\na\nb\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "a\na\n<<<<<<< ours\nb\na\n||||||| base\na\n=======\n>>>>>>> theirs\nb\n"
+   }
+  },
+  {
+   "id": "R052",
+   "title": "a line moved next to the other side's edit",
+   "args": [
+    "b\na\nc\nc\nb\n",
+    "b\na\nc\nZ\nb\n",
+    "b\na\nc\nb\nc\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "b\na\nc\n<<<<<<< ours\nZ\n||||||| base\nc\n=======\n>>>>>>> theirs\nb\nc\n"
+   }
+  },
+  {
+   "id": "R053",
+   "title": "a line moved next to the other side's edit",
+   "args": [
+    "a\na\na\nc\na\nb\nb\nb\n",
+    "a\na\na\nc\nb\nb\na\nb\n",
+    "a\na\na\nc\nZ\na\nb\nb\nb\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "a\na\na\nc\n<<<<<<< ours\n||||||| base\na\n=======\nZ\na\n>>>>>>> theirs\nb\nb\na\nb\n"
+   }
+  },
+  {
+   "id": "R054",
+   "title": "a line moved next to the other side's edit",
+   "args": [
+    "d\na\nd\nc\nb\n",
+    "d\na\nd\nc\n",
+    "d\na\nc\nb\nd\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "d\na\nc\n<<<<<<< ours\n||||||| base\nb\n=======\nb\nd\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R055",
+   "title": "a line moved next to the other side's edit",
+   "args": [
+    "a\na\nb\n",
+    "a\na\nb\n",
+    "a\nb\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\nb\n"
+   }
+  },
+  {
+   "id": "R056",
+   "title": "a line moved next to the other side's edit",
+   "args": [
+    "a\nc\nc\nd\nb\n",
+    "a\nc\nd\nc\nb\n",
+    "c\nc\nd\nb\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "c\nd\nc\nb\n"
+   }
+  },
+  {
+   "id": "R057",
+   "title": "a line moved next to the other side's edit",
+   "args": [
+    "a\nc\nc\n",
+    "Z\na\nc\nc\n",
+    "c\na\nc\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\nZ\n||||||| base\n=======\nc\n>>>>>>> theirs\na\nc\n"
+   }
+  },
+  {
+   "id": "R058",
+   "title": "a line moved next to the other side's edit",
+   "args": [
+    "a\nc\nb\nd\nd\na\nc\n",
+    "a\nc\nb\nd\nd\nc\na\n",
+    "a\nc\nb\nd\nd\nZ\na\nc\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "a\nc\nb\nd\nd\n<<<<<<< ours\n||||||| base\na\n=======\nZ\na\n>>>>>>> theirs\nc\na\n"
+   }
+  },
+  {
+   "id": "R059",
+   "title": "a line moved next to the other side's edit",
+   "args": [
+    "a\nb\nb\nb\nb\na\na\nb\n",
+    "a\nb\nb\nb\nb\na\na\nb\n",
+    "a\nb\nb\nb\nZ\na\na\nb\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\nb\nb\nb\nZ\na\na\nb\n"
+   }
+  },
+  {
+   "id": "R060",
+   "title": "a line moved next to the other side's edit",
+   "args": [
+    "b\nb\nc\nb\nc\nb\na\n",
+    "b\nb\nc\nb\nc\nZ\nb\na\n",
+    "b\nb\nc\nb\nb\nc\na\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "b\nb\nc\nb\n<<<<<<< ours\nc\nZ\n||||||| base\nc\n=======\n>>>>>>> theirs\nb\nc\na\n"
+   }
+  },
+  {
+   "id": "R061",
+   "title": "a line moved next to the other side's edit",
+   "args": [
+    "a\na\na\na\nb\na\nb\n",
+    "a\na\na\na\nb\na\nb\n",
+    "a\na\nZ\na\nb\na\nb\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\na\nZ\na\nb\na\nb\n"
+   }
+  },
+  {
+   "id": "R062",
+   "title": "a line moved next to the other side's edit",
+   "args": [
+    "a\na\na\nb\nb\n",
+    "a\na\na\nb\nb\n",
+    "a\na\na\nZ\nb\nb\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\na\na\nZ\nb\nb\n"
+   }
+  },
+  {
+   "id": "R063",
+   "title": "a line moved next to the other side's edit",
+   "args": [
+    "d\nc\nd\nc\nb\n",
+    "c\nd\nd\nc\nb\n",
+    "d\nZ\nc\nd\nc\nb\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\n||||||| base\nd\n=======\nd\nZ\n>>>>>>> theirs\nc\nd\nd\nc\nb\n"
+   }
+  },
+  {
+   "id": "R064",
+   "title": "a line moved next to the other side's edit",
+   "args": [
+    "a\nb\na\nc\na\nc\n",
+    "a\nb\na\nc\nc\n",
+    "a\nb\na\nc\nc\na\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\nb\na\nc\nc\na\n"
+   }
+  },
+  {
+   "id": "R065",
+   "title": "a line moved next to the other side's edit",
+   "args": [
+    "a\nd\na\nd\n",
+    "a\nd\nd\na\n",
+    "a\na\nd\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "a\n<<<<<<< ours\nd\n||||||| base\nd\na\n=======\na\n>>>>>>> theirs\nd\na\n"
+   }
+  },
+  {
+   "id": "R066",
+   "title": "a line moved next to the other side's edit",
+   "args": [
+    "b\nb\nb\n",
+    "b\nb\nb\n",
+    "Z\nb\nb\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "Z\nb\nb\n"
+   }
+  },
+  {
+   "id": "R067",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\n",
+    "L1o\nL2\nL3\nL4\nL5\nL7\nL8\n",
+    "newt0\nL0\nL1\nL2\nL3t\nL4\nL6\nL7\nL8\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 2,
+    "text": "<<<<<<< ours\nL1o\n||||||| base\nL0\nL1\n=======\nnewt0\nL0\nL1\n>>>>>>> theirs\nL2\nL3t\nL4\n<<<<<<< ours\nL5\n||||||| base\nL5\nL6\n=======\nL6\n>>>>>>> theirs\nL7\nL8\n"
+   }
+  },
+  {
+   "id": "R068",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11\nL12\nL13\n",
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL8\nL9\nL10\nL11o\nL12\nL13\n",
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nnewt8\nL8\nL9\nL10\nL11\nnewt12\nL12\nL13\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 2,
+    "text": "L0\nL1\nL2\nL3\nL4\nL5\nL6\n<<<<<<< ours\n||||||| base\nL7\n=======\nL7\nnewt8\n>>>>>>> theirs\nL8\nL9\nL10\n<<<<<<< ours\nL11o\n||||||| base\nL11\n=======\nL11\nnewt12\n>>>>>>> theirs\nL12\nL13\n"
+   }
+  },
+  {
+   "id": "R069",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\n",
+    "L0\nL1o\nL2\nL3\nL4\nL5\nL6\n",
+    "L0\nL2\nL3\nL4\nL5\nL6\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "L0\n<<<<<<< ours\nL1o\n||||||| base\nL1\n=======\n>>>>>>> theirs\nL2\nL3\nL4\nL5\nL6\n"
+   }
+  },
+  {
+   "id": "R070",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\n",
+    "newo1\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\n",
+    "L1\nL2t\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\nnewo1\n||||||| base\nL0\n=======\n>>>>>>> theirs\nL1\nL2t\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\n"
+   }
+  },
+  {
+   "id": "R071",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11\nL12\n",
+    "L0\nL1\nnewo2\nL2\nL3\nL4\nL5\nL6\nL7\nnewo9\nL8\nL9\nL10\nL11\nL12\n",
+    "L0\nL1\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL12\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "L0\nL1\n<<<<<<< ours\nnewo2\nL2\n||||||| base\nL2\n=======\n>>>>>>> theirs\nL3\nL4\nL5\nL6\nL7\nnewo9\nL8\nL9\nL10\nL12\n"
+   }
+  },
+  {
+   "id": "R072",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11\nL12\nL13\nL14\n",
+    "L0\nL1\nnewo2\nL2\nL3\nL4\nL5\nL6\nL7\nL9\nL10\nL11o\nL12\nL13\nL14\n",
+    "L0\nL1\nL2\nL3\nL5\nL6\nL7\nL8t\nL9\nL10\nnewt11\nL11\nL12\nL13\nL14\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 2,
+    "text": "L0\nL1\nnewo2\nL2\nL3\nL5\nL6\nL7\n<<<<<<< ours\n||||||| base\nL8\n=======\nL8t\n>>>>>>> theirs\nL9\nL10\n<<<<<<< ours\nL11o\n||||||| base\nL11\n=======\nnewt11\nL11\n>>>>>>> theirs\nL12\nL13\nL14\n"
+   }
+  },
+  {
+   "id": "R073",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\n",
+    "news0\nL0\nnewo1\nL1\nL2o\nL3\nL4\nL5\n",
+    "news0\nL0\nnewt1\nL1\nL2\nnewt3\nL3\nL4\nL5\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 2,
+    "text": "news0\nL0\n<<<<<<< ours\nnewo1\n||||||| base\n=======\nnewt1\n>>>>>>> theirs\nL1\n<<<<<<< ours\nL2o\n||||||| base\nL2\n=======\nL2\nnewt3\n>>>>>>> theirs\nL3\nL4\nL5\n"
+   }
+  },
+  {
+   "id": "R074",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11\n",
+    "L0\nL1\nL3\nnewo4\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11\n",
+    "L0\nL1\nL2\nL3\nL4t\nL5t\nL6\nL7\nL8\nL9\nL10\nL11\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "L0\nL1\nL3\n<<<<<<< ours\nnewo4\nL4\nL5\n||||||| base\nL4\nL5\n=======\nL4t\nL5t\n>>>>>>> theirs\nL6\nL7\nL8\nL9\nL10\nL11\n"
+   }
+  },
+  {
+   "id": "R075",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11\nL12\nL13\nL14\nL15\nL16\n",
+    "L0\nL1\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11\nL12\nL13\nL14\nL15\nL16\n",
+    "L0\nL1\nL2\nnewt3\nL3\nL4t\nnewt5\nL5\nL6\nL7\nL8\nL9\nL10\nL11\nL12\nL13\nL14\nL15\nL16\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "L0\nL1\n<<<<<<< ours\n||||||| base\nL2\n=======\nL2\nnewt3\n>>>>>>> theirs\nL3\nL4t\nnewt5\nL5\nL6\nL7\nL8\nL9\nL10\nL11\nL12\nL13\nL14\nL15\nL16\n"
+   }
+  },
+  {
+   "id": "R076",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\n",
+    "L0\nnewo1\nL1\nL3\nL4\nL5\n",
+    "L0\nnewt1\nL1\nnewt4\nL3\nL4\nL5\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 2,
+    "text": "L0\n<<<<<<< ours\nnewo1\n||||||| base\n=======\nnewt1\n>>>>>>> theirs\nL1\n<<<<<<< ours\n||||||| base\nL2\n=======\nnewt4\n>>>>>>> theirs\nL3\nL4\nL5\n"
+   }
+  },
+  {
+   "id": "R077",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11\nL12\nL13\nL14\n",
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11o\nL12\nL13\nL14\n",
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11\nL12\nL13\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11o\nL12\nL13\n"
+   }
+  },
+  {
+   "id": "R078",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\n",
+    "L0o\nL1\nL2\nnews3\nL3\nL4\nL5\nL6\n",
+    "L0\nL2\nnews3\nL3\nL4\nL5\nL6\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\nL0o\nL1\n||||||| base\nL0\nL1\n=======\nL0\n>>>>>>> theirs\nL2\nnews3\nL3\nL4\nL5\nL6\n"
+   }
+  },
+  {
+   "id": "R079",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\n",
+    "L0\nL1s\nL2\nL3\nL4\nL5\nnewo6\nL6\nL7\nL8\n",
+    "L0\nL1s\nL2\nL3\nL4\nL5\nL6\nL7\nL8\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "L0\nL1s\nL2\nL3\nL4\nL5\nnewo6\nL6\nL7\nL8\n"
+   }
+  },
+  {
+   "id": "R080",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11\nL12\nL13\nL14\nL15\nL16\n",
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL12\nL13\nL14\nL15\nL16\n",
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11\nnewt12\nL12\nL13\nL14\nL15\nL16\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\n<<<<<<< ours\n||||||| base\nL11\n=======\nL11\nnewt12\n>>>>>>> theirs\nL12\nL13\nL14\nL15\nL16\n"
+   }
+  },
+  {
+   "id": "R081",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\n",
+    "L0\nnewo1\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\n",
+    "L0\nL1\nL2\nL3\nL4t\nL5\nL6\nL7\nL8\nL9\nL10\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "L0\nnewo1\nL1\nL2\nL3\nL4t\nL5\nL6\nL7\nL8\nL9\nL10\n"
+   }
+  },
+  {
+   "id": "R082",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11\nL12\nL13\nL14\nL15\n",
+    "L0\nL1\nL3\nL4\nL5\nL6\nL7\nL8\nL11\nL12\nL13\nL14\nL15\n",
+    "L0\nL1\nL2\nL3\nL4\nL6\nL7\nL8\nL9\nL12\nL13\nL14\nL15\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "L0\nL1\nL3\nL4\nL6\nL7\nL8\n<<<<<<< ours\nL11\n||||||| base\nL9\nL10\nL11\n=======\nL9\n>>>>>>> theirs\nL12\nL13\nL14\nL15\n"
+   }
+  },
+  {
+   "id": "R083",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11\nL12\nL13\nL14\nL15\nL16\n",
+    "L0\nL1\nL2\nL3\nnewo4\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11\nnewo14\nL13\nL14\nL15\nL16\n",
+    "L0\nL1\nL2\nL3\nL4\nL5t\nL6\nL7\nL8\nL9\nL10\nL11\nL12\nL13\nL14\nL15\nnewt16\nL16\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "L0\nL1\nL2\nL3\nnewo4\nL4\nL5t\nL6\nL7\nL8\nL9\nL10\nL11\nnewo14\nL13\nL14\nL15\nnewt16\nL16\n"
+   }
+  },
+  {
+   "id": "R084",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\n",
+    "L0\nL1\nL2\nL4\nL5\n",
+    "L0\nL1\nL2\nL4\nL5\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "L0\nL1\nL2\nL4\nL5\n"
+   }
+  },
+  {
+   "id": "R085",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\n",
+    "newo0\nL0\nL1\nL2\nL3\nL4\nL5\nL6\nnewo7\nL7\nL8\nL9\n",
+    "L0\nL1\nL2\nL3t\nL4\nL5\nL6\nL7t\nL8\nL9\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "newo0\nL0\nL1\nL2\nL3t\nL4\nL5\nL6\n<<<<<<< ours\nnewo7\nL7\n||||||| base\nL7\n=======\nL7t\n>>>>>>> theirs\nL8\nL9\n"
+   }
+  },
+  {
+   "id": "R086",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\n",
+    "newo0\nL0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\n",
+    "L0\nL1\nL3\nL4\nL5\nL6\nL7\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "newo0\nL0\nL1\nL3\nL4\nL5\nL6\nL7\n"
+   }
+  },
+  {
+   "id": "R087",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11\nL12\nL13\nL14\n",
+    "L0o\nL1\nL2o\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11o\nL12\nL13\nL14\n",
+    "L0\nL1\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11\nL12\nL14\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "L0o\nL1\n<<<<<<< ours\nL2o\nL3\n||||||| base\nL2\nL3\n=======\n>>>>>>> theirs\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11o\nL12\nL14\n"
+   }
+  },
+  {
+   "id": "R088",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\n",
+    "L1\nL2\nL3\nnewo4\nL4\nL5\nL6\n",
+    "L0\nL1t\nL2\nL3\nL4\nL5t\nL6\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\nL1\n||||||| base\nL0\nL1\n=======\nL0\nL1t\n>>>>>>> theirs\nL2\nL3\nnewo4\nL4\nL5t\nL6\n"
+   }
+  },
+  {
+   "id": "R089",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\n",
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\n",
+    "L0\nL1\nL2\nL3\nL4\nnewt6\nL6\nL7\nL8\nL9\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "L0\nL1\nL2\nL3\nL4\nnewt6\nL6\nL7\nL8\nL9\n"
+   }
+  },
+  {
+   "id": "R090",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\n",
+    "L1\nL2\nL3\nL4\nL5\n",
+    "newt0\nL0\nL1\nL2\nL3\nL4\nL5\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\n||||||| base\nL0\n=======\nnewt0\nL0\n>>>>>>> theirs\nL1\nL2\nL3\nL4\nL5\n"
+   }
+  },
+  {
+   "id": "R091",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11\nL12\nL13\nL14\nL15\nL16\n",
+    "L0\nL2\nL3\nnews4\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11\nL12\nL13\nL14\nL15\nL16\n",
+    "L0\nL1\nL3t\nnews4\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11\nL12\nL13\nL14\nL15\nL16\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "L0\n<<<<<<< ours\nL2\nL3\nnews4\n||||||| base\nL1\nL2\nL3\n=======\nL1\nL3t\nnews4\n>>>>>>> theirs\nL4\nL5\nL6\nL7\nL8\nL9\nL10\nL11\nL12\nL13\nL14\nL15\nL16\n"
+   }
+  },
+  {
+   "id": "R092",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\n",
+    "L1\nnews3\nL3\nL4\nL5\n",
+    "L0\nL1t\nL2\nnews3\nL3\nL5\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\nL1\nnews3\n||||||| base\nL0\nL1\nL2\n=======\nL0\nL1t\nL2\nnews3\n>>>>>>> theirs\nL3\nL5\n"
+   }
+  },
+  {
+   "id": "R093",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\n",
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6o\nL7\nL8\nL9\n",
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL8\nL9\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "L0\nL1\nL2\nL3\nL4\nL5\n<<<<<<< ours\nL6o\nL7\n||||||| base\nL6\nL7\n=======\nL6\n>>>>>>> theirs\nL8\nL9\n"
+   }
+  },
+  {
+   "id": "R094",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\n",
+    "L0o\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\n",
+    "L0t\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\nL0o\n||||||| base\nL0\n=======\nL0t\n>>>>>>> theirs\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\n"
+   }
+  },
+  {
+   "id": "R095",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\nL7\nL8\nL9\n",
+    "L0\nL1o\nL2\nnewo3\nL3\nL4\nL5\nnewo7\nL6\nL7\nL8\nL9\n",
+    "L0\nL1\nL2\nL3\nL5\nL6\nL7\nL8t\nL9\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "L0\nL1o\nL2\nnewo3\nL3\nL5\nnewo7\nL6\nL7\nL8t\nL9\n"
+   }
+  },
+  {
+   "id": "R096",
+   "title": "edits at the same or nearby spots",
+   "args": [
+    "L0\nL1\nL2\nL3\nL4\nL5\nL6\n",
+    "L0\nL1\nL3\nL5\nL6\n",
+    "L0\nL1\nL3\nL4t\nL5\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "L0\nL1\nL3\n<<<<<<< ours\n||||||| base\nL4\n=======\nL4t\n>>>>>>> theirs\nL5\n"
+   }
+  },
+  {
+   "id": "R097",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "a\r\ngh\n\r\n",
+    "a\r\ni j\n\r",
+    "a\r\na\r\ngh\ngh\n\r\nb\nk"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "a\r\n<<<<<<< ours\ni j\n\r\n||||||| base\ngh\n\r\n=======\na\r\ngh\ngh\n\r\nb\nk\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R098",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "i j\nk\ngh\nk\n\r\n",
+    "\r\nk\ngh\nk\n\r\ngh\n",
+    "gh\ni j\nk\nk\n\r"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 2,
+    "text": "<<<<<<< ours\n\r\n||||||| base\ni j\n=======\ngh\ni j\n>>>>>>> theirs\nk\nk\n<<<<<<< ours\n\r\ngh\n||||||| base\n\r\n=======\n\r\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R099",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "c\rd\nb\r\na\r\n\r\na\r\n",
+    "a\r\nc\rd\nb\r\na\r\n\r",
+    "c\rd\nb\r\na\r\n\r\na\r\nb\na\r\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "a\r\nc\rd\nb\r\na\r\n<<<<<<< ours\n\r\n||||||| base\n\r\na\r\n=======\n\r\na\r\nb\na\r\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R100",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "\r\nc\rd\n\ngh\n\nb",
+    "\r\nc\rd\n\ngh\na\nk\n\nb\n",
+    "i j\na\n\r\nc\rd\n\ngh\n\nb\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "i j\na\n\r\nc\rd\n\ngh\na\nk\n\nb\n"
+   }
+  },
+  {
+   "id": "R101",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "\nb\nc\rd",
+    "\r\n\nk\nc\rd",
+    "\nb\nc\rd"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "\r\n\nk\nc\rd"
+   }
+  },
+  {
+   "id": "R102",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "i j\na\nb\ne\ff\na\r\n",
+    "i j\na\na\nb\ne\ff\na\r\na\r\n",
+    "b\nk\ni j\na\nb\ne\ff\na\r\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "b\nk\ni j\na\na\nb\ne\ff\na\r\na\r\n"
+   }
+  },
+  {
+   "id": "R103",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "e\ff\ni j\ngh\ni j",
+    "e\ff\ni j\ngh\nk\n",
+    "gh\ni j"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "gh\nk\n"
+   }
+  },
+  {
+   "id": "R104",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "a\r\n\n",
+    "a\r\na\ni j\n",
+    "\na\r"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\na\r\na\ni j\n||||||| base\na\r\n\n=======\n\na\r\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R105",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "a\ni j\nc\rd\n\r\n",
+    "a\ngh\ni j\n\n\r\n",
+    "a\ni j\nc\rd\n\r"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "a\ngh\ni j\n<<<<<<< ours\n\n\r\n||||||| base\nc\rd\n\r\n=======\nc\rd\n\r\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R106",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "c\rd\nk\nb\ne\ff\nk\nb\r",
+    "",
+    "\nc\rd\nk\nb\ne\ff\ne\ff\nk\nb\r\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\n||||||| base\nc\rd\nk\nb\ne\ff\nk\nb\r\n=======\n\nc\rd\nk\nb\ne\ff\ne\ff\nk\nb\r\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R107",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "a\r\nb\r",
+    "b\r\n",
+    "\r\na\r\nb\r\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\nb\r\n||||||| base\na\r\nb\r\n=======\n\r\na\r\nb\r\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R108",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "c\rd\nb\r\na\ngh\na\nb\r",
+    "a\ngh\na\nb\r\n",
+    "b\r\na\ngh\na\nb\r"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\n||||||| base\nc\rd\nb\r\n=======\nb\r\n>>>>>>> theirs\na\ngh\na\nb\r\n"
+   }
+  },
+  {
+   "id": "R109",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "k\n\nb\ngh\n",
+    "k\n\nb\nk\n",
+    "gh\nb\n\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\nk\n\nb\nk\n||||||| base\nk\n\nb\ngh\n=======\ngh\nb\n\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R110",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "b\r\na\r\na\r\n\ngh",
+    "a\r\n\ngh",
+    "b\r\na\r\n\ngh\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\r\n\ngh\n"
+   }
+  },
+  {
+   "id": "R111",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "k\n\r\nc\rd\ngh\na\n",
+    "k\n\r\nc\rd\ngh\n",
+    "k\na\n\r\nc\rd\ngh"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "k\na\n\r\nc\rd\n<<<<<<< ours\ngh\n||||||| base\ngh\na\n=======\ngh\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R112",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "a\r\na\r\n",
+    "a\r\na\r\n",
+    "a\r\ni j\n\na\r\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "a\r\ni j\n\na\r\n"
+   }
+  },
+  {
+   "id": "R113",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "i j\nb\na\r",
+    "i j\nb\na\r\ne\ff\ni j\n",
+    "a\r\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\ni j\nb\na\r\ne\ff\ni j\n||||||| base\ni j\nb\na\r\n=======\na\r\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R114",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "\r\na\ni j\n\nb\r\nb\n",
+    "\r\na\ni j\n\nb\r\nb\ni j\na\r\n",
+    "\r\na\nb\r\nb\ni j"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "\r\na\nb\r\nb\n<<<<<<< ours\ni j\na\r\n||||||| base\n=======\ni j\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R115",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "a\r\ngh\ne\ff\nb\r\nb\r\n\n",
+    "a\r\ngh\ne\ff\nb\r\ne\ff\n\n",
+    ""
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\na\r\ngh\ne\ff\nb\r\ne\ff\n\n||||||| base\na\r\ngh\ne\ff\nb\r\nb\r\n\n=======\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R116",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "k",
+    "b\r\n",
+    "k\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\nb\r\n||||||| base\nk\n=======\nk\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R117",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "a",
+    "",
+    "gh\ne\ff"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\n||||||| base\na\n=======\ngh\ne\ff\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R118",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "b\r\ngh\na\n\r\n",
+    "\r\nb\r\ngh\na",
+    "b\r\ni j\na\ngh\n\r\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "\r\nb\r\n<<<<<<< ours\ngh\na\n||||||| base\ngh\na\n\r\n=======\ni j\na\ngh\n\r\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R119",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "b\na\r\nb\n",
+    "a\r\nb\nb",
+    "c\rd\nb\na\r\nb\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\n||||||| base\nb\n=======\nc\rd\nb\n>>>>>>> theirs\na\r\nb\nb"
+   }
+  },
+  {
+   "id": "R120",
+   "title": "line endings, missing final newlines, empty texts",
+   "args": [
+    "b\na\nc\rd\na\r\ni j\ni j\n",
+    "gh\nb\na\nc\rd\na\r\ni j\ni j",
+    "b\na\nc\rd\na\r\na\r\ni j\ni j\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "gh\nb\na\nc\rd\na\r\na\r\ni j\ni j"
+   }
+  },
+  {
+   "id": "R121",
+   "title": "other separator characters inside lines",
+   "args": [
+    "p0\fm0 q0\n",
+    "p0\fM0 Q0\n",
+    "P0\fm0 q0\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\np0\fM0 Q0\n||||||| base\np0\fm0 q0\n=======\nP0\fm0 q0\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R122",
+   "title": "other separator characters inside lines",
+   "args": [
+    "p0\fm0q0\np1\fm1\fq1\np2\fm2\u000bq2\np3\u001em3\u000bq3\n",
+    "p0\fm0q0\np1\fm1\fq1\nP2\fm2\u000bq2\np3\u001em3\u000bq3\n",
+    "p0\fm0q0\np1\fm1\fq1\np2\fM2\u000bQ2\np3\u001em3\u000bq3\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "p0\fm0q0\np1\fm1\fq1\n<<<<<<< ours\nP2\fm2\u000bq2\n||||||| base\np2\fm2\u000bq2\n=======\np2\fM2\u000bQ2\n>>>>>>> theirs\np3\u001em3\u000bq3\n"
+   }
+  },
+  {
+   "id": "R123",
+   "title": "other separator characters inside lines",
+   "args": [
+    "p0\u001em0 q0\np1m1\u000bq1\np2 m2q2\n",
+    "p0\u001em0 q0\np1m1\u000bq1\nP2 m2q2\n",
+    "p0\u001em0 q0\np1m1\u000bq1\np2 m2Q2\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "p0\u001em0 q0\np1m1\u000bq1\n<<<<<<< ours\nP2 m2q2\n||||||| base\np2 m2q2\n=======\np2 m2Q2\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R124",
+   "title": "other separator characters inside lines",
+   "args": [
+    "p0 m0 q0\np1\u000bm1\rq1\np2\fm2\fq2\n",
+    "p0 m0 q0\nP1\u000bm1\rq1\np2\fm2\fq2\n",
+    "p0 m0 q0\np1\u000bm1\rQ1\np2\fm2\fq2\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "p0 m0 q0\n<<<<<<< ours\nP1\u000bm1\rq1\n||||||| base\np1\u000bm1\rq1\n=======\np1\u000bm1\rQ1\n>>>>>>> theirs\np2\fm2\fq2\n"
+   }
+  },
+  {
+   "id": "R125",
+   "title": "other separator characters inside lines",
+   "args": [
+    "p0\rm0\fq0\np1\rm1q1\n",
+    "P0\rm0\fq0\np1\rm1q1\n",
+    "p0\rm0\fQ0\np1\rm1q1\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\nP0\rm0\fq0\n||||||| base\np0\rm0\fq0\n=======\np0\rm0\fQ0\n>>>>>>> theirs\np1\rm1q1\n"
+   }
+  },
+  {
+   "id": "R126",
+   "title": "other separator characters inside lines",
+   "args": [
+    "p0\fm0 q0\np1\fm1\u001eq1\np2\u001em2q2\np3\u000bm3q3\n",
+    "P0\fm0 q0\np1\fm1\u001eq1\np2\u001em2q2\np3\u000bm3q3\n",
+    "p0\fm0 Q0\np1\fm1\u001eq1\np2\u001em2q2\np3\u000bm3q3\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\nP0\fm0 q0\n||||||| base\np0\fm0 q0\n=======\np0\fm0 Q0\n>>>>>>> theirs\np1\fm1\u001eq1\np2\u001em2q2\np3\u000bm3q3\n"
+   }
+  },
+  {
+   "id": "R127",
+   "title": "other separator characters inside lines",
+   "args": [
+    "p0\u001cm0q0\np1\rm1\u001eq1\np2 m2\u000bq2\np3\rm3q3\n",
+    "p0\u001cm0q0\nP1\rm1\u001eq1\np2 m2\u000bq2\np3\rm3q3\n",
+    "p0\u001cm0q0\np1\rm1\u001eQ1\np2 m2\u000bq2\np3\rm3q3\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "p0\u001cm0q0\n<<<<<<< ours\nP1\rm1\u001eq1\n||||||| base\np1\rm1\u001eq1\n=======\np1\rm1\u001eQ1\n>>>>>>> theirs\np2 m2\u000bq2\np3\rm3q3\n"
+   }
+  },
+  {
+   "id": "R128",
+   "title": "other separator characters inside lines",
+   "args": [
+    "p0\u001cm0\u001eq0\np1m1\fq1\np2\u001cm2\u001cq2\np3\fm3\u001cq3\n",
+    "p0\u001cm0\u001eq0\np1m1\fq1\np2\u001cm2\u001cq2\np3\fm3\u001cQ3\n",
+    "p0\u001cm0\u001eq0\np1m1\fq1\np2\u001cm2\u001cq2\nP3\fm3\u001cq3\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "p0\u001cm0\u001eq0\np1m1\fq1\np2\u001cm2\u001cq2\n<<<<<<< ours\np3\fm3\u001cQ3\n||||||| base\np3\fm3\u001cq3\n=======\nP3\fm3\u001cq3\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R129",
+   "title": "CRLF versus LF",
+   "args": [
+    "l0\r\nl1\r\nl2\r\nl3\r\n",
+    "l0\r\nl1\r\nl2\r\nl3\n",
+    "l0\r\nl1\r\nl2\r\nl3\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "l0\r\nl1\r\nl2\r\nl3\n"
+   }
+  },
+  {
+   "id": "R130",
+   "title": "CRLF versus LF",
+   "args": [
+    "l0\r\nl1\r\n",
+    "l0\r\nL1\r\n",
+    "l0\r\nl1\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "l0\r\n<<<<<<< ours\nL1\r\n||||||| base\nl1\r\n=======\nl1\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R131",
+   "title": "CRLF versus LF",
+   "args": [
+    "l0\r\nl1\r\nl2\r\n",
+    "l0\r\nl1\r\nl2\n",
+    "l0\r\nl1\nl2\r\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "l0\r\n<<<<<<< ours\nl1\r\nl2\n||||||| base\nl1\r\nl2\r\n=======\nl1\nl2\r\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R132",
+   "title": "CRLF versus LF",
+   "args": [
+    "l0\r\nl1\r\n",
+    "l0\r\nl1\n",
+    "l0\r\nl1\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "l0\r\nl1\n"
+   }
+  },
+  {
+   "id": "R133",
+   "title": "CRLF versus LF",
+   "args": [
+    "l0\r\nl1\r\nl2\r\n",
+    "l0\r\nl1\nl2\r\n",
+    "l0\r\nl1\r\nL2\r\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "l0\r\n<<<<<<< ours\nl1\nl2\r\n||||||| base\nl1\r\nl2\r\n=======\nl1\r\nL2\r\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R134",
+   "title": "CRLF versus LF",
+   "args": [
+    "l0\r\nl1\r\nl2\r\nl3\r\nl4\r\nl5\r\n",
+    "l0\r\nl1\r\nl2\r\nl3\r\nl4\r\nl5\n",
+    "l0\r\nl1\r\nl2\r\nl3\r\nl4\r\nL5\r\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "l0\r\nl1\r\nl2\r\nl3\r\nl4\r\n<<<<<<< ours\nl5\n||||||| base\nl5\r\n=======\nL5\r\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R135",
+   "title": "CRLF versus LF",
+   "args": [
+    "l0\r\nl1\r\nl2\r\n",
+    "l0\r\nl1\r\nl2\n",
+    "l0\r\nl1\r\nl2\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "l0\r\nl1\r\nl2\n"
+   }
+  },
+  {
+   "id": "R136",
+   "title": "CRLF versus LF",
+   "args": [
+    "l0\r\nl1\r\n",
+    "l0\r\nl1\n",
+    "l0\r\nl1\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "l0\r\nl1\n"
+   }
+  },
+  {
+   "id": "R137",
+   "title": "marker-like lines",
+   "args": [
+    "<<<<<<< ours\n||||||| base\n||||||| base\n",
+    "<<<<<<< ours\n||||||| base\n||||||| base\n<<<<<<< ours\n",
+    "<<<<<<< ours\n||||||| base\n||||||| base\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "<<<<<<< ours\n||||||| base\n||||||| base\n<<<<<<< ours\n"
+   }
+  },
+  {
+   "id": "R138",
+   "title": "marker-like lines",
+   "args": [
+    "<<<<<<< ours\ny\n=======\n",
+    "<<<<<<< ours\ny\n||||||| base\n=======\n",
+    "<<<<<<< ours\ny\n||||||| base\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "<<<<<<< ours\ny\n<<<<<<< ours\n||||||| base\n=======\n||||||| base\n=======\n=======\n||||||| base\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R139",
+   "title": "marker-like lines",
+   "args": [
+    "=======\n<<<<<<< ours\n<<<<<<< ours\n",
+    "=======\n<<<<<<< ours\n<<<<<<< ours\n<<<<<<< ours\n",
+    "=======\n<<<<<<< ours\n<<<<<<< ours\n=======\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "=======\n<<<<<<< ours\n<<<<<<< ours\n<<<<<<< ours\n<<<<<<< ours\n||||||| base\n=======\n=======\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R140",
+   "title": "marker-like lines",
+   "args": [
+    "<<<<<<< ours\n=======\nx\nx\n",
+    "<<<<<<< ours\n=======\n||||||| base\nx\nx\n",
+    "<<<<<<< ours\n=======\nx\nx\n<<<<<<< ours\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "<<<<<<< ours\n=======\n||||||| base\nx\nx\n<<<<<<< ours\n"
+   }
+  },
+  {
+   "id": "R141",
+   "title": "marker-like lines",
+   "args": [
+    ">>>>>>> theirs\n=======\ny\ny\nz\n",
+    ">>>>>>> theirs\n=======\ny\n=======\ny\nz\n",
+    ">>>>>>> theirs\n=======\ny\ny\nz\n=======\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": ">>>>>>> theirs\n=======\ny\n=======\ny\nz\n=======\n"
+   }
+  },
+  {
+   "id": "R142",
+   "title": "marker-like lines",
+   "args": [
+    "x\nz\n>>>>>>> theirs\n",
+    "=======\nx\nz\n>>>>>>> theirs\n",
+    "x\nz\n>>>>>>> theirs\n<<<<<<< ours\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "=======\nx\nz\n>>>>>>> theirs\n<<<<<<< ours\n"
+   }
+  },
+  {
+   "id": "R143",
+   "title": "marker-like lines",
+   "args": [
+    ">>>>>>> theirs\n||||||| base\n",
+    "=======\n>>>>>>> theirs\n||||||| base\n",
+    ">>>>>>> theirs\n||||||| base\n=======\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "=======\n>>>>>>> theirs\n||||||| base\n=======\n"
+   }
+  },
+  {
+   "id": "R144",
+   "title": "marker-like lines",
+   "args": [
+    "<<<<<<< ours\n=======\n",
+    ">>>>>>> theirs\n<<<<<<< ours\n=======\n",
+    "<<<<<<< ours\n<<<<<<< ours\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": ">>>>>>> theirs\n<<<<<<< ours\n<<<<<<< ours\n"
+   }
+  },
+  {
+   "id": "R145",
+   "title": "marker-like lines",
+   "args": [
+    "||||||| base\nx\n=======\nz\nz\n",
+    "||||||| base\nx\n||||||| base\n=======\nz\nz\n",
+    "||||||| base\nx\n=======\nz\nz\n||||||| base\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "||||||| base\nx\n||||||| base\n=======\nz\nz\n||||||| base\n"
+   }
+  },
+  {
+   "id": "R146",
+   "title": "marker-like lines",
+   "args": [
+    "<<<<<<< ours\n||||||| base\nz\n=======\n||||||| base\n",
+    ">>>>>>> theirs\n<<<<<<< ours\n||||||| base\nz\n=======\n||||||| base\n",
+    "<<<<<<< ours\n||||||| base\nz\n=======\n||||||| base\n>>>>>>> theirs\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": ">>>>>>> theirs\n<<<<<<< ours\n||||||| base\nz\n=======\n||||||| base\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R147",
+   "title": "marker-like lines",
+   "args": [
+    "x\n>>>>>>> theirs\n=======\nx\n||||||| base\n",
+    "x\n>>>>>>> theirs\n>>>>>>> theirs\n=======\nx\n||||||| base\n",
+    "x\n>>>>>>> theirs\n=======\nx\n||||||| base\n<<<<<<< ours\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "x\n>>>>>>> theirs\n>>>>>>> theirs\n=======\nx\n||||||| base\n<<<<<<< ours\n"
+   }
+  },
+  {
+   "id": "R148",
+   "title": "marker-like lines",
+   "args": [
+    ">>>>>>> theirs\nz\n<<<<<<< ours\n",
+    ">>>>>>> theirs\n>>>>>>> theirs\nz\n<<<<<<< ours\n",
+    ">>>>>>> theirs\nz\n<<<<<<< ours\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": ">>>>>>> theirs\n>>>>>>> theirs\nz\n<<<<<<< ours\n"
+   }
+  },
+  {
+   "id": "R149",
+   "title": "code-like file",
+   "args": [
+    "}\n    v44 = f(1);\n    v20 = f(7);\n    v13 = f(0);\n    i += 1;\nelse\n    v54 = f(1);\n    v9 = f(1);\n\n    v45 = f(8);\n    v55 = f(4);\n    v25 = f(7);\n}\nelse\n\n    v5 = f(4);\n    v46 = f(6);\n    v37 = f(0);\n    v40 = f(6);\n}\n    v34 = f(0);\n{\n    i += 1;\n{\n    v9 = f(4);\n}\n    v21 = f(8);\n    v38 = f(2);\n{\n    v27 = f(8);\n    v6 = f(0);\n    v32 = f(2);\n    v50 = f(5);\n    v29 = f(7);\n    v34 = f(4);\n    v26 = f(2);\n    i += 1;\n}\n    v54 = f(6);\n    i += 1;\n    v5 = f(7);\n    v13 = f(8);\n    v37 = f(2);\n    v32 = f(1);\n    v22 = f(2);\n    v5 = f(4);\n}\n    v35 = f(2);\n    v38 = f(6);\n    v1 = f(0);\n    v27 = f(7);\n    v13 = f(2);\n    v2 = f(8);\n    v13 = f(2);\n    v36 = f(6);\n}\n    v54 = f(4);\n    v7 = f(7);\n    v49 = f(1);\n    v57 = f(1);\n    v17 = f(2);\n",
+    "    v21 = f(8);\n}\n    v44 = f(1);\n    v20 = f(7);\n    v13 = f(0);\n    i += 1;\nelse\n    v54 = f(1);\n    v9 = f(1);\n    v45 = f(8);\n    v55 = f(4);\n    v25 = f(7);\n}\nelse\n\n    v5 = f(4);\n    v46 = f(6);\n    v37 = f(0);\n    v40 = f(6);\n}\n    v34 = f(0);\n{\n    i += 1;\n{\n\n    v9 = f(4);\n}\n    v38 = f(2);\n{\n    v27 = f(8);\n    v6 = f(0);\n    v32 = f(2);\n    v50 = f(5);\n    v29 = f(7);\n    v34 = f(4);\n    w5 = g();\n    i += 1;\n}\n    v54 = f(6);\n    i += 1;\n    w3 = g();\n    v5 = f(7);\n    v13 = f(8);\n    v37 = f(2);\n    v32 = f(1);\n    v22 = f(2);\n    v5 = f(4);\n}\n    v35 = f(2);\n    v38 = f(6);\n    v1 = f(0);\n    v27 = f(7);\n    v13 = f(2);\n    v2 = f(8);\n    v13 = f(2);\n    v36 = f(6);\n}\n    v54 = f(4);\n    v7 = f(7);\n    v49 = f(1);\n    v57 = f(1);\n    v17 = f(2);",
+    "}\n    v44 = f(1);\n    v20 = f(7);\n    v13 = f(0);\n    i += 1;\nelse\n    v54 = f(1);\n    v9 = f(1);\n\n    v45 = f(8);\n    v55 = f(4);\n    v25 = f(7);\n}\nelse\n\n    v5 = f(4);\n    v46 = f(6);\n    v37 = f(0);\n    v40 = f(6);\n}\n    v34 = f(0);\n{\n    i += 1;\n{\n    v9 = f(4);\n}\n    v21 = f(8);\n    v38 = f(2);\n{\n    v27 = f(8);\n    v6 = f(0);\n    v38 = f(6);\n    v32 = f(2);\n    v50 = f(5);\n    v29 = f(7);\n    v34 = f(4);\n    v26 = f(2);\n    i += 1;\n}\n    v54 = f(6);\n    i += 1;\n    v5 = f(7);\n    v13 = f(8);\n    v37 = f(2);\n    v32 = f(1);\n    v22 = f(2);\n}\n    v35 = f(2);\n    v1 = f(0);\n    v27 = f(7);\n    v13 = f(2);\n    v2 = f(8);\n    v13 = f(2);\n    v36 = f(6);\n}\nelse\n    v7 = f(7);\n    v49 = f(1);\n    v57 = f(1);\n    v17 = f(2);\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "    v21 = f(8);\n}\n    v44 = f(1);\n    v20 = f(7);\n    v13 = f(0);\n    i += 1;\nelse\n    v54 = f(1);\n    v9 = f(1);\n    v45 = f(8);\n    v55 = f(4);\n    v25 = f(7);\n}\nelse\n\n    v5 = f(4);\n    v46 = f(6);\n    v37 = f(0);\n    v40 = f(6);\n}\n    v34 = f(0);\n{\n    i += 1;\n{\n\n    v9 = f(4);\n}\n    v38 = f(2);\n{\n    v27 = f(8);\n    v6 = f(0);\n    v38 = f(6);\n    v32 = f(2);\n    v50 = f(5);\n    v29 = f(7);\n    v34 = f(4);\n    w5 = g();\n    i += 1;\n}\n    v54 = f(6);\n    i += 1;\n    w3 = g();\n    v5 = f(7);\n    v13 = f(8);\n    v37 = f(2);\n    v32 = f(1);\n    v22 = f(2);\n}\n    v35 = f(2);\n    v1 = f(0);\n    v27 = f(7);\n    v13 = f(2);\n    v2 = f(8);\n    v13 = f(2);\n    v36 = f(6);\n}\nelse\n    v7 = f(7);\n    v49 = f(1);\n    v57 = f(1);\n    v17 = f(2);"
+   }
+  },
+  {
+   "id": "R150",
+   "title": "code-like file",
+   "args": [
+    "    v9 = f(1);\nelse\n    v56 = f(4);\n    v12 = f(5);\n    v30 = f(2);\n    return x;\n    v53 = f(0);\n    v35 = f(3);\n    v29 = f(8);\n    v51 = f(0);\n}\n    v13 = f(7);\n}\n    v34 = f(0);\n    v29 = f(5);\n    return x;\n    v29 = f(4);\n    v14 = f(7);\n\n    i += 1;\n    i += 1;\n    v35 = f(1);\n    return x;\n    v55 = f(8);\n    v38 = f(7);\n    return x;\n    return x;\n    v12 = f(2);\n",
+    "    v9 = f(1);\n    v56 = f(4);\n    v12 = f(5);\n\n    return x;\n    v53 = f(0);\n    v35 = f(3);\n    v29 = f(8);\n    v51 = f(0);\n}\n    v13 = f(7);\n}\n    v34 = f(0);\n    return x;\n    v29 = f(4);\n    v14 = f(7);\n\n    i += 1;\n    i += 1;\n    v35 = f(1);\n    return x;\n    v55 = f(8);\n    v38 = f(7);\n    return x;\n    return x;\n    v12 = f(2);\n",
+    "    v9 = f(1);\nelse\n    v56 = f(4);\n    w4 = g();\n    w2 = g();\n    return x;\n    v53 = f(0);\n    v35 = f(3);\n    v29 = f(8);\n\n    v51 = f(0);\n}\n    v13 = f(7);\n}\n    v34 = f(0);\n    v29 = f(5);\n    return x;\n    v29 = f(4);\n    v14 = f(7);\n    w2 = g();\n    i += 1;\n    v35 = f(1);\n    w0 = g();\n    i += 1;\n    return x;\n    v55 = f(8);\n    v38 = f(7);\n    return x;\n    return x;\n    v12 = f(2);\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 1,
+    "text": "    v9 = f(1);\n    v56 = f(4);\n<<<<<<< ours\n    v12 = f(5);\n\n||||||| base\n    v12 = f(5);\n    v30 = f(2);\n=======\n    w4 = g();\n    w2 = g();\n>>>>>>> theirs\n    return x;\n    v53 = f(0);\n    v35 = f(3);\n    v29 = f(8);\n\n    v51 = f(0);\n}\n    v13 = f(7);\n}\n    v34 = f(0);\n    return x;\n    v29 = f(4);\n    v14 = f(7);\n    w2 = g();\n    i += 1;\n    v35 = f(1);\n    w0 = g();\n    i += 1;\n    return x;\n    v55 = f(8);\n    v38 = f(7);\n    return x;\n    return x;\n    v12 = f(2);\n"
+   }
+  },
+  {
+   "id": "R151",
+   "title": "code-like file",
+   "args": [
+    "    v10 = f(6);\n    v42 = f(2);\nelse\nelse\n    v19 = f(1);\n}\n    v40 = f(6);\n    i += 1;\n\n    v25 = f(6);\n    v16 = f(2);\n    v22 = f(8);\n    v42 = f(3);\n    v44 = f(5);\n    v12 = f(1);\n    v34 = f(6);\n    v41 = f(3);\n    v8 = f(6);\n    v36 = f(2);\n}\n    v52 = f(6);\n\n    v37 = f(5);\n    v21 = f(6);\n    v57 = f(0);\n    v2 = f(6);\n    v35 = f(3);\n    v5 = f(7);\n",
+    "    v10 = f(6);\n    v42 = f(2);\nelse\nelse\n    v19 = f(1);\n}\n    v25 = f(6);\n    v40 = f(6);\n    i += 1;\n\n    v16 = f(2);\n    v22 = f(8);\n    v42 = f(3);\n    v44 = f(5);\n    v12 = f(1);\n    v34 = f(6);\n    v41 = f(3);\n    v8 = f(6);\nelse\n    v36 = f(2);\n}\n    v52 = f(6);\n\n{\n    v21 = f(6);\n    v57 = f(0);\n    v2 = f(6);\n    v35 = f(3);\n    v5 = f(7);\n",
+    "    v10 = f(6);\n    v42 = f(2);\nelse\nelse\n    v19 = f(1);\n}\n    v25 = f(6);\n    v40 = f(6);\n    i += 1;\n\n    v16 = f(2);\n    v22 = f(8);\n    v42 = f(3);\n    v44 = f(5);\n    v12 = f(1);\n    v34 = f(6);\n    v41 = f(3);\n    v8 = f(6);\nelse\n    v36 = f(2);\n}\n    v52 = f(6);\n\n{\n    v21 = f(6);\n    v57 = f(0);\n    v2 = f(6);\n    v35 = f(3);\n    v5 = f(7);"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "    v10 = f(6);\n    v42 = f(2);\nelse\nelse\n    v19 = f(1);\n}\n    v25 = f(6);\n    v40 = f(6);\n    i += 1;\n\n    v16 = f(2);\n    v22 = f(8);\n    v42 = f(3);\n    v44 = f(5);\n    v12 = f(1);\n    v34 = f(6);\n    v41 = f(3);\n    v8 = f(6);\nelse\n    v36 = f(2);\n}\n    v52 = f(6);\n\n{\n    v21 = f(6);\n    v57 = f(0);\n    v2 = f(6);\n    v35 = f(3);\n    v5 = f(7);"
+   }
+  },
+  {
+   "id": "R152",
+   "title": "code-like file",
+   "args": [
+    "    v28 = f(7);\n}\n    v5 = f(3);\n    v10 = f(7);\n    v8 = f(7);\n    v55 = f(7);\n    v54 = f(8);\n    v25 = f(2);\n\n}\n    v52 = f(4);\nelse\n    v42 = f(6);\n    v53 = f(0);\n    return x;\n    v3 = f(3);\n    return x;\n    return x;\n    v24 = f(6);\n    v23 = f(4);\n    v54 = f(0);\n    v53 = f(5);\n    v18 = f(8);\n\n    v23 = f(6);\n    v18 = f(4);\n{\n    v45 = f(7);\n    v59 = f(3);\n    v36 = f(1);\n    v53 = f(2);\n    v19 = f(7);\n    v13 = f(3);\n    v59 = f(8);\n}\nelse\n",
+    "    v28 = f(7);\n}\n    v5 = f(3);\n    v10 = f(7);\n    v8 = f(7);\n    v55 = f(7);\n    v54 = f(8);\n    v25 = f(2);\n\n}\n    v52 = f(4);\nelse\n    v42 = f(6);\n    v53 = f(0);\n    return x;\n    v3 = f(3);\n    return x;\n    return x;\n    v23 = f(4);\n    v54 = f(0);\n    v53 = f(5);\n    v18 = f(8);\n\n    v23 = f(6);\n    v18 = f(4);\n{\n    v45 = f(7);\n    v59 = f(3);\n    v36 = f(1);\n    return x;\n    v53 = f(2);\n    v19 = f(7);\n    v13 = f(3);\n    v59 = f(8);\n    v24 = f(6);\n}\nelse\n",
+    "    v28 = f(7);\n}\n    v5 = f(3);\n    v10 = f(7);\nelse\n    v8 = f(7);\n    v55 = f(7);\n    v54 = f(8);\n    w3 = g();\n\n}\n    v52 = f(4);\nelse\n    v42 = f(6);\n    v53 = f(0);\n    return x;\n    v3 = f(3);\n    return x;\n    return x;\n    v24 = f(6);\n    v23 = f(4);\n    v54 = f(0);\n    v53 = f(5);\n    v18 = f(8);\n\n    v23 = f(6);\n    v18 = f(4);\n{\n    v45 = f(7);\n    v59 = f(3);\n    v36 = f(1);\n    v19 = f(7);\n    v13 = f(3);\n    v59 = f(8);\n{\n}\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 2,
+    "text": "    v28 = f(7);\n}\n    v5 = f(3);\n    v10 = f(7);\nelse\n    v8 = f(7);\n    v55 = f(7);\n    v54 = f(8);\n    w3 = g();\n\n}\n    v52 = f(4);\nelse\n    v42 = f(6);\n    v53 = f(0);\n    return x;\n    v3 = f(3);\n    return x;\n    return x;\n    v23 = f(4);\n    v54 = f(0);\n    v53 = f(5);\n    v18 = f(8);\n\n    v23 = f(6);\n    v18 = f(4);\n{\n    v45 = f(7);\n    v59 = f(3);\n    v36 = f(1);\n<<<<<<< ours\n    return x;\n    v53 = f(2);\n||||||| base\n    v53 = f(2);\n=======\n>>>>>>> theirs\n    v19 = f(7);\n    v13 = f(3);\n    v59 = f(8);\n<<<<<<< ours\n    v24 = f(6);\n||||||| base\n=======\n{\n>>>>>>> theirs\n}\n"
+   }
+  },
+  {
+   "id": "R153",
+   "title": "code-like file",
+   "args": [
+    "\n    v12 = f(0);\n}\n{\n{\n    v22 = f(7);\n    v51 = f(6);\n}\n    v43 = f(4);\n    v31 = f(5);\n    i += 1;\n    i += 1;\n    v57 = f(6);\n    i += 1;\n    v3 = f(3);\n}\n{\n    v57 = f(6);\n    v35 = f(3);\n    v48 = f(3);\n    v4 = f(4);\n\n    v20 = f(4);\n    i += 1;\n    v8 = f(5);\n    v46 = f(2);\n    v8 = f(3);\n    v56 = f(0);\n    v7 = f(3);\n    v10 = f(1);\n    v36 = f(5);\n    i += 1;\n    v25 = f(3);\n    v51 = f(4);\n    v46 = f(1);\n    v51 = f(0);\n{\n    v39 = f(3);\n    v19 = f(3);\n    v22 = f(3);\n    v17 = f(2);\n    v3 = f(4);\n",
+    "\n    v12 = f(0);\n}\n{\n{\n    v22 = f(7);\n    v51 = f(6);\n}\n    v43 = f(4);\n    v31 = f(5);\n    i += 1;\n    v57 = f(6);\n    i += 1;\n    v3 = f(3);\n    v39 = f(3);\n}\n{\n    v57 = f(6);\n    v35 = f(3);\n    v48 = f(3);\n    v4 = f(4);\n\n    i += 1;\n    v8 = f(5);\n    v46 = f(2);\n    v8 = f(3);\n    v56 = f(0);\n    v7 = f(3);\n    v10 = f(1);\n    v36 = f(5);\n    i += 1;\n    v25 = f(3);\n    v51 = f(4);\n    v46 = f(1);\n    v51 = f(0);\n    v19 = f(3);\n    v22 = f(3);\n    v17 = f(2);\n    v3 = f(4);",
+    "\n    v12 = f(0);\n}\n{\n{\n    v22 = f(7);\n    v51 = f(6);\n}\n    v43 = f(4);\n    v31 = f(5);\n    i += 1;\n    i += 1;\n    v57 = f(6);\n    i += 1;\n    v3 = f(3);\n{\n    v48 = f(3);\n    v4 = f(4);\n}\n\n    v20 = f(4);\n    i += 1;\n    v8 = f(5);\n    v46 = f(2);\n    v8 = f(3);\n    v17 = f(2);\n    v56 = f(0);\n    i += 1;\n    w3 = g();\n    v7 = f(3);\n    v10 = f(1);\n    v36 = f(5);\n    i += 1;\n    w3 = g();\n    v25 = f(3);\n    v51 = f(4);\n    v46 = f(1);\n    v51 = f(0);\n{\n    v39 = f(3);\n    v19 = f(3);\n    v22 = f(3);\n    v3 = f(4);\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 2,
+    "text": "\n    v12 = f(0);\n}\n{\n{\n    v22 = f(7);\n    v51 = f(6);\n}\n    v43 = f(4);\n    v31 = f(5);\n    i += 1;\n    v57 = f(6);\n    i += 1;\n    v3 = f(3);\n<<<<<<< ours\n    v39 = f(3);\n}\n||||||| base\n}\n=======\n>>>>>>> theirs\n{\n    v48 = f(3);\n    v4 = f(4);\n}\n\n    i += 1;\n    v8 = f(5);\n    v46 = f(2);\n    v8 = f(3);\n    v17 = f(2);\n    v56 = f(0);\n    i += 1;\n    w3 = g();\n    v7 = f(3);\n    v10 = f(1);\n    v36 = f(5);\n    i += 1;\n    w3 = g();\n    v25 = f(3);\n    v51 = f(4);\n    v46 = f(1);\n    v51 = f(0);\n    v19 = f(3);\n    v22 = f(3);\n<<<<<<< ours\n    v17 = f(2);\n    v3 = f(4);\n||||||| base\n    v17 = f(2);\n    v3 = f(4);\n=======\n    v3 = f(4);\n>>>>>>> theirs\n"
+   }
+  },
+  {
+   "id": "R154",
+   "title": "code-like file",
+   "args": [
+    "    v5 = f(8);\n    v19 = f(7);\n    v12 = f(3);\n    v25 = f(4);\n    v37 = f(1);\n    v25 = f(1);\n    v2 = f(6);\n    v0 = f(8);\n{\n    v59 = f(1);\n    v17 = f(4);\nelse\n    v19 = f(0);\n{\n    v46 = f(4);\n    v43 = f(3);\n    v52 = f(7);\n    v19 = f(4);\n    return x;\n{\n    v27 = f(7);\n    v21 = f(6);\n    v4 = f(6);\n    return x;\n    v36 = f(5);\n    v44 = f(8);\n    v27 = f(3);\n{\n    v34 = f(0);\n    v55 = f(5);\n    v6 = f(4);\n    v34 = f(5);\n    v41 = f(0);\n    v18 = f(1);\n    v38 = f(0);\n    v6 = f(4);\n    v46 = f(1);\n    v4 = f(3);\n    v54 = f(2);\n    v45 = f(0);\n{\nelse\n    v42 = f(1);\n    v57 = f(5);\n    v39 = f(1);\n    v16 = f(7);\n    v3 = f(5);\n\n    v3 = f(2);\n}\n    v57 = f(8);\n    v48 = f(2);\n    i += 1;\n    return x;\n    v59 = f(8);\n",
+    "    v5 = f(8);\n    v19 = f(7);\n    v12 = f(3);\n    v25 = f(4);\n    v37 = f(1);\n    v25 = f(1);\n    v2 = f(6);\n    v0 = f(8);\n{\n    v59 = f(1);\n    v17 = f(4);\nelse\n\n    w2 = g();\n    v19 = f(0);\n{\n    v46 = f(4);\n    v43 = f(3);\n    v52 = f(7);\n    v19 = f(4);\n    return x;\n{\n    v27 = f(7);\n    v21 = f(6);\n    v4 = f(6);\n    return x;\n    v36 = f(5);\n    v44 = f(8);\n    v27 = f(3);\n{\n    v34 = f(0);\n    v55 = f(5);\n    v6 = f(4);\n    v34 = f(5);\n    v41 = f(0);\n    v18 = f(1);\n    v38 = f(0);\n    v6 = f(4);\n    v46 = f(1);\n    v4 = f(3);\n    v54 = f(2);\n    v45 = f(0);\n{\nelse\n    v42 = f(1);\n    v57 = f(5);\n    v39 = f(1);\n    v16 = f(7);\n    v3 = f(5);\n    i += 1;\n    v3 = f(2);\n}\n    v57 = f(8);\n    v48 = f(2);\n    i += 1;\n    return x;\n    v59 = f(8);\n",
+    "    v5 = f(8);\n    v19 = f(7);\n    v12 = f(3);\n    v25 = f(4);\n    v37 = f(1);\n    v25 = f(1);\n    v2 = f(6);\n    v0 = f(8);\n{\n    v59 = f(1);\n    v17 = f(4);\nelse\n\n    w2 = g();\n    v19 = f(0);\n{\n    v46 = f(4);\n    v43 = f(3);\n    v52 = f(7);\n    v19 = f(4);\n    return x;\n{\n    v27 = f(7);\n    v21 = f(6);\n    v4 = f(6);\n    return x;\n    v36 = f(5);\n    v44 = f(8);\n    v27 = f(3);\n{\n    v34 = f(0);\n    v55 = f(5);\n    v6 = f(4);\n    v34 = f(5);\n    v41 = f(0);\n    v18 = f(1);\n    v38 = f(0);\n    v6 = f(4);\n    v46 = f(1);\n    v4 = f(3);\n    v54 = f(2);\n    v45 = f(0);\n{\nelse\n    v42 = f(1);\n    v57 = f(5);\n    v39 = f(1);\n    v16 = f(7);\n    v3 = f(5);\n    i += 1;\n    v3 = f(2);\n}\n    v57 = f(8);\n    v48 = f(2);\n    i += 1;\n    return x;\n    v59 = f(8);\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "    v5 = f(8);\n    v19 = f(7);\n    v12 = f(3);\n    v25 = f(4);\n    v37 = f(1);\n    v25 = f(1);\n    v2 = f(6);\n    v0 = f(8);\n{\n    v59 = f(1);\n    v17 = f(4);\nelse\n\n    w2 = g();\n    v19 = f(0);\n{\n    v46 = f(4);\n    v43 = f(3);\n    v52 = f(7);\n    v19 = f(4);\n    return x;\n{\n    v27 = f(7);\n    v21 = f(6);\n    v4 = f(6);\n    return x;\n    v36 = f(5);\n    v44 = f(8);\n    v27 = f(3);\n{\n    v34 = f(0);\n    v55 = f(5);\n    v6 = f(4);\n    v34 = f(5);\n    v41 = f(0);\n    v18 = f(1);\n    v38 = f(0);\n    v6 = f(4);\n    v46 = f(1);\n    v4 = f(3);\n    v54 = f(2);\n    v45 = f(0);\n{\nelse\n    v42 = f(1);\n    v57 = f(5);\n    v39 = f(1);\n    v16 = f(7);\n    v3 = f(5);\n    i += 1;\n    v3 = f(2);\n}\n    v57 = f(8);\n    v48 = f(2);\n    i += 1;\n    return x;\n    v59 = f(8);\n"
+   }
+  },
+  {
+   "id": "R155",
+   "title": "code-like file",
+   "args": [
+    "    v51 = f(6);\n    v52 = f(7);\n    v45 = f(6);\n    v38 = f(0);\n    v33 = f(6);\n    v27 = f(5);\n    v44 = f(7);\n    v10 = f(4);\n    v41 = f(5);\n    v35 = f(2);\n    v21 = f(4);\n    v4 = f(4);\n    v40 = f(5);\n    v46 = f(1);\n    i += 1;\n    v15 = f(0);\n    v8 = f(3);\n    v3 = f(8);\n}\n    v46 = f(1);\n}\n    v29 = f(6);\n}\n    v54 = f(3);\n    v27 = f(1);\n    v4 = f(7);\n    v1 = f(6);\n    v44 = f(1);\n    v56 = f(4);\n    v42 = f(2);\n    v56 = f(6);\n    return x;\n    v38 = f(1);\n    v55 = f(4);\n    v19 = f(5);\n    v48 = f(2);\n    v5 = f(6);\n    v13 = f(1);\n    i += 1;\n{\n    v53 = f(0);\n    v48 = f(4);\n    v23 = f(5);\n    v59 = f(8);\n    i += 1;\n    v57 = f(1);\n    v23 = f(1);\nelse\nelse\n{\n    v47 = f(1);\n    v58 = f(5);\n    return x;\n{\n{\n    v50 = f(1);\n",
+    "    v51 = f(6);\n    v52 = f(7);\n    i += 1;\n    v38 = f(0);\n    v33 = f(6);\n    v27 = f(5);\n    v44 = f(7);\n    v10 = f(4);\n    v41 = f(5);\n    v35 = f(2);\n    v21 = f(4);\n    v4 = f(4);\n    v40 = f(5);\n    v46 = f(1);\n    i += 1;\n    v15 = f(0);\n    v8 = f(3);\n    v3 = f(8);\n    v58 = f(5);\n    return x;\n    v46 = f(1);\n}\n    v29 = f(6);\n    v54 = f(3);\n    v27 = f(1);\n    v4 = f(7);\n    v1 = f(6);\n    v44 = f(1);\n    v56 = f(4);\n    v42 = f(2);\n    v56 = f(6);\n    return x;\n    v38 = f(1);\n    v55 = f(4);\n    v19 = f(5);\n    v48 = f(2);\nelse\n    v13 = f(1);\n    i += 1;\n{\n    v53 = f(0);\n    v48 = f(4);\n    v23 = f(5);\n    v59 = f(8);\n    i += 1;\n    v57 = f(1);\n    v23 = f(1);\nelse\nelse\n{\n    v47 = f(1);\n    return x;\n{\n{\n    v50 = f(1);",
+    "    v51 = f(6);\n    v52 = f(7);\n    v45 = f(6);\n    v38 = f(0);\n    v33 = f(6);\n    i += 1;\n    w4 = g();\n    v27 = f(5);\n    v44 = f(7);\n    v10 = f(4);\n    v41 = f(5);\n    v35 = f(2);\n    v21 = f(4);\n    v4 = f(4);\n    v40 = f(5);\n    i += 1;\n    v46 = f(1);\n    i += 1;\n    v15 = f(0);\n    v8 = f(3);\n    v3 = f(8);\n}\n    v46 = f(1);\n}\n    v29 = f(6);\n}\n    v54 = f(3);\n    v27 = f(1);\n    v4 = f(7);\n    v1 = f(6);\n    v44 = f(1);\n    v56 = f(4);\n    v42 = f(2);\n    v56 = f(6);\n    return x;\n    v38 = f(1);\n    v55 = f(4);\n    v19 = f(5);\n    v48 = f(2);\n    v5 = f(6);\n    v13 = f(1);\n{\n    v53 = f(0);\n    v48 = f(4);\n    v23 = f(5);\n    v59 = f(8);\n    i += 1;\n    v57 = f(1);\n    v23 = f(1);\n    i += 1;\nelse\nelse\n    v47 = f(1);\n    v58 = f(5);\n    return x;\n{\n{\n    v50 = f(1);\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "    v51 = f(6);\n    v52 = f(7);\n    i += 1;\n    v38 = f(0);\n    v33 = f(6);\n    i += 1;\n    w4 = g();\n    v27 = f(5);\n    v44 = f(7);\n    v10 = f(4);\n    v41 = f(5);\n    v35 = f(2);\n    v21 = f(4);\n    v4 = f(4);\n    v40 = f(5);\n    i += 1;\n    v46 = f(1);\n    i += 1;\n    v15 = f(0);\n    v8 = f(3);\n    v3 = f(8);\n    v58 = f(5);\n    return x;\n    v46 = f(1);\n}\n    v29 = f(6);\n    v54 = f(3);\n    v27 = f(1);\n    v4 = f(7);\n    v1 = f(6);\n    v44 = f(1);\n    v56 = f(4);\n    v42 = f(2);\n    v56 = f(6);\n    return x;\n    v38 = f(1);\n    v55 = f(4);\n    v19 = f(5);\n    v48 = f(2);\nelse\n    v13 = f(1);\n{\n    v53 = f(0);\n    v48 = f(4);\n    v23 = f(5);\n    v59 = f(8);\n    i += 1;\n    v57 = f(1);\n    v23 = f(1);\n    i += 1;\nelse\nelse\n    v47 = f(1);\n    return x;\n{\n{\n    v50 = f(1);"
+   }
+  },
+  {
+   "id": "R156",
+   "title": "code-like file",
+   "args": [
+    "    v20 = f(3);\n    i += 1;\n    v12 = f(5);\n    v28 = f(4);\n}\n    v14 = f(3);\n    v49 = f(4);\n    v0 = f(8);\n    v34 = f(8);\n    v43 = f(5);\n    v3 = f(7);\n    v6 = f(5);\n    v18 = f(4);\n    v27 = f(3);\n    v43 = f(0);\n    v56 = f(4);\n    v9 = f(8);\nelse\n    v34 = f(6);\n    v0 = f(4);\n    v44 = f(6);\n}\n}\n{\n    v50 = f(7);\n    v53 = f(5);\n    v2 = f(1);\n    return x;\n{\n    v50 = f(6);\n    return x;\n    v41 = f(5);\n    v10 = f(5);\n    v23 = f(5);\n    return x;\n{\n    v34 = f(5);\n    i += 1;\n    v15 = f(7);\n    v39 = f(5);\n    v1 = f(1);\n    v17 = f(2);\n    v44 = f(3);\n    v17 = f(4);\n    v35 = f(0);\n    v8 = f(3);\n}\n    v39 = f(1);\n    v37 = f(2);\nelse\n\n    v30 = f(5);\n    return x;\n    v18 = f(2);\n    v52 = f(1);\n    v59 = f(0);\n    v59 = f(0);\n",
+    "    v20 = f(3);\n    i += 1;\n    v12 = f(5);\n    v28 = f(4);\n}\n    v14 = f(3);\n    v49 = f(4);\n    v0 = f(8);\n    v34 = f(8);\n    v43 = f(5);\n    v3 = f(7);\n    v6 = f(5);\n    w4 = g();\n    w1 = g();\n    v18 = f(4);\n    v27 = f(3);\n    v43 = f(0);\n    v56 = f(4);\n    v9 = f(8);\nelse\n    w2 = g();\n    v0 = f(4);\n    v44 = f(6);\n}\n}\n{\n    v50 = f(7);\n    v53 = f(5);\n    v2 = f(1);\n    return x;\n{\n    v50 = f(6);\n    return x;\n    v41 = f(5);\n    v10 = f(5);\n    v23 = f(5);\n    return x;\n{\n    v34 = f(5);\n    i += 1;\n    v15 = f(7);\n    v39 = f(5);\n    v17 = f(2);\n    v44 = f(3);\n    v17 = f(4);\n\n{\n    v35 = f(0);\n    v8 = f(3);\n}\n    v39 = f(1);\n    v37 = f(2);\nelse\n\n    v30 = f(5);\n    return x;\n    v18 = f(2);\n    v52 = f(1);\n    v59 = f(0);\n    v59 = f(0);\n",
+    "    v20 = f(3);\n    i += 1;\n    v12 = f(5);\n    v28 = f(4);\n}\n    v14 = f(3);\n    v49 = f(4);\n    v0 = f(8);\n    v34 = f(8);\n    v43 = f(5);\n    v3 = f(7);\n    v6 = f(5);\n    v18 = f(4);\n    v27 = f(3);\n    v43 = f(0);\n    v56 = f(4);\n    v9 = f(8);\nelse\n    v34 = f(6);\n    v0 = f(4);\n    v44 = f(6);\n}\n}\n{\n    v50 = f(7);\n    v53 = f(5);\n    v2 = f(1);\n    return x;\n{\n    v50 = f(6);\n    return x;\n    v41 = f(5);\n    v10 = f(5);\n    v23 = f(5);\n    return x;\n    i += 1;\n    v15 = f(7);\n    v39 = f(5);\n    v1 = f(1);\n    v17 = f(2);\n{\n    v44 = f(3);\n    v17 = f(4);\n    v35 = f(0);\n    v8 = f(3);\n}\n    v39 = f(1);\n    v37 = f(2);\nelse\n\n    v30 = f(5);\n    return x;\n    v18 = f(2);\n    v52 = f(1);\n    v59 = f(0);\n    v59 = f(0);\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "    v20 = f(3);\n    i += 1;\n    v12 = f(5);\n    v28 = f(4);\n}\n    v14 = f(3);\n    v49 = f(4);\n    v0 = f(8);\n    v34 = f(8);\n    v43 = f(5);\n    v3 = f(7);\n    v6 = f(5);\n    w4 = g();\n    w1 = g();\n    v18 = f(4);\n    v27 = f(3);\n    v43 = f(0);\n    v56 = f(4);\n    v9 = f(8);\nelse\n    w2 = g();\n    v0 = f(4);\n    v44 = f(6);\n}\n}\n{\n    v50 = f(7);\n    v53 = f(5);\n    v2 = f(1);\n    return x;\n{\n    v50 = f(6);\n    return x;\n    v41 = f(5);\n    v10 = f(5);\n    v23 = f(5);\n    return x;\n    i += 1;\n    v15 = f(7);\n    v39 = f(5);\n    v17 = f(2);\n{\n    v44 = f(3);\n    v17 = f(4);\n\n{\n    v35 = f(0);\n    v8 = f(3);\n}\n    v39 = f(1);\n    v37 = f(2);\nelse\n\n    v30 = f(5);\n    return x;\n    v18 = f(2);\n    v52 = f(1);\n    v59 = f(0);\n    v59 = f(0);\n"
+   }
+  },
+  {
+   "id": "R157",
+   "title": "code-like file",
+   "args": [
+    "    v1 = f(2);\n    i += 1;\n    v25 = f(3);\n    v24 = f(0);\n    v0 = f(6);\n    v35 = f(1);\n    v30 = f(4);\n    v2 = f(5);\n}\n    v45 = f(7);\n    v29 = f(7);\n    v59 = f(3);\n    v36 = f(1);\n    v21 = f(2);\n    v26 = f(1);\n\n    return x;\n}\n    v1 = f(6);\n    i += 1;\n    v27 = f(0);\n    v31 = f(2);\n    v27 = f(8);\n    v10 = f(0);\n    v48 = f(5);\n    v7 = f(0);\n    v12 = f(3);\n\n    v5 = f(1);\n    v34 = f(8);\n    v20 = f(6);\nelse\n    v19 = f(4);\nelse\n    i += 1;\n    v26 = f(0);\n    v35 = f(2);\n\n{\nelse\n    v57 = f(4);\n    v5 = f(7);\n    v31 = f(8);\n    v29 = f(4);\n    v0 = f(5);\n}\n    v59 = f(0);\n    v24 = f(5);\n    v12 = f(6);\n    v49 = f(5);\n    v35 = f(0);\n    v54 = f(8);\n    v58 = f(6);\nelse\n    return x;\n    v11 = f(2);\n    v16 = f(5);\n    v20 = f(0);\nelse\n    return x;\n    v37 = f(4);\nelse\n    v3 = f(5);\n    v29 = f(7);\n    v12 = f(6);\n    v2 = f(6);\n    v12 = f(2);\n    v58 = f(7);\n    v25 = f(3);\n",
+    "    v1 = f(2);\n    i += 1;\n    v25 = f(3);\n    v24 = f(0);\n    v0 = f(6);\n    w3 = g();\n    v30 = f(4);\n    v2 = f(5);\n}\n    v45 = f(7);\n    v29 = f(7);\n    v59 = f(3);\n    v36 = f(1);\n    v26 = f(1);\n\n    return x;\n}\n    v1 = f(6);\n    i += 1;\n    v27 = f(0);\n    v31 = f(2);\n    v27 = f(8);\n    v48 = f(5);\n    v7 = f(0);\n    v12 = f(3);\n\n    v5 = f(1);\n    v34 = f(8);\n    v20 = f(6);\nelse\n    v19 = f(4);\nelse\n    i += 1;\n    v26 = f(0);\n\n    v10 = f(0);\n{\nelse\n    v57 = f(4);\n    v5 = f(7);\n    v31 = f(8);\n    v29 = f(4);\n    v0 = f(5);\n}\n    v59 = f(0);\n    v24 = f(5);\n    v12 = f(6);\n    v49 = f(5);\n    v21 = f(2);\n    v35 = f(0);\n    v54 = f(8);\n    v58 = f(6);\n}\nelse\n    return x;\n    v11 = f(2);\n    v16 = f(5);\n    v20 = f(0);\nelse\n    v35 = f(2);\n    return x;\n    v37 = f(4);\nelse\n    w0 = g();\n    v29 = f(7);\n    v12 = f(6);\n    v12 = f(2);\n    v58 = f(7);\n    v25 = f(3);\n",
+    "    v1 = f(2);\n    i += 1;\n    v25 = f(3);\n    v24 = f(0);\n    v0 = f(6);\n    v35 = f(1);\n    v30 = f(4);\n    v2 = f(5);\n}\n    v45 = f(7);\n    w4 = g();\n    v59 = f(3);\n    v36 = f(1);\n    v21 = f(2);\n    v26 = f(1);\n\n    return x;\n}\n    v1 = f(6);\n    i += 1;\n    v27 = f(0);\n    v31 = f(2);\n    v27 = f(8);\n    v10 = f(0);\n    v48 = f(5);\n    v7 = f(0);\n    v12 = f(3);\n\n    v5 = f(1);\n    v34 = f(8);\n    v20 = f(6);\nelse\n    v19 = f(4);\nelse\n    i += 1;\n    v26 = f(0);\n    v35 = f(2);\n\n{\nelse\n    v5 = f(7);\n    v31 = f(8);\n    v29 = f(4);\n    v0 = f(5);\n}\n    w0 = g();\n    v59 = f(0);\n    v24 = f(5);\n    v12 = f(6);\n    v49 = f(5);\n    v35 = f(0);\n    v54 = f(8);\n    v58 = f(6);\nelse\n    return x;\n    v11 = f(2);\n    v16 = f(5);\n    v20 = f(0);\nelse\n    return x;\n    v37 = f(4);\nelse\n    v3 = f(5);\n    v29 = f(7);\n    v12 = f(6);\n    v2 = f(6);\n    v12 = f(2);\n    v58 = f(7);\n    v25 = f(3);"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "    v1 = f(2);\n    i += 1;\n    v25 = f(3);\n    v24 = f(0);\n    v0 = f(6);\n    w3 = g();\n    v30 = f(4);\n    v2 = f(5);\n}\n    v45 = f(7);\n    w4 = g();\n    v59 = f(3);\n    v36 = f(1);\n    v26 = f(1);\n\n    return x;\n}\n    v1 = f(6);\n    i += 1;\n    v27 = f(0);\n    v31 = f(2);\n    v27 = f(8);\n    v48 = f(5);\n    v7 = f(0);\n    v12 = f(3);\n\n    v5 = f(1);\n    v34 = f(8);\n    v20 = f(6);\nelse\n    v19 = f(4);\nelse\n    i += 1;\n    v26 = f(0);\n\n    v10 = f(0);\n{\nelse\n    v5 = f(7);\n    v31 = f(8);\n    v29 = f(4);\n    v0 = f(5);\n}\n    w0 = g();\n    v59 = f(0);\n    v24 = f(5);\n    v12 = f(6);\n    v49 = f(5);\n    v21 = f(2);\n    v35 = f(0);\n    v54 = f(8);\n    v58 = f(6);\n}\nelse\n    return x;\n    v11 = f(2);\n    v16 = f(5);\n    v20 = f(0);\nelse\n    v35 = f(2);\n    return x;\n    v37 = f(4);\nelse\n    w0 = g();\n    v29 = f(7);\n    v12 = f(6);\n    v12 = f(2);\n    v58 = f(7);\n    v25 = f(3);"
+   }
+  },
+  {
+   "id": "R158",
+   "title": "code-like file",
+   "args": [
+    "    v34 = f(4);\n    v23 = f(7);\n    v34 = f(4);\n    return x;\n    i += 1;\n    v39 = f(8);\n    v36 = f(1);\n    v41 = f(5);\n    v45 = f(2);\n\n    v57 = f(6);\n    return x;\n    i += 1;\nelse\n    v10 = f(0);\n\n\nelse\n    v1 = f(8);\n    v56 = f(7);\n    v19 = f(7);\n    v7 = f(5);\n    v27 = f(4);\n    v50 = f(4);\n    v51 = f(7);\n    v37 = f(5);\n{\n    v18 = f(5);\n    v57 = f(0);\n    v56 = f(1);\n    v0 = f(0);\n    v49 = f(7);\n    v56 = f(0);\n    v19 = f(6);\n{\n    v18 = f(6);\n",
+    "    v34 = f(4);\n    w5 = g();\n    v34 = f(4);\n    return x;\n    i += 1;\n    v39 = f(8);\n    v36 = f(1);\n    v41 = f(5);\n    v45 = f(2);\n    return x;\n    i += 1;\nelse\n    v10 = f(0);\n\n\nelse\n    v50 = f(4);\n    v1 = f(8);\n    v56 = f(7);\n    v19 = f(7);\n    v7 = f(5);\n    v27 = f(4);\n    v51 = f(7);\n    w3 = g();\n    v37 = f(5);\n{\n    v18 = f(5);\n    v57 = f(0);\n    w3 = g();\n    v56 = f(1);\n    v0 = f(0);\n    w0 = g();\n    v49 = f(7);\n    v56 = f(0);\n    v19 = f(6);\n{\n    v18 = f(6);\n",
+    "    v27 = f(4);\n    i += 1;\n    v23 = f(7);\n    v34 = f(4);\n    return x;\n    i += 1;\n    v39 = f(8);\n    w3 = g();\n    v41 = f(5);\n    v45 = f(2);\n\n    v57 = f(6);\n    return x;\n    i += 1;\nelse\n    v10 = f(0);\n    w1 = g();\n\n\n\nelse\n    return x;\n    v56 = f(7);\n    v19 = f(7);\n    v7 = f(5);\n    v50 = f(4);\n    v51 = f(7);\n    v37 = f(5);\n{\n    v18 = f(5);\n    v57 = f(0);\n    v56 = f(1);\n    v0 = f(0);\n    w2 = g();\n    v56 = f(0);\n    v19 = f(6);\n    w4 = g();\n    i += 1;\n{\n    v18 = f(6);\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 4,
+    "text": "<<<<<<< ours\n    v34 = f(4);\n    w5 = g();\n||||||| base\n    v34 = f(4);\n    v23 = f(7);\n=======\n    v27 = f(4);\n    i += 1;\n    v23 = f(7);\n>>>>>>> theirs\n    v34 = f(4);\n    return x;\n    i += 1;\n    v39 = f(8);\n    w3 = g();\n    v41 = f(5);\n    v45 = f(2);\n    return x;\n    i += 1;\nelse\n    v10 = f(0);\n    w1 = g();\n\n\n\nelse\n<<<<<<< ours\n    v50 = f(4);\n    v1 = f(8);\n||||||| base\n    v1 = f(8);\n=======\n    return x;\n>>>>>>> theirs\n    v56 = f(7);\n    v19 = f(7);\n    v7 = f(5);\n<<<<<<< ours\n    v27 = f(4);\n||||||| base\n    v27 = f(4);\n    v50 = f(4);\n=======\n    v50 = f(4);\n>>>>>>> theirs\n    v51 = f(7);\n    w3 = g();\n    v37 = f(5);\n{\n    v18 = f(5);\n    v57 = f(0);\n    w3 = g();\n    v56 = f(1);\n    v0 = f(0);\n<<<<<<< ours\n    w0 = g();\n    v49 = f(7);\n||||||| base\n    v49 = f(7);\n=======\n    w2 = g();\n>>>>>>> theirs\n    v56 = f(0);\n    v19 = f(6);\n    w4 = g();\n    i += 1;\n{\n    v18 = f(6);\n"
+   }
+  },
+  {
+   "id": "R159",
+   "title": "code-like file",
+   "args": [
+    "    i += 1;\n    v35 = f(7);\n    v25 = f(7);\n    v12 = f(7);\n    i += 1;\n    v54 = f(8);\n    v52 = f(3);\n    v12 = f(8);\n}\n    return x;\n    v17 = f(2);\n    v23 = f(0);\n\n    v40 = f(1);\n\n    v49 = f(0);\n    v44 = f(3);\nelse\n    i += 1;\n    v12 = f(7);\n    v27 = f(7);\n    v36 = f(6);\n\n    v48 = f(3);\n    v24 = f(8);\n    v37 = f(4);\n    v59 = f(7);\n    v48 = f(8);\n    v29 = f(0);\n    v40 = f(0);\n    v26 = f(1);\n    v12 = f(6);\n    v32 = f(0);\n    v9 = f(2);\n    i += 1;\n    v48 = f(8);\n    v24 = f(4);\n    v59 = f(6);\n\n    v13 = f(4);\n}\n    i += 1;\n{\n    v50 = f(0);\n    v20 = f(0);\n    v19 = f(0);\n    v47 = f(7);\nelse\n    v19 = f(0);\n    v42 = f(2);\n    v36 = f(7);\n    v9 = f(6);\n    return x;\n    v19 = f(1);\n    v46 = f(7);\n    v58 = f(3);\n    return x;\n    v14 = f(1);\n    v54 = f(3);\n    v12 = f(5);\n    v16 = f(8);\n    v49 = f(4);\n\n    v11 = f(7);\n    v30 = f(6);\n}\n    v7 = f(0);\n    return x;\n    return x;\n",
+    "    i += 1;\n    v35 = f(7);\n    v25 = f(7);\n    v12 = f(7);\n    i += 1;\n    v54 = f(8);\n    v52 = f(3);\n    v12 = f(8);\n}\n    return x;\n    v17 = f(2);\n    v23 = f(0);\n\n    v40 = f(1);\n    w5 = g();\n    w2 = g();\n\n    v49 = f(0);\n    v44 = f(3);\nelse\n    i += 1;\n    v12 = f(7);\n    v27 = f(7);\n    v36 = f(6);\n    w2 = g();\n\n    v48 = f(3);\n    v24 = f(8);\n    v37 = f(4);\n    v59 = f(7);\n    v48 = f(8);\n    v29 = f(0);\n    v40 = f(0);\n    v26 = f(1);\n    v12 = f(6);\n    v32 = f(0);\n    v9 = f(2);\n    i += 1;\nelse\n    v48 = f(8);\n    v24 = f(4);\n    v59 = f(6);\n\n    v13 = f(4);\n}\n    i += 1;\n{\n    v50 = f(0);\n    v20 = f(0);\n    v19 = f(0);\n    v47 = f(7);\nelse\n    v19 = f(0);\n    v42 = f(2);\n    v36 = f(7);\n    v9 = f(6);\n    return x;\n    v19 = f(1);\n    v46 = f(7);\n    v58 = f(3);\n    return x;\n    v14 = f(1);\n    v54 = f(3);\n    v12 = f(5);\n    v16 = f(8);\n    v49 = f(4);\n\n    v11 = f(7);\n    v30 = f(6);\n}\n    v7 = f(0);\n    return x;\n    return x;\n",
+    "    i += 1;\n    v35 = f(7);\n    v25 = f(7);\n    v12 = f(7);\n    i += 1;\n    v54 = f(8);\n    v52 = f(3);\n    v12 = f(8);\n}\n    return x;\n    v17 = f(2);\n    v23 = f(0);\n\n    v40 = f(1);\n\n    v49 = f(0);\n    v44 = f(3);\nelse\n    i += 1;\n    v12 = f(7);\n    v27 = f(7);\n    v36 = f(6);\n\n    v48 = f(3);\n    v24 = f(8);\n    v37 = f(4);\n    v59 = f(7);\n    v48 = f(8);\n    v29 = f(0);\n    v40 = f(0);\n    v26 = f(1);\n    v12 = f(6);\n    v32 = f(0);\n    v9 = f(2);\n    i += 1;\n    v48 = f(8);\n    v24 = f(4);\n    v59 = f(6);\n\n    v13 = f(4);\n}\n    i += 1;\n{\n    v50 = f(0);\n    v20 = f(0);\n    v19 = f(0);\n    v47 = f(7);\nelse\n    v19 = f(0);\n    v42 = f(2);\n    v36 = f(7);\n    v9 = f(6);\n    return x;\n    v19 = f(1);\n    v46 = f(7);\n    v58 = f(3);\n    return x;\n    v14 = f(1);\n    v54 = f(3);\n    v12 = f(5);\n    v16 = f(8);\n    v49 = f(4);\n\n    v11 = f(7);\n    v30 = f(6);\n}\n    v7 = f(0);\n}\n    w1 = g();"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "    i += 1;\n    v35 = f(7);\n    v25 = f(7);\n    v12 = f(7);\n    i += 1;\n    v54 = f(8);\n    v52 = f(3);\n    v12 = f(8);\n}\n    return x;\n    v17 = f(2);\n    v23 = f(0);\n\n    v40 = f(1);\n    w5 = g();\n    w2 = g();\n\n    v49 = f(0);\n    v44 = f(3);\nelse\n    i += 1;\n    v12 = f(7);\n    v27 = f(7);\n    v36 = f(6);\n    w2 = g();\n\n    v48 = f(3);\n    v24 = f(8);\n    v37 = f(4);\n    v59 = f(7);\n    v48 = f(8);\n    v29 = f(0);\n    v40 = f(0);\n    v26 = f(1);\n    v12 = f(6);\n    v32 = f(0);\n    v9 = f(2);\n    i += 1;\nelse\n    v48 = f(8);\n    v24 = f(4);\n    v59 = f(6);\n\n    v13 = f(4);\n}\n    i += 1;\n{\n    v50 = f(0);\n    v20 = f(0);\n    v19 = f(0);\n    v47 = f(7);\nelse\n    v19 = f(0);\n    v42 = f(2);\n    v36 = f(7);\n    v9 = f(6);\n    return x;\n    v19 = f(1);\n    v46 = f(7);\n    v58 = f(3);\n    return x;\n    v14 = f(1);\n    v54 = f(3);\n    v12 = f(5);\n    v16 = f(8);\n    v49 = f(4);\n\n    v11 = f(7);\n    v30 = f(6);\n}\n    v7 = f(0);\n}\n    w1 = g();"
+   }
+  },
+  {
+   "id": "R160",
+   "title": "code-like file",
+   "args": [
+    "    v55 = f(4);\n    v51 = f(0);\n    v17 = f(1);\n    v0 = f(1);\n    v12 = f(4);\nelse\n    v26 = f(4);\n    i += 1;\n    v8 = f(3);\n    v50 = f(6);\n    v18 = f(2);\n    v6 = f(0);\n    v4 = f(8);\n}\n    v16 = f(3);\n    v45 = f(2);\n    v9 = f(3);\n    return x;\n    v10 = f(0);\n\n    v23 = f(6);\nelse\n    v33 = f(0);\n    v29 = f(0);\n    v36 = f(6);\n    v53 = f(5);\n    i += 1;\n}\n{\n    v59 = f(2);\n    v54 = f(2);\n    i += 1;\n",
+    "    v9 = f(3);\n    w0 = g();\n}\n    v55 = f(4);\n    v51 = f(0);\n    v17 = f(1);\n    v0 = f(1);\n    v12 = f(4);\nelse\n    v26 = f(4);\n    i += 1;\n    w4 = g();\n    v50 = f(6);\n    v18 = f(2);\n    v6 = f(0);\n    v4 = f(8);\n}\n    v16 = f(3);\n    v45 = f(2);\n    return x;\n    v10 = f(0);\n\n    v23 = f(6);\nelse\n    v36 = f(6);\n    v53 = f(5);\n    i += 1;\n}\n{\n    v59 = f(2);\n    v54 = f(2);\n    i += 1;\n",
+    "    v55 = f(4);\n    v51 = f(0);\n    v17 = f(1);\n    v0 = f(1);\n    v12 = f(4);\n    v50 = f(6);\n\n    v6 = f(0);\n    v4 = f(8);\n}\n    v16 = f(3);\n    v45 = f(2);\n    v9 = f(3);\n    return x;\n    v10 = f(0);\n\n    v23 = f(6);\n    v29 = f(0);\n    v36 = f(6);\n    v53 = f(5);\n    i += 1;\n{\n    v59 = f(2);\n    i += 1;\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 2,
+    "text": "    v9 = f(3);\n    w0 = g();\n}\n    v55 = f(4);\n    v51 = f(0);\n    v17 = f(1);\n    v0 = f(1);\n    v12 = f(4);\n<<<<<<< ours\nelse\n    v26 = f(4);\n    i += 1;\n    w4 = g();\n||||||| base\nelse\n    v26 = f(4);\n    i += 1;\n    v8 = f(3);\n=======\n>>>>>>> theirs\n    v50 = f(6);\n\n    v6 = f(0);\n    v4 = f(8);\n}\n    v16 = f(3);\n    v45 = f(2);\n    return x;\n    v10 = f(0);\n\n    v23 = f(6);\n<<<<<<< ours\nelse\n||||||| base\nelse\n    v33 = f(0);\n    v29 = f(0);\n=======\n    v29 = f(0);\n>>>>>>> theirs\n    v36 = f(6);\n    v53 = f(5);\n    i += 1;\n{\n    v59 = f(2);\n    i += 1;\n"
+   }
+  },
+  {
+   "id": "R161",
+   "title": "code-like file",
+   "args": [
+    "    return x;\n    v49 = f(3);\n    v26 = f(7);\n    v30 = f(6);\n    v27 = f(7);\n\n    v19 = f(3);\n    v45 = f(1);\n    v48 = f(5);\n    v16 = f(8);\n    v21 = f(3);\n    v21 = f(7);\n    v1 = f(2);\n    v13 = f(2);\n    v14 = f(4);\n    v55 = f(7);\n    v56 = f(5);\n    v27 = f(2);\n    v48 = f(1);\n    v10 = f(4);\n    v26 = f(5);\n    v47 = f(8);\nelse\nelse\n    v41 = f(7);\n    v46 = f(8);\n    i += 1;\nelse\n    v31 = f(7);\n}\n    v4 = f(3);\n    v30 = f(7);\n    v44 = f(8);\n    v10 = f(3);\n    v21 = f(0);\n    v45 = f(5);\n    v46 = f(0);\n    v4 = f(0);\n    i += 1;\n    i += 1;\n\n    v11 = f(3);\n    v52 = f(6);\nelse\n    v50 = f(3);\n    v56 = f(7);\n    v45 = f(2);\n    v12 = f(7);\n    v29 = f(3);\n",
+    "    return x;\n    v49 = f(3);\n    v26 = f(7);\n    v30 = f(6);\n    v27 = f(7);\n\n    v19 = f(3);\n    v45 = f(1);\n    v48 = f(5);\n    v21 = f(3);\n    v21 = f(7);\n    v1 = f(2);\n    v13 = f(2);\n    v14 = f(4);\n    v55 = f(7);\n    v56 = f(5);\n    v27 = f(2);\n    v48 = f(1);\n    v10 = f(4);\n    v26 = f(5);\n    v47 = f(8);\nelse\nelse\n    v41 = f(7);\n    v46 = f(8);\n    i += 1;\nelse\n    v31 = f(7);\n    w3 = g();\n    return x;\n}\n    v4 = f(3);\n    v30 = f(7);\n    v44 = f(8);\n    v10 = f(3);\n    v21 = f(0);\n    v45 = f(5);\n    v46 = f(0);\n    v4 = f(0);\n    i += 1;\n    v11 = f(3);\n    v52 = f(6);\nelse\n    v50 = f(3);\n    v56 = f(7);\n    v45 = f(2);\n    v12 = f(7);\n",
+    "    return x;\n    v30 = f(6);\n    v27 = f(7);\n\n    v19 = f(3);\n    v45 = f(1);\n    v48 = f(5);\n    v16 = f(8);\n    v21 = f(3);\n    v21 = f(7);\n    v1 = f(2);\n    v13 = f(2);\n    v14 = f(4);\n    v55 = f(7);\n    v56 = f(5);\n    v27 = f(2);\n    v48 = f(1);\n    v10 = f(4);\n    v26 = f(5);\n    v47 = f(8);\nelse\nelse\n    v41 = f(7);\n    v46 = f(8);\n    i += 1;\nelse\n    v31 = f(7);\n}\n    v10 = f(3);\n    v21 = f(0);\n    v45 = f(5);\n    v46 = f(0);\n    v4 = f(0);\n    i += 1;\n    i += 1;\n\n    v11 = f(3);\n    v52 = f(6);\n    w5 = g();\n    v50 = f(3);\n    v56 = f(7);\n    v45 = f(2);\n    v12 = f(7);\n    v29 = f(3);\n"
+   ],
+   "expected": {
+    "clean": true,
+    "conflicts": 0,
+    "text": "    return x;\n    v30 = f(6);\n    v27 = f(7);\n\n    v19 = f(3);\n    v45 = f(1);\n    v48 = f(5);\n    v21 = f(3);\n    v21 = f(7);\n    v1 = f(2);\n    v13 = f(2);\n    v14 = f(4);\n    v55 = f(7);\n    v56 = f(5);\n    v27 = f(2);\n    v48 = f(1);\n    v10 = f(4);\n    v26 = f(5);\n    v47 = f(8);\nelse\nelse\n    v41 = f(7);\n    v46 = f(8);\n    i += 1;\nelse\n    v31 = f(7);\n    w3 = g();\n    return x;\n}\n    v10 = f(3);\n    v21 = f(0);\n    v45 = f(5);\n    v46 = f(0);\n    v4 = f(0);\n    i += 1;\n    v11 = f(3);\n    v52 = f(6);\n    w5 = g();\n    v50 = f(3);\n    v56 = f(7);\n    v45 = f(2);\n    v12 = f(7);\n"
+   }
+  },
+  {
+   "id": "R162",
+   "title": "code-like file",
+   "args": [
+    "}\n\n    v24 = f(1);\n    v19 = f(7);\n    v42 = f(0);\n    v21 = f(7);\n    v4 = f(1);\n{\n    v43 = f(0);\n    v19 = f(1);\n    v14 = f(8);\n    v40 = f(4);\n    v6 = f(8);\n    v8 = f(2);\n}\n    v56 = f(6);\n    v41 = f(8);\n    v11 = f(6);\n    v41 = f(6);\n}\n    v24 = f(7);\n    v10 = f(3);\n    v7 = f(3);\n    return x;\n    v57 = f(7);\n    v8 = f(2);\n    v34 = f(0);\n    v58 = f(7);\n}\n    v59 = f(7);\n    v3 = f(3);\n    v17 = f(3);\n    v30 = f(4);\n    v10 = f(7);\nelse\n    v1 = f(5);\n    v7 = f(2);\n    v47 = f(0);\n    v58 = f(7);\n{\nelse\n    return x;\n    v40 = f(3);\n    v40 = f(8);\n    v10 = f(6);\n    v42 = f(2);\n    v38 = f(4);\n    v40 = f(7);\n    v8 = f(2);\nelse\n    v18 = f(8);\n    v27 = f(7);\n    i += 1;\n    v34 = f(7);\n    v28 = f(6);\n    v29 = f(8);\n    return x;\n\n    return x;\nelse\n{\n    v53 = f(7);\n{\n    v50 = f(8);\n    v13 = f(6);\n    v50 = f(2);\n    v24 = f(8);\n    v29 = f(6);\nelse\n",
+    "}\n\n    v50 = f(2);\n    v24 = f(1);\n    v19 = f(7);\n    v21 = f(7);\n    v4 = f(1);\n{\n    v43 = f(0);\n    v19 = f(1);\n    v14 = f(8);\n    v40 = f(4);\n    v6 = f(8);\n    v8 = f(2);\n}\n    v56 = f(6);\n    v41 = f(8);\n    v11 = f(6);\n    v41 = f(6);\n}\n{\n    v10 = f(3);\n    v7 = f(3);\n    return x;\n    v57 = f(7);\n    v8 = f(2);\n    v34 = f(0);\n    v58 = f(7);\n}\n    v59 = f(7);\n    v17 = f(3);\n    v30 = f(4);\n    v10 = f(7);\nelse\n    v1 = f(5);\n    v7 = f(2);\n    v47 = f(0);\n{\nelse\n    return x;\n    v40 = f(3);\n    v40 = f(8);\n    v10 = f(6);\n    v42 = f(0);\n    v3 = f(3);\n    v42 = f(2);\n    v58 = f(7);\n    w1 = g();\n    v40 = f(7);\n    v8 = f(2);\nelse\n    v18 = f(8);\n    v27 = f(7);\n    i += 1;\n    v34 = f(7);\n    v28 = f(6);\n    v29 = f(8);\n    return x;\n\n    return x;\nelse\n{\n    v53 = f(7);\n{\n    v50 = f(8);\n    v13 = f(6);\n    v24 = f(8);\n    v29 = f(6);\nelse\n",
+    "}\n\n    v24 = f(1);\n    v19 = f(7);\n    v42 = f(0);\n    v21 = f(7);\n    v4 = f(1);\n{\n    v43 = f(0);\n    v19 = f(1);\n    v6 = f(8);\n    v8 = f(2);\n}\n    v56 = f(6);\n    v41 = f(8);\n    v11 = f(6);\n    v41 = f(6);\n}\n    v24 = f(7);\n    v10 = f(3);\n    v7 = f(3);\n    v53 = f(7);\n    return x;\n    v57 = f(7);\n    v8 = f(2);\n    v34 = f(0);\n    v58 = f(7);\n}\n    v59 = f(7);\n    v3 = f(3);\n    v17 = f(3);\n    v30 = f(4);\n    v10 = f(7);\nelse\n    v1 = f(5);\n    v7 = f(2);\n    v47 = f(0);\n    v58 = f(7);\n{\nelse\n    return x;\n    v40 = f(3);\n    v40 = f(8);\n    v10 = f(6);\n    v38 = f(4);\n    v40 = f(7);\n    v8 = f(2);\n    v27 = f(7);\n    i += 1;\n    v34 = f(7);\n    v28 = f(6);\n    v29 = f(8);\n    return x;\n\n    v42 = f(2);\n    return x;\n{\n{\n{\n    v50 = f(8);\n    v13 = f(6);\n    v50 = f(2);\n    w1 = g();\n    v29 = f(6);\nelse\n"
+   ],
+   "expected": {
+    "clean": false,
+    "conflicts": 2,
+    "text": "}\n\n    v50 = f(2);\n    v24 = f(1);\n    v19 = f(7);\n    v21 = f(7);\n    v4 = f(1);\n{\n    v43 = f(0);\n    v19 = f(1);\n    v6 = f(8);\n    v8 = f(2);\n}\n    v56 = f(6);\n    v41 = f(8);\n    v11 = f(6);\n    v41 = f(6);\n}\n{\n    v10 = f(3);\n    v7 = f(3);\n    v53 = f(7);\n    return x;\n    v57 = f(7);\n    v8 = f(2);\n    v34 = f(0);\n    v58 = f(7);\n}\n    v59 = f(7);\n    v17 = f(3);\n    v30 = f(4);\n    v10 = f(7);\nelse\n    v1 = f(5);\n    v7 = f(2);\n    v47 = f(0);\n{\nelse\n    return x;\n    v40 = f(3);\n    v40 = f(8);\n    v10 = f(6);\n<<<<<<< ours\n    v42 = f(0);\n    v3 = f(3);\n    v42 = f(2);\n    v58 = f(7);\n    w1 = g();\n||||||| base\n    v42 = f(2);\n    v38 = f(4);\n=======\n    v38 = f(4);\n>>>>>>> theirs\n    v40 = f(7);\n    v8 = f(2);\n    v27 = f(7);\n    i += 1;\n    v34 = f(7);\n    v28 = f(6);\n    v29 = f(8);\n    return x;\n\n    v42 = f(2);\n    return x;\n{\n{\n{\n    v50 = f(8);\n    v13 = f(6);\n<<<<<<< ours\n    v24 = f(8);\n||||||| base\n    v50 = f(2);\n    v24 = f(8);\n=======\n    v50 = f(2);\n    w1 = g();\n>>>>>>> theirs\n    v29 = f(6);\nelse\n"
+   }
+  }
+ ],
+ "stress": [
+  {
+   "id": "S1",
+   "title": "50 000 code-like lines, scattered edits on both sides",
+   "seed": 1801,
+   "n": 50000,
+   "sites": 70,
+   "expected_sha256": "42605335d099395906b052c24dd706e7afd0206d0552b29855c2e104a2be0d7e",
+   "expected_head": "{\"clean\":false,\"conflicts\":25,\"text\":\"}\\n    v16 = f(2);\\n    v35 = f(8);\\n    v12 = f(5);\\n    v24 = f(6);\\n\\n    v54 = f(7);\\n}\\n    v28 = f(6);\\n{\\n    v50 = f(4);\\n    return x;\\n\\n{\\n{\\n    v45 ="
+  },
+  {
+   "id": "S2",
+   "title": "long common prefix and suffix around a busy middle",
+   "seed": 1802,
+   "n": 50000,
+   "sites": 60,
+   "expected_sha256": "6fafd7fff3c371c90acfea12a92ce50a68219fdb7954fd3cd5029ef2463bb79a",
+   "expected_head": "{\"clean\":false,\"conflicts\":21,\"text\":\"    v17 = f(0);\\n    v59 = f(3);\\n    v42 = f(6);\\n    i += 1;\\n    v47 = f(2);\\n    v47 = f(1);\\n    v59 = f(0);\\n}\\n    v42 = f(3);\\n    v25 = f(0);\\n    v48 = "
+  },
+  {
+   "id": "S3",
+   "title": "40 000 lines, over half of them repeated lines",
+   "seed": 1803,
+   "n": 40000,
+   "sites": 60,
+   "expected_sha256": "767602d4e77f1480d8033ea3c5bc2224742879e8c7bdd2f461e20762b43f03bc",
+   "expected_head": "{\"clean\":false,\"conflicts\":21,\"text\":\"else\\n    v32 = f(3);\\n    return x;\\n    v4 = f(2);\\n    v7 = f(1);\\n    i += 1;\\n    i += 1;\\n    return x;\\n    v49 = f(5);\\n    v52 = f(0);\\n}\\n    v28 = f(3)"
+  }
+ ]
+}

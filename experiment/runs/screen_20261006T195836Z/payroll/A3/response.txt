@@ -1,0 +1,165 @@
+```python
+from datetime import date, datetime, timedelta
+from fractions import Fraction
+import math
+
+
+def _parse_timestamp(s):
+    """Parse and validate timestamp string YYYY-MM-DD HH:MM."""
+    if not isinstance(s, str) or len(s) != 16:
+        return None
+    if s[4] != "-" or s[7] != "-" or s[10] != " " or s[13] != ":":
+        return None
+    digits = "0123456789"
+    for idx in (0, 1, 2, 3, 5, 6, 8, 9, 11, 12, 14, 15):
+        if s[idx] not in digits:
+            return None
+    try:
+        year = int(s[0:4])
+        month = int(s[5:7])
+        day = int(s[8:10])
+        hour = int(s[11:13])
+        minute = int(s[14:16])
+        if hour > 23 or minute > 59:
+            return None
+        return datetime(year, month, day, hour, minute)
+    except (ValueError, OverflowError):
+        return None
+
+
+def _round_quarter_hour(dt):
+    """Round timestamp to nearest quarter hour by the 7-minute rule."""
+    q = dt.minute % 15
+    if q <= 7:
+        return dt - timedelta(minutes=q)
+    else:
+        return dt + timedelta(minutes=(15 - q))
+
+
+def compute_pay(punches, rate):
+    ignored = []
+    valid_punches = []
+
+    # 1. Parse & 2. Round
+    for idx, p in enumerate(punches):
+        if not isinstance(p, (list, tuple)) or len(p) != 2:
+            ignored.append(idx)
+            continue
+        in_dt = _parse_timestamp(p[0])
+        out_dt = _parse_timestamp(p[1])
+        if in_dt is None or out_dt is None or out_dt <= in_dt:
+            ignored.append(idx)
+            continue
+
+        try:
+            r_in = _round_quarter_hour(in_dt)
+            r_out = _round_quarter_hour(out_dt)
+        except OverflowError:
+            ignored.append(idx)
+            continue
+
+        if r_out <= r_in:
+            ignored.append(idx)
+            continue
+
+        valid_punches.append((r_in, r_out, idx))
+
+    # 3. Overlaps
+    valid_punches.sort(key=lambda x: (x[0], x[1], x[2]))
+
+    shifts = []
+    last_kept_out = None
+    for r_in, r_out, idx in valid_punches:
+        if last_kept_out is None or r_in >= last_kept_out:
+            shifts.append((r_in, r_out, idx))
+            last_kept_out = r_out
+        else:
+            ignored.append(idx)
+
+    ignored.sort()
+
+    # 4 & 5. Group shifts by week and day
+    weeks = {}
+
+    for r_in, r_out, _ in shifts:
+        shift_date = r_in.date()
+        shift_len = int((r_out - r_in).total_seconds() // 60)
+        week_monday = shift_date - timedelta(days=shift_date.weekday())
+
+        if week_monday not in weeks:
+            weeks[week_monday] = {
+                week_monday + timedelta(days=d): [] for d in range(7)
+            }
+        weeks[week_monday][shift_date].append(shift_len)
+
+    weeks_output = []
+    for week_monday in sorted(weeks.keys()):
+        days_dict = weeks[week_monday]
+
+        worked_minutes = [
+            sum(days_dict[week_monday + timedelta(days=d)]) for d in range(7)
+        ]
+        meal_penalties_per_day = [
+            1 if any(length > 300 for length in days_dict[week_monday + timedelta(days=d)]) else 0
+            for d in range(7)
+        ]
+        total_meal_penalties = sum(meal_penalties_per_day)
+
+        # 6. Daily classification
+        is_seventh_day = all(w > 0 for w in worked_minutes)
+
+        # 7. Weekly overtime
+        running_regular = 0
+        week_reg = 0
+        week_ot = 0
+        week_dt = 0
+
+        for d in range(7):
+            w = worked_minutes[d]
+            if d == 6 and is_seventh_day:
+                daily_reg = 0
+                daily_ot = min(480, w)
+                daily_dt = max(0, w - 480)
+            else:
+                daily_reg = min(480, w)
+                daily_ot = min(240, max(0, w - 480))
+                daily_dt = max(0, w - 720)
+
+            available = max(0, 2400 - running_regular)
+            actual_reg = min(daily_reg, available)
+            overflow_ot = daily_reg - actual_reg
+
+            actual_ot = daily_ot + overflow_ot
+            actual_dt = daily_dt
+
+            running_regular += actual_reg
+
+            week_reg += actual_reg
+            week_ot += actual_ot
+            week_dt += actual_dt
+
+        # 9. Pay calculations
+        reg_pay = math.floor(Fraction(week_reg * rate, 60) + Fraction(1, 2))
+        ot_pay = math.floor(Fraction(week_ot * rate * 3, 120) + Fraction(1, 2))
+        dt_pay = math.floor(Fraction(week_dt * rate * 2, 60) + Fraction(1, 2))
+        meal_pay = total_meal_penalties * rate
+        tot_pay = reg_pay + ot_pay + dt_pay + meal_pay
+
+        weeks_output.append({
+            "week_start": week_monday.isoformat(),
+            "regular_minutes": week_reg,
+            "overtime_minutes": week_ot,
+            "double_minutes": week_dt,
+            "meal_penalties": total_meal_penalties,
+            "regular_pay": reg_pay,
+            "overtime_pay": ot_pay,
+            "double_pay": dt_pay,
+            "meal_pay": meal_pay,
+            "total_pay": tot_pay,
+        })
+
+    return {
+        "weeks": weeks_output,
+        "ignored": ignored,
+    }
+```

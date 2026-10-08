@@ -1,0 +1,64 @@
+{
+  "started_utc": "2026-10-07T19:10:49.290931+00:00",
+  "mock": false,
+  "problems": [
+    "policy",
+    "washsale",
+    "roster",
+    "reconcile",
+    "recur",
+    "schema",
+    "ignore",
+    "merge3"
+  ],
+  "runs_per_problem": {
+    "A": 4,
+    "C": 2
+  },
+  "cap_usd": 31.07,
+  "worst_case_per_run": {
+    "A": 0.2908,
+    "C": 1.36
+  },
+  "roles_file": "roles_study.json",
+  "roles_sha256": "c709344779d2c3df22cafe1840d6808ede39f7e804e72095b14575cd860d69d7",
+  "sandbox": {
+    "backend": "docker",
+    "image": "python:3.12-slim@sha256:02108f5d322dd89f1c9e552442c25acb0543dfdbc455693a5599624f20d9155d",
+    "network": "none",
+    "rootfs": "read-only",
+    "code_mount": "read-only",
+    "tmpfs_mb": 64,
+    "user": "65534:65534",
+    "capabilities": "all dropped",
+    "no_new_privileges": true,
+    "memory_mb": 1024,
+    "cpus": 1.0,
+    "pids_limit": 128,
+    "env": "allowlist only"
+  },
+  "keep_rule": {
+    "a_max_pass_rate": 0.25,
+    "c_min_passes": 1
+  },
+  "screen_cases_sha256": {
+    "policy": "9e950fd6f670a88305c31afeb104b150f8564986bdf49ee06b00a7d5bdbb3e3f",
+    "washsale": "bbe2ff8e71acb41280ad183e735b5a13faee22b7bf22b62bbd877bd40fa80624",
+    "roster": "b4853f6d986566914bc44cc92519b483081359054106f89f5c01469cc9f9583a",
+    "reconcile": "7ca6a88daa205ef5265e6bc5cda45717264df249772ca0febfda3ec6f06d322e",
+    "recur": "46313da416bef224722edbb8282d888436dd966c41fc5dfb6a2d47f53ff28f23",
+    "schema": "f8702eec80bd52d333554a1c644d2070342751c9a8de3300b4fe1484a4dc89d6",
+    "ignore": "044ed2ae84c8287c4c5d9ba6247c444cbfbb41a3c5597f46369af51b936b95e8",
+    "merge3": "fb09f48006a56b96e1651cdc5b3cd8959c29df255a623393b71c85c64ef12d21"
+  },
+  "spec_sha256": {
+    "policy": "9f61b94608a9cb380d36d472016c168ea61c0461bbf6ee4ceef34b021536fb05",
+    "washsale": "88612ab544b151f8d349fa93fee2d483f80cc1cff8eb5ba15125381cb95a767c",
+    "roster": "28dbb6cb34c6ec85d395834d12709616e91637e344f31c0b1b5eb358907a7015",
+    "reconcile": "3396957670876b7edc4859766ab44223119dd36522e70755ebcedb1a65fe645a",
+    "recur": "a6611b8588ff24822d8f4d788a5afd881851eb2d275b3b12d53c50e79563b3c8",
+    "schema": "17c8c8d4c3f23dd6a591fdd71cc865ae53252f11d3155e30b6afa1faf8c193f2",
+    "ignore": "ea29d0e2832099c3b518b228a26f443a00a4796ae6e395ee446e6d8650c523d0",
+    "merge3": "b98334036ade07e83aa6ab794c4554ff8b53630ace07eef88b072fbf908e9830"
+  }
+}

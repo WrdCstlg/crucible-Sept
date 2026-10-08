@@ -1,0 +1,552 @@
+import re
+from heapq import heappush, heappop
+from collections import OrderedDict, deque
+from bisect import bisect_left, bisect_right
+
+_NAME_RE = re.compile(r'[A-Za-z0-9_]+')
+
+
+class _Order(object):
+    __slots__ = ('owner', 'oid', 'side', 'price', 'vis', 'hid', 'disp', 'flag', 'pidx')
+
+
+class _Stop(object):
+    __slots__ = ('line', 'owner', 'oid', 'side', 'trig', 'qty', 'tidx', 'alive')
+
+
+def _uint(s):
+    if not s or not s.isascii() or not s.isdigit():
+        return None
+    t = s.lstrip('0')
+    if not t:
+        return 0
+    if len(t) <= 4000:
+        return int(t)
+    v = 0
+    for k in range(0, len(t), 1000):
+        ch = t[k:k + 1000]
+        v = v * (10 ** len(ch)) + int(ch)
+    return v
+
+
+def _name_ok(s):
+    return _NAME_RE.fullmatch(s) is not None
+
+
+def _parse(line):
+    if not isinstance(line, str):
+        return None
+    f = [x.strip() for x in line.strip().split(',')]
+    n = len(f)
+    c = f[0]
+    if c == 'LIMIT':
+        if n != 6 and n != 7:
+            return None
+        owner, oid, side = f[1], f[2], f[3]
+        if not _name_ok(owner) or not _name_ok(oid) or side not in ('B', 'S'):
+            return None
+        price = _uint(f[4])
+        qty = _uint(f[5])
+        if price is None or qty is None or price < 1 or qty < 1:
+            return None
+        flag = ''
+        disp = 0
+        if n == 7:
+            fl = f[6]
+            if fl == 'IOC' or fl == 'FOK' or fl == 'POST':
+                flag = fl
+            elif fl[:4] == 'ICE=':
+                d = _uint(fl[4:])
+                if d is None or d < 1 or d >= qty:
+                    return None
+                flag = 'ICE'
+                disp = d
+            else:
+                return None
+        return ('L', owner, oid, side, price, qty, flag, disp)
+    if c == 'MARKET':
+        if n != 5:
+            return None
+        owner, oid, side = f[1], f[2], f[3]
+        if not _name_ok(owner) or not _name_ok(oid) or side not in ('B', 'S'):
+            return None
+        qty = _uint(f[4])
+        if qty is None or qty < 1:
+            return None
+        return ('M', owner, oid, side, qty)
+    if c == 'STOP':
+        if n != 6:
+            return None
+        owner, oid, side = f[1], f[2], f[3]
+        if not _name_ok(owner) or not _name_ok(oid) or side not in ('B', 'S'):
+            return None
+        trig = _uint(f[4])
+        qty = _uint(f[5])
+        if trig is None or qty is None or trig < 1 or qty < 1:
+            return None
+        return ('T', owner, oid, side, trig, qty)
+    if c == 'CANCEL':
+        if n != 2:
+            return None
+        if not _name_ok(f[1]):
+            return None
+        return ('C', f[1])
+    if c == 'AMEND':
+        if n != 4:
+            return None
+        oid = f[1]
+        if not _name_ok(oid):
+            return None
+        price = _uint(f[2])
+        qty = _uint(f[3])
+        if price is None or qty is None or price < 1 or qty < 1:
+            return None
+        return ('A', oid, price, qty)
+    return None
+
+
+def run_book(commands):
+    commands = list(commands)
+    n_lines = len(commands)
+    parsed = [_parse(c) for c in commands]
+
+    trades = []
+    rejects = []
+    stp = []
+    orders = {}
+    bid_levels = {}
+    ask_levels = {}
+    bid_heap = []
+    ask_heap = []
+    consumed = set()
+    last_price = None
+
+    # ---------- FOK tracking (Fenwick trees) ----------
+    fok_owners = set()
+    for p in parsed:
+        if p is not None and p[0] == 'L' and p[6] == 'FOK':
+            fok_owners.add(p[1])
+    track = bool(fok_owners)
+
+    pindex = {}
+    NP = 0
+    fen = ([0], [0])
+    tot = [0, 0]
+    own_fen = {}
+    own_tot = {}
+    if track:
+        pset = set()
+        for p in parsed:
+            if p is None:
+                continue
+            if p[0] == 'L':
+                pset.add(p[4])
+            elif p[0] == 'A':
+                pset.add(p[2])
+        plist = sorted(pset)
+        for k, v in enumerate(plist):
+            pindex[v] = k + 1
+        NP = len(plist)
+        fen = ([0] * (NP + 1), [0] * (NP + 1))
+        for o in fok_owners:
+            own_fen[o] = ({}, {})
+            own_tot[o] = [0, 0]
+
+    def fen_add(side, i, owner, d):
+        si = 0 if side == 'B' else 1
+        tree = fen[si]
+        tot[si] += d
+        j = i
+        while j <= NP:
+            tree[j] += d
+            j += j & -j
+        of = own_fen.get(owner)
+        if of is not None:
+            t = of[si]
+            own_tot[owner][si] += d
+            j = i
+            while j <= NP:
+                t[j] = t.get(j, 0) + d
+                j += j & -j
+
+    def fok_avail(owner, side, price):
+        k = pindex[price]
+        of = own_fen[owner]
+        if side == 'B':
+            tree = fen[1]
+            t = of[1]
+            s = 0
+            j = k
+            while j > 0:
+                s += tree[j]
+                j -= j & -j
+            o = 0
+            j = k
+            while j > 0:
+                o += t.get(j, 0)
+                j -= j & -j
+            return s - o
+        else:
+            tree = fen[0]
+            t = of[0]
+            s = 0
+            j = k - 1
+            while j > 0:
+                s += tree[j]
+                j -= j & -j
+            o = 0
+            j = k - 1
+            while j > 0:
+                o += t.get(j, 0)
+                j -= j & -j
+            return (tot[0] - s) - (own_tot[owner][0] - o)
+
+    # ---------- book helpers ----------
+    def rest(owner, oid, side, price, vis, hid, disp, flag):
+        o = _Order()
+        o.owner = owner
+        o.oid = oid
+        o.side = side
+        o.price = price
+        o.vis = vis
+        o.hid = hid
+        o.disp = disp
+        o.flag = flag
+        o.pidx = 0
+        if side == 'B':
+            level = bid_levels.get(price)
+            if level is None:
+                level = OrderedDict()
+                bid_levels[price] = level
+                heappush(bid_heap, -price)
+        else:
+            level = ask_levels.get(price)
+            if level is None:
+                level = OrderedDict()
+                ask_levels[price] = level
+                heappush(ask_heap, price)
+        level[oid] = o
+        orders[oid] = o
+        if track:
+            o.pidx = pindex[price]
+            fen_add(side, o.pidx, owner, vis + hid)
+
+    def remove(o):
+        lv = bid_levels if o.side == 'B' else ask_levels
+        level = lv[o.price]
+        del level[o.oid]
+        if not level:
+            del lv[o.price]
+        del orders[o.oid]
+        if track:
+            fen_add(o.side, o.pidx, o.owner, -(o.vis + o.hid))
+
+    def crosses(side, price):
+        if side == 'B':
+            while ask_heap and ask_heap[0] not in ask_levels:
+                heappop(ask_heap)
+            return bool(ask_heap) and ask_heap[0] <= price
+        else:
+            while bid_heap and -bid_heap[0] not in bid_levels:
+                heappop(bid_heap)
+            return bool(bid_heap) and -bid_heap[0] >= price
+
+    def match(owner, oid, side, limit, qty):
+        nonlocal last_price
+        traded = False
+        is_buy = (side == 'B')
+        if is_buy:
+            opp = ask_levels
+            heap = ask_heap
+        else:
+            opp = bid_levels
+            heap = bid_heap
+        while qty > 0:
+            if is_buy:
+                while heap and heap[0] not in opp:
+                    heappop(heap)
+                if not heap:
+                    break
+                p = heap[0]
+                if limit is not None and p > limit:
+                    break
+            else:
+                while heap and -heap[0] not in opp:
+                    heappop(heap)
+                if not heap:
+                    break
+                p = -heap[0]
+                if limit is not None and p < limit:
+                    break
+            level = opp[p]
+            while qty > 0 and level:
+                rid, r = next(iter(level.items()))
+                if r.owner == owner:
+                    level.popitem(last=False)
+                    del orders[rid]
+                    if track:
+                        fen_add(r.side, r.pidx, r.owner, -(r.vis + r.hid))
+                    stp.append(rid)
+                    continue
+                rv = r.vis
+                t = rv if rv < qty else qty
+                qty -= t
+                r.vis = rv - t
+                if is_buy:
+                    trades.append({"seq": len(trades) + 1, "price": p, "qty": t,
+                                   "buy": oid, "sell": rid, "aggressor": "B"})
+                else:
+                    trades.append({"seq": len(trades) + 1, "price": p, "qty": t,
+                                   "buy": rid, "sell": oid, "aggressor": "S"})
+                last_price = p
+                traded = True
+                if track:
+                    fen_add(r.side, r.pidx, r.owner, -t)
+                if r.vis == 0:
+                    if r.hid > 0:
+                        m = r.disp if r.disp < r.hid else r.hid
+                        r.hid -= m
+                        r.vis = m
+                        level.move_to_end(rid)
+                    else:
+                        level.popitem(last=False)
+                        del orders[rid]
+            if not level:
+                del opp[p]
+        return qty, traded
+
+    # ---------- stops ----------
+    trig_vals = sorted({p[4] for p in parsed if p is not None and p[0] == 'T'})
+    K = len(trig_vals)
+    tindex = {v: k for k, v in enumerate(trig_vals)}
+    size = 1
+    while size < K:
+        size <<= 1
+    INF = n_lines + 10
+    seg_b = [INF] * (2 * size)
+    seg_s = [INF] * (2 * size)
+    buckets_b = {}
+    buckets_s = {}
+    stops_alive = {}
+    stop_by_line = {}
+
+    def seg_set(seg, i, val):
+        i += size
+        seg[i] = val
+        i >>= 1
+        while i:
+            a = seg[2 * i]
+            b = seg[2 * i + 1]
+            seg[i] = a if a < b else b
+            i >>= 1
+
+    def seg_query(seg, l, r):
+        res = INF
+        l += size
+        r += size
+        while l < r:
+            if l & 1:
+                if seg[l] < res:
+                    res = seg[l]
+                l += 1
+            if r & 1:
+                r -= 1
+                if seg[r] < res:
+                    res = seg[r]
+            l >>= 1
+            r >>= 1
+        return res
+
+    def add_stop(line, owner, oid, side, trig, qty):
+        rec = _Stop()
+        rec.line = line
+        rec.owner = owner
+        rec.oid = oid
+        rec.side = side
+        rec.trig = trig
+        rec.qty = qty
+        rec.tidx = tindex[trig]
+        rec.alive = True
+        stops_alive[oid] = rec
+        stop_by_line[line] = rec
+        if side == 'B':
+            bk = buckets_b
+            seg = seg_b
+        else:
+            bk = buckets_s
+            seg = seg_s
+        dq = bk.get(rec.tidx)
+        if dq is None:
+            dq = deque()
+            bk[rec.tidx] = dq
+        if not dq:
+            dq.append(line)
+            seg_set(seg, rec.tidx, line)
+        else:
+            dq.append(line)
+
+    def kill_stop(rec):
+        rec.alive = False
+        del stops_alive[rec.oid]
+        if rec.side == 'B':
+            bk = buckets_b
+            seg = seg_b
+        else:
+            bk = buckets_s
+            seg = seg_s
+        dq = bk[rec.tidx]
+        if dq and dq[0] == rec.line:
+            dq.popleft()
+            while dq and not stop_by_line[dq[0]].alive:
+                dq.popleft()
+            seg_set(seg, rec.tidx, dq[0] if dq else INF)
+
+    def run_stops():
+        while stops_alive and last_price is not None:
+            L = last_price
+            best = INF
+            hi = bisect_right(trig_vals, L)
+            if hi > 0:
+                best = seg_query(seg_b, 0, hi)
+            lo = bisect_left(trig_vals, L)
+            if lo < K:
+                v = seg_query(seg_s, lo, K)
+                if v < best:
+                    best = v
+            if best >= INF:
+                return
+            rec = stop_by_line[best]
+            kill_stop(rec)
+            _rem, traded = match(rec.owner, rec.oid, rec.side, None, rec.qty)
+            if not traded:
+                rejects.append({"line": rec.line, "reason": "no_liquidity"})
+
+    # ---------- main loop ----------
+    for i in range(n_lines):
+        p = parsed[i]
+        if p is None:
+            rejects.append({"line": i, "reason": "malformed"})
+            continue
+        kind = p[0]
+        ntr = len(trades)
+        added = False
+        if kind == 'L' or kind == 'M' or kind == 'T':
+            oid = p[2]
+            if oid in consumed:
+                rejects.append({"line": i, "reason": "duplicate_id"})
+                continue
+            consumed.add(oid)
+            owner = p[1]
+            side = p[3]
+            if kind == 'L':
+                price = p[4]
+                qty = p[5]
+                flag = p[6]
+                if flag == '':
+                    rem, _t = match(owner, oid, side, price, qty)
+                    if rem > 0:
+                        rest(owner, oid, side, price, rem, 0, 0, '')
+                elif flag == 'IOC':
+                    match(owner, oid, side, price, qty)
+                elif flag == 'FOK':
+                    if fok_avail(owner, side, price) < qty:
+                        rejects.append({"line": i, "reason": "fok_unfilled"})
+                    else:
+                        match(owner, oid, side, price, qty)
+                elif flag == 'POST':
+                    if crosses(side, price):
+                        rejects.append({"line": i, "reason": "post_would_cross"})
+                    else:
+                        rest(owner, oid, side, price, qty, 0, 0, 'POST')
+                else:  # ICE
+                    disp = p[7]
+                    rem, _t = match(owner, oid, side, price, qty)
+                    if rem > 0:
+                        v = disp if disp < rem else rem
+                        rest(owner, oid, side, price, v, rem - v, disp, 'ICE')
+            elif kind == 'M':
+                qty = p[4]
+                _rem, traded = match(owner, oid, side, None, qty)
+                if not traded:
+                    rejects.append({"line": i, "reason": "no_liquidity"})
+            else:
+                add_stop(i, owner, oid, side, p[4], p[5])
+                added = True
+        elif kind == 'C':
+            oid = p[1]
+            o = orders.get(oid)
+            if o is not None:
+                remove(o)
+            else:
+                rec = stops_alive.get(oid)
+                if rec is not None:
+                    kill_stop(rec)
+                else:
+                    rejects.append({"line": i, "reason": "unknown_id"})
+        else:  # AMEND
+            oid = p[1]
+            price = p[2]
+            qty = p[3]
+            o = orders.get(oid)
+            if o is None:
+                rejects.append({"line": i, "reason": "unknown_id"})
+            else:
+                total = o.vis + o.hid
+                if price == o.price and qty == total:
+                    pass
+                elif price == o.price and qty < total:
+                    red = total - qty
+                    if o.hid >= red:
+                        o.hid -= red
+                    else:
+                        r2 = red - o.hid
+                        o.hid = 0
+                        o.vis -= r2
+                    if track:
+                        fen_add(o.side, o.pidx, o.owner, -red)
+                else:
+                    if o.flag == 'POST' and crosses(o.side, price):
+                        rejects.append({"line": i, "reason": "post_would_cross"})
+                    else:
+                        remove(o)
+                        owner = o.owner
+                        side = o.side
+                        flag = o.flag
+                        disp = o.disp
+                        if flag == 'POST':
+                            if crosses(side, price):
+                                rejects.append({"line": i, "reason": "post_would_cross"})
+                            else:
+                                rest(owner, oid, side, price, qty, 0, 0, 'POST')
+                        else:
+                            rem, _t = match(owner, oid, side, price, qty)
+                            if rem > 0:
+                                if flag == 'ICE':
+                                    v = disp if disp < rem else rem
+                                    rest(owner, oid, side, price, v, rem - v, disp, 'ICE')
+                                else:
+                                    rest(owner, oid, side, price, rem, 0, 0, '')
+        if (added or len(trades) != ntr) and stops_alive:
+            run_stops()
+
+    bids = []
+    for pr in sorted(bid_levels.keys(), reverse=True):
+        level = bid_levels[pr]
+        if level:
+            bids.append([pr, [[o.oid, o.vis, o.hid] for o in level.values()]])
+    asks = []
+    for pr in sorted(ask_levels.keys()):
+        level = ask_levels[pr]
+        if level:
+            asks.append([pr, [[o.oid, o.vis, o.hid] for o in level.values()]])
+    stops_out = [[r.oid, r.side, r.trig, r.qty] for r in stops_alive.values()]
+
+    return {
+        "trades": trades,
+        "rejects": rejects,
+        "stp_cancelled": stp,
+        "bids": bids,
+        "asks": asks,
+        "stops": stops_out,
+        "last_price": last_price,
+    }

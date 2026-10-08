@@ -1,0 +1,174 @@
+from array import array
+from itertools import chain, compress
+from operator import eq, sub
+
+
+def _split(text):
+    if not text:
+        return []
+    parts = text.split("\n")
+    last = parts.pop()
+    lines = [p + "\n" for p in parts]
+    if last:
+        lines.append(last)
+    return lines
+
+
+def _diff(A, B, SA, SB, sentA, sentB):
+    """Return a list m with m[x] = index in B matched with A[x], or -1."""
+    N = len(A)
+    M = len(B)
+    if N == 0 or M == 0:
+        return [-1] * N
+    if set(A).isdisjoint(B):
+        return [-1] * N
+
+    pad = N + M + 2
+    Ap = A + [-1] * pad
+    Bp = B + [-2] * pad
+    SAs = SA + sentA
+    SBs = SB + sentB
+
+    def snake(x, y):
+        # Precondition: x < N, y < M and A[x] == B[y].
+        x += 1
+        y += 1
+        s = 1
+        while SAs[x:x + s] == SBs[y:y + s]:
+            x += s
+            y += s
+            s += s
+        while s > 1:
+            s >>= 1
+            if SAs[x:x + s] == SBs[y:y + s]:
+                x += s
+                y += s
+        return x
+
+    kstar = N - M
+    x0 = snake(0, 0) if A[0] == B[0] else 0
+    trace = [array('i', [x0])]
+    d = 0
+    if not (kstar == 0 and x0 == N):
+        Apg = Ap.__getitem__
+        Bpg = Bp.__getitem__
+        add1 = (1).__add__
+        cur = [x0]
+        while True:
+            d += 1
+            prev = cur
+            cur = list(map(max,
+                           chain(prev, (-1,)),
+                           chain((-1,), map(add1, prev))))
+            ks = range(-d, d + 1, 2)
+            hits = list(map(eq, map(Apg, cur), map(Bpg, map(sub, cur, ks))))
+            for j in compress(range(d + 1), hits):
+                xx = cur[j]
+                cur[j] = snake(xx, xx - 2 * j + d)
+            trace.append(array('i', cur))
+            if -d <= kstar <= d and not ((kstar + d) & 1):
+                if cur[(kstar + d) >> 1] == N:
+                    break
+
+    mapping = [-1] * N
+    k = kstar
+    xend = N
+    while d > 0:
+        prev = trace[d - 1]
+        jd = (k + d) >> 1
+        if k == -d:
+            down = True
+        elif k == d:
+            down = False
+        else:
+            down = prev[jd] > prev[jd - 1]
+        if down:
+            px = prev[jd]
+            xstart = px
+            nk = k + 1
+        else:
+            px = prev[jd - 1]
+            xstart = px + 1
+            nk = k - 1
+        if xstart < xend:
+            mapping[xstart:xend] = range(xstart - k, xend - k)
+        xend = px
+        k = nk
+        d -= 1
+    if xend > 0:
+        mapping[0:xend] = range(xend)
+    return mapping
+
+
+def merge(base, ours, theirs):
+    Lb = _split(base)
+    Lo = _split(ours)
+    Lt = _split(theirs)
+
+    table = {}
+    sd = table.setdefault
+    Ib = [sd(l, len(table)) for l in Lb]
+    Io = [sd(l, len(table)) for l in Lo]
+    It = [sd(l, len(table)) for l in Lt]
+    nid = len(table)
+    sentA = chr(nid)
+    sentB = chr(nid + 1)
+    Sb = "".join(map(chr, Ib))
+    So = "".join(map(chr, Io))
+    St = "".join(map(chr, It))
+
+    mo = _diff(Ib, Io, Sb, So, sentA, sentB)
+    mt = _diff(Ib, It, Sb, St, sentA, sentB)
+
+    out = []
+    app = out.append
+    ext = out.extend
+
+    def part(L, a, b):
+        if a < b:
+            ext(L[a:b])
+            if not L[b - 1].endswith("\n"):
+                app("\n")
+
+    def chunk(b0, b1, o0, o1, t0, t1):
+        if b0 == b1 and o0 == o1 and t0 == t1:
+            return 0
+        bi = Ib[b0:b1]
+        oi = Io[o0:o1]
+        ti = It[t0:t1]
+        if oi == bi:
+            ext(Lt[t0:t1])
+            return 0
+        if ti == bi:
+            ext(Lo[o0:o1])
+            return 0
+        if oi == ti:
+            ext(Lo[o0:o1])
+            return 0
+        app("<<<<<<< ours\n")
+        part(Lo, o0, o1)
+        app("||||||| base\n")
+        part(Lb, b0, b1)
+        app("=======\n")
+        part(Lt, t0, t1)
+        app(">>>>>>> theirs\n")
+        return 1
+
+    conflicts = 0
+    ps = po = pt = -1
+    nb = len(Lb)
+    for x in range(nb):
+        y = mo[x]
+        if y < 0:
+            continue
+        z = mt[x]
+        if z < 0:
+            continue
+        if x != ps + 1 or y != po + 1 or z != pt + 1:
+            conflicts += chunk(ps + 1, x, po + 1, y, pt + 1, z)
+        app(Lb[x])
+        ps, po, pt = x, y, z
+    conflicts += chunk(ps + 1, nb, po + 1, len(Lo), pt + 1, len(Lt))
+
+    text = "".join(out)
+    return {"text": text, "conflicts": conflicts, "clean": conflicts == 0}

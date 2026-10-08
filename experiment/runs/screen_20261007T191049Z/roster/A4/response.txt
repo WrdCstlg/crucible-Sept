@@ -1,0 +1,458 @@
+```python
+import bisect
+import collections
+import datetime
+
+
+def _is_valid_date(s):
+    if not isinstance(s, str) or len(s) != 10:
+        return False
+    if s[4] != "-" or s[7] != "-":
+        return False
+    y_str, m_str, d_str = s[:4], s[5:7], s[8:10]
+    if not (
+        y_str.isascii()
+        and y_str.isdigit()
+        and m_str.isascii()
+        and m_str.isdigit()
+        and d_str.isascii()
+        and d_str.isdigit()
+    ):
+        return False
+    year = int(y_str)
+    if year < 1 or year > 9999:
+        return False
+    month = int(m_str)
+    day = int(d_str)
+    try:
+        datetime.date(year, month, day)
+        return True
+    except ValueError:
+        return False
+
+
+def _parse_timestamp(s):
+    if not isinstance(s, str) or len(s) != 16:
+        return None
+    if s[10] != " " or s[13] != ":":
+        return None
+    if not _is_valid_date(s[:10]):
+        return None
+    h_str, min_str = s[11:13], s[14:16]
+    if not (
+        h_str.isascii()
+        and h_str.isdigit()
+        and min_str.isascii()
+        and min_str.isdigit()
+    ):
+        return None
+    hour = int(h_str)
+    minute = int(min_str)
+    if not (0 <= hour <= 23 and 0 <= minute <= 59):
+        return None
+    d = datetime.date(int(s[:4]), int(s[5:7]), int(s[8:10]))
+    return datetime.datetime(d.year, d.month, d.day, hour, minute)
+
+
+def _is_valid_staff_record(r):
+    if not isinstance(r, dict):
+        return False
+    required_keys = ("id", "skills", "max_minutes_week", "unavailable", "senior")
+    for k in required_keys:
+        if k not in r:
+            return False
+    rid = r["id"]
+    if not isinstance(rid, str) or len(rid) == 0:
+        return False
+    skills = r["skills"]
+    if not isinstance(skills, list) or not all(isinstance(x, str) for x in skills):
+        return False
+    mmw = r["max_minutes_week"]
+    if isinstance(mmw, bool) or not isinstance(mmw, int) or mmw < 0:
+        return False
+    unavail = r["unavailable"]
+    if not isinstance(unavail, list) or not all(_is_valid_date(d) for d in unavail):
+        return False
+    senior = r["senior"]
+    if not isinstance(senior, bool):
+        return False
+    return True
+
+
+def _validate_shift_record(r):
+    if not isinstance(r, dict):
+        return None
+    required_keys = ("id", "start", "end", "skill", "need", "needs_senior")
+    for k in required_keys:
+        if k not in r:
+            return None
+    rid = r["id"]
+    if not isinstance(rid, str) or len(rid) == 0:
+        return None
+    start_dt = _parse_timestamp(r["start"])
+    end_dt = _parse_timestamp(r["end"])
+    if start_dt is None or end_dt is None:
+        return None
+    if end_dt <= start_dt:
+        return None
+    length = int((end_dt - start_dt).total_seconds() // 60)
+    if length > 1440:
+        return None
+    skill = r["skill"]
+    if not isinstance(skill, str):
+        return None
+    need = r["need"]
+    if isinstance(need, bool) or not isinstance(need, int) or need < 1:
+        return None
+    needs_senior = r["needs_senior"]
+    if not isinstance(needs_senior, bool):
+        return None
+    return (rid, start_dt, end_dt, length, skill, need, needs_senior)
+
+
+class _StaffMember:
+    __slots__ = ("id", "skills", "max_minutes_week", "unavailable", "senior")
+
+    def __init__(self, id_, skills, max_minutes_week, unavailable, senior):
+        self.id = id_
+        self.skills = skills
+        self.max_minutes_week = max_minutes_week
+        self.unavailable = unavailable
+        self.senior = senior
+
+
+class _ShiftRecord:
+    __slots__ = (
+        "id",
+        "start_dt",
+        "end_dt",
+        "start_min",
+        "end_min",
+        "length",
+        "skill",
+        "need",
+        "needs_senior",
+        "week",
+        "dates_ordinal",
+        "dates_iso",
+    )
+
+    def __init__(
+        self,
+        id_,
+        start_dt,
+        end_dt,
+        start_min,
+        end_min,
+        length,
+        skill,
+        need,
+        needs_senior,
+        week,
+        dates_ordinal,
+        dates_iso,
+    ):
+        self.id = id_
+        self.start_dt = start_dt
+        self.end_dt = end_dt
+        self.start_min = start_min
+        self.end_min = end_min
+        self.length = length
+        self.skill = skill
+        self.need = need
+        self.needs_senior = needs_senior
+        self.week = week
+        self.dates_ordinal = dates_ordinal
+        self.dates_iso = dates_iso
+
+
+def make_roster(staff, shifts, rules):
+    ignored_staff = []
+    valid_staff_temp = []
+    for idx, r in enumerate(staff):
+        if not _is_valid_staff_record(r):
+            ignored_staff.append(idx)
+        else:
+            valid_staff_temp.append((idx, r))
+
+    staff_id_counts = collections.Counter(r["id"] for _, r in valid_staff_temp)
+    valid_staff_records = []
+    for idx, r in valid_staff_temp:
+        if staff_id_counts[r["id"]] > 1:
+            ignored_staff.append(idx)
+        else:
+            valid_staff_records.append(r)
+    ignored_staff.sort()
+
+    ignored_shifts = []
+    valid_shifts_temp = []
+    for idx, r in enumerate(shifts):
+        parsed = _validate_shift_record(r)
+        if parsed is None:
+            ignored_shifts.append(idx)
+        else:
+            valid_shifts_temp.append((idx, parsed))
+
+    shift_id_counts = collections.Counter(parsed[0] for _, parsed in valid_shifts_temp)
+    valid_shift_parsed = []
+    for idx, parsed in valid_shifts_temp:
+        if shift_id_counts[parsed[0]] > 1:
+            ignored_shifts.append(idx)
+        else:
+            valid_shift_parsed.append(parsed)
+    ignored_shifts.sort()
+
+    valid_staff_members = [
+        _StaffMember(
+            r["id"],
+            set(r["skills"]),
+            r["max_minutes_week"],
+            set(r["unavailable"]),
+            r["senior"],
+        )
+        for r in valid_staff_records
+    ]
+    valid_staff_members.sort(key=lambda m: m.id)
+    valid_staff_ids = {m.id for m in valid_staff_members}
+
+    valid_shift_objects = []
+    for (
+        s_id,
+        start_dt,
+        end_dt,
+        length,
+        skill,
+        need,
+        needs_senior,
+    ) in valid_shift_parsed:
+        start_min = start_dt.toordinal() * 1440 + start_dt.hour * 60 + start_dt.minute
+        end_min = end_dt.toordinal() * 1440 + end_dt.hour * 60 + end_dt.minute
+        start_date = start_dt.date()
+        monday = start_date - datetime.timedelta(days=start_date.weekday())
+        week = monday.toordinal()
+
+        d1 = start_date
+        if end_dt.date() > d1 and not (end_dt.hour == 0 and end_dt.minute == 0):
+            d2 = end_dt.date()
+            dates_ordinal = (d1.toordinal(), d2.toordinal())
+            dates_iso = (d1.isoformat(), d2.isoformat())
+        else:
+            dates_ordinal = (d1.toordinal(),)
+            dates_iso = (d1.isoformat(),)
+
+        valid_shift_objects.append(
+            _ShiftRecord(
+                s_id,
+                start_dt,
+                end_dt,
+                start_min,
+                end_min,
+                length,
+                skill,
+                need,
+                needs_senior,
+                week,
+                dates_ordinal,
+                dates_iso,
+            )
+        )
+
+    min_rest_minutes = rules["min_rest_minutes"]
+    max_consecutive_days = rules["max_consecutive_days"]
+    forbidden_pairs = set()
+    for p in rules["forbidden_pairs"]:
+        id1, id2 = p[0], p[1]
+        if id1 != id2 and id1 in valid_staff_ids and id2 in valid_staff_ids:
+            forbidden_pairs.add((id1, id2))
+            forbidden_pairs.add((id2, id1))
+
+    slots = []
+    for s in valid_shift_objects:
+        for seat in range(s.need):
+            slots.append((s, seat))
+    slots.sort(key=lambda item: (item[0].start_min, item[0].end_min, item[0].id, item[1]))
+
+    if not slots:
+        return {
+            "ok": True,
+            "assignments": {},
+            "minutes": {m.id: 0 for m in valid_staff_members},
+            "ignored": {"staff": ignored_staff, "shifts": ignored_shifts},
+        }
+
+    if not valid_staff_members:
+        return {
+            "ok": False,
+            "assignments": {},
+            "minutes": {},
+            "ignored": {"staff": ignored_staff, "shifts": ignored_shifts},
+        }
+
+    staff_by_skill = {}
+    ids_by_skill = {}
+    for m in valid_staff_members:
+        for sk in m.skills:
+            if sk not in staff_by_skill:
+                staff_by_skill[sk] = []
+            staff_by_skill[sk].append(m)
+    for sk in staff_by_skill:
+        ids_by_skill[sk] = [m.id for m in staff_by_skill[sk]]
+
+    week_minutes = {}
+    person_last_shift_end = {m.id: None for m in valid_staff_members}
+    person_last_date = {m.id: None for m in valid_staff_members}
+    person_run_length = {m.id: 0 for m in valid_staff_members}
+    person_total_minutes = {m.id: 0 for m in valid_staff_members}
+    assignments = {s.id: [] for s in valid_shift_objects}
+    shift_senior_count = {s.id: 0 for s in valid_shift_objects}
+
+    def check_acceptable(cand, shift, seat):
+        last_end = person_last_shift_end[cand.id]
+        if last_end is not None:
+            if shift.start_min - last_end < min_rest_minutes:
+                return False, None, None
+
+        week_dict = week_minutes.get(shift.week)
+        w = week_dict.get(cand.id, 0) if week_dict else 0
+        if w + shift.length > cand.max_minutes_week:
+            return False, None, None
+
+        if len(shift.dates_ordinal) > 1 and max_consecutive_days == 1:
+            return False, None, None
+
+        cur_last = person_last_date[cand.id]
+        cur_run = person_run_length[cand.id]
+        for d in shift.dates_ordinal:
+            if cur_last is None:
+                cur_last = d
+                cur_run = 1
+            elif d == cur_last:
+                pass
+            elif d == cur_last + 1:
+                cur_last = d
+                cur_run += 1
+            else:
+                cur_last = d
+                cur_run = 1
+            if cur_run > max_consecutive_days:
+                return False, None, None
+
+        for d_iso in shift.dates_iso:
+            if d_iso in cand.unavailable:
+                return False, None, None
+
+        seated_people = assignments[shift.id]
+        for p_id in seated_people:
+            if (cand.id, p_id) in forbidden_pairs:
+                return False, None, None
+
+        if shift.needs_senior and seat == shift.need - 1:
+            if not (cand.senior or shift_senior_count[shift.id] > 0):
+                return False, None, None
+
+        return True, cur_last, cur_run
+
+    def place_candidate(cand, shift, new_last_date, new_run_length):
+        old_last_end = person_last_shift_end[cand.id]
+        old_last_date = person_last_date[cand.id]
+        old_run_length = person_run_length[cand.id]
+
+        person_last_shift_end[cand.id] = shift.end_min
+        person_last_date[cand.id] = new_last_date
+        person_run_length[cand.id] = new_run_length
+
+        if shift.week not in week_minutes:
+            week_minutes[shift.week] = {}
+        w_dict = week_minutes[shift.week]
+        w_dict[cand.id] = w_dict.get(cand.id, 0) + shift.length
+        person_total_minutes[cand.id] += shift.length
+
+        assignments[shift.id].append(cand.id)
+        if cand.senior:
+            shift_senior_count[shift.id] += 1
+
+        return cand, old_last_end, old_last_date, old_run_length
+
+    def unplace_candidate(shift, undo_info):
+        cand, old_last_end, old_last_date, old_run_length = undo_info
+
+        person_last_shift_end[cand.id] = old_last_end
+        person_last_date[cand.id] = old_last_date
+        person_run_length[cand.id] = old_run_length
+
+        w_dict = week_minutes[shift.week]
+        w_dict[cand.id] -= shift.length
+        if w_dict[cand.id] == 0:
+            del w_dict[cand.id]
+        person_total_minutes[cand.id] -= shift.length
+
+        assignments[shift.id].pop()
+        if cand.senior:
+            shift_senior_count[shift.id] -= 1
+
+    num_slots = len(slots)
+    slot_candidates = [None] * num_slots
+    slot_cand_idx = [0] * num_slots
+    slot_undo = [None] * num_slots
+
+    slot_idx = 0
+    moving_forward = True
+
+    while 0 <= slot_idx < num_slots:
+        shift, seat = slots[slot_idx]
+
+        if moving_forward:
+            pool = staff_by_skill.get(shift.skill, [])
+            if seat > 0:
+                prev_id = assignments[shift.id][seat - 1]
+                idx = bisect.bisect_right(ids_by_skill[shift.skill], prev_id)
+                pool = pool[idx:]
+
+            w_dict = week_minutes.get(shift.week)
+            if not w_dict:
+                cands = pool
+            else:
+                cands = sorted(pool, key=lambda m: w_dict.get(m.id, 0))
+
+            slot_candidates[slot_idx] = cands
+            slot_cand_idx[slot_idx] = 0
+        else:
+            unplace_candidate(shift, slot_undo[slot_idx])
+
+        cands = slot_candidates[slot_idx]
+        c_idx = slot_cand_idx[slot_idx]
+        found = False
+
+        while c_idx < len(cands):
+            cand = cands[c_idx]
+            c_idx += 1
+            ok_cand, n_date, n_run = check_acceptable(cand, shift, seat)
+            if ok_cand:
+                undo_info = place_candidate(cand, shift, n_date, n_run)
+                slot_undo[slot_idx] = undo_info
+                slot_cand_idx[slot_idx] = c_idx
+                found = True
+                break
+
+        if found:
+            slot_idx += 1
+            moving_forward = True
+        else:
+            slot_idx -= 1
+            moving_forward = False
+
+    if slot_idx == num_slots:
+        return {
+            "ok": True,
+            "assignments": {s.id: list(assignments[s.id]) for s in valid_shift_objects},
+            "minutes": {m.id: person_total_minutes[m.id] for m in valid_staff_members},
+            "ignored": {"staff": ignored_staff, "shifts": ignored_shifts},
+        }
+    else:
+        return {
+            "ok": False,
+            "assignments": {},
+            "minutes": {m.id: 0 for m in valid_staff_members},
+            "ignored": {"staff": ignored_staff, "shifts": ignored_shifts},
+        }
+```

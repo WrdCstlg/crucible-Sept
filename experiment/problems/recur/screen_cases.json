@@ -1,0 +1,8477 @@
+{
+ "problem": "recur",
+ "entry": "occurrences",
+ "public": [
+  {
+   "id": "P1",
+   "title": "BYSETPOS picks the last weekday of each month",
+   "args": [
+    {
+     "start": "2026-01-30T09:00",
+     "rule": "FREQ=MONTHLY;BYDAY=MO,TU,WE,TH,FR;BYSETPOS=-1;COUNT=4",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-01-01T00:00",
+    "2027-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-01-30T09:00",
+     "2026-02-27T09:00",
+     "2026-03-31T09:00",
+     "2026-04-30T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "P2",
+   "title": "WKST decides which days share a week; INTERVAL=2",
+   "args": [
+    {
+     "start": "1997-08-05T09:00",
+     "rule": "FREQ=WEEKLY;INTERVAL=2;COUNT=4;BYDAY=TU,SU;WKST=SU",
+     "exdates": [],
+     "rdates": []
+    },
+    "1997-01-01T00:00",
+    "1998-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1997-08-05T09:00",
+     "1997-08-17T09:00",
+     "1997-08-19T09:00",
+     "1997-08-31T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "P3",
+   "title": "day 31 skipped in short months; UNTIL inclusive; exdate and rdate",
+   "args": [
+    {
+     "start": "2026-01-31T08:00",
+     "rule": "FREQ=MONTHLY;UNTIL=2026-07-31T08:00",
+     "exdates": [
+      "2026-05-31T08:00"
+     ],
+     "rdates": [
+      "2026-02-28T08:00"
+     ]
+    },
+    "2026-02-01T00:00",
+    "2026-08-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-02-28T08:00",
+     "2026-03-31T08:00",
+     "2026-07-31T08:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "P4",
+   "title": "an ordinal is not allowed with WEEKLY",
+   "args": [
+    {
+     "start": "2026-01-05T10:00",
+     "rule": "FREQ=WEEKLY;BYDAY=1MO",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-01-01T00:00",
+    "2026-02-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  }
+ ],
+ "hidden": [
+  {
+   "id": "H01",
+   "title": "the start is the first occurrence even when it does not match the rule",
+   "args": [
+    {
+     "start": "2026-03-04T18:30",
+     "rule": "FREQ=WEEKLY;BYDAY=MO;COUNT=3",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-04T18:30",
+     "2026-03-09T18:30",
+     "2026-03-16T18:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H02",
+   "title": "COUNT is applied before EXDATE removal; an excluded start still counts",
+   "args": [
+    {
+     "start": "2026-03-02T07:00",
+     "rule": "FREQ=DAILY;COUNT=4",
+     "exdates": [
+      "2026-03-02T07:00",
+      "2026-03-04T07:00",
+      "2026-03-05T08:00"
+     ],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-03T07:00",
+     "2026-03-05T07:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H03",
+   "title": "RDATEs are added, deduplicated, not counted, and may precede the start",
+   "args": [
+    {
+     "start": "2026-03-10T09:00",
+     "rule": "FREQ=DAILY;INTERVAL=2;COUNT=3",
+     "exdates": [],
+     "rdates": [
+      "2026-03-12T09:00",
+      "2026-03-01T09:00",
+      "2026-03-20T09:00",
+      "2026-03-12T09:00"
+     ]
+    },
+    "2026-03-01T00:00",
+    "2026-03-31T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-01T09:00",
+     "2026-03-10T09:00",
+     "2026-03-12T09:00",
+     "2026-03-14T09:00",
+     "2026-03-20T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H04",
+   "title": "UNTIL is inclusive",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;UNTIL=2026-03-05T10:00",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-02T10:00",
+     "2026-03-03T10:00",
+     "2026-03-04T10:00",
+     "2026-03-05T10:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H05",
+   "title": "UNTIL compares the time too: one minute early excludes that day",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;UNTIL=2026-03-05T09:59",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-02T10:00",
+     "2026-03-03T10:00",
+     "2026-03-04T10:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H06",
+   "title": "a start later than UNTIL is still an occurrence",
+   "args": [
+    {
+     "start": "2026-03-10T10:00",
+     "rule": "FREQ=DAILY;UNTIL=2026-03-01T00:00",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-10T10:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H07",
+   "title": "MONTHLY from the 31st skips short months instead of clamping",
+   "args": [
+    {
+     "start": "2026-01-31T08:00",
+     "rule": "FREQ=MONTHLY;COUNT=5",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-01-01T00:00",
+    "2027-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-01-31T08:00",
+     "2026-03-31T08:00",
+     "2026-05-31T08:00",
+     "2026-07-31T08:00",
+     "2026-08-31T08:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H08",
+   "title": "YEARLY from Feb 29: leap years only (1900 is not one, 2000 is)",
+   "args": [
+    {
+     "start": "1896-02-29T12:00",
+     "rule": "FREQ=YEARLY;INTERVAL=4",
+     "exdates": [],
+     "rdates": []
+    },
+    "1890-01-01T00:00",
+    "2005-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1896-02-29T12:00",
+     "1904-02-29T12:00",
+     "1908-02-29T12:00",
+     "1912-02-29T12:00",
+     "1916-02-29T12:00",
+     "1920-02-29T12:00",
+     "1924-02-29T12:00",
+     "1928-02-29T12:00",
+     "1932-02-29T12:00",
+     "1936-02-29T12:00",
+     "1940-02-29T12:00",
+     "1944-02-29T12:00",
+     "1948-02-29T12:00",
+     "1952-02-29T12:00",
+     "1956-02-29T12:00",
+     "1960-02-29T12:00",
+     "1964-02-29T12:00",
+     "1968-02-29T12:00",
+     "1972-02-29T12:00",
+     "1976-02-29T12:00",
+     "1980-02-29T12:00",
+     "1984-02-29T12:00",
+     "1988-02-29T12:00",
+     "1992-02-29T12:00",
+     "1996-02-29T12:00",
+     "2000-02-29T12:00",
+     "2004-02-29T12:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H09",
+   "title": "YEARLY ordinal BYDAY without BYMONTH counts within the year",
+   "args": [
+    {
+     "start": "2026-01-01T09:00",
+     "rule": "FREQ=YEARLY;BYDAY=20MO;COUNT=3",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-01-01T00:00",
+    "2030-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-01-01T09:00",
+     "2026-05-18T09:00",
+     "2027-05-17T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H10",
+   "title": "YEARLY ordinal BYDAY with BYMONTH counts within each month",
+   "args": [
+    {
+     "start": "2026-01-01T09:00",
+     "rule": "FREQ=YEARLY;BYMONTH=3,11;BYDAY=2SU,-1MO;COUNT=5",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-01-01T00:00",
+    "2027-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-01-01T09:00",
+     "2026-03-08T09:00",
+     "2026-03-30T09:00",
+     "2026-11-08T09:00",
+     "2026-11-30T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H11",
+   "title": "WKST=TH with INTERVAL=2 changes which days share a week",
+   "args": [
+    {
+     "start": "2026-03-04T12:00",
+     "rule": "FREQ=WEEKLY;INTERVAL=2;WKST=TH;BYDAY=MO,WE,TH;COUNT=6",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-05-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-04T12:00",
+     "2026-03-12T12:00",
+     "2026-03-16T12:00",
+     "2026-03-18T12:00",
+     "2026-03-26T12:00",
+     "2026-03-30T12:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H12",
+   "title": "BYSETPOS counts candidates that lie before the start",
+   "args": [
+    {
+     "start": "2026-03-04T09:00",
+     "rule": "FREQ=MONTHLY;BYDAY=MO,TU,WE,TH,FR;BYSETPOS=1,2;COUNT=5",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-06-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-04T09:00",
+     "2026-04-01T09:00",
+     "2026-04-02T09:00",
+     "2026-05-01T09:00",
+     "2026-05-04T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H13",
+   "title": "BYSETPOS is applied before UNTIL",
+   "args": [
+    {
+     "start": "2026-01-30T09:00",
+     "rule": "FREQ=MONTHLY;BYDAY=MO,TU,WE,TH,FR;BYSETPOS=-1;UNTIL=2026-03-20T09:00",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-01-01T00:00",
+    "2027-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-01-30T09:00",
+     "2026-02-27T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H14",
+   "title": "DAILY periods hold one candidate: BYSETPOS=2 selects nothing",
+   "args": [
+    {
+     "start": "2026-03-02T08:00",
+     "rule": "FREQ=DAILY;BYDAY=MO,WE;BYSETPOS=2",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-03-15T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-02T08:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H15",
+   "title": "negative BYMONTHDAY counts back from each month's end; -31 needs a 31-day month",
+   "args": [
+    {
+     "start": "2026-01-01T00:00",
+     "rule": "FREQ=MONTHLY;BYMONTHDAY=-1,-31;COUNT=6",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-01-01T00:00",
+    "2027-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-01-01T00:00",
+     "2026-01-31T00:00",
+     "2026-02-28T00:00",
+     "2026-03-01T00:00",
+     "2026-03-31T00:00",
+     "2026-04-30T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H16",
+   "title": "MONTHLY BYMONTHDAY and BYDAY intersect",
+   "args": [
+    {
+     "start": "2026-01-01T20:00",
+     "rule": "FREQ=MONTHLY;BYMONTHDAY=13;BYDAY=FR;COUNT=4",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-01-01T00:00",
+    "2027-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-01-01T20:00",
+     "2026-02-13T20:00",
+     "2026-03-13T20:00",
+     "2026-11-13T20:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H17",
+   "title": "YEARLY with BYMONTHDAY but no BYMONTH covers every month",
+   "args": [
+    {
+     "start": "2026-01-15T10:00",
+     "rule": "FREQ=YEARLY;BYMONTHDAY=15;COUNT=4",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-01-01T00:00",
+    "2030-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-01-15T10:00",
+     "2026-02-15T10:00",
+     "2026-03-15T10:00",
+     "2026-04-15T10:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H18",
+   "title": "YEARLY with BYMONTH only uses the start's day of month",
+   "args": [
+    {
+     "start": "2026-01-30T10:00",
+     "rule": "FREQ=YEARLY;BYMONTH=2,3;COUNT=4",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-01-01T00:00",
+    "2030-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-01-30T10:00",
+     "2026-03-30T10:00",
+     "2027-03-30T10:00",
+     "2028-03-30T10:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H19",
+   "title": "the range includes its start and excludes its end",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;COUNT=5",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-03T10:00",
+    "2026-03-05T10:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-03T10:00",
+     "2026-03-04T10:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H20",
+   "title": "range_end before range_start gives an empty list",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;COUNT=5",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-05T10:00",
+    "2026-03-03T10:00"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "H21",
+   "title": "the series ends with year 9999 even if COUNT is not reached",
+   "args": [
+    {
+     "start": "9995-06-15T12:00",
+     "rule": "FREQ=YEARLY;COUNT=10",
+     "exdates": [],
+     "rdates": []
+    },
+    "9990-01-01T00:00",
+    "9999-12-31T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "9995-06-15T12:00",
+     "9996-06-15T12:00",
+     "9997-06-15T12:00",
+     "9998-06-15T12:00",
+     "9999-06-15T12:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H22",
+   "title": "the last week of the calendar has only its existing days",
+   "args": [
+    {
+     "start": "9999-12-01T07:00",
+     "rule": "FREQ=WEEKLY;BYDAY=MO,FR,SU;BYSETPOS=-1",
+     "exdates": [],
+     "rdates": []
+    },
+    "9999-12-01T00:00",
+    "9999-12-31T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "9999-12-01T07:00",
+     "9999-12-05T07:00",
+     "9999-12-12T07:00",
+     "9999-12-19T07:00",
+     "9999-12-26T07:00",
+     "9999-12-31T07:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H23",
+   "title": "the first week of the calendar has only its existing days",
+   "args": [
+    {
+     "start": "0001-01-01T10:00",
+     "rule": "FREQ=WEEKLY;WKST=SU;BYDAY=SU,MO,TU,WE;BYSETPOS=2;COUNT=4",
+     "exdates": [],
+     "rdates": []
+    },
+    "0001-01-01T00:00",
+    "0001-02-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "0001-01-01T10:00",
+     "0001-01-02T10:00",
+     "0001-01-08T10:00",
+     "0001-01-15T10:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H24",
+   "title": "a range thousands of years after the start (YEARLY, INTERVAL=7, Feb 29)",
+   "args": [
+    {
+     "start": "2024-02-29T06:00",
+     "rule": "FREQ=YEARLY;INTERVAL=7",
+     "exdates": [],
+     "rdates": []
+    },
+    "9000-01-01T00:00",
+    "9100-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "9024-02-29T06:00",
+     "9052-02-29T06:00",
+     "9080-02-29T06:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H25",
+   "title": "a range thousands of years after the start (MONTHLY, INTERVAL=5, day 31)",
+   "args": [
+    {
+     "start": "2026-01-31T08:00",
+     "rule": "FREQ=MONTHLY;INTERVAL=5",
+     "exdates": [],
+     "rdates": []
+    },
+    "4000-01-01T00:00",
+    "4001-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "4000-03-31T08:00",
+     "4000-08-31T08:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H26",
+   "title": "an EXDATE removes an RDATE too and must match the time exactly",
+   "args": [
+    {
+     "start": "2026-03-02T09:00",
+     "rule": null,
+     "exdates": [
+      "2026-03-03T09:00",
+      "2026-03-02T09:01"
+     ],
+     "rdates": [
+      "2026-03-03T09:00",
+      "2026-03-04T09:00"
+     ]
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-02T09:00",
+     "2026-03-04T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H27",
+   "title": "MONTHLY BYDAY=5MO only in months with five Mondays",
+   "args": [
+    {
+     "start": "2026-01-05T10:00",
+     "rule": "FREQ=MONTHLY;BYDAY=5MO;COUNT=3",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-01-01T00:00",
+    "2027-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-01-05T10:00",
+     "2026-03-30T10:00",
+     "2026-06-29T10:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H28",
+   "title": "WEEKLY BYMONTH filters each day of a week that straddles two months",
+   "args": [
+    {
+     "start": "2026-03-16T10:00",
+     "rule": "FREQ=WEEKLY;INTERVAL=2;BYDAY=MO,TH,SA;BYMONTH=4;COUNT=4",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-06-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-16T10:00",
+     "2026-04-02T10:00",
+     "2026-04-04T10:00",
+     "2026-04-13T10:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H29",
+   "title": "DAILY INTERVAL counts days from the start; BYMONTHDAY filters",
+   "args": [
+    {
+     "start": "2026-01-30T06:00",
+     "rule": "FREQ=DAILY;INTERVAL=3;BYMONTHDAY=1,2,3;COUNT=4",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-01-01T00:00",
+    "2027-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-01-30T06:00",
+     "2026-02-02T06:00",
+     "2026-03-01T06:00",
+     "2026-04-03T06:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H30",
+   "title": "BYSETPOS: overlapping positions select once, positions past the end select nothing",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=MONTHLY;BYMONTHDAY=2;BYSETPOS=1,-1,5;COUNT=3",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-06-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-02T10:00",
+     "2026-04-02T10:00",
+     "2026-05-02T10:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H31",
+   "title": "YEARLY 53MO and -53MO exist only in years with 53 Mondays",
+   "args": [
+    {
+     "start": "2024-01-01T09:00",
+     "rule": "FREQ=YEARLY;BYDAY=53MO,-53MO;COUNT=4",
+     "exdates": [],
+     "rdates": []
+    },
+    "2024-01-01T00:00",
+    "2030-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2024-01-01T09:00",
+     "2024-12-30T09:00",
+     "2029-01-01T09:00",
+     "2029-12-31T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H32",
+   "title": "YEARLY with a bare BYDAY and no BYMONTH means every such weekday of the year",
+   "args": [
+    {
+     "start": "2026-12-20T10:00",
+     "rule": "FREQ=YEARLY;BYDAY=TU;COUNT=4",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-01-01T00:00",
+    "2028-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-12-20T10:00",
+     "2026-12-22T10:00",
+     "2026-12-29T10:00",
+     "2027-01-05T10:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H33",
+   "title": "WKST changes what BYSETPOS counts even with INTERVAL=1",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=WEEKLY;WKST=WE;BYDAY=MO,FR;BYSETPOS=1;COUNT=3",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-02T10:00",
+     "2026-03-06T10:00",
+     "2026-03-13T10:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H34",
+   "title": "COUNT=1 keeps only the start; RDATEs are still added",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;COUNT=1",
+     "exdates": [],
+     "rdates": [
+      "2026-03-05T10:00"
+     ]
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-02T10:00",
+     "2026-03-05T10:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H35",
+   "title": "explicit + signs; an ordinal BYDAY limits BYMONTHDAY in MONTHLY",
+   "args": [
+    {
+     "start": "2026-01-13T18:00",
+     "rule": "FREQ=MONTHLY;BYDAY=+2TU;BYMONTHDAY=+8,+9,+10,+11,+12,+13,+14;COUNT=3",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-01-01T00:00",
+    "2027-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-01-13T18:00",
+     "2026-02-10T18:00",
+     "2026-03-10T18:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H36",
+   "title": "YEARLY ordinal BYDAY limiting BYMONTHDAY counts in the year without BYMONTH",
+   "args": [
+    {
+     "start": "2026-01-01T09:00",
+     "rule": "FREQ=YEARLY;BYMONTHDAY=1;BYDAY=1MO;COUNT=3",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-01-01T00:00",
+    "2040-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-01-01T09:00",
+     "2029-01-01T09:00",
+     "2035-01-01T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H37",
+   "title": "bad_datetime is checked before bad_rule",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;COUNT=0",
+     "exdates": [
+      "2026-02-29T10:00"
+     ],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_datetime",
+    "ok": false
+   }
+  },
+  {
+   "id": "H38",
+   "title": "datetime digits must be ASCII",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;COUNT=2",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "２026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_datetime",
+    "ok": false
+   }
+  },
+  {
+   "id": "H39",
+   "title": "datetime separator T is case-sensitive",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;COUNT=2",
+     "exdates": [],
+     "rdates": [
+      "2026-03-05t10:00"
+     ]
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_datetime",
+    "ok": false
+   }
+  },
+  {
+   "id": "H40",
+   "title": "year 0000 is not a datetime",
+   "args": [
+    {
+     "start": "0000-12-31T10:00",
+     "rule": null,
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_datetime",
+    "ok": false
+   }
+  },
+  {
+   "id": "H41",
+   "title": "hour 24 is not a datetime",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": null,
+     "exdates": [
+      "2026-03-02T24:00"
+     ],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_datetime",
+    "ok": false
+   }
+  },
+  {
+   "id": "H42",
+   "title": "BYSETPOS is fine with any BY part written (DAILY, BYMONTH)",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;BYSETPOS=1;BYMONTH=3;COUNT=2",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-02T10:00",
+     "2026-03-03T10:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H43",
+   "title": "WEEKLY BYSETPOS with BYMONTH written and the default weekday",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=WEEKLY;WKST=SU;BYMONTH=3;BYSETPOS=-1;COUNT=2",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-02T10:00",
+     "2026-03-09T10:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H44",
+   "title": "DAILY BYMONTHDAY=+31: the non-matching start, then Mar 31",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;BYMONTHDAY=+31;COUNT=2",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-02T10:00",
+     "2026-03-31T10:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H45",
+   "title": "INTERVAL=100000 is valid (only the start in range)",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=YEARLY;INTERVAL=100000",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-02T10:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H46",
+   "title": "no rule: the start outside the range, an RDATE inside it",
+   "args": [
+    {
+     "start": "2026-02-27T10:00",
+     "rule": null,
+     "exdates": [],
+     "rdates": [
+      "2026-03-03T10:00"
+     ]
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-03T10:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "H47",
+   "title": "COUNT exhausted before a later range",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;COUNT=3",
+     "exdates": [],
+     "rdates": []
+    },
+    "2027-03-01T00:00",
+    "2027-04-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "V01",
+   "title": "invalid rule: leading zero in INTERVAL",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;INTERVAL=02",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V02",
+   "title": "invalid rule: a part repeated",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;COUNT=3;FREQ=DAILY",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V03",
+   "title": "invalid rule: COUNT together with UNTIL",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;COUNT=3;UNTIL=2026-03-10T00:00",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V04",
+   "title": "invalid rule: ordinal 0",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=MONTHLY;BYDAY=0MO",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V05",
+   "title": "invalid rule: BYSETPOS without another BY part",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=MONTHLY;BYSETPOS=1",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V06",
+   "title": "invalid rule: BYMONTHDAY with WEEKLY",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=WEEKLY;BYMONTHDAY=1",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V07",
+   "title": "invalid rule: ordinal with DAILY",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;BYDAY=-1FR",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V08",
+   "title": "invalid rule: trailing semicolon",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V09",
+   "title": "invalid rule: UNTIL is not a real date",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;UNTIL=2026-02-30T00:00",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V10",
+   "title": "invalid rule: unsupported part",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;BYHOUR=9",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V11",
+   "title": "invalid rule: FREQ missing",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "COUNT=2",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V12",
+   "title": "invalid rule: ordinal 54",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=YEARLY;BYDAY=54MO",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V13",
+   "title": "invalid rule: BYMONTHDAY -0",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=MONTHLY;BYMONTHDAY=-0",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V14",
+   "title": "invalid rule: empty list item",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=MONTHLY;BYDAY=MO,,TU",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V15",
+   "title": "invalid rule: lower-case keyword",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;WKST=mo",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V16",
+   "title": "invalid rule: sign on an unsigned value",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;COUNT=+3",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V17",
+   "title": "invalid rule: empty rule",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V18",
+   "title": "invalid rule: trailing space",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;COUNT=3 ",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V19",
+   "title": "invalid rule: INTERVAL above 100000",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;INTERVAL=100001",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V20",
+   "title": "invalid rule: BYMONTHDAY 32",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=MONTHLY;BYMONTH=1;BYSETPOS=1;BYMONTHDAY=32",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V21",
+   "title": "invalid rule: two '=' in a part",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=DAILY;COUNT==3",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V22",
+   "title": "invalid rule: unsupported FREQ",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=HOURLY",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V23",
+   "title": "invalid rule: sign without digits in BYDAY",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=MONTHLY;BYDAY=+MO",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V24",
+   "title": "invalid rule: ordinal with WEEKLY even when written +1",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "FREQ=WEEKLY;BYDAY=+1MO,TU",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "V25",
+   "title": "invalid rule: COUNT with UNTIL, in any order",
+   "args": [
+    {
+     "start": "2026-03-02T10:00",
+     "rule": "UNTIL=2026-03-03T10:00;FREQ=DAILY;COUNT=1",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-01T00:00",
+    "2026-04-01T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "R001",
+   "title": "random event",
+   "args": [
+    {
+     "start": "0002-02-28T00:59",
+     "rule": "FREQ=DAILY;WKST=TU;INTERVAL=5;BYDAY=SA,WE,TH;UNTIL=0002-03-09T00:59",
+     "exdates": [
+      "0002-02-28T00:59",
+      "0002-03-02T00:59",
+      "0002-03-04T00:59"
+     ],
+     "rdates": [
+      "0002-03-02T07:59"
+     ]
+    },
+    "0002-02-28T00:00",
+    "0002-03-10T00:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "0002-03-02T07:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R002",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1896-02-14T08:59",
+     "rule": "INTERVAL=4;BYDAY=WE,SU,SU;FREQ=WEEKLY",
+     "exdates": [
+      "1896-03-15T08:59"
+     ],
+     "rdates": [
+      "1896-04-02T07:59"
+     ]
+    },
+    "1896-01-05T00:59",
+    "1897-02-28T08:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "1896-02-14T08:59",
+     "1896-02-16T08:59",
+     "1896-03-11T08:59",
+     "1896-04-02T07:59",
+     "1896-04-08T08:59",
+     "1896-04-12T08:59",
+     "1896-05-06T08:59",
+     "1896-05-10T08:59",
+     "1896-06-03T08:59",
+     "1896-06-07T08:59",
+     "1896-07-01T08:59",
+     "1896-07-05T08:59",
+     "1896-07-29T08:59",
+     "1896-08-02T08:59",
+     "1896-08-26T08:59",
+     "1896-08-30T08:59",
+     "1896-09-23T08:59",
+     "1896-09-27T08:59",
+     "1896-10-21T08:59",
+     "1896-10-25T08:59",
+     "1896-11-18T08:59",
+     "1896-11-22T08:59",
+     "1896-12-16T08:59",
+     "1896-12-20T08:59",
+     "1897-01-13T08:59",
+     "1897-01-17T08:59",
+     "1897-02-10T08:59",
+     "1897-02-14T08:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R003",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2000-06-28T12:45",
+     "rule": "BYMONTHDAY=2;BYSETPOS=1;FREQ=DAILY;INTERVAL=2",
+     "exdates": [
+      "2000-06-30T12:45"
+     ],
+     "rdates": []
+    },
+    "2000-06-28T12:45",
+    "2000-10-26T12:45"
+   ],
+   "expected": {
+    "occurrences": [
+     "2000-06-28T12:45",
+     "2000-07-02T12:45",
+     "2000-09-02T12:45",
+     "2000-10-02T12:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R004",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2100-02-28T23:45",
+     "rule": "BYSETPOS=3;UNTIL=2101-08-02T10:59;BYMONTHDAY=13,30,-2;FREQ=MONTHLY;WKST=MO",
+     "exdates": [
+      "2100-02-28T23:45"
+     ],
+     "rdates": [
+      "2100-04-20T23:45"
+     ]
+    },
+    "2100-02-28T00:00",
+    "2110-01-07T23:45"
+   ],
+   "expected": {
+    "occurrences": [
+     "2100-04-20T23:45",
+     "2100-04-30T23:45",
+     "2100-06-30T23:45",
+     "2100-09-30T23:45",
+     "2100-11-30T23:45",
+     "2101-04-30T23:45",
+     "2101-06-30T23:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R005",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1900-04-30T12:59",
+     "rule": "WKST=TU;FREQ=WEEKLY;BYSETPOS=2,5;BYDAY=WE;COUNT=3",
+     "exdates": [
+      "1900-05-27T12:59",
+      "1900-05-25T12:59"
+     ],
+     "rdates": [
+      "1900-06-03T12:59"
+     ]
+    },
+    "1900-04-30T00:59",
+    "1900-11-26T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1900-04-30T12:59",
+     "1900-06-03T12:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R006",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2099-02-15T09:00",
+     "rule": "INTERVAL=7;FREQ=DAILY;COUNT=5;INTERVAL=01",
+     "exdates": [],
+     "rdates": [
+      "2099-02-20T09:00",
+      "2099-02-14T07:00"
+     ]
+    },
+    "2099-01-06T09:00",
+    "2099-05-06T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "R007",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2027-08-28T12:59",
+     "rule": "WKST=FR;COUNT=13;BYMONTH=2,3;BYDAY=5SA,3SU,5TH;FREQ=YEARLY",
+     "exdates": [
+      "2031-08-28T12:59",
+      "2032-10-27T12:59",
+      "2029-05-03T12:00"
+     ],
+     "rdates": [
+      "2033-07-13T12:59",
+      "2030-07-25T07:59"
+     ]
+    },
+    "2027-08-25T00:59",
+    "2037-08-22T12:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "2027-08-28T12:59",
+     "2028-02-20T12:59",
+     "2028-03-19T12:59",
+     "2028-03-30T12:59",
+     "2029-02-18T12:59",
+     "2029-03-18T12:59",
+     "2029-03-29T12:59",
+     "2029-03-31T12:59",
+     "2030-02-17T12:59",
+     "2030-03-17T12:59",
+     "2030-03-30T12:59",
+     "2030-07-25T07:59",
+     "2031-02-16T12:59",
+     "2031-03-16T12:59",
+     "2033-07-13T12:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R008",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2027-02-28T23:59",
+     "rule": "BYDAY=TU,MO,TH;FREQ=WEEKLY;INTERVAL=3;UNTIL=2027-04-06T10:00;WKST=MO",
+     "exdates": [
+      "2027-03-24T23:59",
+      "2027-03-30T23:59",
+      "2027-02-28T23:59"
+     ],
+     "rdates": [
+      "2027-02-22T23:59",
+      "2027-03-24T07:59"
+     ]
+    },
+    "2027-02-28T23:00",
+    "2027-09-26T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2027-03-15T23:59",
+     "2027-03-16T23:59",
+     "2027-03-18T23:59",
+     "2027-03-24T07:59",
+     "2027-04-05T23:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R009",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1899-08-04T23:45",
+     "rule": "UNTIL=1900-08-11T09:30;INTERVAL=2;FREQ=MONTHLY;WKST=SA",
+     "exdates": [
+      "1899-10-04T23:45",
+      "1899-10-04T23:45"
+     ],
+     "rdates": [
+      "1899-08-26T23:45"
+     ]
+    },
+    "1899-08-04T00:00",
+    "1909-06-13T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1899-08-04T23:45",
+     "1899-08-26T23:45",
+     "1899-12-04T23:45",
+     "1900-02-04T23:45",
+     "1900-04-04T23:45",
+     "1900-06-04T23:45",
+     "1900-08-04T23:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R010",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2027-04-30T00:59",
+     "rule": "FREQ=DAILY;WKST=FR;COUNT=5;BYMONTHDAY=13,31;",
+     "exdates": [
+      "2027-05-04T00:59",
+      "2027-05-04T00:00",
+      "2027-05-02T00:59",
+      "2027-04-30T00:59"
+     ],
+     "rdates": [
+      "2027-05-06T00:59"
+     ]
+    },
+    "2027-04-29T00:00",
+    "2027-05-29T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "R011",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2100-08-28T00:30",
+     "rule": "BYMONTH=1,3;FREQ=MONTHLY;INTERVAL=12",
+     "exdates": [
+      "2100-09-28T00:31",
+      "2100-12-28T00:30"
+     ],
+     "rdates": [
+      "2100-11-14T00:30"
+     ]
+    },
+    "2100-08-25T00:00",
+    "2101-06-21T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "2100-08-28T00:30",
+     "2100-11-14T00:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R012",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2026-08-28T09:30",
+     "rule": "UNTIL=2035-08-06T09:30;FREQ=YEARLY;BYMONTHDAY=-30",
+     "exdates": [
+      "2032-08-28T09:30",
+      "2029-08-28T09:30",
+      "2027-08-28T09:30"
+     ],
+     "rdates": [
+      "2030-10-29T09:30",
+      "2030-05-01T07:30"
+     ]
+    },
+    "2026-08-25T00:30",
+    "2036-08-22T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-08-28T09:30",
+     "2026-09-01T09:30",
+     "2026-10-02T09:30",
+     "2026-11-01T09:30",
+     "2026-12-02T09:30",
+     "2027-01-02T09:30",
+     "2027-03-02T09:30",
+     "2027-04-01T09:30",
+     "2027-05-02T09:30",
+     "2027-06-01T09:30",
+     "2027-07-02T09:30",
+     "2027-08-02T09:30",
+     "2027-09-01T09:30",
+     "2027-10-02T09:30",
+     "2027-11-01T09:30",
+     "2027-12-02T09:30",
+     "2028-01-02T09:30",
+     "2028-03-02T09:30",
+     "2028-04-01T09:30",
+     "2028-05-02T09:30",
+     "2028-06-01T09:30",
+     "2028-07-02T09:30",
+     "2028-08-02T09:30",
+     "2028-09-01T09:30",
+     "2028-10-02T09:30",
+     "2028-11-01T09:30",
+     "2028-12-02T09:30",
+     "2029-01-02T09:30",
+     "2029-03-02T09:30",
+     "2029-04-01T09:30",
+     "2029-05-02T09:30",
+     "2029-06-01T09:30",
+     "2029-07-02T09:30",
+     "2029-08-02T09:30",
+     "2029-09-01T09:30",
+     "2029-10-02T09:30",
+     "2029-11-01T09:30",
+     "2029-12-02T09:30",
+     "2030-01-02T09:30",
+     "2030-03-02T09:30",
+     "2030-04-01T09:30",
+     "2030-05-01T07:30",
+     "2030-05-02T09:30",
+     "2030-06-01T09:30",
+     "2030-07-02T09:30",
+     "2030-08-02T09:30",
+     "2030-09-01T09:30",
+     "2030-10-02T09:30",
+     "2030-10-29T09:30",
+     "2030-11-01T09:30",
+     "2030-12-02T09:30",
+     "2031-01-02T09:30",
+     "2031-03-02T09:30",
+     "2031-04-01T09:30",
+     "2031-05-02T09:30",
+     "2031-06-01T09:30",
+     "2031-07-02T09:30",
+     "2031-08-02T09:30",
+     "2031-09-01T09:30",
+     "2031-10-02T09:30",
+     "2031-11-01T09:30",
+     "2031-12-02T09:30",
+     "2032-01-02T09:30",
+     "2032-03-02T09:30",
+     "2032-04-01T09:30",
+     "2032-05-02T09:30",
+     "2032-06-01T09:30",
+     "2032-07-02T09:30",
+     "2032-08-02T09:30",
+     "2032-09-01T09:30",
+     "2032-10-02T09:30",
+     "2032-11-01T09:30",
+     "2032-12-02T09:30",
+     "2033-01-02T09:30",
+     "2033-03-02T09:30",
+     "2033-04-01T09:30",
+     "2033-05-02T09:30",
+     "2033-06-01T09:30",
+     "2033-07-02T09:30",
+     "2033-08-02T09:30",
+     "2033-09-01T09:30",
+     "2033-10-02T09:30",
+     "2033-11-01T09:30",
+     "2033-12-02T09:30",
+     "2034-01-02T09:30",
+     "2034-03-02T09:30",
+     "2034-04-01T09:30",
+     "2034-05-02T09:30",
+     "2034-06-01T09:30",
+     "2034-07-02T09:30",
+     "2034-08-02T09:30",
+     "2034-09-01T09:30",
+     "2034-10-02T09:30",
+     "2034-11-01T09:30",
+     "2034-12-02T09:30",
+     "2035-01-02T09:30",
+     "2035-03-02T09:30",
+     "2035-04-01T09:30",
+     "2035-05-02T09:30",
+     "2035-06-01T09:30",
+     "2035-07-02T09:30",
+     "2035-08-02T09:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R013",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2025-04-29T23:00",
+     "rule": "UNTIL=2029-03-18T23:00;INTERVAL=2;FREQ=YEARLY;BYMONTH=4;BYMONTHDAY=-30;BYDAY=3FR",
+     "exdates": [
+      "2026-07-08T23:00",
+      "2029-03-19T23:00",
+      "2025-06-23T23:00"
+     ],
+     "rdates": [
+      "2025-04-29T23:00"
+     ]
+    },
+    "2025-04-26T00:00",
+    "2055-04-19T23:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2025-04-29T23:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R014",
+   "title": "random event",
+   "args": [
+    {
+     "start": "9998-02-28T09:59",
+     "rule": "FREQ=DAILY;BYDAY=SU,TU;INTERVAL=7;BYMONTH=9;COUNT=8",
+     "exdates": [
+      "9998-03-03T09:00",
+      "9998-03-04T09:59"
+     ],
+     "rdates": [
+      "9998-03-03T09:59",
+      "9998-02-28T09:59"
+     ]
+    },
+    "9998-02-25T00:59",
+    "9999-12-31T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "9998-02-28T09:59",
+     "9998-03-03T09:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R015",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2026-08-30T08:59",
+     "rule": "UNTIL=2028-06-20T08:59;BYMONTHDAY=28,-29;FREQ=MONTHLY;BYDAY=SA,-5SU,2SU",
+     "exdates": [
+      "2027-01-30T08:00",
+      "2026-11-30T08:59"
+     ],
+     "rdates": [
+      "2027-01-07T08:59"
+     ]
+    },
+    "2026-07-21T08:00",
+    "2031-06-25T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-08-30T08:59",
+     "2026-10-03T08:59",
+     "2026-11-28T08:59",
+     "2027-01-03T08:59",
+     "2027-01-07T08:59",
+     "2027-07-03T08:59",
+     "2027-08-28T08:59",
+     "2027-10-03T08:59",
+     "2028-04-02T08:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R016",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1899-02-28T23:00",
+     "rule": "BYDAY=+1TU,5FR,5MO;COUNT=30;INTERVAL=4;FREQ=MONTHLY;INTERVAL=0",
+     "exdates": [
+      "1899-04-28T23:00"
+     ],
+     "rdates": [
+      "1899-03-03T07:00",
+      "1899-05-12T23:00"
+     ]
+    },
+    "1899-02-28T00:00",
+    "1901-08-17T23:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "R017",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2025-06-28T09:45",
+     "rule": "FREQ=YEARLY;INTERVAL=2;UNTIL=2033-01-07T00:00;BYSETPOS=2;BYMONTH=4",
+     "exdates": [
+      "2031-06-28T09:45"
+     ],
+     "rdates": [
+      "2030-03-27T07:45",
+      "2026-06-20T09:45"
+     ]
+    },
+    "2025-06-28T00:00",
+    "2035-06-26T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "2025-06-28T09:45",
+     "2026-06-20T09:45",
+     "2030-03-27T07:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R018",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1896-02-29T00:00",
+     "rule": "BYMONTHDAY=-30;INTERVAL=2;FREQ=DAILY;BYSETPOS=3;COUNT=13",
+     "exdates": [
+      "1896-02-29T00:00"
+     ],
+     "rdates": []
+    },
+    "1896-02-29T00:00",
+    "1896-06-28T00:00"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R019",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2027-06-01T23:45",
+     "rule": "BYMONTH=4,6;FREQ=YEARLY",
+     "exdates": [],
+     "rdates": [
+      "2032-09-17T07:45"
+     ]
+    },
+    "3261-01-01T00:00",
+    "3320-12-18T23:45"
+   ],
+   "expected": {
+    "occurrences": [
+     "3261-04-01T23:45",
+     "3261-06-01T23:45",
+     "3262-04-01T23:45",
+     "3262-06-01T23:45",
+     "3263-04-01T23:45",
+     "3263-06-01T23:45",
+     "3264-04-01T23:45",
+     "3264-06-01T23:45",
+     "3265-04-01T23:45",
+     "3265-06-01T23:45",
+     "3266-04-01T23:45",
+     "3266-06-01T23:45",
+     "3267-04-01T23:45",
+     "3267-06-01T23:45",
+     "3268-04-01T23:45",
+     "3268-06-01T23:45",
+     "3269-04-01T23:45",
+     "3269-06-01T23:45",
+     "3270-04-01T23:45",
+     "3270-06-01T23:45",
+     "3271-04-01T23:45",
+     "3271-06-01T23:45",
+     "3272-04-01T23:45",
+     "3272-06-01T23:45",
+     "3273-04-01T23:45",
+     "3273-06-01T23:45",
+     "3274-04-01T23:45",
+     "3274-06-01T23:45",
+     "3275-04-01T23:45",
+     "3275-06-01T23:45",
+     "3276-04-01T23:45",
+     "3276-06-01T23:45",
+     "3277-04-01T23:45",
+     "3277-06-01T23:45",
+     "3278-04-01T23:45",
+     "3278-06-01T23:45",
+     "3279-04-01T23:45",
+     "3279-06-01T23:45",
+     "3280-04-01T23:45",
+     "3280-06-01T23:45",
+     "3281-04-01T23:45",
+     "3281-06-01T23:45",
+     "3282-04-01T23:45",
+     "3282-06-01T23:45",
+     "3283-04-01T23:45",
+     "3283-06-01T23:45",
+     "3284-04-01T23:45",
+     "3284-06-01T23:45",
+     "3285-04-01T23:45",
+     "3285-06-01T23:45",
+     "3286-04-01T23:45",
+     "3286-06-01T23:45",
+     "3287-04-01T23:45",
+     "3287-06-01T23:45",
+     "3288-04-01T23:45",
+     "3288-06-01T23:45",
+     "3289-04-01T23:45",
+     "3289-06-01T23:45",
+     "3290-04-01T23:45",
+     "3290-06-01T23:45",
+     "3291-04-01T23:45",
+     "3291-06-01T23:45",
+     "3292-04-01T23:45",
+     "3292-06-01T23:45",
+     "3293-04-01T23:45",
+     "3293-06-01T23:45",
+     "3294-04-01T23:45",
+     "3294-06-01T23:45",
+     "3295-04-01T23:45",
+     "3295-06-01T23:45",
+     "3296-04-01T23:45",
+     "3296-06-01T23:45",
+     "3297-04-01T23:45",
+     "3297-06-01T23:45",
+     "3298-04-01T23:45",
+     "3298-06-01T23:45",
+     "3299-04-01T23:45",
+     "3299-06-01T23:45",
+     "3300-04-01T23:45",
+     "3300-06-01T23:45",
+     "3301-04-01T23:45",
+     "3301-06-01T23:45",
+     "3302-04-01T23:45",
+     "3302-06-01T23:45",
+     "3303-04-01T23:45",
+     "3303-06-01T23:45",
+     "3304-04-01T23:45",
+     "3304-06-01T23:45",
+     "3305-04-01T23:45",
+     "3305-06-01T23:45",
+     "3306-04-01T23:45",
+     "3306-06-01T23:45",
+     "3307-04-01T23:45",
+     "3307-06-01T23:45",
+     "3308-04-01T23:45",
+     "3308-06-01T23:45",
+     "3309-04-01T23:45",
+     "3309-06-01T23:45",
+     "3310-04-01T23:45",
+     "3310-06-01T23:45",
+     "3311-04-01T23:45",
+     "3311-06-01T23:45",
+     "3312-04-01T23:45",
+     "3312-06-01T23:45",
+     "3313-04-01T23:45",
+     "3313-06-01T23:45",
+     "3314-04-01T23:45",
+     "3314-06-01T23:45",
+     "3315-04-01T23:45",
+     "3315-06-01T23:45",
+     "3316-04-01T23:45",
+     "3316-06-01T23:45",
+     "3317-04-01T23:45",
+     "3317-06-01T23:45",
+     "3318-04-01T23:45",
+     "3318-06-01T23:45",
+     "3319-04-01T23:45",
+     "3319-06-01T23:45",
+     "3320-04-01T23:45",
+     "3320-06-01T23:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R020",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1900-08-04T00:30",
+     "rule": "BYDAY=WE,5TU;FREQ=MONTHLY;BYMONTH=1,4,9;COUNT=8",
+     "exdates": [],
+     "rdates": [
+      "1900-09-11T07:30"
+     ]
+    },
+    "1900-08-04T00:00",
+    "1905-07-09T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1900-08-04T00:30",
+     "1900-09-05T00:30",
+     "1900-09-11T07:30",
+     "1900-09-12T00:30",
+     "1900-09-19T00:30",
+     "1900-09-26T00:30",
+     "1901-01-02T00:30",
+     "1901-01-09T00:30",
+     "1901-01-16T00:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R021",
+   "title": "random event",
+   "args": [
+    {
+     "start": "0002-06-30T09:30",
+     "rule": "FREQ=DAILY;BYMONTH=2,3,4",
+     "exdates": [
+      "0002-07-02T09:30",
+      "0002-07-03T09:30",
+      "0002-07-05T09:30"
+     ],
+     "rdates": [
+      "0002-06-29T07:30",
+      "0002-07-03T07:30"
+     ]
+    },
+    "3002-06-01T00:30",
+    "3002-07-01T09:30"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R022",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2100-02-28T12:45",
+     "rule": "BYSETPOS=-2,5;BYMONTH=2;INTERVAL=5;UNTIL=2100-02-24T12:45;BYDAY=FR;BYMONTHDAY=31,-31;FREQ=DAILY",
+     "exdates": [
+      "2100-02-28T12:45"
+     ],
+     "rdates": [
+      "2100-03-02T12:45",
+      "2100-03-01T07:45"
+     ]
+    },
+    "2100-02-25T00:00",
+    "2100-03-27T12:45"
+   ],
+   "expected": {
+    "occurrences": [
+     "2100-03-01T07:45",
+     "2100-03-02T12:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R023",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1896-04-30T08:59",
+     "rule": null,
+     "exdates": [
+      "1896-05-13T08:59",
+      "1896-05-11T08:59"
+     ],
+     "rdates": [
+      "1896-05-06T07:59",
+      "1896-06-06T07:59"
+     ]
+    },
+    "1896-03-21T08:59",
+    "1896-05-30T08:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "1896-04-30T08:59",
+     "1896-05-06T07:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R024",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1999-12-01T23:00",
+     "rule": "FREQ=DAILY",
+     "exdates": [
+      "1999-12-05T23:01",
+      "1999-12-05T23:00"
+     ],
+     "rdates": [
+      "1999-12-02T07:00",
+      "1999-12-05T23:00"
+     ]
+    },
+    "1999-10-22T00:00",
+    "1999-11-21T23:59"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R025",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2100-03-01T09:30",
+     "rule": "BYSETPOS=-1;FREQ=DAILY;BYMONTH=2;INTERVAL=2;BYMONTHDAY=13;UNTIL=2100-04-03T09:30",
+     "exdates": [
+      "2100-03-06T09:30",
+      "2100-03-04T09:30",
+      "2100-03-01T09:30"
+     ],
+     "rdates": [
+      "2100-03-01T07:30",
+      "2100-03-03T09:30",
+      "2100-03-01T09:30"
+     ]
+    },
+    "2100-03-01T00:00",
+    "2100-03-31T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "2100-03-01T07:30",
+     "2100-03-03T09:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R026",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2024-11-15T00:00",
+     "rule": null,
+     "exdates": [
+      "2024-12-04T00:00",
+      "2024-11-21T00:00"
+     ],
+     "rdates": [
+      "2024-11-13T07:00",
+      "2024-12-18T07:00"
+     ]
+    },
+    "2024-11-14T00:00",
+    "2025-06-12T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2024-11-15T00:00",
+     "2024-12-18T07:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R027",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2024-01-31T00:45",
+     "rule": "BYMONTH=3,4,11;FREQ=YEARLY",
+     "exdates": [
+      "2027-01-31T00:45"
+     ],
+     "rdates": [
+      "2027-06-24T07:45",
+      "2024-05-30T00:45",
+      "2024-01-31T00:45"
+     ]
+    },
+    "2023-12-22T00:45",
+    "2053-12-14T00:45"
+   ],
+   "expected": {
+    "occurrences": [
+     "2024-01-31T00:45",
+     "2024-03-31T00:45",
+     "2024-05-30T00:45",
+     "2025-03-31T00:45",
+     "2026-03-31T00:45",
+     "2027-03-31T00:45",
+     "2027-06-24T07:45",
+     "2028-03-31T00:45",
+     "2029-03-31T00:45",
+     "2030-03-31T00:45",
+     "2031-03-31T00:45",
+     "2032-03-31T00:45",
+     "2033-03-31T00:45",
+     "2034-03-31T00:45",
+     "2035-03-31T00:45",
+     "2036-03-31T00:45",
+     "2037-03-31T00:45",
+     "2038-03-31T00:45",
+     "2039-03-31T00:45",
+     "2040-03-31T00:45",
+     "2041-03-31T00:45",
+     "2042-03-31T00:45",
+     "2043-03-31T00:45",
+     "2044-03-31T00:45",
+     "2045-03-31T00:45",
+     "2046-03-31T00:45",
+     "2047-03-31T00:45",
+     "2048-03-31T00:45",
+     "2049-03-31T00:45",
+     "2050-03-31T00:45",
+     "2051-03-31T00:45",
+     "2052-03-31T00:45",
+     "2053-03-31T00:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R028",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1900-08-28T08:59",
+     "rule": null,
+     "exdates": [
+      "1900-09-01T08:59",
+      "1900-09-01T08:59",
+      "1900-08-28T08:00"
+     ],
+     "rdates": [
+      "1900-09-02T07:59"
+     ]
+    },
+    "1900-08-27T08:00",
+    "1900-12-25T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "1900-08-28T08:59",
+     "1900-09-02T07:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R029",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2100-12-15T23:00",
+     "rule": "FREQ=YEARLY;UNTIL=2106-10-13T09:00;BYMONTH=1,6;BYDAY=WE,5WE;BYDAY=0MO",
+     "exdates": [
+      "2105-04-04T23:00"
+     ],
+     "rdates": []
+    },
+    "2100-12-12T23:00",
+    "2220-11-13T23:59"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "R030",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2023-02-28T23:59",
+     "rule": "FREQ=YEARLY;UNTIL=2033-04-13T23:59",
+     "exdates": [
+      "2028-07-01T23:59",
+      "2028-07-04T23:59"
+     ],
+     "rdates": []
+    },
+    "2023-02-28T00:00",
+    "2033-02-25T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "2023-02-28T23:59",
+     "2024-02-28T23:59",
+     "2025-02-28T23:59",
+     "2026-02-28T23:59",
+     "2027-02-28T23:59",
+     "2028-02-28T23:59",
+     "2029-02-28T23:59",
+     "2030-02-28T23:59",
+     "2031-02-28T23:59",
+     "2032-02-28T23:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R031",
+   "title": "random event",
+   "args": [
+    {
+     "start": "0001-12-28T08:30",
+     "rule": "FREQ=MONTHLY;BYDAY=-5SA,FR;COUNT=30",
+     "exdates": [
+      "0002-01-28T08:30",
+      "0002-01-25T08:31",
+      "0001-12-28T08:30"
+     ],
+     "rdates": [
+      "0002-03-24T07:30"
+     ]
+    },
+    "0001-12-27T00:30",
+    "0002-10-23T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "0002-01-04T08:30",
+     "0002-01-11T08:30",
+     "0002-01-18T08:30",
+     "0002-01-25T08:30",
+     "0002-02-01T08:30",
+     "0002-02-08T08:30",
+     "0002-02-15T08:30",
+     "0002-02-22T08:30",
+     "0002-03-01T08:30",
+     "0002-03-02T08:30",
+     "0002-03-08T08:30",
+     "0002-03-15T08:30",
+     "0002-03-22T08:30",
+     "0002-03-24T07:30",
+     "0002-03-29T08:30",
+     "0002-04-05T08:30",
+     "0002-04-12T08:30",
+     "0002-04-19T08:30",
+     "0002-04-26T08:30",
+     "0002-05-03T08:30",
+     "0002-05-10T08:30",
+     "0002-05-17T08:30",
+     "0002-05-24T08:30",
+     "0002-05-31T08:30",
+     "0002-06-01T08:30",
+     "0002-06-07T08:30",
+     "0002-06-14T08:30",
+     "0002-06-21T08:30",
+     "0002-06-28T08:30",
+     "0002-07-05T08:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R032",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2023-02-28T12:45",
+     "rule": "BYDAY=TH,5WE,-53SA;FREQ=YEARLY;WKST=FR",
+     "exdates": [
+      "2029-02-28T12:45",
+      "2026-11-13T12:45",
+      "2023-02-28T12:45"
+     ],
+     "rdates": [
+      "2025-10-04T12:45",
+      "2023-02-28T12:45"
+     ]
+    },
+    "2023-01-19T12:45",
+    "2033-01-16T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2023-03-02T12:45",
+     "2023-03-09T12:45",
+     "2023-03-16T12:45",
+     "2023-03-23T12:45",
+     "2023-03-30T12:45",
+     "2023-04-06T12:45",
+     "2023-04-13T12:45",
+     "2023-04-20T12:45",
+     "2023-04-27T12:45",
+     "2023-05-04T12:45",
+     "2023-05-11T12:45",
+     "2023-05-18T12:45",
+     "2023-05-25T12:45",
+     "2023-06-01T12:45",
+     "2023-06-08T12:45",
+     "2023-06-15T12:45",
+     "2023-06-22T12:45",
+     "2023-06-29T12:45",
+     "2023-07-06T12:45",
+     "2023-07-13T12:45",
+     "2023-07-20T12:45",
+     "2023-07-27T12:45",
+     "2023-08-03T12:45",
+     "2023-08-10T12:45",
+     "2023-08-17T12:45",
+     "2023-08-24T12:45",
+     "2023-08-31T12:45",
+     "2023-09-07T12:45",
+     "2023-09-14T12:45",
+     "2023-09-21T12:45",
+     "2023-09-28T12:45",
+     "2023-10-05T12:45",
+     "2023-10-12T12:45",
+     "2023-10-19T12:45",
+     "2023-10-26T12:45",
+     "2023-11-02T12:45",
+     "2023-11-09T12:45",
+     "2023-11-16T12:45",
+     "2023-11-23T12:45",
+     "2023-11-30T12:45",
+     "2023-12-07T12:45",
+     "2023-12-14T12:45",
+     "2023-12-21T12:45",
+     "2023-12-28T12:45",
+     "2024-01-04T12:45",
+     "2024-01-11T12:45",
+     "2024-01-18T12:45",
+     "2024-01-25T12:45",
+     "2024-01-31T12:45",
+     "2024-02-01T12:45",
+     "2024-02-08T12:45",
+     "2024-02-15T12:45",
+     "2024-02-22T12:45",
+     "2024-02-29T12:45",
+     "2024-03-07T12:45",
+     "2024-03-14T12:45",
+     "2024-03-21T12:45",
+     "2024-03-28T12:45",
+     "2024-04-04T12:45",
+     "2024-04-11T12:45",
+     "2024-04-18T12:45",
+     "2024-04-25T12:45",
+     "2024-05-02T12:45",
+     "2024-05-09T12:45",
+     "2024-05-16T12:45",
+     "2024-05-23T12:45",
+     "2024-05-30T12:45",
+     "2024-06-06T12:45",
+     "2024-06-13T12:45",
+     "2024-06-20T12:45",
+     "2024-06-27T12:45",
+     "2024-07-04T12:45",
+     "2024-07-11T12:45",
+     "2024-07-18T12:45",
+     "2024-07-25T12:45",
+     "2024-08-01T12:45",
+     "2024-08-08T12:45",
+     "2024-08-15T12:45",
+     "2024-08-22T12:45",
+     "2024-08-29T12:45",
+     "2024-09-05T12:45",
+     "2024-09-12T12:45",
+     "2024-09-19T12:45",
+     "2024-09-26T12:45",
+     "2024-10-03T12:45",
+     "2024-10-10T12:45",
+     "2024-10-17T12:45",
+     "2024-10-24T12:45",
+     "2024-10-31T12:45",
+     "2024-11-07T12:45",
+     "2024-11-14T12:45",
+     "2024-11-21T12:45",
+     "2024-11-28T12:45",
+     "2024-12-05T12:45",
+     "2024-12-12T12:45",
+     "2024-12-19T12:45",
+     "2024-12-26T12:45",
+     "2025-01-02T12:45",
+     "2025-01-09T12:45",
+     "2025-01-16T12:45",
+     "2025-01-23T12:45",
+     "2025-01-29T12:45",
+     "2025-01-30T12:45",
+     "2025-02-06T12:45",
+     "2025-02-13T12:45",
+     "2025-02-20T12:45",
+     "2025-02-27T12:45",
+     "2025-03-06T12:45",
+     "2025-03-13T12:45",
+     "2025-03-20T12:45",
+     "2025-03-27T12:45",
+     "2025-04-03T12:45",
+     "2025-04-10T12:45",
+     "2025-04-17T12:45",
+     "2025-04-24T12:45",
+     "2025-05-01T12:45",
+     "2025-05-08T12:45",
+     "2025-05-15T12:45",
+     "2025-05-22T12:45",
+     "2025-05-29T12:45",
+     "2025-06-05T12:45",
+     "2025-06-12T12:45",
+     "2025-06-19T12:45",
+     "2025-06-26T12:45",
+     "2025-07-03T12:45",
+     "2025-07-10T12:45",
+     "2025-07-17T12:45",
+     "2025-07-24T12:45",
+     "2025-07-31T12:45",
+     "2025-08-07T12:45",
+     "2025-08-14T12:45",
+     "2025-08-21T12:45",
+     "2025-08-28T12:45",
+     "2025-09-04T12:45",
+     "2025-09-11T12:45",
+     "2025-09-18T12:45",
+     "2025-09-25T12:45",
+     "2025-10-02T12:45",
+     "2025-10-04T12:45",
+     "2025-10-09T12:45",
+     "2025-10-16T12:45",
+     "2025-10-23T12:45",
+     "2025-10-30T12:45",
+     "2025-11-06T12:45",
+     "2025-11-13T12:45",
+     "2025-11-20T12:45",
+     "2025-11-27T12:45",
+     "2025-12-04T12:45",
+     "2025-12-11T12:45",
+     "2025-12-18T12:45",
+     "2025-12-25T12:45",
+     "2026-01-01T12:45",
+     "2026-01-08T12:45",
+     "2026-01-15T12:45",
+     "2026-01-22T12:45",
+     "2026-01-29T12:45",
+     "2026-02-04T12:45",
+     "2026-02-05T12:45",
+     "2026-02-12T12:45",
+     "2026-02-19T12:45",
+     "2026-02-26T12:45",
+     "2026-03-05T12:45",
+     "2026-03-12T12:45",
+     "2026-03-19T12:45",
+     "2026-03-26T12:45",
+     "2026-04-02T12:45",
+     "2026-04-09T12:45",
+     "2026-04-16T12:45",
+     "2026-04-23T12:45",
+     "2026-04-30T12:45",
+     "2026-05-07T12:45",
+     "2026-05-14T12:45",
+     "2026-05-21T12:45",
+     "2026-05-28T12:45",
+     "2026-06-04T12:45",
+     "2026-06-11T12:45",
+     "2026-06-18T12:45",
+     "2026-06-25T12:45",
+     "2026-07-02T12:45",
+     "2026-07-09T12:45",
+     "2026-07-16T12:45",
+     "2026-07-23T12:45",
+     "2026-07-30T12:45",
+     "2026-08-06T12:45",
+     "2026-08-13T12:45",
+     "2026-08-20T12:45",
+     "2026-08-27T12:45",
+     "2026-09-03T12:45",
+     "2026-09-10T12:45",
+     "2026-09-17T12:45",
+     "2026-09-24T12:45",
+     "2026-10-01T12:45",
+     "2026-10-08T12:45",
+     "2026-10-15T12:45",
+     "2026-10-22T12:45",
+     "2026-10-29T12:45",
+     "2026-11-05T12:45",
+     "2026-11-12T12:45",
+     "2026-11-19T12:45",
+     "2026-11-26T12:45",
+     "2026-12-03T12:45",
+     "2026-12-10T12:45",
+     "2026-12-17T12:45",
+     "2026-12-24T12:45",
+     "2026-12-31T12:45",
+     "2027-01-07T12:45",
+     "2027-01-14T12:45",
+     "2027-01-21T12:45",
+     "2027-01-28T12:45",
+     "2027-02-03T12:45",
+     "2027-02-04T12:45",
+     "2027-02-11T12:45",
+     "2027-02-18T12:45",
+     "2027-02-25T12:45",
+     "2027-03-04T12:45",
+     "2027-03-11T12:45",
+     "2027-03-18T12:45",
+     "2027-03-25T12:45",
+     "2027-04-01T12:45",
+     "2027-04-08T12:45",
+     "2027-04-15T12:45",
+     "2027-04-22T12:45",
+     "2027-04-29T12:45",
+     "2027-05-06T12:45",
+     "2027-05-13T12:45",
+     "2027-05-20T12:45",
+     "2027-05-27T12:45",
+     "2027-06-03T12:45",
+     "2027-06-10T12:45",
+     "2027-06-17T12:45",
+     "2027-06-24T12:45",
+     "2027-07-01T12:45",
+     "2027-07-08T12:45",
+     "2027-07-15T12:45",
+     "2027-07-22T12:45",
+     "2027-07-29T12:45",
+     "2027-08-05T12:45",
+     "2027-08-12T12:45",
+     "2027-08-19T12:45",
+     "2027-08-26T12:45",
+     "2027-09-02T12:45",
+     "2027-09-09T12:45",
+     "2027-09-16T12:45",
+     "2027-09-23T12:45",
+     "2027-09-30T12:45",
+     "2027-10-07T12:45",
+     "2027-10-14T12:45",
+     "2027-10-21T12:45",
+     "2027-10-28T12:45",
+     "2027-11-04T12:45",
+     "2027-11-11T12:45",
+     "2027-11-18T12:45",
+     "2027-11-25T12:45",
+     "2027-12-02T12:45",
+     "2027-12-09T12:45",
+     "2027-12-16T12:45",
+     "2027-12-23T12:45",
+     "2027-12-30T12:45",
+     "2028-01-01T12:45",
+     "2028-01-06T12:45",
+     "2028-01-13T12:45",
+     "2028-01-20T12:45",
+     "2028-01-27T12:45",
+     "2028-02-02T12:45",
+     "2028-02-03T12:45",
+     "2028-02-10T12:45",
+     "2028-02-17T12:45",
+     "2028-02-24T12:45",
+     "2028-03-02T12:45",
+     "2028-03-09T12:45",
+     "2028-03-16T12:45",
+     "2028-03-23T12:45",
+     "2028-03-30T12:45",
+     "2028-04-06T12:45",
+     "2028-04-13T12:45",
+     "2028-04-20T12:45",
+     "2028-04-27T12:45",
+     "2028-05-04T12:45",
+     "2028-05-11T12:45",
+     "2028-05-18T12:45",
+     "2028-05-25T12:45",
+     "2028-06-01T12:45",
+     "2028-06-08T12:45",
+     "2028-06-15T12:45",
+     "2028-06-22T12:45",
+     "2028-06-29T12:45",
+     "2028-07-06T12:45",
+     "2028-07-13T12:45",
+     "2028-07-20T12:45",
+     "2028-07-27T12:45",
+     "2028-08-03T12:45",
+     "2028-08-10T12:45",
+     "2028-08-17T12:45",
+     "2028-08-24T12:45",
+     "2028-08-31T12:45",
+     "2028-09-07T12:45",
+     "2028-09-14T12:45",
+     "2028-09-21T12:45",
+     "2028-09-28T12:45",
+     "2028-10-05T12:45",
+     "2028-10-12T12:45",
+     "2028-10-19T12:45",
+     "2028-10-26T12:45",
+     "2028-11-02T12:45",
+     "2028-11-09T12:45",
+     "2028-11-16T12:45",
+     "2028-11-23T12:45",
+     "2028-11-30T12:45",
+     "2028-12-07T12:45",
+     "2028-12-14T12:45",
+     "2028-12-21T12:45",
+     "2028-12-28T12:45",
+     "2029-01-04T12:45",
+     "2029-01-11T12:45",
+     "2029-01-18T12:45",
+     "2029-01-25T12:45",
+     "2029-01-31T12:45",
+     "2029-02-01T12:45",
+     "2029-02-08T12:45",
+     "2029-02-15T12:45",
+     "2029-02-22T12:45",
+     "2029-03-01T12:45",
+     "2029-03-08T12:45",
+     "2029-03-15T12:45",
+     "2029-03-22T12:45",
+     "2029-03-29T12:45",
+     "2029-04-05T12:45",
+     "2029-04-12T12:45",
+     "2029-04-19T12:45",
+     "2029-04-26T12:45",
+     "2029-05-03T12:45",
+     "2029-05-10T12:45",
+     "2029-05-17T12:45",
+     "2029-05-24T12:45",
+     "2029-05-31T12:45",
+     "2029-06-07T12:45",
+     "2029-06-14T12:45",
+     "2029-06-21T12:45",
+     "2029-06-28T12:45",
+     "2029-07-05T12:45",
+     "2029-07-12T12:45",
+     "2029-07-19T12:45",
+     "2029-07-26T12:45",
+     "2029-08-02T12:45",
+     "2029-08-09T12:45",
+     "2029-08-16T12:45",
+     "2029-08-23T12:45",
+     "2029-08-30T12:45",
+     "2029-09-06T12:45",
+     "2029-09-13T12:45",
+     "2029-09-20T12:45",
+     "2029-09-27T12:45",
+     "2029-10-04T12:45",
+     "2029-10-11T12:45",
+     "2029-10-18T12:45",
+     "2029-10-25T12:45",
+     "2029-11-01T12:45",
+     "2029-11-08T12:45",
+     "2029-11-15T12:45",
+     "2029-11-22T12:45",
+     "2029-11-29T12:45",
+     "2029-12-06T12:45",
+     "2029-12-13T12:45",
+     "2029-12-20T12:45",
+     "2029-12-27T12:45",
+     "2030-01-03T12:45",
+     "2030-01-10T12:45",
+     "2030-01-17T12:45",
+     "2030-01-24T12:45",
+     "2030-01-30T12:45",
+     "2030-01-31T12:45",
+     "2030-02-07T12:45",
+     "2030-02-14T12:45",
+     "2030-02-21T12:45",
+     "2030-02-28T12:45",
+     "2030-03-07T12:45",
+     "2030-03-14T12:45",
+     "2030-03-21T12:45",
+     "2030-03-28T12:45",
+     "2030-04-04T12:45",
+     "2030-04-11T12:45",
+     "2030-04-18T12:45",
+     "2030-04-25T12:45",
+     "2030-05-02T12:45",
+     "2030-05-09T12:45",
+     "2030-05-16T12:45",
+     "2030-05-23T12:45",
+     "2030-05-30T12:45",
+     "2030-06-06T12:45",
+     "2030-06-13T12:45",
+     "2030-06-20T12:45",
+     "2030-06-27T12:45",
+     "2030-07-04T12:45",
+     "2030-07-11T12:45",
+     "2030-07-18T12:45",
+     "2030-07-25T12:45",
+     "2030-08-01T12:45",
+     "2030-08-08T12:45",
+     "2030-08-15T12:45",
+     "2030-08-22T12:45",
+     "2030-08-29T12:45",
+     "2030-09-05T12:45",
+     "2030-09-12T12:45",
+     "2030-09-19T12:45",
+     "2030-09-26T12:45",
+     "2030-10-03T12:45",
+     "2030-10-10T12:45",
+     "2030-10-17T12:45",
+     "2030-10-24T12:45",
+     "2030-10-31T12:45",
+     "2030-11-07T12:45",
+     "2030-11-14T12:45",
+     "2030-11-21T12:45",
+     "2030-11-28T12:45",
+     "2030-12-05T12:45",
+     "2030-12-12T12:45",
+     "2030-12-19T12:45",
+     "2030-12-26T12:45",
+     "2031-01-02T12:45",
+     "2031-01-09T12:45",
+     "2031-01-16T12:45",
+     "2031-01-23T12:45",
+     "2031-01-29T12:45",
+     "2031-01-30T12:45",
+     "2031-02-06T12:45",
+     "2031-02-13T12:45",
+     "2031-02-20T12:45",
+     "2031-02-27T12:45",
+     "2031-03-06T12:45",
+     "2031-03-13T12:45",
+     "2031-03-20T12:45",
+     "2031-03-27T12:45",
+     "2031-04-03T12:45",
+     "2031-04-10T12:45",
+     "2031-04-17T12:45",
+     "2031-04-24T12:45",
+     "2031-05-01T12:45",
+     "2031-05-08T12:45",
+     "2031-05-15T12:45",
+     "2031-05-22T12:45",
+     "2031-05-29T12:45",
+     "2031-06-05T12:45",
+     "2031-06-12T12:45",
+     "2031-06-19T12:45",
+     "2031-06-26T12:45",
+     "2031-07-03T12:45",
+     "2031-07-10T12:45",
+     "2031-07-17T12:45",
+     "2031-07-24T12:45",
+     "2031-07-31T12:45",
+     "2031-08-07T12:45",
+     "2031-08-14T12:45",
+     "2031-08-21T12:45",
+     "2031-08-28T12:45",
+     "2031-09-04T12:45",
+     "2031-09-11T12:45",
+     "2031-09-18T12:45",
+     "2031-09-25T12:45",
+     "2031-10-02T12:45",
+     "2031-10-09T12:45",
+     "2031-10-16T12:45",
+     "2031-10-23T12:45",
+     "2031-10-30T12:45",
+     "2031-11-06T12:45",
+     "2031-11-13T12:45",
+     "2031-11-20T12:45",
+     "2031-11-27T12:45",
+     "2031-12-04T12:45",
+     "2031-12-11T12:45",
+     "2031-12-18T12:45",
+     "2031-12-25T12:45",
+     "2032-01-01T12:45",
+     "2032-01-08T12:45",
+     "2032-01-15T12:45",
+     "2032-01-22T12:45",
+     "2032-01-29T12:45",
+     "2032-02-04T12:45",
+     "2032-02-05T12:45",
+     "2032-02-12T12:45",
+     "2032-02-19T12:45",
+     "2032-02-26T12:45",
+     "2032-03-04T12:45",
+     "2032-03-11T12:45",
+     "2032-03-18T12:45",
+     "2032-03-25T12:45",
+     "2032-04-01T12:45",
+     "2032-04-08T12:45",
+     "2032-04-15T12:45",
+     "2032-04-22T12:45",
+     "2032-04-29T12:45",
+     "2032-05-06T12:45",
+     "2032-05-13T12:45",
+     "2032-05-20T12:45",
+     "2032-05-27T12:45",
+     "2032-06-03T12:45",
+     "2032-06-10T12:45",
+     "2032-06-17T12:45",
+     "2032-06-24T12:45",
+     "2032-07-01T12:45",
+     "2032-07-08T12:45",
+     "2032-07-15T12:45",
+     "2032-07-22T12:45",
+     "2032-07-29T12:45",
+     "2032-08-05T12:45",
+     "2032-08-12T12:45",
+     "2032-08-19T12:45",
+     "2032-08-26T12:45",
+     "2032-09-02T12:45",
+     "2032-09-09T12:45",
+     "2032-09-16T12:45",
+     "2032-09-23T12:45",
+     "2032-09-30T12:45",
+     "2032-10-07T12:45",
+     "2032-10-14T12:45",
+     "2032-10-21T12:45",
+     "2032-10-28T12:45",
+     "2032-11-04T12:45",
+     "2032-11-11T12:45",
+     "2032-11-18T12:45",
+     "2032-11-25T12:45",
+     "2032-12-02T12:45",
+     "2032-12-09T12:45",
+     "2032-12-16T12:45",
+     "2032-12-23T12:45",
+     "2032-12-30T12:45",
+     "2033-01-01T12:45",
+     "2033-01-06T12:45",
+     "2033-01-13T12:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R033",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2026-02-28T00:00",
+     "rule": "INTERVAL=4;BYMONTHDAY=13,-30;FREQ=DAILY",
+     "exdates": [
+      "2026-03-03T00:00",
+      "2026-03-04T00:00",
+      "2026-03-01T00:00"
+     ],
+     "rdates": [
+      "2026-03-03T07:00",
+      "2026-03-05T00:00"
+     ]
+    },
+    "2026-02-28T00:00",
+    "2026-03-10T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-02-28T00:00",
+     "2026-03-03T07:00",
+     "2026-03-05T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R034",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2027-01-29T00:30",
+     "rule": "BYMONTH=1,6;FREQ=MONTHLY;INTERVAL=7;BYMONTHDAY=-1;BYSETPOS=1",
+     "exdates": [
+      "2027-04-29T00:30",
+      "2027-04-03T00:30",
+      "2027-04-29T00:30"
+     ],
+     "rdates": [
+      "2027-03-25T00:30",
+      "2027-02-21T07:30",
+      "2027-01-29T00:30"
+     ]
+    },
+    "3261-02-01T00:00",
+    "3263-07-21T00:30"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R035",
+   "title": "random event",
+   "args": [
+    {
+     "start": "0001-03-29T09:45",
+     "rule": "WKST=FR;UNTIL=0001-09-21T09:00;FREQ=WEEKLY;INTERVAL=5",
+     "exdates": [
+      "0001-04-21T09:45"
+     ],
+     "rdates": [
+      "0001-04-11T09:45",
+      "0001-05-10T09:45"
+     ]
+    },
+    "0001-03-29T09:45",
+    "0002-05-23T09:45"
+   ],
+   "expected": {
+    "occurrences": [
+     "0001-03-29T09:45",
+     "0001-04-11T09:45",
+     "0001-05-03T09:45",
+     "0001-05-10T09:45",
+     "0001-06-07T09:45",
+     "0001-07-12T09:45",
+     "0001-08-16T09:45",
+     "0001-09-20T09:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R036",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2023-08-28T12:30",
+     "rule": "BYMONTH=3,12;FREQ=MONTHLY;INTERVAL=2;UNTIL=2024-06-02T23:59;BYDAY=3FR,TH,-5FR",
+     "exdates": [
+      "2023-08-28T12:30"
+     ],
+     "rdates": [
+      "2024-03-10T12:30",
+      "2023-12-17T07:30"
+     ]
+    },
+    "5023-01-01T12:00",
+    "5025-06-19T00:00"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R037",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1896-11-15T23:45",
+     "rule": "COUNT=2;INTERVAL=3;BYMONTHDAY=-30;BYMONTH=4;FREQ=MONTHLY",
+     "exdates": [
+      "1897-05-15T23:45",
+      "1896-12-22T23:46"
+     ],
+     "rdates": [
+      "1897-04-19T23:45",
+      "1897-04-11T07:45"
+     ]
+    },
+    "1896-11-12T00:45",
+    "1901-10-18T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1896-11-15T23:45",
+     "1897-04-11T07:45",
+     "1897-04-19T23:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R038",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1896-12-01T00:45",
+     "rule": "INTERVAL=2;BYMONTH=11;FREQ=YEARLY",
+     "exdates": [
+      "1902-12-01T00:45",
+      "1897-12-01T00:45",
+      "1896-12-01T00:45"
+     ],
+     "rdates": []
+    },
+    "1896-10-22T00:45",
+    "1956-10-08T00:45"
+   ],
+   "expected": {
+    "occurrences": [
+     "1898-11-01T00:45",
+     "1900-11-01T00:45",
+     "1902-11-01T00:45",
+     "1904-11-01T00:45",
+     "1906-11-01T00:45",
+     "1908-11-01T00:45",
+     "1910-11-01T00:45",
+     "1912-11-01T00:45",
+     "1914-11-01T00:45",
+     "1916-11-01T00:45",
+     "1918-11-01T00:45",
+     "1920-11-01T00:45",
+     "1922-11-01T00:45",
+     "1924-11-01T00:45",
+     "1926-11-01T00:45",
+     "1928-11-01T00:45",
+     "1930-11-01T00:45",
+     "1932-11-01T00:45",
+     "1934-11-01T00:45",
+     "1936-11-01T00:45",
+     "1938-11-01T00:45",
+     "1940-11-01T00:45",
+     "1942-11-01T00:45",
+     "1944-11-01T00:45",
+     "1946-11-01T00:45",
+     "1948-11-01T00:45",
+     "1950-11-01T00:45",
+     "1952-11-01T00:45",
+     "1954-11-01T00:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R039",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1900-11-29T12:00",
+     "rule": "BYMONTHDAY=28,31,-1;COUNT=30;BYDAY=TU,TH,MO;FREQ=DAILY",
+     "exdates": [],
+     "rdates": [
+      "1900-12-03T12:00"
+     ]
+    },
+    "1900-11-29T00:00",
+    "1901-03-29T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "1900-11-29T12:00",
+     "1900-12-03T12:00",
+     "1900-12-31T12:00",
+     "1901-01-28T12:00",
+     "1901-01-31T12:00",
+     "1901-02-28T12:00",
+     "1901-03-28T12:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R040",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2024-02-29T23:59",
+     "rule": "UNTIL=2024-06-10T23:59;FREQ=WEEKLY;BYDAY=MO,WE,MO;INTERVAL=3;BYSETPOS=3",
+     "exdates": [],
+     "rdates": [
+      "2024-04-01T07:59"
+     ]
+    },
+    "2024-01-20T23:59",
+    "2026-05-09T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2024-02-29T23:59",
+     "2024-04-01T07:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R041",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1999-11-01T23:45",
+     "rule": "FREQ=DAILY;INTERVAL=3",
+     "exdates": [
+      "1999-11-04T23:45",
+      "1999-11-02T23:45",
+      "1999-11-01T23:45"
+     ],
+     "rdates": [
+      "1999-11-07T07:45",
+      "1999-11-06T07:45",
+      "1999-11-01T23:45"
+     ]
+    },
+    "1999-11-01T00:00",
+    "1999-12-01T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "1999-11-06T07:45",
+     "1999-11-07T07:45",
+     "1999-11-07T23:45",
+     "1999-11-10T23:45",
+     "1999-11-13T23:45",
+     "1999-11-16T23:45",
+     "1999-11-19T23:45",
+     "1999-11-22T23:45",
+     "1999-11-25T23:45",
+     "1999-11-28T23:45",
+     "1999-12-01T23:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R042",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1896-08-31T09:00",
+     "rule": "BYDAY=WE,SA,MO;FREQ=DAILY",
+     "exdates": [
+      "1896-09-02T09:01",
+      "1896-09-05T09:00",
+      "1896-08-31T09:00"
+     ],
+     "rdates": [
+      "1896-09-02T07:00"
+     ]
+    },
+    "9895-02-01T00:00",
+    "9895-04-02T09:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "9895-02-02T09:00",
+     "9895-02-04T09:00",
+     "9895-02-06T09:00",
+     "9895-02-09T09:00",
+     "9895-02-11T09:00",
+     "9895-02-13T09:00",
+     "9895-02-16T09:00",
+     "9895-02-18T09:00",
+     "9895-02-20T09:00",
+     "9895-02-23T09:00",
+     "9895-02-25T09:00",
+     "9895-02-27T09:00",
+     "9895-03-02T09:00",
+     "9895-03-04T09:00",
+     "9895-03-06T09:00",
+     "9895-03-09T09:00",
+     "9895-03-11T09:00",
+     "9895-03-13T09:00",
+     "9895-03-16T09:00",
+     "9895-03-18T09:00",
+     "9895-03-20T09:00",
+     "9895-03-23T09:00",
+     "9895-03-25T09:00",
+     "9895-03-27T09:00",
+     "9895-03-30T09:00",
+     "9895-04-01T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R043",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2023-02-28T12:00",
+     "rule": "INTERVAL=2;BYMONTHDAY=15,-31;FREQ=MONTHLY;BYDAY=-5TU",
+     "exdates": [
+      "2023-06-28T12:00"
+     ],
+     "rdates": []
+    },
+    "2023-02-25T12:00",
+    "2023-12-22T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "2023-02-28T12:00",
+     "2023-08-01T12:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R044",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1896-02-29T08:59",
+     "rule": "BYSETPOS=-1,-2;FREQ=DAILY;BYMONTH=9,11",
+     "exdates": [],
+     "rdates": [
+      "1896-03-02T08:59"
+     ]
+    },
+    "1896-01-20T00:59",
+    "1896-03-20T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "1896-02-29T08:59",
+     "1896-03-02T08:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R045",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2026-06-30T08:45",
+     "rule": "BYDAY=5WE,FR,FR;FREQ=MONTHLY;BYMONTH=1,4,11;BYSETPOS=5;UNTIL=2027-11-22T08:45;INTERVAL=01",
+     "exdates": [],
+     "rdates": [
+      "2026-08-12T07:45",
+      "2026-06-30T08:45"
+     ]
+    },
+    "2076-12-01T08:45",
+    "2086-10-10T08:45"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "R046",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2027-02-01T08:00",
+     "rule": "BYMONTHDAY=-2;BYSETPOS=5;FREQ=DAILY;BYDAY=FR,FR,SU",
+     "exdates": [
+      "2027-02-03T08:00",
+      "2027-02-01T08:00",
+      "2027-02-04T08:00"
+     ],
+     "rdates": []
+    },
+    "9999-12-01T08:00",
+    "9999-12-31T23:59"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R047",
+   "title": "random event",
+   "args": [
+    {
+     "start": "9999-11-30T00:00",
+     "rule": "FREQ=WEEKLY;COUNT=2;BYDAY=SU;INTERVAL=4",
+     "exdates": [
+      "9999-11-30T00:00"
+     ],
+     "rdates": []
+    },
+    "9999-11-30T00:00",
+    "9999-12-31T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "9999-12-05T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R048",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2023-02-15T09:45",
+     "rule": "UNTIL=2023-08-03T09:45;INTERVAL=2;FREQ=WEEKLY;BYDAY=SU,SU",
+     "exdates": [
+      "2023-02-15T09:45"
+     ],
+     "rdates": []
+    },
+    "2423-06-01T00:45",
+    "2425-09-18T00:00"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R049",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2026-06-30T08:45",
+     "rule": "BYDAY=MO,TH;BYMONTH=6,9;WKST=MO;FREQ=WEEKLY;COUNT=30;INTERVAL=1",
+     "exdates": [
+      "2026-07-08T08:45",
+      "2026-08-07T08:45",
+      "2026-07-26T08:45"
+     ],
+     "rdates": [
+      "2026-06-26T08:45"
+     ]
+    },
+    "2026-06-29T08:00",
+    "2027-01-25T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-06-30T08:45",
+     "2026-09-03T08:45",
+     "2026-09-07T08:45",
+     "2026-09-10T08:45",
+     "2026-09-14T08:45",
+     "2026-09-17T08:45",
+     "2026-09-21T08:45",
+     "2026-09-24T08:45",
+     "2026-09-28T08:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R050",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1999-11-30T09:45",
+     "rule": "UNTIL=2000-01-16T10:30;BYMONTH=12;INTERVAL=5;FREQ=WEEKLY",
+     "exdates": [],
+     "rdates": [
+      "1999-12-01T09:45",
+      "2000-01-03T07:45"
+     ]
+    },
+    "1999-10-21T00:00",
+    "2000-12-14T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1999-11-30T09:45",
+     "1999-12-01T09:45",
+     "2000-01-03T07:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R051",
+   "title": "random event",
+   "args": [
+    {
+     "start": "9998-08-01T12:00",
+     "rule": "FREQ=MONTHLY;INTERVAL=3;COUNT=3;BYSETPOS=-1,5;BYMONTH=6",
+     "exdates": [],
+     "rdates": [
+      "9998-11-05T07:00",
+      "9999-02-26T12:00"
+     ]
+    },
+    "9998-08-01T00:00",
+    "9999-12-31T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "9998-08-01T12:00",
+     "9998-11-05T07:00",
+     "9999-02-26T12:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R052",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1896-03-30T09:45",
+     "rule": "UNTIL=1897-06-29T10:30;BYDAY=5TH;FREQ=MONTHLY;INTERVAL=7;BYMONTHDAY=1,28",
+     "exdates": [
+      "1896-09-09T09:46",
+      "1896-08-30T09:45",
+      "1896-03-30T09:45"
+     ],
+     "rdates": [
+      "1896-04-14T09:45",
+      "1896-03-30T09:45"
+     ]
+    },
+    "1896-03-30T00:00",
+    "1901-03-05T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1896-04-14T09:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R053",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1999-02-28T08:45",
+     "rule": "COUNT=30;FREQ=DAILY",
+     "exdates": [
+      "1999-03-02T08:45",
+      "1999-03-04T08:45",
+      "1999-02-28T08:45"
+     ],
+     "rdates": [
+      "1999-03-03T08:45"
+     ]
+    },
+    "1999-02-27T00:45",
+    "1999-03-09T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "1999-03-01T08:45",
+     "1999-03-03T08:45",
+     "1999-03-05T08:45",
+     "1999-03-06T08:45",
+     "1999-03-07T08:45",
+     "1999-03-08T08:45",
+     "1999-03-09T08:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R054",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2100-08-31T08:45",
+     "rule": "BYSETPOS=2,-1;BYMONTHDAY=29,31,-30;INTERVAL=2;FREQ=MONTHLY;BYDAY=-2SU,-5FR,2MO",
+     "exdates": [
+      "2101-01-11T08:45",
+      "2101-01-08T08:45",
+      "2101-01-31T08:45"
+     ],
+     "rdates": []
+    },
+    "2100-08-31T00:00",
+    "2101-06-27T08:45"
+   ],
+   "expected": {
+    "occurrences": [
+     "2100-08-31T08:45",
+     "2101-04-01T08:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R055",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1899-03-31T23:45",
+     "rule": null,
+     "exdates": [
+      "1899-04-05T23:45"
+     ],
+     "rdates": []
+    },
+    "1899-03-31T00:45",
+    "1899-04-10T23:45"
+   ],
+   "expected": {
+    "occurrences": [
+     "1899-03-31T23:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R056",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1899-08-29T00:30",
+     "rule": "BYMONTH=6,12;BYDAY=MO;UNTIL=1899-09-25T00:30;FREQ=DAILY",
+     "exdates": [
+      "1899-09-03T00:31",
+      "1899-08-29T00:30",
+      "1899-08-29T00:30"
+     ],
+     "rdates": [
+      "1899-09-02T00:30"
+     ]
+    },
+    "1899-08-28T00:30",
+    "1899-10-27T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "1899-09-02T00:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R057",
+   "title": "random event",
+   "args": [
+    {
+     "start": "0002-06-08T23:30",
+     "rule": "COUNT=30;FREQ=YEARLY;INTERVAL=7",
+     "exdates": [
+      "0006-06-08T23:30"
+     ],
+     "rdates": [
+      "0008-02-20T07:30"
+     ]
+    },
+    "0002-06-08T00:00",
+    "0062-05-24T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "0002-06-08T23:30",
+     "0008-02-20T07:30",
+     "0009-06-08T23:30",
+     "0016-06-08T23:30",
+     "0023-06-08T23:30",
+     "0030-06-08T23:30",
+     "0037-06-08T23:30",
+     "0044-06-08T23:30",
+     "0051-06-08T23:30",
+     "0058-06-08T23:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R058",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2400-11-04T08:00",
+     "rule": "WKST=MO;BYDAY=WE;INTERVAL=3;FREQ=WEEKLY",
+     "exdates": [],
+     "rdates": []
+    },
+    "2400-11-04T00:00",
+    "2401-06-02T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2400-11-04T08:00",
+     "2400-11-22T08:00",
+     "2400-12-13T08:00",
+     "2401-01-03T08:00",
+     "2401-01-24T08:00",
+     "2401-02-14T08:00",
+     "2401-03-07T08:00",
+     "2401-03-28T08:00",
+     "2401-04-18T08:00",
+     "2401-05-09T08:00",
+     "2401-05-30T08:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R059",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1899-06-30T00:45",
+     "rule": "FREQ=MONTHLY;BYMONTH=4,12;BYDAY=-1MO,2MO,WE;COUNT=13;INTERVAL=4;BYMONTHDAY=13,-29",
+     "exdates": [
+      "1899-07-17T00:45",
+      "1899-08-30T00:45",
+      "1899-09-30T00:45"
+     ],
+     "rdates": [
+      "1899-08-10T07:45"
+     ]
+    },
+    "1899-06-29T00:45",
+    "1901-12-16T00:45"
+   ],
+   "expected": {
+    "occurrences": [
+     "1899-06-30T00:45",
+     "1899-08-10T07:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R060",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1900-11-28T08:30",
+     "rule": "FREQ=DAILY;INTERVAL=1;BYDAY=MO,SA;BYMONTH=6;COUNT=13;BYSETPOS=2",
+     "exdates": [],
+     "rdates": [
+      "1900-11-27T08:30"
+     ]
+    },
+    "1900-11-28T00:00",
+    "1901-01-27T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "1900-11-28T08:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R061",
+   "title": "random event",
+   "args": [
+    {
+     "start": "0002-02-28T08:59",
+     "rule": "FREQ=WEEKLY;BYDAY=MO;BYDAY=TU",
+     "exdates": [],
+     "rdates": [
+      "0002-03-22T07:59"
+     ]
+    },
+    "0002-02-25T00:59",
+    "0002-05-06T08:59"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "R062",
+   "title": "random event",
+   "args": [
+    {
+     "start": "0001-12-29T08:30",
+     "rule": "BYSETPOS=-1,10;FREQ=DAILY;INTERVAL=1;BYMONTH=6;COUNT=13",
+     "exdates": [],
+     "rdates": [
+      "0002-01-04T08:30",
+      "0002-01-04T08:30"
+     ]
+    },
+    "0001-12-26T00:00",
+    "0002-01-25T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "0001-12-29T08:30",
+     "0002-01-04T08:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R063",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2026-12-01T00:30",
+     "rule": null,
+     "exdates": [
+      "2027-01-10T00:31",
+      "2026-12-26T00:30",
+      "2027-01-10T00:30"
+     ],
+     "rdates": [
+      "2026-12-01T00:30"
+     ]
+    },
+    "2026-10-22T00:00",
+    "2027-05-20T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-12-01T00:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R064",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2025-12-29T09:45",
+     "rule": "FREQ=WEEKLY;BYDAY=TU,FR,SA;BYMONTH=0",
+     "exdates": [
+      "2026-01-30T09:45",
+      "2026-01-06T09:45",
+      "2026-01-23T09:45",
+      "2025-12-29T09:45"
+     ],
+     "rdates": [
+      "2026-02-13T09:45",
+      "2026-01-28T07:45"
+     ]
+    },
+    "2025-12-26T00:45",
+    "2026-07-24T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "R065",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2024-03-01T00:00",
+     "rule": "UNTIL=2027-11-13T00:59;BYDAY=SU,-53MO;FREQ=YEARLY;BYSETPOS=2",
+     "exdates": [
+      "2027-03-01T00:00",
+      "2028-03-01T00:00"
+     ],
+     "rdates": [
+      "2024-03-27T07:00"
+     ]
+    },
+    "2024-03-01T00:00",
+    "2144-02-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2024-03-01T00:00",
+     "2024-03-27T07:00",
+     "2025-01-12T00:00",
+     "2026-01-11T00:00",
+     "2027-01-10T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R066",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1900-02-01T00:30",
+     "rule": "BYDAY=2TH,-1TH,+1TU;FREQ=MONTHLY;UNTIL=1902-02-08T23:00",
+     "exdates": [
+      "1900-05-07T00:30",
+      "1900-02-18T00:30"
+     ],
+     "rdates": [
+      "1900-07-21T07:30"
+     ]
+    },
+    "4900-02-01T00:00",
+    "4902-07-21T00:30"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R067",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2026-03-15T23:00",
+     "rule": "INTERVAL=7;UNTIL=2035-05-30T23:00;BYDAY=1FR,53SU;FREQ=YEARLY;BYMONTHDAY=13",
+     "exdates": [
+      "2026-07-02T23:00",
+      "2028-11-08T23:01",
+      "2029-03-15T23:00",
+      "2026-03-15T23:00"
+     ],
+     "rdates": []
+    },
+    "9999-01-01T23:00",
+    "9999-12-31T00:00"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R068",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2023-02-01T08:45",
+     "rule": "BYMONTHDAY=29,-1;FREQ=DAILY;BYDAY=MO,WE;COUNT=2",
+     "exdates": [
+      "2023-02-02T08:45",
+      "2023-02-01T08:45"
+     ],
+     "rdates": [
+      "2023-02-06T07:45"
+     ]
+    },
+    "2023-01-29T00:45",
+    "2023-02-28T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2023-02-06T07:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R069",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2000-08-31T09:00",
+     "rule": "COUNT=30;INTERVAL=2;FREQ=YEARLY;BYMONTH=2,6",
+     "exdates": [
+      "2002-08-31T09:00",
+      "2001-08-31T09:00",
+      "2001-01-12T09:00"
+     ],
+     "rdates": [
+      "2002-03-18T09:00",
+      "1999-09-26T09:00"
+     ]
+    },
+    "2000-08-30T09:00",
+    "2030-08-23T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2000-08-31T09:00",
+     "2002-03-18T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R070",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1900-02-28T08:45",
+     "rule": "COUNT=8;BYMONTHDAY=1,13,28;FREQ=MONTHLY",
+     "exdates": [
+      "1900-07-16T08:45",
+      "1900-05-28T08:45",
+      "1900-08-28T08:45"
+     ],
+     "rdates": [
+      "1900-02-02T08:45",
+      "1900-04-09T07:45",
+      "1900-02-28T08:45"
+     ]
+    },
+    "1900-02-25T00:45",
+    "1905-01-30T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "1900-02-28T08:45",
+     "1900-03-01T08:45",
+     "1900-03-13T08:45",
+     "1900-03-28T08:45",
+     "1900-04-01T08:45",
+     "1900-04-09T07:45",
+     "1900-04-13T08:45",
+     "1900-04-28T08:45",
+     "1900-05-01T08:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R071",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2025-12-02T12:30",
+     "rule": "COUNT=5;FREQ=MONTHLY;BYDAY=5FR,-2MO",
+     "exdates": [
+      "2026-02-14T12:30",
+      "2025-12-02T12:30"
+     ],
+     "rdates": [
+      "2025-12-07T07:30",
+      "2026-05-12T12:30"
+     ]
+    },
+    "2025-11-29T00:00",
+    "2030-11-03T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2025-12-07T07:30",
+     "2025-12-22T12:30",
+     "2026-01-19T12:30",
+     "2026-01-30T12:30",
+     "2026-02-16T12:30",
+     "2026-05-12T12:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R072",
+   "title": "random event",
+   "args": [
+    {
+     "start": "0002-11-15T12:00",
+     "rule": "FREQ=YEARLY;BYDAY=-1SA,1TH;BYMONTHDAY=30,-1;UNTIL=0008-09-23T00:00;INTERVAL=4;BYSETPOS=5",
+     "exdates": [],
+     "rdates": [
+      "0009-03-14T12:00",
+      "0006-03-23T12:00"
+     ]
+    },
+    "0002-11-14T00:00",
+    "0062-10-30T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "0002-11-15T12:00",
+     "0006-03-23T12:00",
+     "0009-03-14T12:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R073",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1899-02-28T08:45",
+     "rule": "BYDAY=5SU; BYMONTHDAY=28,-29,-30;BYSETPOS=-2;FREQ=MONTHLY",
+     "exdates": [
+      "1899-07-28T08:46",
+      "1899-05-28T08:45"
+     ],
+     "rdates": [
+      "1899-03-06T08:45",
+      "1899-04-12T07:45",
+      "1899-02-28T08:45"
+     ]
+    },
+    "3133-06-01T00:45",
+    "3143-04-10T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "R074",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2100-03-30T09:30",
+     "rule": "COUNT=13;INTERVAL=2;BYMONTH=2,9;FREQ=DAILY",
+     "exdates": [
+      "2100-04-04T09:30",
+      "2100-04-03T09:31",
+      "2100-03-31T09:30"
+     ],
+     "rdates": []
+    },
+    "2100-03-29T09:30",
+    "2100-05-28T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "2100-03-30T09:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R075",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2099-11-30T12:45",
+     "rule": "INTERVAL=2;BYMONTH=4,9,11;FREQ=YEARLY;BYDAY=3FR,TH;BYMONTHDAY=2,29,-30;UNTIL=2109-11-15T12:45;WKST=SA",
+     "exdates": [
+      "2100-11-30T12:45"
+     ],
+     "rdates": []
+    },
+    "2099-11-29T12:45",
+    "2109-11-27T12:45"
+   ],
+   "expected": {
+    "occurrences": [
+     "2099-11-30T12:45",
+     "2101-09-01T12:45",
+     "2101-09-29T12:45",
+     "2103-11-01T12:45",
+     "2103-11-29T12:45",
+     "2105-04-02T12:45",
+     "2107-09-01T12:45",
+     "2107-09-29T12:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R076",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2099-02-28T08:45",
+     "rule": "FREQ=DAILY;BYMONTHDAY=-1,-2;BYMONTH=1,2,9;BYDAY=SA;BYSETPOS=1",
+     "exdates": [
+      "2099-03-03T08:45",
+      "2099-03-01T08:45",
+      "2099-02-28T08:45"
+     ],
+     "rdates": [
+      "2099-03-05T07:45"
+     ]
+    },
+    "2099-02-28T08:45",
+    "2099-06-28T08:45"
+   ],
+   "expected": {
+    "occurrences": [
+     "2099-03-05T07:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R077",
+   "title": "random event",
+   "args": [
+    {
+     "start": "0002-03-24T00:30",
+     "rule": "UNTIL=0002-03-13T00:30;FREQ=WEEKLY;INTERVAL=12;WKST=SU",
+     "exdates": [
+      "0002-04-03T00:30"
+     ],
+     "rdates": [
+      "2026-03-02T10:60"
+     ]
+    },
+    "0002-03-24T00:00",
+    "0002-10-20T00:00"
+   ],
+   "expected": {
+    "error": "bad_datetime",
+    "ok": false
+   }
+  },
+  {
+   "id": "R078",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2400-11-30T09:30",
+     "rule": "BYDAY=MO;COUNT=8;BYSETPOS=3;FREQ=DAILY",
+     "exdates": [],
+     "rdates": [
+      "2400-11-29T09:30",
+      "2400-12-06T07:30"
+     ]
+    },
+    "2400-11-29T00:30",
+    "2401-01-28T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2400-11-29T09:30",
+     "2400-11-30T09:30",
+     "2400-12-06T07:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R079",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1899-08-29T08:00",
+     "rule": "BYMONTHDAY=15,-31;INTERVAL=1;COUNT=30;FREQ=YEARLY",
+     "exdates": [
+      "1903-06-04T08:00",
+      "1900-12-13T08:01"
+     ],
+     "rdates": [
+      "1905-10-11T08:00"
+     ]
+    },
+    "1899-07-20T00:00",
+    "2019-06-21T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "1899-08-29T08:00",
+     "1899-09-15T08:00",
+     "1899-10-01T08:00",
+     "1899-10-15T08:00",
+     "1899-11-15T08:00",
+     "1899-12-01T08:00",
+     "1899-12-15T08:00",
+     "1900-01-01T08:00",
+     "1900-01-15T08:00",
+     "1900-02-15T08:00",
+     "1900-03-01T08:00",
+     "1900-03-15T08:00",
+     "1900-04-15T08:00",
+     "1900-05-01T08:00",
+     "1900-05-15T08:00",
+     "1900-06-15T08:00",
+     "1900-07-01T08:00",
+     "1900-07-15T08:00",
+     "1900-08-01T08:00",
+     "1900-08-15T08:00",
+     "1900-09-15T08:00",
+     "1900-10-01T08:00",
+     "1900-10-15T08:00",
+     "1900-11-15T08:00",
+     "1900-12-01T08:00",
+     "1900-12-15T08:00",
+     "1901-01-01T08:00",
+     "1901-01-15T08:00",
+     "1901-02-15T08:00",
+     "1901-03-01T08:00",
+     "1905-10-11T08:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R080",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2027-02-15T09:45",
+     "rule": "FREQ=DAILY;BYDAY=SA,SU,SA;WKST=TH;INTERVAL=12;UNTIL=2027-03-10T23:30;BYMONTH=4,9,11",
+     "exdates": [
+      "2027-02-17T09:45"
+     ],
+     "rdates": []
+    },
+    "9999-12-01T09:45",
+    "9999-12-31T23:59"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R081",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1896-08-31T23:00",
+     "rule": "BYMONTH=6;FREQ=YEARLY;COUNT=13;BYDAY=SA,FR,3TU;BYSETPOS=3,-1;BYMONTHDAY=31",
+     "exdates": [],
+     "rdates": []
+    },
+    "1896-08-30T23:00",
+    "1956-08-16T23:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1896-08-31T23:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R082",
+   "title": "random event",
+   "args": [
+    {
+     "start": "0001-01-01T12:30",
+     "rule": "BYMONTH=1,2,12;FREQ=YEARLY;BYMONTHDAY=30,-29;COUNT=5;INTERVAL=7",
+     "exdates": [],
+     "rdates": [
+      "0006-09-07T07:30",
+      "0003-11-07T12:30"
+     ]
+    },
+    "0001-01-01T00:00",
+    "0030-12-25T12:30"
+   ],
+   "expected": {
+    "occurrences": [
+     "0001-01-01T12:30",
+     "0001-01-03T12:30",
+     "0001-01-30T12:30",
+     "0001-12-03T12:30",
+     "0001-12-30T12:30",
+     "0003-11-07T12:30",
+     "0006-09-07T07:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R083",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2024-06-28T00:00",
+     "rule": "FREQ=MONTHLY",
+     "exdates": [
+      "2024-10-28T00:00",
+      "2024-09-08T00:00",
+      "2024-12-28T00:00"
+     ],
+     "rdates": [
+      "2024-07-25T07:00",
+      "2024-12-02T00:00",
+      "2024-06-28T00:00"
+     ]
+    },
+    "2024-05-19T00:00",
+    "2029-04-23T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2024-06-28T00:00",
+     "2024-07-25T07:00",
+     "2024-07-28T00:00",
+     "2024-08-28T00:00",
+     "2024-09-28T00:00",
+     "2024-11-28T00:00",
+     "2024-12-02T00:00",
+     "2025-01-28T00:00",
+     "2025-02-28T00:00",
+     "2025-03-28T00:00",
+     "2025-04-28T00:00",
+     "2025-05-28T00:00",
+     "2025-06-28T00:00",
+     "2025-07-28T00:00",
+     "2025-08-28T00:00",
+     "2025-09-28T00:00",
+     "2025-10-28T00:00",
+     "2025-11-28T00:00",
+     "2025-12-28T00:00",
+     "2026-01-28T00:00",
+     "2026-02-28T00:00",
+     "2026-03-28T00:00",
+     "2026-04-28T00:00",
+     "2026-05-28T00:00",
+     "2026-06-28T00:00",
+     "2026-07-28T00:00",
+     "2026-08-28T00:00",
+     "2026-09-28T00:00",
+     "2026-10-28T00:00",
+     "2026-11-28T00:00",
+     "2026-12-28T00:00",
+     "2027-01-28T00:00",
+     "2027-02-28T00:00",
+     "2027-03-28T00:00",
+     "2027-04-28T00:00",
+     "2027-05-28T00:00",
+     "2027-06-28T00:00",
+     "2027-07-28T00:00",
+     "2027-08-28T00:00",
+     "2027-09-28T00:00",
+     "2027-10-28T00:00",
+     "2027-11-28T00:00",
+     "2027-12-28T00:00",
+     "2028-01-28T00:00",
+     "2028-02-28T00:00",
+     "2028-03-28T00:00",
+     "2028-04-28T00:00",
+     "2028-05-28T00:00",
+     "2028-06-28T00:00",
+     "2028-07-28T00:00",
+     "2028-08-28T00:00",
+     "2028-09-28T00:00",
+     "2028-10-28T00:00",
+     "2028-11-28T00:00",
+     "2028-12-28T00:00",
+     "2029-01-28T00:00",
+     "2029-02-28T00:00",
+     "2029-03-28T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R084",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1899-01-31T08:00",
+     "rule": "FREQ=YEARLY;BYMONTH=1",
+     "exdates": [
+      "1903-01-31T08:00"
+     ],
+     "rdates": [
+      "1898-08-16T08:00",
+      "1903-02-10T07:00"
+     ]
+    },
+    "1899-01-30T00:00",
+    "1929-01-23T08:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1899-01-31T08:00",
+     "1900-01-31T08:00",
+     "1901-01-31T08:00",
+     "1902-01-31T08:00",
+     "1903-02-10T07:00",
+     "1904-01-31T08:00",
+     "1905-01-31T08:00",
+     "1906-01-31T08:00",
+     "1907-01-31T08:00",
+     "1908-01-31T08:00",
+     "1909-01-31T08:00",
+     "1910-01-31T08:00",
+     "1911-01-31T08:00",
+     "1912-01-31T08:00",
+     "1913-01-31T08:00",
+     "1914-01-31T08:00",
+     "1915-01-31T08:00",
+     "1916-01-31T08:00",
+     "1917-01-31T08:00",
+     "1918-01-31T08:00",
+     "1919-01-31T08:00",
+     "1920-01-31T08:00",
+     "1921-01-31T08:00",
+     "1922-01-31T08:00",
+     "1923-01-31T08:00",
+     "1924-01-31T08:00",
+     "1925-01-31T08:00",
+     "1926-01-31T08:00",
+     "1927-01-31T08:00",
+     "1928-01-31T08:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R085",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2024-08-28T00:45",
+     "rule": "FREQ=MONTHLY;UNTIL=2025-02-12T10:30;BYSETPOS=3,-2;INTERVAL=2;BYDAY=TH;BYMONTH=1,2",
+     "exdates": [
+      "2025-02-16T00:45",
+      "2024-10-23T00:45",
+      "2024-10-15T00:45"
+     ],
+     "rdates": []
+    },
+    "2074-01-01T00:45",
+    "2078-12-06T00:00"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R086",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2023-11-01T08:00",
+     "rule": "FREQ=WEEKLY;BYDAY=MO,MO;UNTIL=2023-11-28T10:30;WKST=TH;INTERVAL=01",
+     "exdates": [
+      "2023-12-11T08:00"
+     ],
+     "rdates": [
+      "2023-11-11T07:00"
+     ]
+    },
+    "2023-10-31T00:00",
+    "2024-01-09T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "R087",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2025-02-15T23:00",
+     "rule": "FREQ=MONTHLY;WKST=TH",
+     "exdates": [
+      "2025-04-14T23:00",
+      "2025-07-09T23:00",
+      "2025-05-17T23:00",
+      "2025-02-15T23:00"
+     ],
+     "rdates": [
+      "2025-04-14T23:00"
+     ]
+    },
+    "2075-12-01T00:00",
+    "2078-05-19T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2075-12-15T23:00",
+     "2076-01-15T23:00",
+     "2076-02-15T23:00",
+     "2076-03-15T23:00",
+     "2076-04-15T23:00",
+     "2076-05-15T23:00",
+     "2076-06-15T23:00",
+     "2076-07-15T23:00",
+     "2076-08-15T23:00",
+     "2076-09-15T23:00",
+     "2076-10-15T23:00",
+     "2076-11-15T23:00",
+     "2076-12-15T23:00",
+     "2077-01-15T23:00",
+     "2077-02-15T23:00",
+     "2077-03-15T23:00",
+     "2077-04-15T23:00",
+     "2077-05-15T23:00",
+     "2077-06-15T23:00",
+     "2077-07-15T23:00",
+     "2077-08-15T23:00",
+     "2077-09-15T23:00",
+     "2077-10-15T23:00",
+     "2077-11-15T23:00",
+     "2077-12-15T23:00",
+     "2078-01-15T23:00",
+     "2078-02-15T23:00",
+     "2078-03-15T23:00",
+     "2078-04-15T23:00",
+     "2078-05-15T23:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R088",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2000-08-30T00:59",
+     "rule": "BYMONTH=2,11;INTERVAL=2;FREQ=DAILY;BYSETPOS=10",
+     "exdates": [
+      "2000-09-04T00:59",
+      "2000-08-30T00:59"
+     ],
+     "rdates": [
+      "2000-08-29T00:59",
+      "2000-09-04T07:59"
+     ]
+    },
+    "2000-08-27T00:59",
+    "2000-12-25T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2000-08-29T00:59",
+     "2000-09-04T07:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R089",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2023-02-27T09:30",
+     "rule": "UNTIL=2023-03-13T09:30;FREQ=DAILY;BYMONTHDAY=2,15,30",
+     "exdates": [],
+     "rdates": []
+    },
+    "2023-02-27T00:00",
+    "2023-03-09T09:30"
+   ],
+   "expected": {
+    "occurrences": [
+     "2023-02-27T09:30",
+     "2023-03-02T09:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R090",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2400-02-01T00:59",
+     "rule": "FREQ=WEEKLY;INTERVAL=12;WKST=TU;BYSETPOS=2,-2;BYDAY=MO,MO,SU",
+     "exdates": [
+      "2400-03-05T00:59",
+      "2400-02-05T00:59",
+      "2400-02-22T00:59"
+     ],
+     "rdates": []
+    },
+    "2400-02-01T00:00",
+    "2400-04-11T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2400-02-01T00:59",
+     "2400-02-06T00:59",
+     "2400-02-07T00:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R091",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2100-06-30T08:59",
+     "rule": "FREQ=YEARLY;BYDAY=52WE,52SA;BYSETPOS=1,2;BYMONTHDAY=2",
+     "exdates": [
+      "2101-11-18T08:00",
+      "2102-12-27T08:59"
+     ],
+     "rdates": [
+      "2100-06-30T08:59"
+     ]
+    },
+    "2100-06-27T00:59",
+    "2160-06-12T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2100-06-30T08:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R092",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2400-12-28T23:45",
+     "rule": "FREQ=DAILY;BYMONTHDAY=1,-1,-31;UNTIL=2400-12-27T23:45;BYSETPOS=-1;BYDAY=MO,TU;BYMONTH=2,4,12",
+     "exdates": [
+      "2400-12-28T23:45"
+     ],
+     "rdates": []
+    },
+    "2400-12-28T00:00",
+    "2401-01-27T23:59"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R093",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1896-04-01T12:00",
+     "rule": "BYMONTH=1,2,12;COUNT=30;INTERVAL=5;FREQ=DAILY;INTERVAL=0",
+     "exdates": [],
+     "rdates": [
+      "1896-04-07T12:00"
+     ]
+    },
+    "1896-04-01T12:00",
+    "1896-05-31T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "R094",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2023-06-15T09:59",
+     "rule": "INTERVAL=2;FREQ=YEARLY;COUNT=1;BYMONTH=3,4",
+     "exdates": [
+      "2025-06-15T09:59",
+      "2027-12-11T09:59",
+      "2023-07-20T09:59"
+     ],
+     "rdates": [
+      "2029-07-29T07:59",
+      "2026-11-22T09:59"
+     ]
+    },
+    "2023-06-12T00:59",
+    "2083-05-28T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2023-06-15T09:59",
+     "2026-11-22T09:59",
+     "2029-07-29T07:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R095",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2400-01-30T09:45",
+     "rule": "INTERVAL=3;FREQ=MONTHLY;BYMONTH=1,6;BYSETPOS=-1,10",
+     "exdates": [
+      "2400-03-07T09:46",
+      "2400-05-30T09:45",
+      "2400-07-30T09:46",
+      "2400-01-30T09:45"
+     ],
+     "rdates": []
+    },
+    "2450-02-01T00:00",
+    "2452-07-20T09:45"
+   ],
+   "expected": {
+    "occurrences": [
+     "2451-01-30T09:45",
+     "2452-01-30T09:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R096",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1999-11-30T08:59",
+     "rule": "FREQ=MONTHLY; COUNT=13;INTERVAL=12;BYSETPOS=3;BYDAY=2TH,TU,+1TU;BYMONTH=3,12;BYMONTHDAY=28,-30",
+     "exdates": [],
+     "rdates": []
+    },
+    "1999-10-21T08:59",
+    "2002-04-08T00:00"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "R097",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2023-06-15T09:30",
+     "rule": "BYMONTHDAY=29;BYSETPOS=1,2;INTERVAL=1;BYDAY=MO;FREQ=YEARLY;BYMONTH=1",
+     "exdates": [
+      "2024-08-19T09:30",
+      "2027-06-15T09:30"
+     ],
+     "rdates": []
+    },
+    "2023-05-06T09:00",
+    "2053-04-28T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2023-06-15T09:30",
+     "2024-01-29T09:30",
+     "2029-01-29T09:30",
+     "2035-01-29T09:30",
+     "2046-01-29T09:30",
+     "2052-01-29T09:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R098",
+   "title": "random event",
+   "args": [
+    {
+     "start": "9999-11-30T08:45",
+     "rule": "BYMONTH=4;BYSETPOS=5;COUNT=3;FREQ=MONTHLY;INTERVAL=2",
+     "exdates": [],
+     "rdates": []
+    },
+    "9999-10-21T00:45",
+    "9999-12-31T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "9999-11-30T08:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R099",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1896-02-01T23:00",
+     "rule": "WKST=SA;BYDAY=TH,SU;INTERVAL=2;BYSETPOS=3;FREQ=DAILY",
+     "exdates": [
+      "1896-02-01T23:00"
+     ],
+     "rdates": [
+      "1896-02-06T07:00",
+      "1896-02-05T07:00"
+     ]
+    },
+    "1896-02-01T23:00",
+    "1896-02-11T23:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1896-02-05T07:00",
+     "1896-02-06T07:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R100",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2100-03-28T09:45",
+     "rule": "BYDAY=52MO,5FR;FREQ=YEARLY;BYMONTHDAY=31,-2,-29;UNTIL=2109-08-10T09:45;BYMONTH=3",
+     "exdates": [
+      "2104-01-18T09:45",
+      "2101-09-26T09:46"
+     ],
+     "rdates": []
+    },
+    "2500-02-01T00:45",
+    "2620-01-04T23:59"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R101",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2400-01-06T23:59",
+     "rule": "BYDAY=4SA,TH;INTERVAL=1;FREQ=MONTHLY;UNTIL=2401-12-05T10:59",
+     "exdates": [
+      "2400-06-02T23:00",
+      "2400-01-11T23:00",
+      "2400-02-06T23:59"
+     ],
+     "rdates": [
+      "2400-04-29T07:59",
+      "2399-12-15T07:59"
+     ]
+    },
+    "2400-01-05T00:59",
+    "2404-12-09T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2400-01-06T23:59",
+     "2400-01-13T23:59",
+     "2400-01-20T23:59",
+     "2400-01-22T23:59",
+     "2400-01-27T23:59",
+     "2400-02-03T23:59",
+     "2400-02-10T23:59",
+     "2400-02-17T23:59",
+     "2400-02-24T23:59",
+     "2400-02-26T23:59",
+     "2400-03-02T23:59",
+     "2400-03-09T23:59",
+     "2400-03-16T23:59",
+     "2400-03-23T23:59",
+     "2400-03-25T23:59",
+     "2400-03-30T23:59",
+     "2400-04-06T23:59",
+     "2400-04-13T23:59",
+     "2400-04-20T23:59",
+     "2400-04-22T23:59",
+     "2400-04-27T23:59",
+     "2400-04-29T07:59",
+     "2400-05-04T23:59",
+     "2400-05-11T23:59",
+     "2400-05-18T23:59",
+     "2400-05-25T23:59",
+     "2400-05-27T23:59",
+     "2400-06-01T23:59",
+     "2400-06-08T23:59",
+     "2400-06-15T23:59",
+     "2400-06-22T23:59",
+     "2400-06-24T23:59",
+     "2400-06-29T23:59",
+     "2400-07-06T23:59",
+     "2400-07-13T23:59",
+     "2400-07-20T23:59",
+     "2400-07-22T23:59",
+     "2400-07-27T23:59",
+     "2400-08-03T23:59",
+     "2400-08-10T23:59",
+     "2400-08-17T23:59",
+     "2400-08-24T23:59",
+     "2400-08-26T23:59",
+     "2400-08-31T23:59",
+     "2400-09-07T23:59",
+     "2400-09-14T23:59",
+     "2400-09-21T23:59",
+     "2400-09-23T23:59",
+     "2400-09-28T23:59",
+     "2400-10-05T23:59",
+     "2400-10-12T23:59",
+     "2400-10-19T23:59",
+     "2400-10-26T23:59",
+     "2400-10-28T23:59",
+     "2400-11-02T23:59",
+     "2400-11-09T23:59",
+     "2400-11-16T23:59",
+     "2400-11-23T23:59",
+     "2400-11-25T23:59",
+     "2400-11-30T23:59",
+     "2400-12-07T23:59",
+     "2400-12-14T23:59",
+     "2400-12-21T23:59",
+     "2400-12-23T23:59",
+     "2400-12-28T23:59",
+     "2401-01-04T23:59",
+     "2401-01-11T23:59",
+     "2401-01-18T23:59",
+     "2401-01-25T23:59",
+     "2401-01-27T23:59",
+     "2401-02-01T23:59",
+     "2401-02-08T23:59",
+     "2401-02-15T23:59",
+     "2401-02-22T23:59",
+     "2401-02-24T23:59",
+     "2401-03-01T23:59",
+     "2401-03-08T23:59",
+     "2401-03-15T23:59",
+     "2401-03-22T23:59",
+     "2401-03-24T23:59",
+     "2401-03-29T23:59",
+     "2401-04-05T23:59",
+     "2401-04-12T23:59",
+     "2401-04-19T23:59",
+     "2401-04-26T23:59",
+     "2401-04-28T23:59",
+     "2401-05-03T23:59",
+     "2401-05-10T23:59",
+     "2401-05-17T23:59",
+     "2401-05-24T23:59",
+     "2401-05-26T23:59",
+     "2401-05-31T23:59",
+     "2401-06-07T23:59",
+     "2401-06-14T23:59",
+     "2401-06-21T23:59",
+     "2401-06-23T23:59",
+     "2401-06-28T23:59",
+     "2401-07-05T23:59",
+     "2401-07-12T23:59",
+     "2401-07-19T23:59",
+     "2401-07-26T23:59",
+     "2401-07-28T23:59",
+     "2401-08-02T23:59",
+     "2401-08-09T23:59",
+     "2401-08-16T23:59",
+     "2401-08-23T23:59",
+     "2401-08-25T23:59",
+     "2401-08-30T23:59",
+     "2401-09-06T23:59",
+     "2401-09-13T23:59",
+     "2401-09-20T23:59",
+     "2401-09-22T23:59",
+     "2401-09-27T23:59",
+     "2401-10-04T23:59",
+     "2401-10-11T23:59",
+     "2401-10-18T23:59",
+     "2401-10-25T23:59",
+     "2401-10-27T23:59",
+     "2401-11-01T23:59",
+     "2401-11-08T23:59",
+     "2401-11-15T23:59",
+     "2401-11-22T23:59",
+     "2401-11-24T23:59",
+     "2401-11-29T23:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R102",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2000-12-29T23:59",
+     "rule": null,
+     "exdates": [
+      "2001-02-05T23:59",
+      "2001-01-27T23:59",
+      "2001-01-12T23:59"
+     ],
+     "rdates": [
+      "2001-02-13T23:59",
+      "2000-12-25T23:59"
+     ]
+    },
+    "2000-12-28T00:59",
+    "2001-03-08T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "2000-12-29T23:59",
+     "2001-02-13T23:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R103",
+   "title": "random event",
+   "args": [
+    {
+     "start": "0002-12-29T09:45",
+     "rule": "FREQ=WEEKLY;COUNT=1;BYDAY=SU,SU;WKST=SU",
+     "exdates": [
+      "0003-01-18T09:46",
+      "0003-01-13T09:45",
+      "0003-01-14T09:45"
+     ],
+     "rdates": [
+      "0002-12-29T09:45"
+     ]
+    },
+    "0002-11-19T00:45",
+    "0004-01-13T09:45"
+   ],
+   "expected": {
+    "occurrences": [
+     "0002-12-29T09:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R104",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1900-01-31T08:30",
+     "rule": "INTERVAL=4;FREQ=MONTHLY;COUNT=2;BYDAY=0MO",
+     "exdates": [
+      "1900-04-20T08:30",
+      "1900-03-31T08:30",
+      "1900-07-31T08:30"
+     ],
+     "rdates": []
+    },
+    "1900-01-30T08:30",
+    "1902-07-19T08:30"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "R105",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1896-02-28T12:00",
+     "rule": "UNTIL=1897-12-12T09:00;FREQ=MONTHLY",
+     "exdates": [
+      "1896-07-28T12:00",
+      "1896-08-28T12:00",
+      "1896-07-20T12:00"
+     ],
+     "rdates": [
+      "1896-02-19T07:00",
+      "1896-02-22T07:00"
+     ]
+    },
+    "1896-02-25T12:00",
+    "1896-12-21T12:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1896-02-28T12:00",
+     "1896-03-28T12:00",
+     "1896-04-28T12:00",
+     "1896-05-28T12:00",
+     "1896-06-28T12:00",
+     "1896-09-28T12:00",
+     "1896-10-28T12:00",
+     "1896-11-28T12:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R106",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1900-03-29T08:45",
+     "rule": "INTERVAL=4;BYMONTH=3,9;FREQ=YEARLY",
+     "exdates": [
+      "1902-03-29T08:46",
+      "1905-06-29T08:45",
+      "1900-03-29T08:45"
+     ],
+     "rdates": []
+    },
+    "1900-03-29T08:45",
+    "1960-03-14T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "1900-09-29T08:45",
+     "1904-03-29T08:45",
+     "1904-09-29T08:45",
+     "1908-03-29T08:45",
+     "1908-09-29T08:45",
+     "1912-03-29T08:45",
+     "1912-09-29T08:45",
+     "1916-03-29T08:45",
+     "1916-09-29T08:45",
+     "1920-03-29T08:45",
+     "1920-09-29T08:45",
+     "1924-03-29T08:45",
+     "1924-09-29T08:45",
+     "1928-03-29T08:45",
+     "1928-09-29T08:45",
+     "1932-03-29T08:45",
+     "1932-09-29T08:45",
+     "1936-03-29T08:45",
+     "1936-09-29T08:45",
+     "1940-03-29T08:45",
+     "1940-09-29T08:45",
+     "1944-03-29T08:45",
+     "1944-09-29T08:45",
+     "1948-03-29T08:45",
+     "1948-09-29T08:45",
+     "1952-03-29T08:45",
+     "1952-09-29T08:45",
+     "1956-03-29T08:45",
+     "1956-09-29T08:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R107",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2025-02-28T00:30",
+     "rule": "INTERVAL=2;FREQ=YEARLY;BYMONTH=1,3,12;BYMONTHDAY=2,-2;BYDAY=3SA,SU",
+     "exdates": [
+      "2029-02-28T00:30",
+      "2029-05-11T00:31",
+      "2030-07-14T00:30",
+      "2025-02-28T00:30"
+     ],
+     "rdates": []
+    },
+    "2025-01-19T00:00",
+    "2085-01-04T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2025-03-02T00:30",
+     "2025-03-30T00:30",
+     "2029-12-02T00:30",
+     "2029-12-30T00:30",
+     "2031-03-02T00:30",
+     "2031-03-30T00:30",
+     "2033-01-02T00:30",
+     "2033-01-30T00:30",
+     "2035-12-02T00:30",
+     "2035-12-30T00:30",
+     "2039-01-02T00:30",
+     "2039-01-30T00:30",
+     "2053-03-02T00:30",
+     "2053-03-30T00:30",
+     "2057-12-02T00:30",
+     "2057-12-30T00:30",
+     "2059-03-02T00:30",
+     "2059-03-30T00:30",
+     "2061-01-02T00:30",
+     "2061-01-30T00:30",
+     "2063-12-02T00:30",
+     "2063-12-30T00:30",
+     "2067-01-02T00:30",
+     "2067-01-30T00:30",
+     "2081-03-02T00:30",
+     "2081-03-30T00:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R108",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2027-12-01T12:59",
+     "rule": "INTERVAL=4;BYSETPOS=-2;FREQ=DAILY;BYDAY=TU,WE;BYMONTH=4,6,11;INTERVAL=0",
+     "exdates": [],
+     "rdates": [
+      "2027-12-02T07:59",
+      "2027-12-04T07:59"
+     ]
+    },
+    "2027-11-30T12:00",
+    "2028-01-29T12:59"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "R109",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1896-12-29T12:00",
+     "rule": "INTERVAL=5;COUNT=1;BYDAY=SA;FREQ=DAILY",
+     "exdates": [],
+     "rdates": [
+      "1896-12-28T12:00",
+      "1897-01-03T07:00"
+     ]
+    },
+    "1896-11-19T00:00",
+    "1896-12-19T00:00"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R110",
+   "title": "random event",
+   "args": [
+    {
+     "start": "0001-04-06T00:30",
+     "rule": "BYDAY=FR,TH;INTERVAL=3;FREQ=WEEKLY",
+     "exdates": [
+      "0001-04-23T00:31",
+      "0001-04-12T00:31",
+      "0001-05-06T00:30"
+     ],
+     "rdates": [
+      "0001-04-25T07:30"
+     ]
+    },
+    "1235-02-01T00:30",
+    "1235-08-30T00:30"
+   ],
+   "expected": {
+    "occurrences": [
+     "1235-02-15T00:30",
+     "1235-02-16T00:30",
+     "1235-03-08T00:30",
+     "1235-03-09T00:30",
+     "1235-03-29T00:30",
+     "1235-03-30T00:30",
+     "1235-04-19T00:30",
+     "1235-04-20T00:30",
+     "1235-05-10T00:30",
+     "1235-05-11T00:30",
+     "1235-05-31T00:30",
+     "1235-06-01T00:30",
+     "1235-06-21T00:30",
+     "1235-06-22T00:30",
+     "1235-07-12T00:30",
+     "1235-07-13T00:30",
+     "1235-08-02T00:30",
+     "1235-08-03T00:30",
+     "1235-08-23T00:30",
+     "1235-08-24T00:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R111",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2024-11-01T00:30",
+     "rule": "FREQ=YEARLY;UNTIL=2023-07-21T00:30",
+     "exdates": [
+      "2030-11-01T00:30",
+      "2024-11-01T00:30"
+     ],
+     "rdates": [
+      "2027-11-22T00:30",
+      "2023-11-22T07:30"
+     ]
+    },
+    "2024-09-22T00:30",
+    "2084-09-07T00:30"
+   ],
+   "expected": {
+    "occurrences": [
+     "2027-11-22T00:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R112",
+   "title": "random event",
+   "args": [
+    {
+     "start": "0002-12-30T23:45",
+     "rule": "FREQ=MONTHLY;BYMONTHDAY=15,-30,-31;BYMONTHDAY=32",
+     "exdates": [
+      "0003-03-04T23:45",
+      "0003-04-30T23:45",
+      "0003-02-22T23:45"
+     ],
+     "rdates": [
+      "0003-03-23T07:45"
+     ]
+    },
+    "0002-12-30T23:00",
+    "0012-11-07T23:59"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "R113",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2400-04-29T08:00",
+     "rule": "BYSETPOS=3,-1;BYMONTH=4,12;INTERVAL=2;FREQ=WEEKLY;COUNT=5",
+     "exdates": [
+      "2400-05-08T08:00",
+      "2400-05-14T08:01",
+      "2400-05-15T08:00"
+     ],
+     "rdates": [
+      "2400-05-29T07:00",
+      "2400-04-24T08:00"
+     ]
+    },
+    "2400-04-26T00:00",
+    "2400-11-22T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "2400-04-29T08:00",
+     "2400-05-29T07:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R114",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1896-11-15T09:00",
+     "rule": "FREQ=MONTHLY;BYSETPOS=2;COUNT=2;BYMONTH=3",
+     "exdates": [
+      "1896-12-15T09:01",
+      "1897-05-15T09:00"
+     ],
+     "rdates": []
+    },
+    "1896-11-14T09:00",
+    "1897-09-10T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1896-11-15T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R115",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1900-01-15T08:45",
+     "rule": "FREQ=YEARLY;COUNT=30",
+     "exdates": [
+      "1904-06-21T08:45",
+      "1904-08-14T08:45"
+     ],
+     "rdates": []
+    },
+    "1900-01-15T00:00",
+    "1960-01-01T08:45"
+   ],
+   "expected": {
+    "occurrences": [
+     "1900-01-15T08:45",
+     "1901-01-15T08:45",
+     "1902-01-15T08:45",
+     "1903-01-15T08:45",
+     "1904-01-15T08:45",
+     "1905-01-15T08:45",
+     "1906-01-15T08:45",
+     "1907-01-15T08:45",
+     "1908-01-15T08:45",
+     "1909-01-15T08:45",
+     "1910-01-15T08:45",
+     "1911-01-15T08:45",
+     "1912-01-15T08:45",
+     "1913-01-15T08:45",
+     "1914-01-15T08:45",
+     "1915-01-15T08:45",
+     "1916-01-15T08:45",
+     "1917-01-15T08:45",
+     "1918-01-15T08:45",
+     "1919-01-15T08:45",
+     "1920-01-15T08:45",
+     "1921-01-15T08:45",
+     "1922-01-15T08:45",
+     "1923-01-15T08:45",
+     "1924-01-15T08:45",
+     "1925-01-15T08:45",
+     "1926-01-15T08:45",
+     "1927-01-15T08:45",
+     "1928-01-15T08:45",
+     "1929-01-15T08:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R116",
+   "title": "random event",
+   "args": [
+    {
+     "start": "9999-02-28T23:00",
+     "rule": "COUNT=2;FREQ=DAILY;BYDAY=MO;BYSETPOS=2;BYMONTHDAY=30,-2",
+     "exdates": [
+      "9999-03-01T23:00"
+     ],
+     "rdates": [
+      "9999-03-06T23:00",
+      "9999-03-06T07:00"
+     ]
+    },
+    "9999-02-25T00:00",
+    "9999-12-31T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "9999-02-28T23:00",
+     "9999-03-06T07:00",
+     "9999-03-06T23:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R117",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1896-02-29T08:45",
+     "rule": "INTERVAL=7;FREQ=DAILY;BYMONTHDAY=29,-2,-31;COUNT=30;BYDAY=TU",
+     "exdates": [
+      "1896-03-03T08:45",
+      "1896-03-04T08:45",
+      "1896-03-02T08:45"
+     ],
+     "rdates": []
+    },
+    "1896-02-29T08:00",
+    "1896-04-29T08:45"
+   ],
+   "expected": {
+    "occurrences": [
+     "1896-02-29T08:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R118",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1999-03-01T08:45",
+     "rule": "FREQ=YEARLY;UNTIL=2003-10-20T09:30;INTERVAL=7",
+     "exdates": [],
+     "rdates": []
+    },
+    "1999-02-26T00:45",
+    "2009-02-23T08:45"
+   ],
+   "expected": {
+    "occurrences": [
+     "1999-03-01T08:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R119",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2023-01-15T12:59",
+     "rule": "FREQ=MONTHLY;UNTIL=2024-04-28T12:59;BYMONTH=6",
+     "exdates": [
+      "2023-07-15T12:59",
+      "2023-03-15T12:59",
+      "2023-04-15T12:59"
+     ],
+     "rdates": [
+      "2023-04-23T07:59"
+     ]
+    },
+    "2023-01-12T00:59",
+    "2023-11-08T12:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "2023-01-15T12:59",
+     "2023-04-23T07:59",
+     "2023-06-15T12:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R120",
+   "title": "random event",
+   "args": [
+    {
+     "start": "9998-12-28T09:59",
+     "rule": "FREQ=DAILY;INTERVAL=4;COUNT=2",
+     "exdates": [],
+     "rdates": []
+    },
+    "9998-12-28T00:00",
+    "9999-12-31T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "9998-12-28T09:59",
+     "9999-01-01T09:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R121",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1900-04-15T09:59",
+     "rule": "BYMONTH=6;UNTIL=1900-05-01T09:59;BYMONTHDAY=13,31,-30;FREQ=DAILY;BYDAY=SA",
+     "exdates": [
+      "1900-04-17T09:00",
+      "1900-04-15T09:00"
+     ],
+     "rdates": []
+    },
+    "1900-04-14T09:59",
+    "1900-05-14T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "1900-04-15T09:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R122",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2027-04-01T09:45",
+     "rule": "INTERVAL=2;FREQ=MONTHLY;BYSETPOS=-2;BYMONTHDAY=1,-1;INTERVAL=01",
+     "exdates": [
+      "2027-10-01T09:45",
+      "2027-07-01T09:45",
+      "2027-05-26T09:45"
+     ],
+     "rdates": []
+    },
+    "2027-02-20T00:00",
+    "2027-12-17T23:59"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "R123",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2400-12-01T12:59",
+     "rule": "UNTIL=2400-12-12T23:00;INTERVAL=12;FREQ=DAILY",
+     "exdates": [
+      "2400-12-05T12:59",
+      "2400-12-04T12:59",
+      "2400-12-02T12:59"
+     ],
+     "rdates": [
+      "2400-12-07T07:59",
+      "2400-11-30T07:59"
+     ]
+    },
+    "2400-11-28T00:00",
+    "2401-03-28T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "2400-11-30T07:59",
+     "2400-12-01T12:59",
+     "2400-12-07T07:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R124",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2026-02-28T12:59",
+     "rule": "FREQ=DAILY;INTERVAL=5",
+     "exdates": [],
+     "rdates": [
+      "2026-02-28T07:59"
+     ]
+    },
+    "2026-02-28T00:00",
+    "2026-03-30T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-02-28T07:59",
+     "2026-02-28T12:59",
+     "2026-03-05T12:59",
+     "2026-03-10T12:59",
+     "2026-03-15T12:59",
+     "2026-03-20T12:59",
+     "2026-03-25T12:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R125",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1899-02-15T09:30",
+     "rule": "BYMONTH=4,12;BYMONTHDAY=31,-1,-31;UNTIL=1900-10-14T09:30;WKST=WE;FREQ=MONTHLY;BYSETPOS=5;INTERVAL=5",
+     "exdates": [],
+     "rdates": [
+      "1899-06-15T07:30",
+      "1899-05-02T09:30",
+      "1899-02-15T09:30"
+     ]
+    },
+    "1899-01-06T09:00",
+    "1899-11-02T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "1899-02-15T09:30",
+     "1899-05-02T09:30",
+     "1899-06-15T07:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R126",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2027-02-28T12:30",
+     "rule": "INTERVAL=2;BYSETPOS=5;FREQ=YEARLY;UNTIL=2034-06-05T09:59;BYMONTH=9,12",
+     "exdates": [
+      "2031-02-28T12:30"
+     ],
+     "rdates": []
+    },
+    "2027-01-19T00:30",
+    "2087-01-04T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "2027-02-28T12:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R127",
+   "title": "random event",
+   "args": [
+    {
+     "start": "9998-01-31T00:00",
+     "rule": "BYDAY=SU;BYMONTHDAY=-29;FREQ=DAILY;UNTIL=9998-01-31T10:30;BYSETPOS=2",
+     "exdates": [],
+     "rdates": []
+    },
+    "9999-01-01T00:00",
+    "9999-12-31T23:59"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R128",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1900-06-01T23:30",
+     "rule": "FREQ=MONTHLY;INTERVAL=7;BYDAY=SA,MO,-5MO;BYMONTH=9;COUNT=5",
+     "exdates": [
+      "1900-11-09T23:30",
+      "1900-11-01T23:30"
+     ],
+     "rdates": [
+      "1900-05-18T07:30"
+     ]
+    },
+    "1900-05-31T23:30",
+    "1910-04-09T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1900-06-01T23:30",
+     "1905-09-02T23:30",
+     "1905-09-04T23:30",
+     "1905-09-09T23:30",
+     "1905-09-11T23:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R129",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2026-01-29T12:59",
+     "rule": null,
+     "exdates": [
+      "2028-07-12T12:59",
+      "2030-03-21T12:59"
+     ],
+     "rdates": [
+      "2029-06-26T07:59",
+      "2028-08-11T12:59"
+     ]
+    },
+    "2025-12-20T00:59",
+    "2145-11-21T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-01-29T12:59",
+     "2028-08-11T12:59",
+     "2029-06-26T07:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R130",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2400-02-29T23:59",
+     "rule": "UNTIL=2400-03-26T00:30;FREQ=DAILY;INTERVAL=1",
+     "exdates": [
+      "2400-03-03T23:59",
+      "2400-03-03T23:00",
+      "2400-03-02T23:59"
+     ],
+     "rdates": [
+      "2400-03-02T23:59",
+      "2400-03-01T07:59"
+     ]
+    },
+    "2400-02-28T00:00",
+    "2400-03-09T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2400-02-29T23:59",
+     "2400-03-01T07:59",
+     "2400-03-01T23:59",
+     "2400-03-04T23:59",
+     "2400-03-05T23:59",
+     "2400-03-06T23:59",
+     "2400-03-07T23:59",
+     "2400-03-08T23:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R131",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1999-08-31T09:59",
+     "rule": "BYMONTH=2,9;WKST=SU;BYMONTHDAY=29;BYDAY=20TH,-2WE;FREQ=YEARLY;BYSETPOS=2,5",
+     "exdates": [
+      "2002-08-03T09:59",
+      "2001-11-18T09:59"
+     ],
+     "rdates": [
+      "2005-08-23T09:59"
+     ]
+    },
+    "1999-08-31T00:59",
+    "2059-08-16T09:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "1999-08-31T09:59",
+     "2005-08-23T09:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R132",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2025-02-15T12:30",
+     "rule": "BYMONTHDAY=13,-30;INTERVAL=5;BYDAY=-2TH,2SU,MO;UNTIL=2026-11-08T12:30;FREQ=MONTHLY",
+     "exdates": [
+      "2025-03-21T12:30"
+     ],
+     "rdates": [
+      "2025-02-06T12:30",
+      "2025-07-24T12:30"
+     ]
+    },
+    "5025-12-01T00:00",
+    "5028-05-19T00:00"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R133",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2100-04-28T08:59",
+     "rule": "UNTIL=2102-01-23T23:59;FREQ=MONTHLY;BYMONTHDAY=1",
+     "exdates": [],
+     "rdates": []
+    },
+    "2100-04-28T08:59",
+    "2110-03-07T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "2100-04-28T08:59",
+     "2100-05-01T08:59",
+     "2100-06-01T08:59",
+     "2100-07-01T08:59",
+     "2100-08-01T08:59",
+     "2100-09-01T08:59",
+     "2100-10-01T08:59",
+     "2100-11-01T08:59",
+     "2100-12-01T08:59",
+     "2101-01-01T08:59",
+     "2101-02-01T08:59",
+     "2101-03-01T08:59",
+     "2101-04-01T08:59",
+     "2101-05-01T08:59",
+     "2101-06-01T08:59",
+     "2101-07-01T08:59",
+     "2101-08-01T08:59",
+     "2101-09-01T08:59",
+     "2101-10-01T08:59",
+     "2101-11-01T08:59",
+     "2101-12-01T08:59",
+     "2102-01-01T08:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R134",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2026-06-01T09:59",
+     "rule": "BYDAY=TH;FREQ=DAILY;BYSETPOS=2,-2",
+     "exdates": [
+      "2026-06-01T09:59",
+      "2026-06-03T09:59",
+      "2026-06-01T09:59"
+     ],
+     "rdates": [
+      "2026-05-31T09:59",
+      "2026-06-01T09:59"
+     ]
+    },
+    "2026-04-22T00:59",
+    "2026-08-20T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-05-31T09:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R135",
+   "title": "random event",
+   "args": [
+    {
+     "start": "9999-01-29T23:30",
+     "rule": "FREQ=YEARLY;BYMONTH=6,9,11;INTERVAL=12;BYSETPOS=1;BYDAY=-53SU,TH;COUNT=30",
+     "exdates": [],
+     "rdates": [
+      "9998-05-22T23:30"
+     ]
+    },
+    "9998-12-20T00:30",
+    "9999-12-31T23:30"
+   ],
+   "expected": {
+    "occurrences": [
+     "9999-01-29T23:30",
+     "9999-06-03T23:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R136",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2099-04-15T08:59",
+     "rule": "BYSETPOS=-1;FREQ=DAILY;UNTIL=2099-04-20T09:30;BYDAY=FR,SA",
+     "exdates": [
+      "2099-04-18T08:59"
+     ],
+     "rdates": []
+    },
+    "9999-02-01T08:59",
+    "9999-06-01T08:59"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R137",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2100-02-28T23:00",
+     "rule": "INTERVAL=7;FREQ=DAILY",
+     "exdates": [
+      "2100-03-01T23:00"
+     ],
+     "rdates": []
+    },
+    "2100-01-19T23:00",
+    "2100-01-29T23:59"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R138",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2023-02-28T09:59",
+     "rule": "FREQ=WEEKLY;BYDAY=MO;BYSETPOS=-1",
+     "exdates": [
+      "2023-03-13T09:59",
+      "2023-03-14T09:59"
+     ],
+     "rdates": []
+    },
+    "5023-02-01T09:59",
+    "5023-08-30T09:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "5023-02-03T09:59",
+     "5023-02-10T09:59",
+     "5023-02-17T09:59",
+     "5023-02-24T09:59",
+     "5023-03-03T09:59",
+     "5023-03-10T09:59",
+     "5023-03-17T09:59",
+     "5023-03-24T09:59",
+     "5023-03-31T09:59",
+     "5023-04-07T09:59",
+     "5023-04-14T09:59",
+     "5023-04-21T09:59",
+     "5023-04-28T09:59",
+     "5023-05-05T09:59",
+     "5023-05-12T09:59",
+     "5023-05-19T09:59",
+     "5023-05-26T09:59",
+     "5023-06-02T09:59",
+     "5023-06-09T09:59",
+     "5023-06-16T09:59",
+     "5023-06-23T09:59",
+     "5023-06-30T09:59",
+     "5023-07-07T09:59",
+     "5023-07-14T09:59",
+     "5023-07-21T09:59",
+     "5023-07-28T09:59",
+     "5023-08-04T09:59",
+     "5023-08-11T09:59",
+     "5023-08-18T09:59",
+     "5023-08-25T09:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R139",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2026-11-01T23:00",
+     "rule": "BYDAY=MO,SU,MO;FREQ=DAILY",
+     "exdates": [],
+     "rdates": [
+      "2026-11-05T23:00",
+      "2026-11-07T23:00"
+     ]
+    },
+    "2026-10-29T23:00",
+    "2026-11-28T23:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-11-01T23:00",
+     "2026-11-02T23:00",
+     "2026-11-05T23:00",
+     "2026-11-07T23:00",
+     "2026-11-08T23:00",
+     "2026-11-09T23:00",
+     "2026-11-15T23:00",
+     "2026-11-16T23:00",
+     "2026-11-22T23:00",
+     "2026-11-23T23:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R140",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2027-08-01T12:59",
+     "rule": "FREQ=DAILY;BYDAY=MO,TH,MO;COUNT=1;INTERVAL=2",
+     "exdates": [
+      "2027-08-02T12:59"
+     ],
+     "rdates": [
+      "2027-08-05T07:59"
+     ]
+    },
+    "2027-07-31T00:59",
+    "2027-11-28T12:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "2027-08-01T12:59",
+     "2027-08-05T07:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R141",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1900-01-14T08:45",
+     "rule": "INTERVAL=1;UNTIL=1900-04-05T08:45;BYDAY=SU,WE;FREQ=WEEKLY",
+     "exdates": [],
+     "rdates": [
+      "1900-02-12T08:45",
+      "1900-02-14T07:45"
+     ]
+    },
+    "1900-01-13T00:00",
+    "1900-03-24T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1900-01-14T08:45",
+     "1900-01-17T08:45",
+     "1900-01-21T08:45",
+     "1900-01-24T08:45",
+     "1900-01-28T08:45",
+     "1900-01-31T08:45",
+     "1900-02-04T08:45",
+     "1900-02-07T08:45",
+     "1900-02-11T08:45",
+     "1900-02-12T08:45",
+     "1900-02-14T07:45",
+     "1900-02-14T08:45",
+     "1900-02-18T08:45",
+     "1900-02-21T08:45",
+     "1900-02-25T08:45",
+     "1900-02-28T08:45",
+     "1900-03-04T08:45",
+     "1900-03-07T08:45",
+     "1900-03-11T08:45",
+     "1900-03-14T08:45",
+     "1900-03-18T08:45",
+     "1900-03-21T08:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R142",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1899-02-28T09:30",
+     "rule": "COUNT=5;BYDAY=MO,SU,TU;WKST=FR;BYSETPOS=1;FREQ=WEEKLY;BYMONTH=3,9,12",
+     "exdates": [
+      "1899-03-19T09:30"
+     ],
+     "rdates": []
+    },
+    "1899-02-27T00:30",
+    "1900-04-23T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1899-02-28T09:30",
+     "1899-03-05T09:30",
+     "1899-03-12T09:30",
+     "1899-03-26T09:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R143",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2000-11-28T00:00",
+     "rule": "BYMONTHDAY=2,-31;UNTIL=2002-12-23T09:30;FREQ=YEARLY;BYDAY=WE,TU,3FR;INTERVAL=4;BYSETPOS=-2",
+     "exdates": [
+      "2006-10-21T00:00",
+      "2002-11-27T00:00",
+      "2006-11-28T00:00",
+      "2000-11-28T00:00"
+     ],
+     "rdates": []
+    },
+    "2400-12-01T00:00",
+    "2430-11-24T00:00"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R144",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2026-03-15T08:45",
+     "rule": "COUNT=3;WKST=SA;FREQ=MONTHLY",
+     "exdates": [
+      "2026-05-03T08:45",
+      "2026-09-15T08:45",
+      "2026-05-04T08:46"
+     ],
+     "rdates": []
+    },
+    "2026-03-15T00:45",
+    "2027-01-09T08:45"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-15T08:45",
+     "2026-04-15T08:45",
+     "2026-05-15T08:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R145",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2400-02-29T09:30",
+     "rule": "COUNT=3;BYDAY=3TU;BYSETPOS=2,-1;FREQ=MONTHLY;INTERVAL=3",
+     "exdates": [
+      "2400-07-04T09:30",
+      "2400-03-05T09:30",
+      "2400-06-29T09:30"
+     ],
+     "rdates": []
+    },
+    "2400-01-20T00:30",
+    "2402-07-08T09:30"
+   ],
+   "expected": {
+    "occurrences": [
+     "2400-02-29T09:30",
+     "2400-05-16T09:30",
+     "2400-08-15T09:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R146",
+   "title": "random event",
+   "args": [
+    {
+     "start": "0001-02-01T12:45",
+     "rule": "INTERVAL=12;FREQ=YEARLY;BYDAY=3FR,2WE;COUNT=1",
+     "exdates": [
+      "0001-02-01T12:45"
+     ],
+     "rdates": [
+      "0006-12-16T12:45",
+      "0004-03-09T07:45"
+     ]
+    },
+    "0001-01-01T00:45",
+    "0030-12-25T12:45"
+   ],
+   "expected": {
+    "occurrences": [
+     "0004-03-09T07:45",
+     "0006-12-16T12:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R147",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1899-12-29T09:59",
+     "rule": "WKST=FR;BYSETPOS=10;FREQ=YEARLY;BYMONTH=2,12",
+     "exdates": [
+      "1903-07-17T09:59",
+      "1904-12-29T09:59",
+      "1903-10-28T09:59"
+     ],
+     "rdates": [
+      "1900-11-08T07:59"
+     ]
+    },
+    "1899-12-26T00:00",
+    "1929-12-19T09:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "1899-12-29T09:59",
+     "1900-11-08T07:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R148",
+   "title": "random event",
+   "args": [
+    {
+     "start": "2100-02-28T09:45",
+     "rule": "WKST=SU;FREQ=DAILY;UNTIL=2100-03-14T09:45;BYMONTH=4",
+     "exdates": [
+      "2100-03-04T09:45",
+      "2100-03-05T09:45"
+     ],
+     "rdates": [
+      "2100-03-03T09:45",
+      "2100-03-04T07:45"
+     ]
+    },
+    "2100-02-28T00:00",
+    "2100-04-29T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2100-02-28T09:45",
+     "2100-03-03T09:45",
+     "2100-03-04T07:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R149",
+   "title": "random event",
+   "args": [
+    {
+     "start": "9999-02-28T12:30",
+     "rule": "UNTIL=10007-08-13T09:00;INTERVAL=5;FREQ=YEARLY",
+     "exdates": [],
+     "rdates": []
+    },
+    "9999-01-01T00:00",
+    "9999-12-31T23:59"
+   ],
+   "expected": {
+    "error": "bad_rule",
+    "ok": false
+   }
+  },
+  {
+   "id": "R150",
+   "title": "random event",
+   "args": [
+    {
+     "start": "1899-02-01T08:45",
+     "rule": "FREQ=YEARLY;COUNT=13",
+     "exdates": [
+      "1903-12-17T08:46"
+     ],
+     "rdates": [
+      "1905-07-21T08:45"
+     ]
+    },
+    "1899-02-01T08:45",
+    "1909-01-30T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1899-02-01T08:45",
+     "1900-02-01T08:45",
+     "1901-02-01T08:45",
+     "1902-02-01T08:45",
+     "1903-02-01T08:45",
+     "1904-02-01T08:45",
+     "1905-02-01T08:45",
+     "1905-07-21T08:45",
+     "1906-02-01T08:45",
+     "1907-02-01T08:45",
+     "1908-02-01T08:45"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R151",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2027-03-01T23:59",
+     "rule": "FREQ=YEARLY;BYDAY=TU,TH;BYMONTH=12;BYSETPOS=-2;UNTIL=2027-08-28T12:59",
+     "exdates": [],
+     "rdates": []
+    },
+    "2027-02-27T00:00",
+    "2028-04-04T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2027-03-01T23:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R152",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2024-06-15T09:00",
+     "rule": "FREQ=MONTHLY;UNTIL=2024-06-07T09:00",
+     "exdates": [],
+     "rdates": []
+    },
+    "2024-06-15T00:00",
+    "2028-07-24T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2024-06-15T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R153",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2027-01-28T00:00",
+     "rule": "FREQ=WEEKLY;UNTIL=2027-01-01T00:00",
+     "exdates": [],
+     "rdates": []
+    },
+    "2027-01-24T00:00",
+    "2028-03-03T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2027-01-28T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R154",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2000-07-21T09:00",
+     "rule": "FREQ=YEARLY;BYDAY=MO,WE,FR;BYSETPOS=1,-1;COUNT=12",
+     "exdates": [
+      "2000-07-21T09:00"
+     ],
+     "rdates": []
+    },
+    "2000-07-18T00:00",
+    "2001-08-25T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2000-12-29T09:00",
+     "2001-01-01T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R155",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "1999-06-01T00:00",
+     "rule": "FREQ=YEARLY;BYDAY=SA,SU;BYSETPOS=1,2;COUNT=3",
+     "exdates": [],
+     "rdates": []
+    },
+    "1999-05-30T00:00",
+    "1999-07-31T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1999-06-01T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R156",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2026-02-16T23:59",
+     "rule": "FREQ=WEEKLY;BYDAY=SA,SU;BYSETPOS=-2;UNTIL=2026-02-22T12:59",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-02-15T00:00",
+    "2058-12-25T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-02-16T23:59",
+     "2026-02-21T23:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R157",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2024-01-30T00:00",
+     "rule": "FREQ=WEEKLY;UNTIL=2024-01-09T00:00",
+     "exdates": [],
+     "rdates": []
+    },
+    "2024-01-29T00:00",
+    "2025-03-05T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2024-01-30T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R158",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "9999-12-04T23:59",
+     "rule": "FREQ=WEEKLY;BYDAY=SA,SU;BYSETPOS=2;WKST=MO",
+     "exdates": [],
+     "rdates": []
+    },
+    "9999-12-01T00:00",
+    "9999-12-31T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "9999-12-04T23:59",
+     "9999-12-05T23:59",
+     "9999-12-12T23:59",
+     "9999-12-19T23:59",
+     "9999-12-26T23:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R159",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2027-09-28T00:00",
+     "rule": "FREQ=YEARLY;BYDAY=TU;BYSETPOS=2;COUNT=3",
+     "exdates": [],
+     "rdates": []
+    },
+    "2027-09-26T00:00",
+    "2027-11-27T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2027-09-28T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R160",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2024-05-29T09:00",
+     "rule": "FREQ=YEARLY;BYDAY=MO,WE,FR;BYSETPOS=1;COUNT=3",
+     "exdates": [],
+     "rdates": []
+    },
+    "2024-05-27T00:00",
+    "2024-07-28T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2024-05-29T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R161",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2024-07-28T00:00",
+     "rule": "FREQ=YEARLY;BYDAY=20SA,20MO;COUNT=8",
+     "exdates": [
+      "2024-07-28T00:00"
+     ],
+     "rdates": []
+    },
+    "2024-07-24T00:00",
+    "2054-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2025-05-17T00:00",
+     "2025-05-19T00:00",
+     "2026-05-16T00:00",
+     "2026-05-18T00:00",
+     "2027-05-15T00:00",
+     "2027-05-17T00:00",
+     "2028-05-13T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R162",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "1999-11-15T18:30",
+     "rule": "FREQ=MONTHLY;BYDAY=SA,SU;BYSETPOS=2;UNTIL=2000-01-03T18:30",
+     "exdates": [],
+     "rdates": []
+    },
+    "1999-11-12T00:00",
+    "2000-12-19T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1999-11-15T18:30",
+     "1999-12-05T18:30",
+     "2000-01-02T18:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R163",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "9999-11-04T00:00",
+     "rule": "FREQ=WEEKLY;BYDAY=SA,SU;BYSETPOS=1,-1;WKST=TU",
+     "exdates": [],
+     "rdates": []
+    },
+    "9999-11-01T00:00",
+    "9999-12-31T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "9999-11-04T00:00",
+     "9999-11-06T00:00",
+     "9999-11-07T00:00",
+     "9999-11-13T00:00",
+     "9999-11-14T00:00",
+     "9999-11-20T00:00",
+     "9999-11-21T00:00",
+     "9999-11-27T00:00",
+     "9999-11-28T00:00",
+     "9999-12-04T00:00",
+     "9999-12-05T00:00",
+     "9999-12-11T00:00",
+     "9999-12-12T00:00",
+     "9999-12-18T00:00",
+     "9999-12-19T00:00",
+     "9999-12-25T00:00",
+     "9999-12-26T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R164",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2024-10-31T18:30",
+     "rule": "FREQ=YEARLY;BYDAY=20TH,5SA;COUNT=4;BYMONTH=7,10",
+     "exdates": [],
+     "rdates": []
+    },
+    "2024-10-30T00:00",
+    "2054-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2024-10-31T18:30",
+     "2026-10-31T18:30",
+     "2027-07-31T18:30",
+     "2027-10-30T18:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R165",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2027-01-15T00:00",
+     "rule": "FREQ=WEEKLY;COUNT=10",
+     "exdates": [],
+     "rdates": []
+    },
+    "2027-01-13T00:00",
+    "2027-03-12T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2027-01-15T00:00",
+     "2027-01-22T00:00",
+     "2027-01-29T00:00",
+     "2027-02-05T00:00",
+     "2027-02-12T00:00",
+     "2027-02-19T00:00",
+     "2027-02-26T00:00",
+     "2027-03-05T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R166",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "1999-03-31T23:59",
+     "rule": "FREQ=MONTHLY;UNTIL=1999-04-01T23:59",
+     "exdates": [],
+     "rdates": []
+    },
+    "1999-03-30T00:00",
+    "2003-05-09T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1999-03-31T23:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R167",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "1999-07-06T23:59",
+     "rule": "FREQ=YEARLY;COUNT=10",
+     "exdates": [],
+     "rdates": []
+    },
+    "1999-07-05T00:00",
+    "2001-07-06T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "1999-07-06T23:59",
+     "2000-07-06T23:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R168",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2000-09-30T18:30",
+     "rule": "FREQ=MONTHLY;BYDAY=MO,TU,WE,TH,FR;BYSETPOS=-1;UNTIL=2001-02-22T12:30",
+     "exdates": [
+      "2000-09-30T18:30"
+     ],
+     "rdates": []
+    },
+    "2000-09-27T00:00",
+    "2033-08-08T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2000-10-31T18:30",
+     "2000-11-30T18:30",
+     "2000-12-29T18:30",
+     "2001-01-31T18:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R169",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "9999-11-08T00:00",
+     "rule": "FREQ=MONTHLY;BYDAY=-1FR,-1SA;BYSETPOS=-1;WKST=WE",
+     "exdates": [],
+     "rdates": []
+    },
+    "9999-11-01T00:00",
+    "9999-12-31T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "9999-11-08T00:00",
+     "9999-11-27T00:00",
+     "9999-12-31T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R170",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2027-02-28T18:30",
+     "rule": "FREQ=YEARLY;BYDAY=-2TU;COUNT=4",
+     "exdates": [],
+     "rdates": []
+    },
+    "2027-02-28T00:00",
+    "2057-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2027-02-28T18:30",
+     "2027-12-21T18:30",
+     "2028-12-19T18:30",
+     "2029-12-18T18:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R171",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2024-10-28T00:00",
+     "rule": "FREQ=MONTHLY;UNTIL=2025-03-28T00:00;INTERVAL=1",
+     "exdates": [],
+     "rdates": []
+    },
+    "2024-10-25T00:00",
+    "2028-12-06T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2024-10-28T00:00",
+     "2024-11-28T00:00",
+     "2024-12-28T00:00",
+     "2025-01-28T00:00",
+     "2025-02-28T00:00",
+     "2025-03-28T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R172",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2026-03-15T23:59",
+     "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;BYSETPOS=2;COUNT=12;WKST=SU",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-03-11T00:00",
+    "2030-04-23T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-03-15T23:59",
+     "2026-03-17T23:59",
+     "2026-03-24T23:59",
+     "2026-03-31T23:59",
+     "2026-04-07T23:59",
+     "2026-04-14T23:59",
+     "2026-04-21T23:59",
+     "2026-04-28T23:59",
+     "2026-05-05T23:59",
+     "2026-05-12T23:59",
+     "2026-05-19T23:59",
+     "2026-05-26T23:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R173",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2000-01-29T00:00",
+     "rule": "FREQ=WEEKLY;BYDAY=TU,TH;BYSETPOS=2;UNTIL=2000-02-18T00:00",
+     "exdates": [],
+     "rdates": []
+    },
+    "2000-01-28T00:00",
+    "2032-12-06T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2000-01-29T00:00",
+     "2000-02-03T00:00",
+     "2000-02-10T00:00",
+     "2000-02-17T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R174",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "1999-12-21T09:00",
+     "rule": "FREQ=YEARLY;BYDAY=MO,TU,WE,TH,FR;BYMONTH=9;BYSETPOS=-1;UNTIL=2002-09-12T09:00",
+     "exdates": [],
+     "rdates": []
+    },
+    "1999-12-17T00:00",
+    "2001-01-24T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1999-12-21T09:00",
+     "2000-09-29T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R175",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2027-03-15T18:30",
+     "rule": "FREQ=YEARLY;BYDAY=MO,TU,WE,TH,FR;BYSETPOS=2;COUNT=3",
+     "exdates": [],
+     "rdates": []
+    },
+    "2027-03-13T00:00",
+    "2031-04-23T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2027-03-15T18:30",
+     "2028-01-04T18:30",
+     "2029-01-02T18:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R176",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2027-03-15T23:59",
+     "rule": "FREQ=YEARLY;BYDAY=MO,WE,FR;BYSETPOS=1;COUNT=6",
+     "exdates": [],
+     "rdates": []
+    },
+    "2027-03-12T00:00",
+    "2031-04-23T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2027-03-15T23:59",
+     "2028-01-03T23:59",
+     "2029-01-01T23:59",
+     "2030-01-02T23:59",
+     "2031-01-01T23:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R177",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2026-05-28T09:00",
+     "rule": "FREQ=WEEKLY;UNTIL=2026-06-25T09:00",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-05-24T00:00",
+    "2027-07-02T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-05-28T09:00",
+     "2026-06-04T09:00",
+     "2026-06-11T09:00",
+     "2026-06-18T09:00",
+     "2026-06-25T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R178",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2000-06-30T09:00",
+     "rule": "FREQ=YEARLY;BYDAY=-2WE,10TU;COUNT=4;BYMONTH=10",
+     "exdates": [
+      "2000-06-30T09:00"
+     ],
+     "rdates": []
+    },
+    "2000-06-28T00:00",
+    "2030-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2000-10-18T09:00",
+     "2001-10-24T09:00",
+     "2002-10-23T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R179",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "1999-02-15T18:30",
+     "rule": "FREQ=MONTHLY;UNTIL=1999-03-15T18:30;BYMONTH=3",
+     "exdates": [],
+     "rdates": []
+    },
+    "1999-02-11T00:00",
+    "2003-03-26T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1999-02-15T18:30",
+     "1999-03-15T18:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R180",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2024-08-28T23:59",
+     "rule": "FREQ=YEARLY;BYDAY=TU;BYSETPOS=-3;COUNT=6",
+     "exdates": [],
+     "rdates": []
+    },
+    "2024-08-28T00:00",
+    "2057-07-06T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2024-08-28T23:59",
+     "2024-12-17T23:59",
+     "2025-12-16T23:59",
+     "2026-12-15T23:59",
+     "2027-12-14T23:59",
+     "2028-12-12T23:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R181",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2026-09-15T00:00",
+     "rule": "FREQ=YEARLY;UNTIL=2030-09-15T00:00;BYMONTH=9",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-09-15T00:00",
+    "2059-07-24T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-09-15T00:00",
+     "2027-09-15T00:00",
+     "2028-09-15T00:00",
+     "2029-09-15T00:00",
+     "2030-09-15T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R182",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2000-05-01T00:00",
+     "rule": "FREQ=MONTHLY;BYDAY=MO,WE,FR;BYSETPOS=1,2;COUNT=3",
+     "exdates": [
+      "2000-05-01T00:00"
+     ],
+     "rdates": []
+    },
+    "2000-04-27T00:00",
+    "2000-06-30T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2000-05-03T00:00",
+     "2000-06-02T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R183",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "1999-09-15T23:59",
+     "rule": "FREQ=MONTHLY;UNTIL=1999-09-14T23:59",
+     "exdates": [
+      "1999-09-15T23:59"
+     ],
+     "rdates": []
+    },
+    "1999-09-13T00:00",
+    "2003-10-24T00:00"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R184",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "9999-11-16T18:30",
+     "rule": "FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR;BYSETPOS=1,-1;WKST=MO",
+     "exdates": [],
+     "rdates": []
+    },
+    "9999-11-01T00:00",
+    "9999-12-31T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "9999-11-16T18:30",
+     "9999-11-17T18:30",
+     "9999-11-18T18:30",
+     "9999-11-19T18:30",
+     "9999-11-22T18:30",
+     "9999-11-23T18:30",
+     "9999-11-24T18:30",
+     "9999-11-25T18:30",
+     "9999-11-26T18:30",
+     "9999-11-29T18:30",
+     "9999-11-30T18:30",
+     "9999-12-01T18:30",
+     "9999-12-02T18:30",
+     "9999-12-03T18:30",
+     "9999-12-06T18:30",
+     "9999-12-07T18:30",
+     "9999-12-08T18:30",
+     "9999-12-09T18:30",
+     "9999-12-10T18:30",
+     "9999-12-13T18:30",
+     "9999-12-14T18:30",
+     "9999-12-15T18:30",
+     "9999-12-16T18:30",
+     "9999-12-17T18:30",
+     "9999-12-20T18:30",
+     "9999-12-21T18:30",
+     "9999-12-22T18:30",
+     "9999-12-23T18:30",
+     "9999-12-24T18:30",
+     "9999-12-27T18:30",
+     "9999-12-28T18:30",
+     "9999-12-29T18:30",
+     "9999-12-30T18:30",
+     "9999-12-31T18:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R185",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "1999-03-31T09:00",
+     "rule": "FREQ=YEARLY;BYDAY=SA,SU;BYMONTH=3;BYSETPOS=2;UNTIL=2000-05-12T12:00",
+     "exdates": [],
+     "rdates": []
+    },
+    "1999-03-27T00:00",
+    "2000-05-04T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1999-03-31T09:00",
+     "2000-03-05T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R186",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "9999-11-19T09:00",
+     "rule": "FREQ=DAILY;BYDAY=SA,SU;BYSETPOS=-2;WKST=FR",
+     "exdates": [],
+     "rdates": []
+    },
+    "9999-11-01T00:00",
+    "9999-12-31T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "9999-11-19T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R187",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2000-04-15T18:30",
+     "rule": "FREQ=MONTHLY;BYDAY=MO,WE,FR;BYSETPOS=1,-1;COUNT=6",
+     "exdates": [],
+     "rdates": []
+    },
+    "2000-04-12T00:00",
+    "2033-02-21T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2000-04-15T18:30",
+     "2000-04-28T18:30",
+     "2000-05-01T18:30",
+     "2000-05-31T18:30",
+     "2000-06-02T18:30",
+     "2000-06-30T18:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R188",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "1999-06-15T23:59",
+     "rule": "FREQ=MONTHLY;BYDAY=MO,TU,WE,TH,FR;BYSETPOS=1,2;COUNT=3",
+     "exdates": [],
+     "rdates": []
+    },
+    "1999-06-13T00:00",
+    "2032-04-22T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1999-06-15T23:59",
+     "1999-07-01T23:59",
+     "1999-07-02T23:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R189",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2027-10-28T18:30",
+     "rule": "FREQ=YEARLY;BYDAY=1MO,10SU;COUNT=8",
+     "exdates": [],
+     "rdates": []
+    },
+    "2027-10-28T00:00",
+    "2057-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2027-10-28T18:30",
+     "2028-01-03T18:30",
+     "2028-03-05T18:30",
+     "2029-01-01T18:30",
+     "2029-03-11T18:30",
+     "2030-01-07T18:30",
+     "2030-03-10T18:30",
+     "2031-01-06T18:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R190",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2027-06-02T00:00",
+     "rule": "FREQ=MONTHLY;BYDAY=SA,SU;BYSETPOS=3;UNTIL=2027-12-09T00:00",
+     "exdates": [],
+     "rdates": []
+    },
+    "2027-05-29T00:00",
+    "2060-04-09T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2027-06-02T00:00",
+     "2027-06-12T00:00",
+     "2027-07-10T00:00",
+     "2027-08-08T00:00",
+     "2027-09-11T00:00",
+     "2027-10-09T00:00",
+     "2027-11-13T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R191",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2026-09-30T18:30",
+     "rule": "FREQ=WEEKLY;UNTIL=2026-09-16T18:30",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-09-26T00:00",
+    "2027-11-04T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-09-30T18:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R192",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2024-09-17T18:30",
+     "rule": "FREQ=YEARLY;BYDAY=-20WE,3TU;COUNT=8;BYMONTH=12",
+     "exdates": [],
+     "rdates": []
+    },
+    "2024-09-15T00:00",
+    "2054-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2024-09-17T18:30",
+     "2024-12-17T18:30",
+     "2025-12-16T18:30",
+     "2026-12-15T18:30",
+     "2027-12-21T18:30",
+     "2028-12-19T18:30",
+     "2029-12-18T18:30",
+     "2030-12-17T18:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R193",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2026-07-29T23:59",
+     "rule": "FREQ=YEARLY;BYDAY=10TH,-20SA;COUNT=4",
+     "exdates": [
+      "2026-07-29T23:59"
+     ],
+     "rdates": []
+    },
+    "2026-07-27T00:00",
+    "2056-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-08-15T23:59",
+     "2027-03-11T23:59",
+     "2027-08-14T23:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R194",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2000-09-01T00:00",
+     "rule": "FREQ=WEEKLY;UNTIL=2000-09-29T00:00",
+     "exdates": [],
+     "rdates": []
+    },
+    "2000-08-30T00:00",
+    "2001-10-06T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2000-09-01T00:00",
+     "2000-09-08T00:00",
+     "2000-09-15T00:00",
+     "2000-09-22T00:00",
+     "2000-09-29T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R195",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2027-08-15T18:30",
+     "rule": "FREQ=DAILY;UNTIL=2027-08-20T18:30",
+     "exdates": [],
+     "rdates": []
+    },
+    "2027-08-14T00:00",
+    "2027-10-14T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2027-08-15T18:30",
+     "2027-08-16T18:30",
+     "2027-08-17T18:30",
+     "2027-08-18T18:30",
+     "2027-08-19T18:30",
+     "2027-08-20T18:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R196",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "1999-09-29T18:30",
+     "rule": "FREQ=DAILY;UNTIL=1999-10-06T18:30",
+     "exdates": [],
+     "rdates": []
+    },
+    "1999-09-27T00:00",
+    "1999-11-28T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1999-09-29T18:30",
+     "1999-09-30T18:30",
+     "1999-10-01T18:30",
+     "1999-10-02T18:30",
+     "1999-10-03T18:30",
+     "1999-10-04T18:30",
+     "1999-10-05T18:30",
+     "1999-10-06T18:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R197",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2000-01-29T23:59",
+     "rule": "FREQ=YEARLY;BYDAY=5SU,-1TU;COUNT=8;BYMONTH=10",
+     "exdates": [],
+     "rdates": []
+    },
+    "2000-01-25T00:00",
+    "2030-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2000-01-29T23:59",
+     "2000-10-29T23:59",
+     "2000-10-31T23:59",
+     "2001-10-30T23:59",
+     "2002-10-29T23:59",
+     "2003-10-28T23:59",
+     "2004-10-26T23:59",
+     "2004-10-31T23:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R198",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2026-08-01T23:59",
+     "rule": "FREQ=MONTHLY;BYDAY=TU,TH;BYSETPOS=-1,1;UNTIL=2026-10-30T12:59",
+     "exdates": [
+      "2026-08-01T23:59"
+     ],
+     "rdates": []
+    },
+    "2026-07-30T00:00",
+    "2027-09-05T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-08-04T23:59",
+     "2026-08-27T23:59",
+     "2026-09-01T23:59",
+     "2026-09-29T23:59",
+     "2026-10-01T23:59",
+     "2026-10-29T23:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R199",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "1999-08-30T00:00",
+     "rule": "FREQ=YEARLY;BYDAY=2SA,1TU;COUNT=8",
+     "exdates": [],
+     "rdates": []
+    },
+    "1999-08-27T00:00",
+    "2029-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1999-08-30T00:00",
+     "2000-01-04T00:00",
+     "2000-01-08T00:00",
+     "2001-01-02T00:00",
+     "2001-01-13T00:00",
+     "2002-01-01T00:00",
+     "2002-01-12T00:00",
+     "2003-01-07T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R200",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2000-08-31T23:59",
+     "rule": "FREQ=WEEKLY;UNTIL=2000-08-07T23:59;BYDAY=MO,TU,WE,TH,FR,SA,SU",
+     "exdates": [],
+     "rdates": []
+    },
+    "2000-08-29T00:00",
+    "2001-10-05T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2000-08-31T23:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R201",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2027-01-15T18:30",
+     "rule": "FREQ=YEARLY;COUNT=5",
+     "exdates": [],
+     "rdates": []
+    },
+    "2027-01-13T00:00",
+    "2032-01-15T18:30"
+   ],
+   "expected": {
+    "occurrences": [
+     "2027-01-15T18:30",
+     "2028-01-15T18:30",
+     "2029-01-15T18:30",
+     "2030-01-15T18:30",
+     "2031-01-15T18:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R202",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2000-11-15T09:00",
+     "rule": "FREQ=WEEKLY;BYDAY=MO,TU,WE,TH,FR;BYSETPOS=-1;UNTIL=2000-11-18T12:00",
+     "exdates": [],
+     "rdates": []
+    },
+    "2000-11-15T00:00",
+    "2001-01-14T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2000-11-15T09:00",
+     "2000-11-17T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R203",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2027-01-01T09:00",
+     "rule": "FREQ=MONTHLY;BYDAY=MO,WE,FR;BYSETPOS=-1,1;UNTIL=2027-01-10T12:00",
+     "exdates": [
+      "2027-01-01T09:00"
+     ],
+     "rdates": []
+    },
+    "2026-12-30T00:00",
+    "2028-02-05T00:00"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R204",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2027-12-24T18:30",
+     "rule": "FREQ=YEARLY;BYDAY=MO,TU,WE,TH,FR;BYMONTH=11;BYSETPOS=2;UNTIL=2028-06-02T18:30",
+     "exdates": [
+      "2027-12-24T18:30"
+     ],
+     "rdates": []
+    },
+    "2027-12-21T00:00",
+    "2029-01-27T00:00"
+   ],
+   "expected": {
+    "occurrences": [],
+    "ok": true
+   }
+  },
+  {
+   "id": "R205",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2000-10-30T00:00",
+     "rule": "FREQ=WEEKLY;UNTIL=2000-10-28T00:00;BYDAY=MO,TU,WE,TH,FR,SA,SU",
+     "exdates": [],
+     "rdates": []
+    },
+    "2000-10-30T00:00",
+    "2001-12-04T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2000-10-30T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R206",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2026-08-01T18:30",
+     "rule": "FREQ=YEARLY;UNTIL=2033-08-01T18:30",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-07-28T00:00",
+    "2059-06-09T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-08-01T18:30",
+     "2027-08-01T18:30",
+     "2028-08-01T18:30",
+     "2029-08-01T18:30",
+     "2030-08-01T18:30",
+     "2031-08-01T18:30",
+     "2032-08-01T18:30",
+     "2033-08-01T18:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R207",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2027-12-28T00:00",
+     "rule": "FREQ=WEEKLY;COUNT=10",
+     "exdates": [],
+     "rdates": []
+    },
+    "2027-12-25T00:00",
+    "2028-01-18T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2027-12-28T00:00",
+     "2028-01-04T00:00",
+     "2028-01-11T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R208",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "1999-04-04T00:00",
+     "rule": "FREQ=DAILY;UNTIL=1999-03-29T00:00",
+     "exdates": [],
+     "rdates": []
+    },
+    "1999-04-02T00:00",
+    "1999-06-03T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1999-04-04T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R209",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2027-01-01T23:59",
+     "rule": "FREQ=WEEKLY;BYDAY=SA,SU;BYSETPOS=2;UNTIL=2027-01-24T12:59",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-12-30T00:00",
+    "2028-02-05T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2027-01-01T23:59",
+     "2027-01-03T23:59",
+     "2027-01-10T23:59",
+     "2027-01-17T23:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R210",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "9999-11-16T18:30",
+     "rule": "FREQ=DAILY;BYDAY=TH,FR,SA,SU;BYSETPOS=2;WKST=MO",
+     "exdates": [],
+     "rdates": []
+    },
+    "9999-11-01T00:00",
+    "9999-12-31T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "9999-11-16T18:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R211",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2027-01-28T00:00",
+     "rule": "FREQ=DAILY;UNTIL=2026-12-27T00:00",
+     "exdates": [],
+     "rdates": []
+    },
+    "2027-01-24T00:00",
+    "2027-03-29T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2027-01-28T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R212",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2024-11-29T09:00",
+     "rule": "FREQ=MONTHLY;COUNT=40",
+     "exdates": [],
+     "rdates": []
+    },
+    "2024-11-25T00:00",
+    "2025-03-29T09:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2024-11-29T09:00",
+     "2024-12-29T09:00",
+     "2025-01-29T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R213",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "1999-12-28T00:00",
+     "rule": "FREQ=YEARLY;COUNT=40",
+     "exdates": [
+      "1999-12-28T00:00"
+     ],
+     "rdates": []
+    },
+    "1999-12-28T00:00",
+    "2007-12-28T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2000-12-28T00:00",
+     "2001-12-28T00:00",
+     "2002-12-28T00:00",
+     "2003-12-28T00:00",
+     "2004-12-28T00:00",
+     "2005-12-28T00:00",
+     "2006-12-28T00:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R214",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "9999-12-18T09:00",
+     "rule": "FREQ=WEEKLY;BYDAY=FR;BYSETPOS=1,-1;WKST=SU",
+     "exdates": [],
+     "rdates": []
+    },
+    "9999-12-01T00:00",
+    "9999-12-31T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "9999-12-18T09:00",
+     "9999-12-24T09:00",
+     "9999-12-31T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R215",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2024-10-01T18:30",
+     "rule": "FREQ=YEARLY;BYDAY=MO,TU,WE,TH,FR;BYMONTH=12;BYSETPOS=-2;UNTIL=2027-06-27T18:30",
+     "exdates": [],
+     "rdates": []
+    },
+    "2024-09-27T00:00",
+    "2028-11-09T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2024-10-01T18:30",
+     "2024-12-30T18:30",
+     "2025-12-30T18:30",
+     "2026-12-30T18:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R216",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "1999-05-09T23:59",
+     "rule": "FREQ=WEEKLY;BYDAY=SA,SU;BYSETPOS=3;UNTIL=1999-05-18T12:59",
+     "exdates": [],
+     "rdates": []
+    },
+    "1999-05-05T00:00",
+    "2000-06-12T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "1999-05-09T23:59"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R217",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2000-09-29T18:30",
+     "rule": "FREQ=YEARLY;BYDAY=SA,SU;BYSETPOS=1,2;COUNT=3",
+     "exdates": [],
+     "rdates": []
+    },
+    "2000-09-25T00:00",
+    "2033-08-07T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2000-09-29T18:30",
+     "2001-01-06T18:30",
+     "2001-01-07T18:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R218",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2026-01-29T18:30",
+     "rule": "FREQ=YEARLY;BYDAY=20MO,2SU;COUNT=8;BYMONTH=5,7,10",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-01-26T00:00",
+    "2056-01-01T00:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-01-29T18:30",
+     "2026-05-10T18:30",
+     "2026-07-12T18:30",
+     "2026-10-11T18:30",
+     "2027-05-09T18:30",
+     "2027-07-11T18:30",
+     "2027-10-10T18:30",
+     "2028-05-14T18:30"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R219",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "2026-02-28T09:00",
+     "rule": "FREQ=DAILY;COUNT=10",
+     "exdates": [],
+     "rdates": []
+    },
+    "2026-02-28T00:00",
+    "2026-03-08T09:00"
+   ],
+   "expected": {
+    "occurrences": [
+     "2026-02-28T09:00",
+     "2026-03-01T09:00",
+     "2026-03-02T09:00",
+     "2026-03-03T09:00",
+     "2026-03-04T09:00",
+     "2026-03-05T09:00",
+     "2026-03-06T09:00",
+     "2026-03-07T09:00"
+    ],
+    "ok": true
+   }
+  },
+  {
+   "id": "R220",
+   "title": "random event around one trap",
+   "args": [
+    {
+     "start": "9999-12-19T18:30",
+     "rule": "FREQ=MONTHLY;BYDAY=-1FR,-1SA;BYSETPOS=2;WKST=TH",
+     "exdates": [
+      "9999-12-19T18:30"
+     ],
+     "rdates": []
+    },
+    "9999-12-01T00:00",
+    "9999-12-31T23:59"
+   ],
+   "expected": {
+    "occurrences": [
+     "9999-12-31T18:30"
+    ],
+    "ok": true
+   }
+  }
+ ],
+ "stress": [
+  {
+   "id": "S1",
+   "title": "no COUNT: dense DAILY rule from 0001-01-01, range in the last century",
+   "seed": 151,
+   "start": "0001-01-01T06:15",
+   "rule": "FREQ=DAILY;BYMONTH=1,2,3,4,5,6,7,8,9,10,11,12;BYMONTHDAY=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;BYDAY=MO,TU,WE,TH,FR,SA;BYSETPOS=-1",
+   "range": [
+    "9900-01-01T00:00",
+    "9999-12-31T23:59"
+   ],
+   "n_dates": 1000,
+   "expected_sha256": "0eaf7a3e44b3604186da875c0da2dfb15cc40232c492a8fef94e4973887d8898",
+   "expected_head": "{\"occurrences\":[\"9900-01-01T06:15\",\"9900-01-02T06:15\",\"9900-01-03T06:15\",\"9900-01-04T06:15\",\"9900-01-05T06:15\",\"9900-01-06T06:15\",\"9900-01-07T12:15\",\"9900-01-08T06:15\",\"9900-01-09T06:15\",\"9900-01-09T1"
+  },
+  {
+   "id": "S2",
+   "title": "COUNT 59000: YEARLY with 21 ordinal BYDAY entries and BYSETPOS from year 1",
+   "seed": 152,
+   "start": "0001-01-01T09:00",
+   "rule": "FREQ=YEARLY;BYDAY=1MO,-1MO,3MO,1TU,-1TU,3TU,1WE,-1WE,3WE,1TH,-1TH,3TH,1FR,-1FR,3FR,1SA,-1SA,3SA,1SU,-1SU,3SU;BYMONTH=1,2,3,4,5,6,7,8,9,10,11,12;BYSETPOS=3,-3,7,-7,50,100;COUNT=59000",
+   "range": [
+    "9000-01-01T00:00",
+    "9999-12-31T23:59"
+   ],
+   "n_dates": 1000,
+   "expected_sha256": "bd9a90b6efec243f8379a0146001e1781798bbecf151fdc19a0a6f953c688347",
+   "expected_head": "{\"occurrences\":[\"9000-01-03T09:00\",\"9000-01-07T09:00\",\"9000-03-15T09:00\",\"9000-05-12T09:00\",\"9000-05-26T09:00\",\"9000-06-22T12:00\",\"9000-07-09T12:00\",\"9000-12-25T09:00\",\"9000-12-29T09:00\",\"9001-01-03T0"
+  },
+  {
+   "id": "S3",
+   "title": "COUNT 40000: dense DAILY rule with BYSETPOS over five centuries",
+   "seed": 153,
+   "start": "9460-01-01T06:30",
+   "rule": "FREQ=DAILY;BYDAY=MO,TU,WE,TH,FR;BYMONTH=1,4,7,10;BYSETPOS=-1;COUNT=40000",
+   "range": [
+    "9800-01-01T00:00",
+    "9999-12-31T23:59"
+   ],
+   "n_dates": 1000,
+   "expected_sha256": "429c5cd9c5325625de68aa029799664c253db132bc269445781a78503ca15e4d",
+   "expected_head": "{\"occurrences\":[\"9800-01-01T06:30\",\"9800-01-02T06:30\",\"9800-01-03T06:30\",\"9800-01-06T06:30\",\"9800-01-07T06:30\",\"9800-01-08T06:30\",\"9800-01-09T06:30\",\"9800-01-10T06:30\",\"9800-01-13T06:30\",\"9800-01-14T0"
+  }
+ ]
+}

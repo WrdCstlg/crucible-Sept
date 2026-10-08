@@ -1,0 +1,905 @@
+{
+  "problem": "promo",
+  "sandbox": "docker",
+  "strict_pass": true,
+  "passed": 123,
+  "total": 123,
+  "public_pass": true,
+  "by_layer": {
+    "public": "4/4",
+    "hidden": "120/120",
+    "stress": "3/3"
+  },
+  "first_failure": null,
+  "cases": [
+    {
+      "id": "P1",
+      "layer": "public",
+      "title": "order matters",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P2",
+      "layer": "public",
+      "title": "buy 2 get 1",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P3",
+      "layer": "public",
+      "title": "bundle allocation",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P4",
+      "layer": "public",
+      "title": "group conflict, tie by id",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H01",
+      "layer": "hidden",
+      "title": "percent floors per unit",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H02",
+      "layer": "hidden",
+      "title": "percent skips claimed units",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H03",
+      "layer": "hidden",
+      "title": "bxgy: last claimed units are free, ties by unit order",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H04",
+      "layer": "hidden",
+      "title": "bxgy leaves a remainder for a later percent",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H05",
+      "layer": "hidden",
+      "title": "threshold allocation with a zero-price unit",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H06",
+      "layer": "hidden",
+      "title": "threshold capped at the subtotal",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H07",
+      "layer": "hidden",
+      "title": "exclusive promotion stands alone",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H08",
+      "layer": "hidden",
+      "title": "fewer promotions beat the id order",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H09",
+      "layer": "hidden",
+      "title": "ids compare by code point",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H10",
+      "layer": "hidden",
+      "title": "applied by priority, not by id",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H11",
+      "layer": "hidden",
+      "title": "equal priority applied by id",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H12",
+      "layer": "hidden",
+      "title": "bundle repeats while units remain",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H13",
+      "layer": "hidden",
+      "title": "bundle allocation ties by unit order, not sku order",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H14",
+      "layer": "hidden",
+      "title": "no promotions",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H15",
+      "layer": "hidden",
+      "title": "buy 2 get 2 with a partial group",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H16",
+      "layer": "hidden",
+      "title": "group conflict with an ungrouped promotion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H17",
+      "layer": "hidden",
+      "title": "threshold after bxgy: free units get no share",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H18",
+      "layer": "hidden",
+      "title": "min_qty counts units across lines",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H19",
+      "layer": "hidden",
+      "title": "100 percent",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H20",
+      "layer": "hidden",
+      "title": "bundle stops when it would not lower the price",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R001",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R002",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R003",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R004",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R005",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R006",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R007",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R008",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R009",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R010",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R011",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R012",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R013",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R014",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R015",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R016",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R017",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R018",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R019",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R020",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R021",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R022",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R023",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R024",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R025",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R026",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R027",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R028",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R029",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R030",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R031",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R032",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R033",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R034",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R035",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R036",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R037",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R038",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R039",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R040",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R041",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R042",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R043",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R044",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R045",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R046",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R047",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R048",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R049",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R050",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R051",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R052",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R053",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R054",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R055",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R056",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R057",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R058",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R059",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R060",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R061",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R062",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R063",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R064",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R065",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R066",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R067",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R068",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R069",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R070",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R071",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R072",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R073",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R074",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R075",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R076",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R077",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R078",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R079",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R080",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R081",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R082",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R083",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R084",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R085",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R086",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R087",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R088",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R089",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R090",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R091",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R092",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R093",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R094",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R095",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R096",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R097",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R098",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R099",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R100",
+      "layer": "hidden",
+      "title": "random cart",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S1",
+      "layer": "stress",
+      "title": "10 promotions, ~200 units",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S2",
+      "layer": "stress",
+      "title": "10 promotions, ~200 units",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S3",
+      "layer": "stress",
+      "title": "10 promotions, ~200 units",
+      "pass": true,
+      "reason": null
+    }
+  ]
+}

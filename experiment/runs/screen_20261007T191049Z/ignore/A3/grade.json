@@ -1,0 +1,1206 @@
+{
+  "problem": "ignore",
+  "sandbox": "docker",
+  "strict_pass": true,
+  "passed": 166,
+  "total": 166,
+  "public_pass": true,
+  "by_layer": {
+    "public": "4/4",
+    "hidden": "163/163",
+    "stress": "3/3"
+  },
+  "first_failure": null,
+  "cases": [
+    {
+      "id": "P1",
+      "layer": "public",
+      "title": "comments, negation, last match wins, directory-only at any depth, invalid path",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P2",
+      "layer": "public",
+      "title": "anchoring relative to the ignore file; deeper ignore file wins",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P3",
+      "layer": "public",
+      "title": "an excluded directory cannot be re-included",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "P4",
+      "layer": "public",
+      "title": "escapes, trailing spaces, ?, a range, a path that is also a directory",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H01",
+      "layer": "hidden",
+      "title": "parent exclusion beats negations in the excluded directory's own ignore file",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H02",
+      "layer": "hidden",
+      "title": "trailing /** matches inside the directory but not the directory itself",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H03",
+      "layer": "hidden",
+      "title": "leading **/ and middle /**/ match zero or more directories",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H04",
+      "layer": "hidden",
+      "title": "a middle slash anchors; * does not cross /",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H05",
+      "layer": "hidden",
+      "title": "a trailing slash alone does not anchor; directory-only skips files",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H06",
+      "layer": "hidden",
+      "title": "the deepest ignore file with a match decides",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H07",
+      "layer": "hidden",
+      "title": "last matching line wins, including re-ignoring after a negation",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H08",
+      "layer": "hidden",
+      "title": "trailing spaces: escaped kept, plain removed; leading spaces and tabs kept",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H09",
+      "layer": "hidden",
+      "title": "comments, escaped # and !, double !",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H10",
+      "layer": "hidden",
+      "title": "bracket expressions: ^ negates, ] first is a member, reversed range, - at the end",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H11",
+      "layer": "hidden",
+      "title": "an unclosed [ or a dangling \\ makes the rule match nothing",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H12",
+      "layer": "hidden",
+      "title": "directory-only never matches a file; negated directory-only re-includes directories only",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H13",
+      "layer": "hidden",
+      "title": "rules of a subdirectory: unanchored at any depth below it, anchored to it",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H14",
+      "layer": "hidden",
+      "title": "* matches a leading dot; ? is exactly one character; case-sensitive",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H15",
+      "layer": "hidden",
+      "title": "invalid paths: empty, . and .. segments, slashes, paths that are directories, duplicates",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H16",
+      "layer": "hidden",
+      "title": "*** is a globstar; ** inside a segment is a plain *",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H17",
+      "layer": "hidden",
+      "title": "globstars around a middle segment; the last globstar needs one segment",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H18",
+      "layer": "hidden",
+      "title": "an ignore file applies only below its directory; keys that are not directories do nothing",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H19",
+      "layer": "hidden",
+      "title": "ignored_dirs lists only the topmost excluded directories",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H20",
+      "layer": "hidden",
+      "title": "re-including a directory, then excluding inside it (the /* !/foo idiom)",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H21",
+      "layer": "hidden",
+      "title": "lines that become empty; empty pattern segments match nothing",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H22",
+      "layer": "hidden",
+      "title": "escapes outside and inside bracket expressions",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H23",
+      "layer": "hidden",
+      "title": "leading / and **/ in a subdirectory's ignore file are relative to that subdirectory",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H24",
+      "layer": "hidden",
+      "title": "deeper ignore file decides for directories too",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H25",
+      "layer": "hidden",
+      "title": "characters are code points; ranges compare code points",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H26",
+      "layer": "hidden",
+      "title": "unanchored ** is a plain *; all files ignored but no directory excluded",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H27",
+      "layer": "hidden",
+      "title": "case-sensitive directory names; duplicates reported once",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "H28",
+      "layer": "hidden",
+      "title": "trailing spaces before and after a trailing slash",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R001",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R002",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R003",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R004",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R005",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R006",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R007",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R008",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R009",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R010",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R011",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R012",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R013",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R014",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R015",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R016",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R017",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R018",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R019",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R020",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R021",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R022",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R023",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R024",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R025",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R026",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R027",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R028",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R029",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R030",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R031",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R032",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R033",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R034",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R035",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R036",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R037",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R038",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R039",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R040",
+      "layer": "hidden",
+      "title": "random tree and rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R041",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R042",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R043",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R044",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R045",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R046",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R047",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R048",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R049",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R050",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R051",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R052",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R053",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R054",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R055",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R056",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R057",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R058",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R059",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R060",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R061",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R062",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R063",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R064",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R065",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R066",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R067",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R068",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R069",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R070",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R071",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R072",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R073",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R074",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R075",
+      "layer": "hidden",
+      "title": "random precedence and exclusion",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R076",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R077",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R078",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R079",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R080",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R081",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R082",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R083",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R084",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R085",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R086",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R087",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R088",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R089",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R090",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R091",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R092",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R093",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R094",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R095",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R096",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R097",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R098",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R099",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R100",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R101",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R102",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R103",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R104",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R105",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R106",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R107",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R108",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R109",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R110",
+      "layer": "hidden",
+      "title": "random pattern syntax",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R111",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R112",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R113",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R114",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R115",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R116",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R117",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R118",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R119",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R120",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R121",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R122",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R123",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R124",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R125",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R126",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R127",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R128",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R129",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R130",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R131",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R132",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R133",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R134",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "R135",
+      "layer": "hidden",
+      "title": "random globstar rules",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S1",
+      "layer": "stress",
+      "title": "60 000 files ~28 levels deep under ~1 600 ignore files",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S2",
+      "layer": "stress",
+      "title": "directory chains 2 900, 1 600 and 1 100 levels deep",
+      "pass": true,
+      "reason": null
+    },
+    {
+      "id": "S3",
+      "layer": "stress",
+      "title": "many-star and many-globstar rules against long names and deep paths",
+      "pass": true,
+      "reason": null
+    }
+  ]
+}

@@ -1,0 +1,354 @@
+import re
+
+_NUM_PAT = r'(?:0|[1-9][0-9]*)'
+_PRE_ID_PAT = r'(?:0|[1-9][0-9]*|[0-9]*[A-Za-z-][0-9A-Za-z-]*)'
+_PRE_PAT = _PRE_ID_PAT + r'(?:\.' + _PRE_ID_PAT + r')*'
+_BUILD_PAT = r'[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*'
+
+_VERSION_RE = re.compile(
+    r'(' + _NUM_PAT + r')\.(' + _NUM_PAT + r')\.(' + _NUM_PAT + r')'
+    r'(?:-(' + _PRE_PAT + r'))?(?:\+(' + _BUILD_PAT + r'))?'
+)
+_CORE_RE = re.compile(r'(' + _NUM_PAT + r')\.(' + _NUM_PAT + r')\.(' + _NUM_PAT + r')')
+_NUM_RE = re.compile(_NUM_PAT)
+_PRE_RE = re.compile(_PRE_PAT)
+
+_INVALID = object()
+_NOTHING = object()
+_WILDCARDS = ('x', 'X', '*')
+
+_version_cache = {}
+_range_cache = {}
+
+
+def _pre_key(pre):
+    out = []
+    for ident in pre.split('.'):
+        if _NUM_RE.fullmatch(ident):
+            out.append((0, int(ident), ''))
+        else:
+            out.append((1, 0, ident))
+    return tuple(out)
+
+
+def _make(M, m, p, pre):
+    if pre is None:
+        return ((M, m, p, 1, ()), (M, m, p), False)
+    return ((M, m, p, 0, pre), (M, m, p), True)
+
+
+def _parse_version(s):
+    if s in _version_cache:
+        return _version_cache[s]
+    res = None
+    mt = _VERSION_RE.fullmatch(s)
+    if mt:
+        M, m, p = int(mt.group(1)), int(mt.group(2)), int(mt.group(3))
+        pre = mt.group(4)
+        res = _make(M, m, p, _pre_key(pre) if pre is not None else None)
+    _version_cache[s] = res
+    return res
+
+
+def _parse_partial(s):
+    """Return (components tuple, prerelease key or None) or None if invalid."""
+    if not s or '+' in s:
+        return None
+    if '-' in s:
+        main, pre = s.split('-', 1)
+        mt = _CORE_RE.fullmatch(main)
+        if not mt or not _PRE_RE.fullmatch(pre):
+            return None
+        return ((int(mt.group(1)), int(mt.group(2)), int(mt.group(3))), _pre_key(pre))
+    parts = s.split('.')
+    if len(parts) > 3:
+        return None
+    comps = []
+    seen_wild = False
+    for part in parts:
+        if part in _WILDCARDS:
+            seen_wild = True
+            continue
+        if seen_wild:
+            return None
+        if not _NUM_RE.fullmatch(part):
+            return None
+        comps.append(int(part))
+    return (tuple(comps), None)
+
+
+def _pad(c):
+    c = list(c)
+    while len(c) < 3:
+        c.append(0)
+    return c
+
+
+def _low(comps, pre):
+    c = _pad(comps)
+    return _make(c[0], c[1], c[2], pre)
+
+
+def _next(comps):
+    c = list(comps)
+    c[-1] += 1
+    c = _pad(c)
+    return _make(c[0], c[1], c[2], None)
+
+
+def _caret(comps):
+    idx = None
+    for i, v in enumerate(comps):
+        if v != 0:
+            idx = i
+            break
+    if idx is None:
+        idx = len(comps) - 1
+    c = list(comps[:idx + 1])
+    c[idx] += 1
+    c = _pad(c)
+    return _make(c[0], c[1], c[2], None)
+
+
+def _parse_item(tok):
+    if tok.startswith('>=') or tok.startswith('<='):
+        op, rest = tok[:2], tok[2:]
+    elif tok[:1] in ('>', '<', '=', '~', '^'):
+        op, rest = tok[0], tok[1:]
+    else:
+        op, rest = '', tok
+    pv = _parse_partial(rest)
+    if pv is None:
+        return _INVALID
+    c, pre = pv
+    k = len(c)
+    if op == '=':
+        op = ''
+    if k == 0:
+        if op in ('>', '<'):
+            return _NOTHING
+        return ()
+    if k < 3:
+        low = _low(c, None)
+        if op == '' or op == '~':
+            return (('>=',) + low, ('<',) + _next(c))
+        if op == '>=':
+            return (('>=',) + low,)
+        if op == '>':
+            return (('>=',) + _next(c),)
+        if op == '<':
+            return (('<',) + low,)
+        if op == '<=':
+            return (('<',) + _next(c),)
+        if op == '^':
+            return (('>=',) + low, ('<',) + _caret(c))
+        return _INVALID
+    full = _make(c[0], c[1], c[2], pre)
+    if op == '':
+        return (('=',) + full,)
+    if op in ('>=', '>', '<', '<='):
+        return ((op,) + full,)
+    if op == '~':
+        return (('>=',) + full, ('<',) + _make(c[0], c[1] + 1, 0, None))
+    if op == '^':
+        return (('>=',) + full, ('<',) + _caret(c))
+    return _INVALID
+
+
+def _parse_set(tokens):
+    comps = []
+    if len(tokens) == 3 and tokens[1] == '-':
+        a = _parse_partial(tokens[0])
+        b = _parse_partial(tokens[2])
+        if a is None or b is None:
+            return _INVALID
+        ac, apre = a
+        if ac:
+            comps.append(('>=',) + _low(ac, apre))
+        bc, bpre = b
+        if len(bc) == 3:
+            comps.append(('<=',) + _make(bc[0], bc[1], bc[2], bpre))
+        elif bc:
+            comps.append(('<',) + _next(bc))
+        return tuple(comps)
+    nothing = False
+    for tok in tokens:
+        r = _parse_item(tok)
+        if r is _INVALID:
+            return _INVALID
+        if r is _NOTHING:
+            nothing = True
+        else:
+            comps.extend(r)
+    if nothing:
+        return _NOTHING
+    return tuple(comps)
+
+
+def _parse_range(rng):
+    if rng in _range_cache:
+        return _range_cache[rng]
+    sets = []
+    result = None
+    for part in rng.split('||'):
+        tokens = [t for t in part.split(' ') if t]
+        res = _parse_set(tokens)
+        if res is _INVALID:
+            sets = None
+            break
+        sets.append(res)
+    result = sets
+    _range_cache[rng] = result
+    return result
+
+
+def _set_ok(s, ver):
+    if s is _NOTHING:
+        return False
+    key, mmp, has_pre = ver
+    for op, ck, cm, cp in s:
+        if op == '>=':
+            if not key >= ck:
+                return False
+        elif op == '>':
+            if not key > ck:
+                return False
+        elif op == '<':
+            if not key < ck:
+                return False
+        elif op == '<=':
+            if not key <= ck:
+                return False
+        else:
+            if key != ck:
+                return False
+    if has_pre:
+        for op, ck, cm, cp in s:
+            if cp and cm == mmp:
+                return True
+        return False
+    return True
+
+
+def _range_ok(rng, vstr):
+    ver = _parse_version(vstr)
+    if ver is None:
+        return False
+    sets = _parse_range(rng)
+    if sets is None:
+        return False
+    for s in sets:
+        if _set_ok(s, ver):
+            return True
+    return False
+
+
+def resolve(registry, root):
+    sat_cache = {}
+
+    def satisfies(rng, vstr):
+        k = (rng, vstr)
+        r = sat_cache.get(k)
+        if r is None:
+            r = _range_ok(rng, vstr)
+            sat_cache[k] = r
+        return r
+
+    sorted_cache = {}
+
+    def sorted_versions(name):
+        if name in sorted_cache:
+            return sorted_cache[name]
+        vs = registry.get(name)
+        lst = []
+        if vs:
+            for vstr in vs:
+                pv = _parse_version(vstr)
+                if pv is not None:
+                    lst.append((pv[0], vstr))
+        lst.sort(reverse=True)
+        out = [v for _, v in lst]
+        sorted_cache[name] = out
+        return out
+
+    selected = {}
+    reqs = {}
+
+    def add_req(name, rng):
+        d = reqs.get(name)
+        if d is None:
+            d = reqs[name] = {}
+        d[rng] = d.get(rng, 0) + 1
+
+    def remove_req(name, rng):
+        d = reqs[name]
+        c = d[rng] - 1
+        if c:
+            d[rng] = c
+        else:
+            del d[rng]
+            if not d:
+                del reqs[name]
+
+    def candidates(name):
+        rs = list(reqs.get(name, {}).keys())
+        out = []
+        for v in sorted_versions(name):
+            ok = True
+            for r in rs:
+                if not satisfies(r, v):
+                    ok = False
+                    break
+            if ok:
+                out.append(v)
+        return out
+
+    def deps_of(name, v):
+        d = registry[name][v]
+        return d if d else {}
+
+    for name, rng in root.items():
+        add_req(name, rng)
+
+    stack = []
+    while True:
+        P = None
+        for name in reqs:
+            if name not in selected and (P is None or name < P):
+                P = name
+        if P is None:
+            return {"ok": True, "packages": dict(sorted(selected.items()))}
+        stack.append([P, candidates(P), 0])
+        while True:
+            if not stack:
+                return {"ok": False, "packages": {}}
+            frame = stack[-1]
+            name, cands, i = frame
+            if name in selected:
+                v_old = selected.pop(name)
+                for d, r in deps_of(name, v_old).items():
+                    remove_req(d, r)
+            found = False
+            while i < len(cands):
+                v = cands[i]
+                i += 1
+                selected[name] = v
+                deps = deps_of(name, v)
+                for d, r in deps.items():
+                    add_req(d, r)
+                good = True
+                for d, r in deps.items():
+                    sv = selected.get(d)
+                    if sv is not None and not satisfies(r, sv):
+                        good = False
+                        break
+                if good:
+                    found = True
+                    break
+                del selected[name]
+                for d, r in deps.items():
+                    remove_req(d, r)
+            frame[2] = i
+            if found:
+                break
+            stack.pop()

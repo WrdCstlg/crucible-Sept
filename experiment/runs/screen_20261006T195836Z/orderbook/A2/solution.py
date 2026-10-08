@@ -1,0 +1,631 @@
+import heapq
+import re
+
+IDENT_RE = re.compile(r"^[A-Za-z0-9_]+$")
+NUM_RE = re.compile(r"^[0-9]+$")
+
+INF = 10**18
+
+
+class RestingOrder:
+    __slots__ = (
+        "owner",
+        "id",
+        "side",
+        "price",
+        "visible",
+        "hidden",
+        "display",
+        "flag",
+    )
+
+    def __init__(self, owner, id_, side, price, visible, hidden, display, flag):
+        self.owner = owner
+        self.id = id_
+        self.side = side
+        self.price = price
+        self.visible = visible
+        self.hidden = hidden
+        self.display = display
+        self.flag = flag
+
+
+class StopOrder:
+    __slots__ = ("line", "owner", "id", "side", "trigger", "qty")
+
+    def __init__(self, line, owner, id_, side, trigger, qty):
+        self.line = line
+        self.owner = owner
+        self.id = id_
+        self.side = side
+        self.trigger = trigger
+        self.qty = qty
+
+
+class StopSegmentTree:
+    __slots__ = ("size", "min_buy", "max_sell")
+
+    def __init__(self, n):
+        sz = 1
+        while sz < n:
+            sz <<= 1
+        if sz < 2:
+            sz = 2
+        self.size = sz
+        self.min_buy = [INF] * (2 * sz)
+        self.max_sell = [-INF] * (2 * sz)
+
+    def set_stop(self, line, side, trigger):
+        idx = self.size + line
+        if side == "B":
+            self.min_buy[idx] = trigger
+            self.max_sell[idx] = -INF
+        else:
+            self.min_buy[idx] = INF
+            self.max_sell[idx] = trigger
+        p = idx >> 1
+        while p:
+            left = p << 1
+            right = left + 1
+            self.min_buy[p] = min(self.min_buy[left], self.min_buy[right])
+            self.max_sell[p] = max(self.max_sell[left], self.max_sell[right])
+            p >>= 1
+
+    def remove_stop(self, line):
+        idx = self.size + line
+        self.min_buy[idx] = INF
+        self.max_sell[idx] = -INF
+        p = idx >> 1
+        while p:
+            left = p << 1
+            right = left + 1
+            self.min_buy[p] = min(self.min_buy[left], self.min_buy[right])
+            self.max_sell[p] = max(self.max_sell[left], self.max_sell[right])
+            p >>= 1
+
+    def query_earliest(self, last_price):
+        if self.min_buy[1] > last_price and self.max_sell[1] < last_price:
+            return None
+        node = 1
+        while node < self.size:
+            left = node << 1
+            if (
+                self.min_buy[left] <= last_price
+                or self.max_sell[left] >= last_price
+            ):
+                node = left
+            else:
+                node = left + 1
+        return node - self.size
+
+
+def run_book(commands):
+    trades = []
+    rejects = []
+    stp_cancelled = []
+    consumed_ids = set()
+
+    orders_by_id = {}
+    bid_levels = {}
+    ask_levels = {}
+    bid_heap = []
+    ask_heap = []
+
+    stops_by_line = {}
+    stop_line_by_id = {}
+    stop_tree = StopSegmentTree(len(commands))
+
+    next_trade_seq = 1
+    last_price = None
+
+    def remove_order_from_book(order):
+        if order.side == "B":
+            lvl = bid_levels[order.price]
+            del lvl[order.id]
+            if not lvl:
+                del bid_levels[order.price]
+        else:
+            lvl = ask_levels[order.price]
+            del lvl[order.id]
+            if not lvl:
+                del ask_levels[order.price]
+        del orders_by_id[order.id]
+
+    def add_resting_order(order):
+        orders_by_id[order.id] = order
+        if order.side == "B":
+            if order.price not in bid_levels:
+                bid_levels[order.price] = {}
+                heapq.heappush(bid_heap, -order.price)
+            bid_levels[order.price][order.id] = order
+        else:
+            if order.price not in ask_levels:
+                ask_levels[order.price] = {}
+                heapq.heappush(ask_heap, order.price)
+            ask_levels[order.price][order.id] = order
+
+    def check_fok_tradable(side, limit_price, qty, owner):
+        needed = qty
+        if side == "B":
+            while ask_heap and ask_heap[0] not in ask_levels:
+                heapq.heappop(ask_heap)
+            if not ask_heap:
+                return False
+            stack = [0]
+            while stack:
+                idx = stack.pop()
+                if idx >= len(ask_heap):
+                    continue
+                p = ask_heap[idx]
+                if p > limit_price:
+                    continue
+                if p in ask_levels:
+                    for o in ask_levels[p].values():
+                        if o.owner != owner:
+                            needed -= o.visible + o.hidden
+                            if needed <= 0:
+                                return True
+                left = 2 * idx + 1
+                right = left + 1
+                if left < len(ask_heap) and ask_heap[left] <= limit_price:
+                    stack.append(left)
+                if right < len(ask_heap) and ask_heap[right] <= limit_price:
+                    stack.append(right)
+            return False
+        else:
+            while bid_heap and -bid_heap[0] not in bid_levels:
+                heapq.heappop(bid_heap)
+            if not bid_heap:
+                return False
+            neg_limit = -limit_price
+            stack = [0]
+            while stack:
+                idx = stack.pop()
+                if idx >= len(bid_heap):
+                    continue
+                neg_p = bid_heap[idx]
+                if neg_p > neg_limit:
+                    continue
+                p = -neg_p
+                if p in bid_levels:
+                    for o in bid_levels[p].values():
+                        if o.owner != owner:
+                            needed -= o.visible + o.hidden
+                            if needed <= 0:
+                                return True
+                left = 2 * idx + 1
+                right = left + 1
+                if left < len(bid_heap) and bid_heap[left] <= neg_limit:
+                    stack.append(left)
+                if right < len(bid_heap) and bid_heap[right] <= neg_limit:
+                    stack.append(right)
+            return False
+
+    def execute_market_order(owner, id_, side, qty, origin_line):
+        nonlocal next_trade_seq, last_price
+        remaining = qty
+        trades_count = 0
+
+        while remaining > 0:
+            if side == "B":
+                while ask_heap and ask_heap[0] not in ask_levels:
+                    heapq.heappop(ask_heap)
+                if not ask_heap:
+                    break
+                best_price = ask_heap[0]
+                level = ask_levels[best_price]
+            else:
+                while bid_heap and -bid_heap[0] not in bid_levels:
+                    heapq.heappop(bid_heap)
+                if not bid_heap:
+                    break
+                best_price = -bid_heap[0]
+                level = bid_levels[best_price]
+
+            resting = next(iter(level.values()))
+            if resting.owner == owner:
+                stp_cancelled.append(resting.id)
+                remove_order_from_book(resting)
+                continue
+
+            trade_qty = min(remaining, resting.visible)
+            remaining -= trade_qty
+            resting.visible -= trade_qty
+            trades_count += 1
+
+            trade_price = resting.price
+            last_price = trade_price
+
+            trades.append(
+                {
+                    "seq": next_trade_seq,
+                    "price": trade_price,
+                    "qty": trade_qty,
+                    "buy": id_ if side == "B" else resting.id,
+                    "sell": resting.id if side == "B" else id_,
+                    "aggressor": side,
+                }
+            )
+            next_trade_seq += 1
+
+            if resting.visible == 0:
+                if resting.hidden > 0:
+                    refresh = min(resting.display, resting.hidden)
+                    resting.visible = refresh
+                    resting.hidden -= refresh
+                    level[resting.id] = level.pop(resting.id)
+                else:
+                    remove_order_from_book(resting)
+
+        if trades_count == 0:
+            rejects.append({"line": origin_line, "reason": "no_liquidity"})
+
+    def execute_limit_order(
+        owner, id_, side, price, qty, flag, display, line_idx
+    ):
+        nonlocal next_trade_seq, last_price
+
+        if flag == "POST":
+            if side == "B":
+                while ask_heap and ask_heap[0] not in ask_levels:
+                    heapq.heappop(ask_heap)
+                if ask_heap and ask_heap[0] <= price:
+                    rejects.append(
+                        {"line": line_idx, "reason": "post_would_cross"}
+                    )
+                    return
+            else:
+                while bid_heap and -bid_heap[0] not in bid_levels:
+                    heapq.heappop(bid_heap)
+                if bid_heap and -bid_heap[0] >= price:
+                    rejects.append(
+                        {"line": line_idx, "reason": "post_would_cross"}
+                    )
+                    return
+            add_resting_order(
+                RestingOrder(owner, id_, side, price, qty, 0, None, "POST")
+            )
+            return
+
+        if flag == "FOK":
+            if not check_fok_tradable(side, price, qty, owner):
+                rejects.append({"line": line_idx, "reason": "fok_unfilled"})
+                return
+
+        remaining = qty
+        while remaining > 0:
+            if side == "B":
+                while ask_heap and ask_heap[0] not in ask_levels:
+                    heapq.heappop(ask_heap)
+                if not ask_heap or ask_heap[0] > price:
+                    break
+                best_price = ask_heap[0]
+                level = ask_levels[best_price]
+            else:
+                while bid_heap and -bid_heap[0] not in bid_levels:
+                    heapq.heappop(bid_heap)
+                if not bid_heap or -bid_heap[0] < price:
+                    break
+                best_price = -bid_heap[0]
+                level = bid_levels[best_price]
+
+            resting = next(iter(level.values()))
+            if resting.owner == owner:
+                stp_cancelled.append(resting.id)
+                remove_order_from_book(resting)
+                continue
+
+            trade_qty = min(remaining, resting.visible)
+            remaining -= trade_qty
+            resting.visible -= trade_qty
+
+            trade_price = resting.price
+            last_price = trade_price
+
+            trades.append(
+                {
+                    "seq": next_trade_seq,
+                    "price": trade_price,
+                    "qty": trade_qty,
+                    "buy": id_ if side == "B" else resting.id,
+                    "sell": resting.id if side == "B" else id_,
+                    "aggressor": side,
+                }
+            )
+            next_trade_seq += 1
+
+            if resting.visible == 0:
+                if resting.hidden > 0:
+                    refresh = min(resting.display, resting.hidden)
+                    resting.visible = refresh
+                    resting.hidden -= refresh
+                    level[resting.id] = level.pop(resting.id)
+                else:
+                    remove_order_from_book(resting)
+
+        if remaining > 0:
+            if flag == "IOC" or flag == "FOK":
+                pass
+            elif flag == "ICE":
+                vis = min(display, remaining)
+                hid = remaining - vis
+                add_resting_order(
+                    RestingOrder(
+                        owner, id_, side, price, vis, hid, display, "ICE"
+                    )
+                )
+            else:
+                add_resting_order(
+                    RestingOrder(owner, id_, side, price, remaining, 0, None, None)
+                )
+
+    def process_triggered_stops():
+        nonlocal last_price
+        while last_price is not None:
+            earliest_line = stop_tree.query_earliest(last_price)
+            if earliest_line is None:
+                break
+            stop = stops_by_line[earliest_line]
+            del stops_by_line[earliest_line]
+            del stop_line_by_id[stop.id]
+            stop_tree.remove_stop(earliest_line)
+            execute_market_order(
+                stop.owner,
+                stop.id,
+                stop.side,
+                stop.qty,
+                origin_line=stop.line,
+            )
+
+    for line_idx, line in enumerate(commands):
+        raw = line.strip()
+        fields = [f.strip() for f in raw.split(",")]
+
+        if not fields or not fields[0]:
+            rejects.append({"line": line_idx, "reason": "malformed"})
+            continue
+
+        cmd = fields[0]
+
+        if cmd == "LIMIT":
+            if len(fields) == 6:
+                _, owner, id_, side, price_str, qty_str = fields
+                flag = None
+                display = None
+            elif len(fields) == 7:
+                _, owner, id_, side, price_str, qty_str, flag_str = fields
+                if flag_str in ("IOC", "FOK", "POST"):
+                    flag = flag_str
+                    display = None
+                elif flag_str.startswith("ICE="):
+                    disp_str = flag_str[4:]
+                    if NUM_RE.match(disp_str) and int(disp_str) >= 1:
+                        display = int(disp_str)
+                        flag = "ICE"
+                    else:
+                        rejects.append(
+                            {"line": line_idx, "reason": "malformed"}
+                        )
+                        continue
+                else:
+                    rejects.append({"line": line_idx, "reason": "malformed"})
+                    continue
+            else:
+                rejects.append({"line": line_idx, "reason": "malformed"})
+                continue
+
+            if not IDENT_RE.match(owner) or not IDENT_RE.match(id_):
+                rejects.append({"line": line_idx, "reason": "malformed"})
+                continue
+            if side not in ("B", "S"):
+                rejects.append({"line": line_idx, "reason": "malformed"})
+                continue
+            if not NUM_RE.match(price_str) or int(price_str) < 1:
+                rejects.append({"line": line_idx, "reason": "malformed"})
+                continue
+            if not NUM_RE.match(qty_str) or int(qty_str) < 1:
+                rejects.append({"line": line_idx, "reason": "malformed"})
+                continue
+
+            price = int(price_str)
+            qty = int(qty_str)
+
+            if flag == "ICE" and display >= qty:
+                rejects.append({"line": line_idx, "reason": "malformed"})
+                continue
+
+            if id_ in consumed_ids:
+                rejects.append({"line": line_idx, "reason": "duplicate_id"})
+                continue
+            consumed_ids.add(id_)
+
+            execute_limit_order(
+                owner, id_, side, price, qty, flag, display, line_idx
+            )
+            process_triggered_stops()
+
+        elif cmd == "MARKET":
+            if len(fields) != 5:
+                rejects.append({"line": line_idx, "reason": "malformed"})
+                continue
+            _, owner, id_, side, qty_str = fields
+            if not IDENT_RE.match(owner) or not IDENT_RE.match(id_):
+                rejects.append({"line": line_idx, "reason": "malformed"})
+                continue
+            if side not in ("B", "S"):
+                rejects.append({"line": line_idx, "reason": "malformed"})
+                continue
+            if not NUM_RE.match(qty_str) or int(qty_str) < 1:
+                rejects.append({"line": line_idx, "reason": "malformed"})
+                continue
+
+            qty = int(qty_str)
+
+            if id_ in consumed_ids:
+                rejects.append({"line": line_idx, "reason": "duplicate_id"})
+                continue
+            consumed_ids.add(id_)
+
+            execute_market_order(
+                owner, id_, side, qty, origin_line=line_idx
+            )
+            process_triggered_stops()
+
+        elif cmd == "STOP":
+            if len(fields) != 6:
+                rejects.append({"line": line_idx, "reason": "malformed"})
+                continue
+            _, owner, id_, side, trigger_str, qty_str = fields
+            if not IDENT_RE.match(owner) or not IDENT_RE.match(id_):
+                rejects.append({"line": line_idx, "reason": "malformed"})
+                continue
+            if side not in ("B", "S"):
+                rejects.append({"line": line_idx, "reason": "malformed"})
+                continue
+            if not NUM_RE.match(trigger_str) or int(trigger_str) < 1:
+                rejects.append({"line": line_idx, "reason": "malformed"})
+                continue
+            if not NUM_RE.match(qty_str) or int(qty_str) < 1:
+                rejects.append({"line": line_idx, "reason": "malformed"})
+                continue
+
+            trigger = int(trigger_str)
+            qty = int(qty_str)
+
+            if id_ in consumed_ids:
+                rejects.append({"line": line_idx, "reason": "duplicate_id"})
+                continue
+            consumed_ids.add(id_)
+
+            stop_obj = StopOrder(line_idx, owner, id_, side, trigger, qty)
+            stops_by_line[line_idx] = stop_obj
+            stop_line_by_id[id_] = line_idx
+            stop_tree.set_stop(line_idx, side, trigger)
+
+            process_triggered_stops()
+
+        elif cmd == "CANCEL":
+            if len(fields) != 2:
+                rejects.append({"line": line_idx, "reason": "malformed"})
+                continue
+            _, id_ = fields
+            if not IDENT_RE.match(id_):
+                rejects.append({"line": line_idx, "reason": "malformed"})
+                continue
+
+            if id_ in orders_by_id:
+                order = orders_by_id[id_]
+                remove_order_from_book(order)
+            elif id_ in stop_line_by_id:
+                s_line = stop_line_by_id.pop(id_)
+                del stops_by_line[s_line]
+                stop_tree.remove_stop(s_line)
+            else:
+                rejects.append({"line": line_idx, "reason": "unknown_id"})
+
+        elif cmd == "AMEND":
+            if len(fields) != 4:
+                rejects.append({"line": line_idx, "reason": "malformed"})
+                continue
+            _, id_, price_str, qty_str = fields
+            if not IDENT_RE.match(id_):
+                rejects.append({"line": line_idx, "reason": "malformed"})
+                continue
+            if not NUM_RE.match(price_str) or int(price_str) < 1:
+                rejects.append({"line": line_idx, "reason": "malformed"})
+                continue
+            if not NUM_RE.match(qty_str) or int(qty_str) < 1:
+                rejects.append({"line": line_idx, "reason": "malformed"})
+                continue
+
+            new_price = int(price_str)
+            new_qty = int(qty_str)
+
+            if id_ not in orders_by_id:
+                rejects.append({"line": line_idx, "reason": "unknown_id"})
+                continue
+
+            order = orders_by_id[id_]
+            curr_total = order.visible + order.hidden
+
+            if new_price == order.price and new_qty == curr_total:
+                pass
+            elif new_price == order.price and new_qty < curr_total:
+                reduction = curr_total - new_qty
+                from_hidden = min(reduction, order.hidden)
+                order.hidden -= from_hidden
+                reduction -= from_hidden
+                order.visible -= reduction
+            else:
+                if order.flag == "POST":
+                    if order.side == "B":
+                        while ask_heap and ask_heap[0] not in ask_levels:
+                            heapq.heappop(ask_heap)
+                        if ask_heap and ask_heap[0] <= new_price:
+                            rejects.append(
+                                {
+                                    "line": line_idx,
+                                    "reason": "post_would_cross",
+                                }
+                            )
+                            continue
+                    else:
+                        while bid_heap and -bid_heap[0] not in bid_levels:
+                            heapq.heappop(bid_heap)
+                        if bid_heap and -bid_heap[0] >= new_price:
+                            rejects.append(
+                                {
+                                    "line": line_idx,
+                                    "reason": "post_would_cross",
+                                }
+                            )
+                            continue
+
+                orig_owner = order.owner
+                orig_id = order.id
+                orig_side = order.side
+                orig_flag = order.flag
+                orig_display = order.display
+
+                remove_order_from_book(order)
+
+                execute_limit_order(
+                    orig_owner,
+                    orig_id,
+                    orig_side,
+                    new_price,
+                    new_qty,
+                    orig_flag,
+                    orig_display,
+                    line_idx,
+                )
+                process_triggered_stops()
+
+        else:
+            rejects.append({"line": line_idx, "reason": "malformed"})
+
+    bids_out = []
+    for p in sorted(bid_levels.keys(), reverse=True):
+        lvl = bid_levels[p]
+        if lvl:
+            bids_out.append([p, [[o.id, o.visible, o.hidden] for o in lvl.values()]])
+
+    asks_out = []
+    for p in sorted(ask_levels.keys()):
+        lvl = ask_levels[p]
+        if lvl:
+            asks_out.append([p, [[o.id, o.visible, o.hidden] for o in lvl.values()]])
+
+    stops_out = [
+        [s.id, s.side, s.trigger, s.qty] for s in stops_by_line.values()
+    ]
+
+    return {
+        "trades": trades,
+        "rejects": rejects,
+        "stp_cancelled": stp_cancelled,
+        "bids": bids_out,
+        "asks": asks_out,
+        "stops": stops_out,
+        "last_price": last_price,
+    }

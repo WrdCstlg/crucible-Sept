@@ -1,0 +1,22 @@
+{
+  "role": "evaluated",
+  "provider": "google",
+  "model": "gemini-3.8-flash",
+  "seconds": 227.0,
+  "agent_calls": 1,
+  "usage": {
+    "input_tokens": 1911,
+    "output_tokens": 31476,
+    "thinking_tokens": 29820
+  },
+  "cost_usd": 0.11947,
+  "stop_reason": "STOP",
+  "tool_calls": 0,
+  "arm": "A",
+  "runner": "study",
+  "spec": "SPEC.md",
+  "roles_provider": {
+    "evaluated": "google",
+    "competitor": "anthropic"
+  }
+}
